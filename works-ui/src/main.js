@@ -26,7 +26,7 @@ app.addComponents = function () {
         this.component(component.name, component)
     }
 }
-app.config.productionTip = true;
+app.config.productionTip = false;
 app.addComponents(
     BackwardFilled,
     HomeFilled,
@@ -40,7 +40,6 @@ app.addComponents(
     BellOutlined,
     FontSizeOutlined,
 )
-// app.ad
 app.use(store);
 app.use(router);
 app.use(i18n);

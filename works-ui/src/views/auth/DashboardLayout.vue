@@ -32,7 +32,6 @@
         </a-form-item>
       </a-form>
     </div>
-  </div>
 </template>
 
 <script>

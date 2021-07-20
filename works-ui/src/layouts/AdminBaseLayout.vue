@@ -8,7 +8,6 @@
         <AdminHeader />
       </a-layout-header>
       <a-layout-content class="admin-layout-content">
-        <Dashboard />
         <router-view/>
       </a-layout-content>
       <a-layout-footer class="admin-layout-footer">
@@ -21,7 +20,6 @@
 <script>
 import AdminSider from "./sider/AdminSider";
 import AdminHeader from "./header/AdminHeader";
-import Dashboard from "../views/admin/dashboard/Dashboard";
 import AdminFooter from "./footer/AdminFooter";
 
 export default ({
@@ -30,33 +28,29 @@ export default ({
     AdminSider,
     AdminHeader,
     AdminFooter,
-    Dashboard,
   }
 })
 </script>
 
 <style>
-aside{
-
-}
 .admin-sider-layout{
   flex: 0 0 256px !important;
   max-width: 256px !important;
   min-width: 256px !important;
   width: 256px !important;
-  background: cornflowerblue;
+  background: white;
 }
 
 .admin-layout-header{
-  background: darkorchid;
+  background: white;
 }
 
 .admin-layout-content{
-  background: chartreuse;
+  background: white;
 }
 
 .admin-layout-footer{
-  background: coral;
+  background: #f0f2f5;;
   text-align: center;
 }
 </style>

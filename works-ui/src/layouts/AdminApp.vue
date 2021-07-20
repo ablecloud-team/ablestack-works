@@ -1,5 +1,5 @@
 <template>
-  <AdminBaseLayout/>
+  <AdminBaseLayout />
 </template>
 
 <script>

@@ -1,46 +1,62 @@
 import { createRouter, createWebHistory } from 'vue-router'
+// import Home from '../views/Home.vue'
+import Login from '../views/auth/Login'
+import AdminApp from '../layouts/AdminApp.vue'
+import AdminBaseLayout from '../layouts/AdminBaseLayout';
+import Dashboard from '../views/admin/dashboard/Dashboard';
+import Workspaces from '../views/admin/workSpace/WorkSpace';
+import UserBaseLayout from '../layouts/UserBaseLayout';
+import UserDashboard from '../views/user/Dashboard/UserDashboard'
 
 const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/auth/Login.vue')
+    component: Login
   },
   {
-    path: '/dashboardLayout',
-    name: 'DashboardLayout',
-    components: () => import('../views/admin/dashboard/Dashboard.vue')
+    path: '/adminApp',
+    name: 'AdminApp',
+    component: AdminApp
   },
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../layouts/AdminApp.vue'),
+    name: 'home',
+    component: AdminBaseLayout,
+    meta: { icon: 'home' },
+    redirect: '/dashboard',
     children: [
       {
         path: '/dashboard',
         name: 'Dashboard',
-        components: () => import('../views/admin/dashboard/Dashboard.vue')
+        component: Dashboard
       },
       {
-        path: '/workSpace',
-        name: 'WorkSpace',
-        components: () => import('../views/admin/workSpace/WorkSpace.vue')
-      },
+        path: '/workspaces',
+        name: 'Workspaces',
+        component: Workspaces
+      }
     ]
   },
   {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    path: '/user',
+    name: 'User',
+    component: UserBaseLayout,
+    meta: { icon: 'home' },
+    redirect: '/userDashboard',
+    children: [
+      {
+        path: '/userDashboard',
+        name: 'UserDashboard',
+        component: UserDashboard
+      }
+    ]
   }
 ]
 
-const router = createRouter({
+const index = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
 
-export default router
+export default index
