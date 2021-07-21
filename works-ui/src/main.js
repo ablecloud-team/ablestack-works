@@ -11,13 +11,24 @@ import {
     CameraOutlined,
     PaperClipOutlined,
     LockOutlined,
-    BellOutlined, FontSizeOutlined,
+    BellOutlined, FontSizeOutlined, EditOutlined
 } from '@ant-design/icons-vue';
 import 'ant-design-vue/dist/antd.css';
 import App from './App';
 import router from './router'
 import store from './store'
 import i18n from './locales'
+
+
+import {faCameraRetro, faUserSecret} from '@fortawesome/free-solid-svg-icons'
+import {faUbuntu, faCentos} from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+
+library.add(faCameraRetro)
+library.add(faUbuntu)
+library.add(faCentos)
+library.add(faUserSecret)
 
 const app = createApp(App);//.use(loadLocaleMessages);
 app.addComponents = function () {
@@ -39,7 +50,10 @@ app.addComponents(
     LockOutlined,
     BellOutlined,
     FontSizeOutlined,
+    EditOutlined,
 )
+
+app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(store);
 app.use(router);
 app.use(i18n);

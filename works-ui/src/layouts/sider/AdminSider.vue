@@ -12,43 +12,44 @@
         <template #icon>
           <DashboardOutlined />
         </template>
-        <span>대시보드</span>
+        <span>{{ $t('label.Dashboard') }}</span>
       </a-menu-item>
-      <a-menu-item key="2">
+      <a-menu-item key="2"
+                   @click="$router.push({name: 'Workspaces'})">
         <template #icon>
           <CloudOutlined />
         </template>
-        <span>워크스페이스</span>
+        <span>{{ $t('label.Workspace') }}</span>
       </a-menu-item>
       <a-menu-item key="3">
         <template #icon>
           <DesktopOutlined />
         </template>
-        <span>가상머신</span>
+        <span>{{ $t('label.VM') }}</span>
       </a-menu-item>
       <a-menu-item key="4">
         <template #icon>
           <TeamOutlined />
         </template>
-        <span>사용자</span>
+        <span>{{ $t('label.User') }}</span>
       </a-menu-item>
       <a-menu-item key="5">
         <template #icon>
           <ReconciliationOutlined />
         </template>
-        <span>정책</span>
+        <span>{{ $t('label.GroupPolicy') }}</span>
       </a-menu-item>
       <a-menu-item key="6">
         <template #icon>
           <BarChartOutlined />
         </template>
-        <span>로그기록</span>
+        <span>{{ $t('label.Audit') }}</span>
       </a-menu-item>
       <a-menu-item key="7">
         <template #icon>
           <CoffeeOutlined />
         </template>
-        <span>커뮤니티</span>
+        <span>{{ $t('label.Community') }}</span>
       </a-menu-item>
     </a-menu>
   </div>

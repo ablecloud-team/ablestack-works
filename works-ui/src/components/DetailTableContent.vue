@@ -34,11 +34,11 @@
 <script>
 import Actions from "@/components/actions";
 import Apath from "@/components/Apath";
-import TableContent from "@/components/TableContent";
+import TableContent from "./TableContent";
 import {data, columns} from "@/data"
 
 export default {
-  name: 'WorkSpace',
+  name: 'DetailTableContent',
   props: {
     msg: String
   },

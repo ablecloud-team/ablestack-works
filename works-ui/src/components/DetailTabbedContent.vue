@@ -6,7 +6,7 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.Workspace')]"
+              <Apath v-bind:paths="['Application List', 'Application']"
               />
 
             </a-col>
@@ -21,10 +21,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-
-          <ACard bordered>
-            <TableContent :data="data" :columns="columns" :bordered="true"/>
-          </ACard>
+          <Bodycontent />
         </div>
       </a-layout-content>
     </a-layout>
@@ -32,24 +29,15 @@
 </template>
 
 <script>
+import Bodycontent from "@/components/BodyContent";
 import Actions from "@/components/actions";
 import Apath from "@/components/Apath";
-import TableContent from "@/components/TableContent";
-import {data, columns} from "@/data"
-
 export default {
-  name: 'WorkSpace',
+  name: 'DetailTabbedContent',
   props: {
     msg: String
   },
-  components: {TableContent, Apath, Actions},
-
-  setup() {
-    return {
-      data,
-      columns
-    };
-  }
+  components: {Apath, Actions, Bodycontent},
 }
 </script>
 
