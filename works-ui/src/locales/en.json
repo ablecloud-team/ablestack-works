@@ -1,5 +1,21 @@
 {
   "message1.aaaa.qqqq": "hello iqweqweqwe18n !!",
   "sdf": "",
-  "sdfsdf": ""
+  "sdfsdf": "",
+  "tooltip.poweron": "Power On",
+  "tooltip.poweroff": "Power Off",
+  "tooltip.reset": "Restart",
+  "tooltip.edit": "Edit",
+  "tooltip.reinstall": "VM Reinstall",
+  "tooltip.snapshot": "Take a Snapshot",
+  "tooltip.volsnapshot": "Take a Volume Snapshot",
+  "tooltip.isoattach": "Attach ISO",
+  "tooltip.destroy": "VM Destroy",
+  "label.Dashboard": "Dashboard",
+  "label.Workspace": "Workspaces",
+  "label.VM": "Virtual Machines",
+  "label.User": "Users",
+  "label.GroupPolicy": "GroupPolicy",
+  "label.Audit": "Audit",
+  "label.Community": "Community"
 }

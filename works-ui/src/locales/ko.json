@@ -1,5 +1,21 @@
 {
   "message1.aaaa.qqqq": "hello iqwasdfasdasdㅁㄴㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹeqweqwe18n !!",
   "sdf": "",
-  "sdfsdf": ""
+  "sdfsdf": "",
+  "tooltip.poweron": "전원 켜기",
+  "tooltip.poweroff": "전원 끄기",
+  "tooltip.reset": "재기동",
+  "tooltip.edit": "편집",
+  "tooltip.reinstall": "VM 재설치",
+  "tooltip.snapshot": "스냅샷 생성",
+  "tooltip.volsnapshot": "볼륨 스냅샷 생성",
+  "tooltip.isoattach": "ISO 연결",
+  "tooltip.destroy": "파기",
+  "label.Dashboard": "대시보드",
+  "label.Workspace": "워크스페이스",
+  "label.VM": "가상머신",
+  "label.User": "사용자",
+  "label.GroupPolicy": "정책",
+  "label.Audit": "로그기록",
+  "label.Community": "커뮤니티"
 }
