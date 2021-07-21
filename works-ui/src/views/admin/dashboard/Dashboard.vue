@@ -7,7 +7,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>가상머신 수</h3>
+              <h3>워크스페이스 수</h3>
               <a-progress
                   type="dashboard"
                   :percent="70"
@@ -31,7 +31,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>가상머신 수</h3>
+              <h3>가상데스크톱 연결 수</h3>
               <a-progress
                   type="dashboard"
                   :percent="70"
@@ -45,7 +45,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>가상머신 수</h3>
+              <h3>앱 가상화 연결 수</h3>
               <a-progress
                   type="dashboard"
                   :percent="70"
@@ -57,7 +57,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>가상머신 수</h3>
+              <h3>전체 CPU 할당량</h3>
               <a-progress
                   type="dashboard"
                   :percent="70"
@@ -69,7 +69,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>가상머신 수</h3>
+              <h3>전체 메모리 할당량</h3>
               <a-progress
                   type="dashboard"
                   :percent="70"

@@ -7,25 +7,48 @@
             <a-card
                 :loading="loading"
             >
-              <h3>Desktop name1</h3>
+              <h3><a-badge status="success"/>Desktop name1</h3>
               <DesktopOutlined style="font-size: 90px"/>
               <br>
-              <a-button type="primary" shape="round" :size="size">
+              <a-button shape="round">
                 <template #icon>
                   <DownloadOutlined />
                 </template>
               </a-button>
-              <a-button type="primary" shape="round" :size="size">
+              <a-button shape="round">
                 <template #icon>
                   <Html5Outlined />
                 </template>
               </a-button>
-              <a-popover placement="topRight">
+              <a-popover placement="right">
                 <template #content>
-                  <p>시작</p>
-                  <p>정지</p>
+                  <a-button shape="circle" :size="small" style="margin: 0 5px">
+                    <template #icon>
+                      <PoweroffOutlined />
+                    </template>
+                  </a-button>
+                  <a-button shape="circle" :size="small" style="margin: 0 5px">
+                    <template #icon>
+                      <PlayCircleOutlined />
+                    </template>
+                  </a-button>
+                  <a-button shape="circle" :size="small" style="margin: 0 5px">
+                    <template #icon>
+                      <ReloadOutlined />
+                    </template>
+                  </a-button>
+                  <a-button shape="circle" :size="small" style="margin: 0 5px">
+                    <template #icon>
+                      <SwapOutlined />
+                    </template>
+                  </a-button>
+                  <a-button shape="circle" :size="small" style="margin: 0 5px" danger>
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                  </a-button>
                 </template>
-                <a-button class="ant-btn-icon-only"><MoreOutlined style="font-size: large"/></a-button>
+                <a-button type="text" class="ant-btn-icon-only"><MoreOutlined style="font-size: large"/></a-button>
               </a-popover>
 
             </a-card>
@@ -34,7 +57,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>Application name1</h3>
+              <h3><a-badge status="error"/>Application name1</h3>
               <AppstoreOutlined style="font-size: 90px"/>
               <br>
               <a-button type="primary" shape="round" :size="size">
@@ -53,7 +76,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>Application name2</h3>
+              <h3><a-badge status="success"/>Application name2</h3>
               <AppstoreOutlined style="font-size: 90px"/>
               <br>
               <a-button type="primary" shape="round" :size="size">
@@ -74,7 +97,7 @@
             <a-card
                 :loading="loading"
             >
-              <h3>Desktop name2</h3>
+              <h3><a-badge status="error"/>Desktop name2</h3>
               <DesktopOutlined style="font-size: 90px"/>
               <br>
               <a-button type="primary" shape="round" :size="size">
@@ -137,7 +160,14 @@
 
 <script>
 import { defineComponent } from 'vue';
-import {AppstoreOutlined, DesktopOutlined, DownloadOutlined, Html5Outlined, MoreOutlined} from '@ant-design/icons-vue'
+import {
+  AppstoreOutlined, DeleteOutlined,
+  DesktopOutlined,
+  DownloadOutlined,
+  Html5Outlined,
+  MoreOutlined, PlayCircleOutlined,
+  PoweroffOutlined, ReloadOutlined, SwapOutlined
+} from '@ant-design/icons-vue'
 export default defineComponent({
   components:{
     DesktopOutlined,
@@ -145,6 +175,11 @@ export default defineComponent({
     Html5Outlined,
     MoreOutlined,
     AppstoreOutlined,
+    PoweroffOutlined,
+    PlayCircleOutlined,
+    DeleteOutlined,
+    ReloadOutlined,
+    SwapOutlined,
   }
 })
 </script>

@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// import Home from '../views/Home.vue'
 import Login from '../views/auth/Login'
 import AdminApp from '../layouts/AdminApp.vue'
 import AdminBaseLayout from '../layouts/AdminBaseLayout';
 import Dashboard from '../views/admin/dashboard/Dashboard';
 import Workspaces from '../views/admin/workSpace/WorkSpace';
 import UserBaseLayout from '../layouts/UserBaseLayout';
-import UserDashboard from '../views/user/Dashboard/UserDashboard'
+import UserDashboard from '../views/user/dashboard/UserDashboard'
 
 const routes = [
   {
