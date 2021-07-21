@@ -9,7 +9,7 @@
       style="overflow-y: auto; overflow: auto"
   >
     <template #name="{ text }">
-      <a>{{ text }}</a>
+      <a href='WorkspacesDetail'>{{ text }}</a>
       <a-Popover placement="topLeft">
 
         <template #content>

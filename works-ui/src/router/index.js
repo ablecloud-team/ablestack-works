@@ -6,6 +6,7 @@ import Dashboard from '../views/admin/dashboard/Dashboard';
 import Workspaces from '../views/admin/workSpace/WorkSpace';
 import UserBaseLayout from '../layouts/UserBaseLayout';
 import UserDashboard from '../views/user/dashboard/UserDashboard'
+import WorkspacesDetail from '../components/TableContent'
 
 const routes = [
   {
@@ -34,6 +35,11 @@ const routes = [
         path: '/workspaces',
         name: 'Workspaces',
         component: Workspaces
+      },
+      {
+        path: '/workspacesDetail',
+        name: 'WorkspacesDetail',
+        component: WorkspacesDetail
       }
     ]
   },
