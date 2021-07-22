@@ -13,7 +13,7 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :poweroff=true :destroy="true" :reset="true"/>
+              <actions :add="$t('label.addworkspace')" :poweroff=true :destroy="true" :reset="true"/>
             </a-col>
 
           </a-row>
@@ -21,7 +21,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-            <TableContent :data="data" :columns="columns" :bordered="false"/>
+            <WorkSpaceList :data="WorkspaceListData" :columns="WorkspaceListColumns" :bordered="false"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -31,23 +31,22 @@
 <script>
 import Actions from "@/components/actions";
 import Apath from "@/components/Apath";
-import TableContent from "@/components/TableContent";
-import {data, columns} from "@/data"
+import {WorkspaceListData, WorkspaceListColumns} from "@/data"
+import WorkSpaceList from "./WorkSpaceList";
+import {defineComponent} from "vue";
 
-export default {
-  name: 'WorkSpace',
+export default defineComponent({
   props: {
     msg: String
   },
-  components: {TableContent, Apath, Actions},
+  components: {WorkSpaceList, Apath, Actions},
 
   setup() {
     return {
-      data,
-      columns
+      WorkspaceListData, WorkspaceListColumns
     };
   }
-}
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

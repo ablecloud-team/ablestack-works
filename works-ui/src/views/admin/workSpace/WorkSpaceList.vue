@@ -7,19 +7,11 @@
       :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
       :bordered="bordered?bordered:false"
       style="overflow-y: auto; overflow: auto"
+      :row-key="(record, index) => index"
       :row-selection="rowSelection"
-      :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <span v-if="comp!==undefined">
-      <router-link :to="{ name: comp, params: { name: record.Name, info:[record.IPAddress, record.Account, record.Zone] }}">
-        {{ record.Name }}
-      </router-link>
-      </span>
-      <span v-else>
-        {{record.Name}}
-      </span>
-
+      <router-link :to="{ name: 'WorkspacesDetail', params: { name: record.Name, info:[record.IPAddress, record.Account, record.Zone] }}">{{ record.Name }}</router-link>
     </template>
 
     <template #actionRender="{ record }">
@@ -45,14 +37,12 @@
         </a-tag>
       </span>
     </template>
-    {{ data }}
-    {{ comp }}
+
   </a-table>
 
 </template>
 
 <script>
-// import {SmileOutlined} from '@ant-design/icons-vue';
 import {defineComponent} from 'vue';
 import Actions from "@/components/actions";
 
@@ -71,19 +61,12 @@ export default defineComponent({
   props: {
     data: Object,
     columns: Object,
-    bordered: Boolean,
-    comp: String
+    bordered: Boolean
   },
   setup() {
     return {
       rowSelection,
-      pagination: {
-        pageSize: 20,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ['10', '20', '30', '40'], // number of pages per option
-        showTotal: total => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => this.pageSize = pageSize, // update display when changing the number of pages per page
-      }
+
     };
   },
   components: {

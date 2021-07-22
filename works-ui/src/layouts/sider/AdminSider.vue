@@ -21,7 +21,8 @@
         </template>
         <span>{{ $t('label.Workspace') }}</span>
       </a-menu-item>
-      <a-menu-item key="3">
+      <a-menu-item key="3"
+                   @click="$router.push({name: 'Virtualmachine'})">
         <template #icon>
           <DesktopOutlined />
         </template>

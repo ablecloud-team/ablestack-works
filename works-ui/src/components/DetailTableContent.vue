@@ -38,7 +38,6 @@ import TableContent from "./TableContent";
 import {data2, columns} from "@/data"
 
 export default {
-  name: 'DetailTableContent',
   props: {
     msg: String
   },

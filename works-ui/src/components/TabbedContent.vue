@@ -2,7 +2,7 @@
   <div id="ContentTab">
     <a-tabs type="card" v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" tab="Tab 1"><TableContent :data="data" :columns="columns" /></a-tab-pane>
-      <a-tab-pane key="2" tab="Tab 2"><ListView /></a-tab-pane>
+<!--      <a-tab-pane key="2" tab="Tab 2"><ListView :data="data" :columns="columns"  /></a-tab-pane>-->
       <a-tab-pane key="3" tab="Tab 3">Content of Tab Pane 3</a-tab-pane>
     </a-tabs>
   </div>

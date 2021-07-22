@@ -18,5 +18,9 @@
   "label.GroupPolicy": "정책",
   "label.Audit": "로그기록",
   "label.Community": "커뮤니티",
-  "label.WorkspaceDetail": "상세정보"
+  "label.WorkspaceDetail": "상세정보",
+  "label.VMList": "가상데스크톱 리스트",
+  "label.DiskList": "데이터 디스크 리스트",
+  "label.NWList": "네트워크 리스트",
+  "label.addworkspace": "워크스페이스 추가"
 }

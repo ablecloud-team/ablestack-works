@@ -30,39 +30,36 @@
 
 <script>
 
-import {columns, data, listdata} from "../data";
 import Actions from "@/components/actions";
 export default {
-  name: 'ListView',
   components: {
     Actions
   },
   props: {
+    data,
+    listdata,
   },
   setup(){
     return {
-      data,
-      columns,
-      listdata,
     };
   }
 }
 </script>
 
 <style scoped>
-:deep(.ant-table-thead) {
+::v-deep(.ant-table-thead) {
   background-color: #f9f9f9;
 }
 
-:deep(.ant-table-small) > .ant-table-content > .ant-table-body {
+::v-deep(.ant-table-small) > .ant-table-content > .ant-table-body {
   margin: 0;
 }
 
-:deep(.light-row) {
+::v-deep(.light-row) {
   background-color: #fff;
 }
 
-:deep(.dark-row) {
+::v-deep(.dark-row) {
   background-color: #f9f9f9;
 }
 </style>
