@@ -1,4 +1,14 @@
-<template>
+<template class="able-action">
+
+  <a-tooltip placement="top" v-if="add !== undefined">
+    <template #title>{{ add }}</template>
+    <a-button type="primary" shape="round" :size="size">
+      <template #icon>
+        {{ add }}
+        <PlusOutlined />
+      </template>
+    </a-button>
+  </a-tooltip>
 
   <a-tooltip placement="top" v-if="power === true">
     <template #title>{{ $t('tooltip.poweron') }}</template>
@@ -67,9 +77,10 @@
 </template>
 
 <script>
-export default {
-  name: "actions",
+import { defineComponent, ref } from 'vue';
+export default defineComponent({
   props:{
+    add: String,
     power: Boolean,
     poweroff: Boolean,
     reset: Boolean,
@@ -79,10 +90,20 @@ export default {
     iso: Boolean,
     destroy: Boolean,
     edit: Boolean,
-  }
-}
+  },
+  setup() {
+    return {
+      size: ref(''),
+    };
+  },
+})
 </script>
 
 <style scoped>
-
+#content-action .ant-btn {
+  margin-left: 8px;
+  padding-top:0px ;
+  padding-bottom: 0px;
+  font-size: 14px;
+}
 </style>

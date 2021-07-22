@@ -6,7 +6,9 @@ import Dashboard from '../views/admin/dashboard/Dashboard';
 import Workspaces from '../views/admin/workSpace/WorkSpace';
 import UserBaseLayout from '../layouts/UserBaseLayout';
 import UserDashboard from '../views/user/dashboard/UserDashboard'
-import WorkspacesDetail from '../components/TableContent'
+import WorkspacesDetail from '../views/admin/workSpace/WorkSpaceDetail'
+import VirtualMachineDetail from "../views/admin/VirtualMachine/VirtualMachineDetail";
+import VirtualMachine from "../views/admin/VirtualMachine/VirtualMachine";
 
 const routes = [
   {
@@ -37,9 +39,21 @@ const routes = [
         component: Workspaces
       },
       {
-        path: '/workspacesDetail',
+        path: '/workspacesDetail/',
         name: 'WorkspacesDetail',
-        component: WorkspacesDetail
+        component: WorkspacesDetail,
+        props: true
+      },
+      {
+        path: '/virtualmachine',
+        name: 'Virtualmachine',
+        component: VirtualMachine
+      },
+      {
+        path: '/vmdetail/',
+        name: 'VirtualMachineDetail',
+        component: VirtualMachineDetail,
+        props: true
       }
     ]
   },

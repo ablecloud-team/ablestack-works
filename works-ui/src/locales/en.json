@@ -17,5 +17,10 @@
   "label.User": "Users",
   "label.GroupPolicy": "GroupPolicy",
   "label.Audit": "Audit",
-  "label.Community": "Community"
+  "label.Community": "Community",
+  "label.WorkspaceDetail": "Detail",
+  "label.VMList": "Virtual Desktops",
+  "label.DiskList": "Data Disks",
+  "label.NWList": "Networks",
+  "label.addworkspace": "Add Workspace"
 }
