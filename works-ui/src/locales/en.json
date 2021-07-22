@@ -20,5 +20,10 @@
   "label.Community": "Community",
   "label.dashboard.workspace": "Workspaces",
   "label.dashboard.desktop": "Desktop",
-  "label.dashboard.application": "Application"
+  "label.dashboard.application": "Application",
+  "label.WorkspaceDetail": "Detail",
+  "label.VMList": "Virtual Desktops",
+  "label.DiskList": "Data Disks",
+  "label.NWList": "Networks",
+  "label.addworkspace": "Add Workspace"
 }

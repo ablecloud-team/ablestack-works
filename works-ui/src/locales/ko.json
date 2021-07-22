@@ -20,5 +20,10 @@
   "label.Community": "커뮤니티",
   "label.dashboard.workspace": "워크스페이스",
   "label.dashboard.desktop": "데스크탑",
-  "label.dashboard.application": "애플리케이션"
+  "label.dashboard.application": "애플리케이션",
+  "label.WorkspaceDetail": "상세정보",
+  "label.VMList": "가상데스크톱 리스트",
+  "label.DiskList": "데이터 디스크 리스트",
+  "label.NWList": "네트워크 리스트",
+  "label.addworkspace": "워크스페이스 추가"
 }
