@@ -1,9 +1,10 @@
 <template>
-  <div style="width: 256px">
+  <div style="width: 256px; height: 100%;">
     <Logo />
     <a-menu
         mode="inline"
         theme="light"
+        style="padding-top: 14px"
     >
       <a-menu-item
           key="1"

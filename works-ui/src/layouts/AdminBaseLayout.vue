@@ -1,5 +1,5 @@
 <template>
-  <a-layout>
+  <a-layout style="height: 100%">
     <a-layout-sider class="admin-sider-layout">
       <AdminSider/>
     </a-layout-sider>
@@ -46,7 +46,9 @@ export default ({
 }
 
 .admin-layout-content{
-  background: white;
+  background: #f0f2f5;
+  min-height: 700px;
+  height: 100%;
 }
 
 .admin-layout-footer{

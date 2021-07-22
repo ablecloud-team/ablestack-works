@@ -1,5 +1,5 @@
 <template>
-  <a-layout>
+  <a-layout style="height: 100%">
     <a-layout-sider class="user-sider-layout">
       <UserSider/>
     </a-layout-sider>
@@ -46,7 +46,8 @@ export default ({
 }
 
 .user-layout-content{
-  background: white;
+  background: #f0f2f5;
+  height: 100%;
 }
 
 .user-layout-footer{

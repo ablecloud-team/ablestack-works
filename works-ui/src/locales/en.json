@@ -17,5 +17,8 @@
   "label.User": "Users",
   "label.GroupPolicy": "GroupPolicy",
   "label.Audit": "Audit",
-  "label.Community": "Community"
+  "label.Community": "Community",
+  "label.dashboard.workspace": "Workspaces",
+  "label.dashboard.desktop": "Desktop",
+  "label.dashboard.application": "Application"
 }

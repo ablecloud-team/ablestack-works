@@ -5,8 +5,10 @@ import AdminBaseLayout from '../layouts/AdminBaseLayout';
 import Dashboard from '../views/admin/dashboard/Dashboard';
 import Workspaces from '../views/admin/workSpace/WorkSpace';
 import UserBaseLayout from '../layouts/UserBaseLayout';
-import UserDashboard from '../views/user/dashboard/UserDashboard'
-import WorkspacesDetail from '../components/TableContent'
+import Favorites from '../views/user/favorites/Favorites';
+import WorkspacesDetail from '../components/TableContent';
+import UserDesktop from '../views/user/desktopApp/DesktopApp';
+import A from "../views/admin/dashboard/A";
 
 const routes = [
   {
@@ -18,6 +20,11 @@ const routes = [
     path: '/adminApp',
     name: 'AdminApp',
     component: AdminApp
+  },
+  {
+    path: '/a',
+    name: 'A',
+    component: A
   },
   {
     path: '/',
@@ -48,12 +55,17 @@ const routes = [
     name: 'User',
     component: UserBaseLayout,
     meta: { icon: 'home' },
-    redirect: '/userDashboard',
+    redirect: '/favorites',
     children: [
       {
-        path: '/userDashboard',
-        name: 'UserDashboard',
-        component: UserDashboard
+        path: '/favorites',
+        name: 'Favorites',
+        component: Favorites
+      },
+      {
+        path: '/userDesktop',
+        name: 'UserDesktop',
+        component: UserDesktop
       }
     ]
   }
