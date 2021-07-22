@@ -6,7 +6,7 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="['Application List', 'Application']"
+              <Apath v-bind:paths="[{name:$t('label.Workspace'), component: 'Workspaces'}, {name:$t('label.WorkspaceDetail'), component: null}]"
               />
 
             </a-col>
@@ -21,7 +21,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <Bodycontent />
+          <Bodycontent :name="name" :info="info"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -35,7 +35,8 @@ import Apath from "@/components/Apath";
 export default {
   name: 'DetailTabbedContent',
   props: {
-    msg: String
+    name: String,
+    info: Object
   },
   components: {Apath, Actions, Bodycontent},
 }

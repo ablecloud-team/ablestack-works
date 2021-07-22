@@ -2,11 +2,11 @@
   <div id="content-layout">
     <a-layout>
       <a-layout-header id="content-header">
-        <div id="content-header-body">
-          <a-row id="content-header-row">
+        <div>
+          <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.Workspace')]"
+              <Apath v-bind:paths="[{name:$t('label.Workspace'), component: 'Workspaces'}, {name:$t('label.WorkspaceDetail'), component: null}]"
               />
 
             </a-col>
@@ -21,7 +21,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-            <TableContent :data="data" :columns="columns" :bordered="false"/>
+          <Bodycontent :name="name" :info="info"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -29,52 +29,57 @@
 </template>
 
 <script>
+import Bodycontent from "@/components/BodyContent";
 import Actions from "@/components/actions";
 import Apath from "@/components/Apath";
-import TableContent from "@/components/TableContent";
-import {data, columns} from "@/data"
-
 export default {
-  name: 'WorkSpace',
+  name: 'DetailWorkSpace',
   props: {
-    msg: String
+    name: String,
+    info: Object
   },
-  components: {TableContent, Apath, Actions},
-
-  setup() {
-    return {
-      data,
-      columns
-    };
-  }
+  components: {Apath, Actions, Bodycontent},
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#content-layout .ant-layout-content {
-  background: #f0f2f5;
-  padding: 10px;
+#content-layout, #content-body{
+  width:calc(100%);
 }
 #content-layout .ant-layout-header {
   text-align: left;
-  background: white;
-  border: 1px solid #e8e8e8;
-  /*color: #fff;*/
+  background: #e8eaed;
+  color: #fff;
   font-size: 14px;
   line-height: 1.5;
   padding: 24px;
-  height: auto;
 }
 
-#content-path {
+#content-layout .ant-layout-header #content-path {
   text-align: left;
-  align-items: center;
-  display: flex;
+  /*background: #ea7da3;*/
 }
 
-#content-action {
+
+#content-layout .ant-layout-header #content-action {
   text-align: right;
+  /*background: #b0ea7d;*/
+  margin-bottom: -6px;
+}
+#content-layout .ant-layout-content {
+  /*background: rgb(233, 211, 16);*/
+  color: #fff;
+  min-height: 120px;
+  line-height: 120px;
+}
+
+#content-layout > .ant-layout {
+  margin-bottom: 48px;
+}
+
+#content-layout > .ant-layout:last-child {
+  margin: 0;
 }
 
 </style>

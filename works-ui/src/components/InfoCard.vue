@@ -9,9 +9,11 @@
           {{ name }}
         </h4>
       </div>
-      <a-tag v-for="tag in tags">
-        {{ tag }}
-      </a-tag>
+      <div id="div_tag" v-if="tags !== undefined">
+        <a-tag v-for="tag in tags" v-bind:key="tags.indexOf(tag)">
+          {{ tag }}
+        </a-tag>
+      </div>
       <a-tooltip placement="right">
         <template #title>connect portal</template>
         <a-button shape="circle" type="dashed">
@@ -21,6 +23,11 @@
     </div>
 
     <ADivider />
+    <div v-if="info !== undefined">
+      <a-tag v-for="tag in info" v-bind:key="info.indexOf(tag)">
+        {{tag}}
+      </a-tag>
+    </div>
     <AEmpty />
 </template>
 
@@ -29,7 +36,17 @@ export default {
   name: "InfoCard",
   props:{
     name: String,
-    tags: Array,
+    tags: {
+      type:Array,
+      required: false,
+    },
+    info: {
+      type:Object,
+      required: false,
+    }
+  },
+  setup(){
+    return
   }
 }
 </script>

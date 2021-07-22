@@ -4,14 +4,14 @@
       <a-layout-header id="content-header">
         <div>
           <a-row>
-            <!-- 오른쪽 경로 -->
+            <!-- 왼쪽 경로 -->
             <a-col id='content-path' :span="12">
               <Apath v-bind:paths="[$t('label.Workspace')]"
               />
 
             </a-col>
 
-            <!-- 왼쪽 액션 -->
+            <!-- 오른쪽 액션 -->
             <a-col id="content-action" :span="12">
               <actions :poweroff=true :destroy="true" :reset="true"/>
             </a-col>
@@ -23,7 +23,7 @@
         <div id="content-body">
 
           <ACard bordered>
-            <TableContent :data="data" :columns="columns" :bordered="true"/>
+            <TableContent :data="data2" :columns="columns" :bordered="true"/>
           </ACard>
         </div>
       </a-layout-content>
@@ -35,7 +35,7 @@
 import Actions from "@/components/actions";
 import Apath from "@/components/Apath";
 import TableContent from "./TableContent";
-import {data, columns} from "@/data"
+import {data2, columns} from "@/data"
 
 export default {
   name: 'DetailTableContent',
@@ -46,7 +46,7 @@ export default {
 
   setup() {
     return {
-      data,
+      data2,
       columns
     };
   }

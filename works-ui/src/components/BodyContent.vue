@@ -4,7 +4,7 @@
       <ACol :span="8" style="background: #ececec; padding: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style=" min-height: 300px">
-          <InfoCard name="test-name" :tags="['test', 'tag', 'list']" />
+          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
         </ACard>
       </ACol>
 
@@ -25,6 +25,10 @@ import InfoCard from "@/components/InfoCard";
 export default {
   name: 'Bodycontent',
   components: {InfoCard, TabbedContent,},
+  props: {
+    name: String,
+    info: Object
+  }
 
 };
 </script>

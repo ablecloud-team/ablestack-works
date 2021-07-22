@@ -17,5 +17,6 @@
   "label.User": "사용자",
   "label.GroupPolicy": "정책",
   "label.Audit": "로그기록",
-  "label.Community": "커뮤니티"
+  "label.Community": "커뮤니티",
+  "label.WorkspaceDetail": "상세정보"
 }

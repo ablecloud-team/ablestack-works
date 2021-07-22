@@ -84,5 +84,7 @@ export default {
 </script>
 
 <style scoped>
-
+#content-action .ant-btn {
+  margin-left: 8px;
+}
 </style>

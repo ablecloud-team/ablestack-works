@@ -3,28 +3,35 @@
       size="middle"
       class="ant-table-striped"
       :columns="columns"
-      :data-source="data"
+      :data-source="data2"
       :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
       :bordered="bordered?bordered:false"
       style="overflow-y: auto; overflow: auto"
+      :row-selection="rowSelection"
   >
-    <template #name="{ text }">
-      <a href='WorkspacesDetail'>{{ text }}</a>
+    <template #nameRender="{ record }">
+      <router-link :to="{ name: 'WorkspacesDetail', params: { name: record.Name, info:[record.IPAddress, record.Account, record.Zone] }}">{{ record.Name }}</router-link>
+<!--      <a-Popover placement="topLeft">-->
+
+<!--        <template #content>-->
+<!--          <ASpace direction="horizontal">-->
+<!--            <actions :power=true :destroy="true" :reset="true" :iso="true" />-->
+<!--          </ASpace>-->
+<!--        </template>-->
+<!--        :-->
+<!--      </a-Popover>-->
+    </template>
+
+    <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
 
         <template #content>
           <ASpace direction="horizontal">
-            <actions :power=true :destroy="true" :reset="true" :iso="true" />
+            <actions :power="record.State === 'Running'" :destroy="true" :reset="true" :iso="true" />
           </ASpace>
         </template>
         :
       </a-Popover>
-    </template>
-
-    <template #customTitle>
-      <span>
-        Name
-      </span>
     </template>
 
     <template #tags="{ text: tags }">
@@ -40,21 +47,37 @@
     </template>
 
   </a-table>
+  {{data2}}
 </template>
 
 <script>
 // import {SmileOutlined} from '@ant-design/icons-vue';
 import {defineComponent} from 'vue';
 import Actions from "@/components/actions";
+import {data2} from "@/data"
+
+const rowSelection = {
+  onChange: (selectedRowKeys, selectedRows) => {
+    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+  },
+  onSelect: (record, selected, selectedRows) => {
+    console.log(record, selected, selectedRows);
+  },
+  onSelectAll: (selected, selectedRows, changeRows) => {
+    console.log(selected, selectedRows, changeRows);
+  },
+};
 export default defineComponent({
   name: 'TableContent',
   props: {
-    data: Object,
+    //data: Object,
     columns: Object,
     bordered: Boolean
   },
   setup() {
     return {
+      rowSelection,
+      data2
     };
   },
   components: {
