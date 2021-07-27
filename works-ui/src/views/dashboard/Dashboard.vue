@@ -3,7 +3,7 @@
     <div class="dashboard-left-grid">
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -19,7 +19,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -35,7 +35,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
       <span style="font-size: x-large; margin-bottom: 10px;">
-        {{ $t('label.Workspace') }}
+        {{ $t('label.workspace') }}
       </span>
         <a-progress
             type="dashboard"
@@ -51,7 +51,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -67,7 +67,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -83,7 +83,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -99,7 +99,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"
@@ -115,7 +115,7 @@
       </a-card>
       <a-card class="dashboard-card" hoverable>
         <span style="font-size: x-large; margin-bottom: 10px;">
-          {{ $t('label.Workspace') }}
+          {{ $t('label.workspace') }}
         </span>
         <a-progress
             type="dashboard"

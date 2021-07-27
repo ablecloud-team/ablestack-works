@@ -23,14 +23,13 @@
     </template>
 
     <template #actionRender="{ record }">
-      <a-Popover placement="topLeft">
-
+      <a-Popover placement="top">
         <template #content>
           <ASpace direction="horizontal">
             <actions :power="record.State === 'Running'" :destroy="true" :reset="true" :iso="true" />
           </ASpace>
         </template>
-        :
+        <MoreOutlined />
       </a-Popover>
     </template>
 
@@ -54,7 +53,7 @@
 <script>
 // import {SmileOutlined} from '@ant-design/icons-vue';
 import {defineComponent} from 'vue';
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {

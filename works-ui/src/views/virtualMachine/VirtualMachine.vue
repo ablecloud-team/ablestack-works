@@ -2,11 +2,11 @@
   <div id="content-layout">
     <a-layout>
       <a-layout-header id="content-header">
-        <div>
-          <a-row>
+        <div id="content-header-body">
+          <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[{name:$t('label.Workspace'), component: 'Workspaces'}, {name:name, component: null}]"
+              <Apath v-bind:paths="[$t('label.vm')]"
               />
 
             </a-col>
@@ -21,7 +21,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody :name="name" :info="info"/>
+            <VirtualMachineList :data="VMListData" :columns="VMListColumns" :bordered="false"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -29,22 +29,28 @@
 </template>
 
 <script>
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/admin/workSpace/WorkSpaceBody";
+import {VMListColumns, VMListData} from "@/data"
+import VirtualMachineList from "@/views/virtualMachine/VirtualMachineList";
 import {defineComponent} from "vue";
+
 export default defineComponent({
   props: {
-    name: String,
-    info: Object
+    msg: String
   },
-  components: {Apath, Actions, WorkSpaceBody},
+  components: {VirtualMachineList,  Apath, Actions},
+
+  setup() {
+    return {
+      VMListColumns, VMListData
+    };
+  }
 })
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 #content-layout .ant-layout-content {
   background: #f0f2f5;
   padding: 10px;

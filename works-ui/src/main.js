@@ -11,7 +11,13 @@ import {
     CameraOutlined,
     PaperClipOutlined,
     LockOutlined,
-    BellOutlined, FontSizeOutlined, EditOutlined, HomeOutlined,BarcodeOutlined,PlusOutlined
+    BellOutlined,
+    FontSizeOutlined,
+    EditOutlined,
+    HomeOutlined,
+    BarcodeOutlined,
+    PlusOutlined,
+    MoreOutlined
 } from '@ant-design/icons-vue';
 import 'ant-design-vue/dist/antd.css';
 import App from './App';
@@ -53,8 +59,8 @@ app.addComponents(
     EditOutlined,
     HomeOutlined,
     BarcodeOutlined,
-    PlusOutlined
-
+    PlusOutlined,
+    MoreOutlined
 )
 
 app.component('font-awesome-icon', FontAwesomeIcon)

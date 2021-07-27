@@ -11,7 +11,7 @@
       <ACol :span="16" style="background: #f0f2f5; padding-left:8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <WorkSpaceTab />
+          <VirtualMachineTab />
         </ACard>
       </ACol>
     </ARow>
@@ -19,12 +19,13 @@
 </template>
 
 <script>
+// import TabbedContent from "@/components/TabbedContent";
 import InfoCard from "@/components/InfoCard";
-import WorkSpaceTab from "@/views/admin/workSpace/WorkSpaceTab";
+import VirtualMachineTab from "@/views/virtualMachine/VirtualMachineTab";
 import {defineComponent} from "vue";
 
 export default defineComponent({
-  components: {WorkSpaceTab, InfoCard,},
+  components: {VirtualMachineTab, InfoCard,},
   props: {
     name: String,
     info: Object

@@ -6,7 +6,7 @@
           <a-row>
             <!-- 왼쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.Workspace')]"
+              <Apath v-bind:paths="[$t('label.workspace')]"
               />
 
             </a-col>
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import TableContent from "./TableContent";
 import {data2, columns} from "@/data"

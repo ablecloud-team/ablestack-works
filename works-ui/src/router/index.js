@@ -2,15 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Login from '../views/auth/Login'
 import AdminApp from '../layouts/AdminApp.vue'
 import AdminBaseLayout from '../layouts/AdminBaseLayout';
-import Dashboard from '../views/admin/dashboard/Dashboard';
-import Workspaces from '../views/admin/workSpace/WorkSpace';
+import Dashboard from '../views/dashboard/Dashboard';
+import Workspaces from '../views/workSpace/WorkSpace';
 import UserBaseLayout from '../layouts/UserBaseLayout';
-import WorkspacesDetail from '../views/admin/workSpace/WorkSpaceDetail'
-import VirtualMachineDetail from "../views/admin/VirtualMachine/VirtualMachineDetail";
-import VirtualMachine from "../views/admin/VirtualMachine/VirtualMachine";
-import Favorites from '../views/user/favorites/Favorites';
-import UserDesktop from '../views/user/desktopApp/DesktopApp';
-import A from "../views/admin/dashboard/A";
+import WorkspacesDetail from '../views/workSpace/WorkSpaceDetail'
+import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail";
+import VirtualMachine from "../views/virtualMachine/VirtualMachine";
+import Favorites from '../views/favorites/Favorites';
+import UserDesktop from '../views/desktopApplication/DesktopApplication';
+import A from "../components/AddModal";
 
 const routes = [
   {
@@ -22,6 +22,11 @@ const routes = [
     path: '/adminApp',
     name: 'AdminApp',
     component: AdminApp
+  },
+  {
+    path: '/a',
+    name: 'A',
+    component: A
   },
   {
     path: '/a',

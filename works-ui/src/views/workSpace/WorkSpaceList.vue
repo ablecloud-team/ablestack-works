@@ -18,11 +18,9 @@
       <a-Popover placement="topLeft">
 
         <template #content>
-          <ASpace direction="horizontal">
-            <actions :power="record.State === 'Running'" :destroy="true" :reset="true" :iso="true" />
-          </ASpace>
+          <Actions :power="record.State === 'Running'" :destroy="true" :reset="true" :iso="true" />
         </template>
-        :
+        <MoreOutlined />
       </a-Popover>
     </template>
 
@@ -44,7 +42,7 @@
 
 <script>
 import {defineComponent} from 'vue';
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {

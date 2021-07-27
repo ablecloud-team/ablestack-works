@@ -30,7 +30,7 @@
 
 <script>
 
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 export default {
   components: {
     Actions

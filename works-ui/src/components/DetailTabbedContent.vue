@@ -6,7 +6,7 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[{name:$t('label.Workspace'), component: 'Workspaces'}, {name:$t('label.WorkspaceDetail'), component: null}]"
+              <Apath v-bind:paths="[{name:$t('label.workspace'), component: 'Workspaces'}, {name:$t('label.WorkspaceDetail'), component: null}]"
               />
 
             </a-col>
@@ -30,7 +30,7 @@
 
 <script>
 import Bodycontent from "@/components/BodyContent";
-import Actions from "@/components/actions";
+import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 export default {
   props: {
