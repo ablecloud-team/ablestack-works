@@ -111,7 +111,9 @@ export const VMDiskListColumns = [
     }
 ];
 export const VMDiskListData = JSON.parse(
-    '[{"Name":"Datadisk1","State":"Allocated","Size":"50GB","Conn":"TRUE","action":""},{"Name":"Datadisk2","State":"Allocated","Size":"100GB","Conn":"FALSE","action":""},{"Name":"Datadisk3","State":"Allocated","Size":"200GB","Conn":"TRUE","action":""}]'
+    '[{"Name":"Datadisk1","State":"Allocated","Size":"50GB","Conn":"VM1","action":""},' +
+    '{"Name":"Datadisk2","State":"Allocated","Size":"100GB","Conn":"VM2","action":""},' +
+    '{"Name":"Datadisk3","State":"Allocated","Size":"200GB","Conn":"VM3","action":""}]'
 )
 
 export const VMListColumns = [
@@ -195,16 +197,23 @@ export const UserListColumns = [
         sorter: (a, b) => a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0,
         sortDirections: ['descend', 'ascend']
     },
-    {
-        title: '',
-        key: 'action',
-        dataIndex: 'action',
-        slots: {customRender: 'actionRender'}
-    },
+    // {
+    //     title: '',
+    //     key: 'action',
+    //     dataIndex: 'action',
+    //     slots: {customRender: 'actionRender'}
+    // },
     {
         title: 'State',
         dataIndex: 'State',
         key: 'State',
+        sorter: (a, b) => a.State < b.State ? -1 : a.State > b.State ? 1 : 0,
+        sortDirections: ['descend', 'ascend']
+    },
+    {
+        title: 'Allocated Desktop',
+        dataIndex: 'Desktop',
+        key: 'Desktop',
         sorter: (a, b) => a.State < b.State ? -1 : a.State > b.State ? 1 : 0,
         sortDirections: ['descend', 'ascend']
     },
@@ -215,5 +224,5 @@ export const NWListData = JSON.parse(
 )
 
 export const UserListData = JSON.parse(
-    '[{"Name":"user01","State":"Allocated"}]'
+    '[{"Name":"user01","State":"Allocated","Desktop":"Desktop1"}]'
 )

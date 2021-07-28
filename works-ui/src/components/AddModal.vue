@@ -9,35 +9,37 @@
     <a-form layout="vertical">
       <!--워크스페이스 이름 start-->
       <a-form-item class="addmodal-aform-item">
-        <template #label>
-          <span>{{ $t('label.name') }}</span>
-          <a-tooltip placement="top">
-            <template #title>
-              {{ $t('tooltip.workspace.name') }}
-            </template>
-            <InfoCircleOutlined class="addmodal-info-icon"/>
-          </a-tooltip>
-        </template>
+          <slot name="label">
+            {{ $t('label.name') }}
+            <a-tooltip placement="top">
+              <template #title>
+                {{ $t('tooltip.workspace.name') }}
+              </template>
+              <InfoCircleOutlined class="addmodal-info-icon"/>
+            </a-tooltip>
+          </slot>
         <a-input v-bind:placeholder="$t('tooltip.workspace.name')"/>
       </a-form-item>
       <!--워크스페이스 이름 end-->
       <!--워크스페이스 설명 start-->
-      <a-form-item class="addmodal-aform-item">
-        <template #label>
-          <span>{{ $t('label.description') }}</span>
+      <a-form-item
+          class="addmodal-aform-item"
+      >
+        <slot name="label">
+          {{ $t('label.description') }}
           <a-tooltip placement="top">
             <template #title>
               {{ $t('tooltip.workspace.description') }}
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-input v-bind:placeholder="$t('tooltip.workspace.description')"/>
       </a-form-item>
       <!--워크스페이스 설명 end-->
       <!--워크스페이스 타입 start-->
       <a-form-item class="addmodal-aform-item">
-        <template #label>
+        <slot name="label">
           <span>{{ $t('label.type') }}</span>
           <a-tooltip placement="top">
             <template #title>
@@ -45,7 +47,7 @@
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-select
             v-model:value="workspaceType"
             v-bind:placeholder="$t('tooltip.workspace.type')"
@@ -60,15 +62,15 @@
       <!--워크스페이스 타입 end-->
       <!--워크스페이스 템플릿 start-->
       <a-form-item class="addmodal-aform-item">
-        <template #label>
-          <span>{{ $t('label.template') }}</span>
+        <slot name="label">
+          {{ $t('label.template') }}
           <a-tooltip placement="top">
             <template #title>
               {{ $t('tooltip.workspace.template') }}
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-select
             v-model:value="templateId"
             v-bind:placeholder="$t('tooltip.workspace.type')"
@@ -80,26 +82,31 @@
         </a-select>
       </a-form-item>
       <!--워크스페이스 템플릿 end-->
-      <!--데스크탑 퍼블릭 여부 start-->
+      <!--워크스페이스 전용 여부 start-->
       <a-form-item
+          v-show="state.desktopBoolean"
           class="addmodal-aform-item"
-          v-model:style="state.publicSwitch"
       >
-        <template #label>
-          <span>{{ $t('label.workspace.public.boolean') }}</span>
+        <slot name="label">
+          {{ $t(state.switchLabel) }}
+<!--          <span v-show>{{ $t('label.shared') }}</span>-->
           <a-tooltip placement="top">
             <template #title>
               {{ $t('tooltip.workspace.type') }}
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
-        <a-switch v-model:checked="workspacePublicBoolean" />
+        </slot>
+        <br>
+        <a-switch
+            v-model:checked="workspacePublicBoolean"
+            @change="dedicatedChange"
+        />
       </a-form-item>
-      <!--데스크탑 퍼블릭 여부 end-->
+      <!--워크스페이스 전용 여부 end-->
       <!--워크스페이스 컴퓨트 오퍼링 start-->
       <a-form-item class="addmodal-aform-item">
-        <template #label>
+        <slot name="label">
           <span>{{ $t('label.compute.offering') }}</span>
           <a-tooltip placement="top">
             <template #title>
@@ -107,7 +114,7 @@
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-select
             v-model:value="computeOfferingId"
             v-bind:placeholder="$t('tooltip.workspace.compute.offering')"
@@ -121,7 +128,7 @@
       <!--워크스페이스 컴퓨트 오퍼링 end-->
       <!--워크스페이스 디스크 오퍼링 start-->
       <a-form-item class="addmodal-aform-item">
-        <template #label>
+        <slot name="label">
           <span>{{ $t('label.disk.offering') }}</span>
           <a-tooltip placement="top">
             <template #title>
@@ -129,7 +136,7 @@
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-select
             v-model:value="diskOfferingId"
             v-bind:placeholder="$t('tooltip.workspace.disk.offering')"
@@ -143,10 +150,10 @@
       <!--워크스페이스 디스크 오퍼링 end-->
       <!--데스크탑 생성 수량 start-->
       <a-form-item
-          v-model:style="state.publicSwitch"
+          v-show="state.desktopBoolean"
           class="addmodal-aform-item"
       >
-        <template #label>
+        <slot name="label">
           <span>{{ $t('label.quantity') }}</span>
           <a-tooltip placement="top">
             <template #title>
@@ -154,7 +161,7 @@
             </template>
             <InfoCircleOutlined class="addmodal-info-icon"/>
           </a-tooltip>
-        </template>
+        </slot>
         <a-input-number
             v-model:value="desktopQuantity"
             :min="1"
@@ -164,7 +171,7 @@
       </a-form-item>
       <!--데스크탑 생성 수량 end-->
       <a-form-item class="addmodal-aform-item-button">
-        <a-button type="button" style="margin-left: 7px">{{ $t('label.cancel') }}</a-button>
+        <a-button style="margin-left: 7px">{{ $t('label.cancel') }}</a-button>
         <a-button type="primary" style="margin-left: 7px">{{ $t('label.ok') }}</a-button>
       </a-form-item>
     </a-form>
@@ -193,30 +200,43 @@ export default defineComponent({
       'changeAddModal'
   ],
   setup(){
+    // 모달 창 변수
     const modalVisible = ref(false);
-    // let publicSwitch = ref('display: none');
+    // AddModal의 기본값 설정
     const state = reactive({
-      publicSwitch : ref('display: none')
+      switchLabel: ref('label.dedicated'),
+      desktopBoolean: ref(false),
     });
+    // Type select box 의 변경에 따른 action
     const workstpaceTypeChange = value => {
-      console.log(`${value}`);
       if (`${value}` === 'desktop'){
-        state.publicSwitch = ref('display: block');
-        console.log(state.publicSwitch.value);
+        state.desktopBoolean = ref(true);
       }else{
-        state.publicSwitch = ref('display: none');
+        state.desktopBoolean = ref(false);
       }
     };
+    // switch 변경에 따른 라벨 변경
+    const dedicatedChange = value => {
+      console.log(`${value}`);
+      if(`${value}` === 'true'){
+        state.switchLabel = ref('label.shared');
+        console.log(`참`);
+      }else{
+        state.switchLabel = ref('label.dedicated');
+        console.log(`거짓`);
+      }
+    }
     return{
       modalVisible,
-      desktopQuantity: ref(1),
+      state,
       workstpaceTypeChange,
+      dedicatedChange,
+      desktopQuantity: ref(1),
       workspaceType: ref(undefined),
       templateId: ref(undefined),
       computeOfferingId: ref(undefined),
       diskOfferingId: ref(undefined),
       workspacePublicBoolean: ref(false),
-      state
     }
   },
 });
@@ -225,6 +245,7 @@ export default defineComponent({
 <style scoped>
 .addmodal-aform-item{
   margin-bottom: 14px;
+  width: 100%;
 }
 .addmodal-aform-item-button{
   /*margin-bottom: 14px;*/

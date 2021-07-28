@@ -1,4 +1,14 @@
 <template>
+  <a-button
+      type="dashed"
+      block
+      style="margin-bottom: 14px;"
+      @click="changeModal(true)"
+      v-show="state.addButtonBoolean"
+  >
+    <PlusOutlined />
+    {{ state.addButtontext }}
+  </a-button>
   <a-table
       size="middle"
       class="ant-table-striped"
@@ -48,11 +58,27 @@
     {{ comp }}
   </a-table>
 
+  <a-modal
+      v-model:title="state.addButtontext"
+      v-model:visible="state.modalBoolean"
+      @ok="changeModal(false)"
+      width="400px"
+  >
+    Desktop Quantity
+    <a-input-number
+        id="inputNumber"
+        v-model:value="addDesktopQuantity"
+        :min="1"
+        :max="10"
+        style="width: 100%; margin-top: 7px;"
+    />
+  </a-modal>
+
 </template>
 
 <script>
 // import {SmileOutlined} from '@ant-design/icons-vue';
-import {defineComponent} from 'vue';
+import {defineComponent, reactive, ref} from 'vue';
 import Actions from "@/components/Actions";
 
 const rowSelection = {
@@ -68,26 +94,54 @@ const rowSelection = {
 };
 export default defineComponent({
   props: {
+    tapName: String,
     data: Object,
     columns: Object,
     bordered: Boolean,
     comp: String
   },
-  setup() {
+  setup(props) {
+    console.log('TableContent.vue props.tapName');
+    console.log(props.tapName);
+    const state = reactive({
+      modalBoolean: ref(false),
+      callTapName: ref(props.tapName),
+      addButtonBoolean: ref(),
+      addButtontext: ref(''),
+    });
+    if(state.callTapName === 'desktop'){
+      state.addButtonBoolean = ref(true);
+      state.addButtontext = ref('데스크탑 추가')
+    }else if (state.callTapName === 'user'){
+      state.addButtonBoolean = ref(true);
+      state.addButtontext = ref('유저 추가')
+    }else if (state.callTapName === 'datadisk'){
+      state.addButtonBoolean = ref(false);
+    }else if (state.callTapName === 'network'){
+      state.addButtonBoolean = ref(false);
+    }
+    const addDesktopQuantity = ref(1);
     return {
       rowSelection,
+      state,
+      addDesktopQuantity,
       pagination: {
         pageSize: 20,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ['10', '20', '30', '40'], // number of pages per option
         showTotal: total => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => this.pageSize = pageSize, // update display when changing the number of pages per page
-      }
+      },
     };
   },
   components: {
     Actions,
   },
+  methods: {
+    changeModal(value){
+      this.state.modalBoolean = ref(value);
+    }
+  }
 });
 </script>
 

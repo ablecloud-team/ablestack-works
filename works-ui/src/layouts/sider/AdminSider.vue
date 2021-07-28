@@ -5,7 +5,6 @@
         mode="inline"
         theme="light"
         :inline-collapsed="collapsed"
-        v-model:openKeys="openKeys"
         v-model:selectedKeys="selectedKeys"
         style="padding-top: 14px"
     >

@@ -185,10 +185,6 @@ export default {
   text-align: center;
 }
 
-.dashboard-right-grid{
-
-}
-
 .dashboard-card{
   max-height: 291px;
 }
@@ -211,6 +207,5 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0;
-}::after{
- }
+}
 </style>

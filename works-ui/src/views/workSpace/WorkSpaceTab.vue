@@ -1,17 +1,39 @@
 <template>
   <div id="ContentTab">
-    <a-tabs type="card" v-model:activeKey="activeKey" :tab-position="tabPosition">
+    <a-tabs
+        type="card"
+        v-model:activeKey="activeKey"
+        :tab-position="tabPosition"
+        @change="changeTap"
+    >
       <a-tab-pane key="1" :tab="$t('label.vm.list')">
-        <TableContent :data="VMListData" :columns="VMListColumns" comp="VirtualMachineDetail" />
+        <TableContent
+            v-model:tapName="status.callTap"
+            :data="VMListData"
+            :columns="VMListColumns"
+            comp="VirtualMachineDetail"
+        />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
-        <TableContent :data="UserListData" :columns="UserListColumns" />
+        <TableContent
+            v-model:tapName="status.callTap"
+            :data="UserListData"
+            :columns="UserListColumns"
+        />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.disk.list')">
-        <TableContent :data="VMDiskListData" :columns="VMDiskListColumns" />
+        <TableContent
+            v-model:tapName="status.callTap"
+            :data="VMDiskListData"
+            :columns="VMDiskListColumns"
+        />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent :data="NWListData" :columns="NWListColumns" />
+        <TableContent
+            v-model:tapName="status.callTap"
+            :data="NWListData"
+            :columns="NWListColumns"
+        />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -20,7 +42,7 @@
 <script>
 import TableContent from "@/components/TableContent";
 
-import { defineComponent, ref } from 'vue';
+import {defineComponent, reactive, ref} from 'vue';
 // import ListView from "@/components/ListView";
 
 import {VMListData,
@@ -37,7 +59,26 @@ export default defineComponent({
   setup() {
     const tabPosition = ref('top');
     const activeKey = ref('1');
+    const status = reactive({
+      callTap: ref('desktop'),
+    });
+    const changeTap = value =>{
+      console.log(`${value}`);
+      if(`${value}` === '1'){
+        status.callTap = ref('desktop');
+      }else if(`${value}` === '2'){
+        status.callTap = ref('user');
+      }else if(`${value}` === '3'){
+        status.callTap = ref('datadisk');
+      }else if(`${value}` === '4'){
+        status.callTap = ref('network');
+      }
+      console.log('sdfsdfsdf');
+      console.log(status.callTap);
+    }
     return {
+      status,
+      changeTap,
       tabPosition,
       activeKey,
       VMListData,

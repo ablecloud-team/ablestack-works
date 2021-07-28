@@ -60,7 +60,7 @@ app.addComponents(
     HomeOutlined,
     BarcodeOutlined,
     PlusOutlined,
-    MoreOutlined
+    MoreOutlined,
 )
 
 app.component('font-awesome-icon', FontAwesomeIcon)

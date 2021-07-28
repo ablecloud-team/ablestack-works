@@ -6,7 +6,7 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[{name:$t('label.VM'), component: 'Virtualmachine'}, {name:name, component: null}]"
+              <Apath v-bind:paths="[{name:$t('label.vm'), component: 'Virtualmachine'}, {name:name, component: null}]"
               />
 
             </a-col>

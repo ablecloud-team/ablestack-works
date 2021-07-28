@@ -39,5 +39,7 @@
   "label.workspace.public.boolean": "Public",
   "label.ok": "OK",
   "label.cancel": "Cancel",
-  "label.template": "Template"
+  "label.template": "Template",
+  "label.dedicated": "Dedicated",
+  "label.shared": "Shared"
 }

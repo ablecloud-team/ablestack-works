@@ -1,5 +1,4 @@
 <template>
-
   <div class="resource-details">
     <div class="resource-details__name">
       <a-avatar id='oslogo' :size="100" style="background-color: rgba(0,0,0,0); font-size: 20px" >
@@ -10,19 +9,13 @@
       </h4>
     </div>
     <div id="div_tag" v-if="tags !== undefined">
-      <a-tag v-for="tag in tags" v-bind:key="tags.indexOf(tag)">
+      <a-tag
+          v-for="tag in tags"
+          v-bind:key="tags.indexOf(tag)">
         {{ tag }}
       </a-tag>
     </div>
-    <!--      <a-tooltip placement="right">-->
-    <!--        <template #title>connect portal</template>-->
-    <!--        <a-button shape="circle" type="dashed">-->
-    <!--          <PaperClipOutlined/>-->
-    <!--        </a-button>-->
-    <!--      </a-tooltip>-->
   </div>
-  <ADivider />
-
   <div id="Status" class="CardItem">
     <div class="ItemName">Status</div>
     <div class="Item">
@@ -49,16 +42,30 @@
 
 
   <div id="NoD" class="CardItem">
-    <div class="ItemName">Number Of Desktop</div>
+    <div class="ItemName">Desktop</div>
     <div class="Item">
       83
     </div>
   </div>
 
   <div id="NoC" class="CardItem">
-    <div class="ItemName">Number Of Connection</div>
+    <div class="ItemName">Connection</div>
     <div class="Item">
       42
+    </div>
+  </div>
+
+  <div class="CardItem">
+    <div class="ItemName">CPU</div>
+    <div class="Item">
+      8 Core
+    </div>
+  </div>
+
+  <div class="CardItem">
+    <div class="ItemName">Memory</div>
+    <div class="Item">
+      16 GB
     </div>
   </div>
 
@@ -68,21 +75,18 @@
       DaaS-ISO-NW
     </div>
   </div>
-<!--  <div v-if="info !== undefined">-->
-<!--    <a-tag v-for="tag in info" v-bind:key="info.indexOf(tag)">-->
-<!--      {{tag}}-->
-<!--    </a-tag>-->
-<!--  </div>-->
 </template>
 
 <script>
+import {defineComponent} from "vue";
+
 function guid() {
   function _s4() {
     return ((1 + Math.random()) * 0x10000 | 0).toString(16).substring(1);
   }
   return _s4() + _s4() + '-' + _s4() + '-' + _s4() + '-' + _s4() + '-' + _s4() + _s4() + _s4();
 }
-export default {
+export default defineComponent({
   props:{
     name: String,
     tags: {
@@ -98,7 +102,7 @@ export default {
     let infoID = guid()
     return {infoID}
   }
-}
+});
 </script>
 
 <style  lang="scss" scoped>
