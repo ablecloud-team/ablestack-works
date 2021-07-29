@@ -2,10 +2,12 @@ package main
 
 import (
 	auth "github.com/korylprince/go-ad-auth/v3"
-	//log "github.com/sirupsen/logrus"
 )
 
-//var log = logrus.New().WithField("who", "LOGIN")
+type USER struct {
+	id string `uri:"id" binding:"required"`
+	name string `uri:"username" binding:"optional"`
+}
 
 func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string, isAdmin bool, err error){
 	setLog()
@@ -20,6 +22,9 @@ func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string,
 		return false, nil, false, err
 	}
 	_, _, groups, _ = listGroups(conn, id)
+	if len(groups)<=0{
+		return false, nil, false, err
+	}
 
 	isAdmin, err = inGroup(conn, id, "Administrators")
 

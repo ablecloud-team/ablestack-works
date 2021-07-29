@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	ldap "github.com/go-ldap/ldap/v3"
 	auth "github.com/korylprince/go-ad-auth/v3"
@@ -60,8 +61,8 @@ func Auth(conn *auth.Conn, username string, password string) (status bool, err e
 	return status, err
 }
 func listGroups(conn*auth.Conn, username string) (status bool, entry *ldap.Entry, userGroups []string, err error){
-	//conn, status, err := ConnectAD()
 
+	setLog()
 	upn, err := config.UPN(username)
 	if err != nil {
 		log.Errorln(err)
@@ -133,3 +134,79 @@ func InGroup(username string, groupname string){
 	fmt.Println(cn)
 }
 */
+
+func testLDAP(){
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+	var filter = []string{
+		"(cn=user)",
+		"(cn=user2)",
+		"(&(owner=*)(cn=user))",
+		"(&(objectclass=rfc822mailgroup)(cn=*Computer*))",
+		"(&(objectclass=rfc822mailgroup)(cn=*Mathematics*))"}
+	var attributes = []string{
+		"dn",
+		"cn",
+		"description"}
+
+	ldapsServer := fmt.Sprintf("ldaps://%v:%v", ADserver, ADport)
+	//ldapServer := fmt.Sprintf("ldap://%v:%v", ADserver, ADport)
+	baseDN := ADbasedn
+	l, err := ldap.DialURL(ldapsServer, ldap.DialWithTLSConfig(&tls.Config{InsecureSkipVerify: true}))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer l.Close()
+
+	upn, err := config.UPN(ADusername)
+	if err != nil {
+		log.Errorln(err)
+		upn = ADusername
+	}
+	err = l.Bind(upn, ADpassword)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	searchRequest := ldap.NewSearchRequest(
+		baseDN,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		filter[0],
+		attributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+	sr.PrettyPrint(4)
+
+	groupname:="dev4"
+	//ou add
+	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
+
+	addReq.Attribute("objectClass", []string{"top", "organizationalUnit"})
+	addReq.Attribute("name", []string{groupname})
+	addReq.Attribute("ou", []string{groupname})
+	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
+	//addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004 | 0x80000000)})
+	log.Infoln(addReq.Attributes)
+	if err := l.Add(addReq); err != nil {
+		log.Fatal("error adding OU:", addReq, err)
+	}
+	//group add
+	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,ou=%v,%v",groupname, groupname, ADbasedn), []ldap.Control{})
+
+	addReq.Attribute("objectClass", []string{"top", "group"})
+	addReq.Attribute("name", []string{groupname})
+	addReq.Attribute("sAMAccountName", []string{groupname})
+	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
+	addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004 | 0x80000000)})
+
+	if err := l.Add(addReq); err != nil {
+		log.Fatal("error adding group:", addReq, err)
+	}
+	//fmt.Println(tests)
+}
+

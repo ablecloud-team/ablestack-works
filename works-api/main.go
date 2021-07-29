@@ -7,6 +7,10 @@ import (
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	logrus "github.com/sirupsen/logrus"
+	"path"
+	"runtime"
+	"strings"
+
 	//ps "github.com/zhongpei/go-powershell"
 	//"github.com/zhongpei/go-powershell/backend"
 	"github.com/ycyun/go-powershell"
@@ -56,6 +60,11 @@ func setup() {
 		HideKeys: false,
 		//FieldsOrder: []string{"component", "category"},
 		CallerFirst: false,
+		CustomCallerFormatter: func(f *runtime.Frame) string {
+			s := strings.Split(f.Function, ".")
+			funcName := s[len(s)-1]
+			return fmt.Sprintf(" [%s:%d][%s()]", path.Base(f.File), f.Line, funcName)
+		},
 	})
 	log.SetReportCaller(true)
 }
@@ -75,6 +84,9 @@ func main() {
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
+
+	testLDAP()
+
 	conn, status, err := ConnectAD()
 	if err != nil {
 		log.Errorln(err)
@@ -123,7 +135,7 @@ func main() {
 			})
 			v1.GET("/cmd/:cmd/:arg", func(c *gin.Context) {
 				if err := c.ShouldBindUri(&pscmd); err != nil {
-					c.JSON(400, gin.H{"msg": err})
+					c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 					return
 				}
 
@@ -135,7 +147,31 @@ func main() {
 				log.Infof("cmd: %v, arg: %v, stdout: %v", pscmd.CMD, pscmd.ARG, stdout)
 				c.JSON(http.StatusOK, gin.H{"version": stdout})
 			})
+			v1.POST("/user", func(c *gin.Context) {
+				userID := c.PostForm("username")
+				userPW := c.PostForm("password")
+				userPhone := c.PostForm("phone")
+				userMail := c.PostForm("email")
+				log.Infof("%v, %v, %v, %v", userID, userPW, userPhone, userMail)
+				c.JSON(http.StatusCreated, gin.H{
+					"userID":1,
+					"username":userID,
+				})
+			})
+			v1.DELETE("/user/:id", func(c *gin.Context) {
 
+				var user USER
+				if err := c.ShouldBindUri(&user); err != nil {
+					c.JSON(http.StatusBadRequest, gin.H{"msg": err})
+					return
+				}
+				userID := &user.id
+				log.Infof("delete %v", userID, )
+				c.JSON(http.StatusNoContent, gin.H{
+					"userID":1,
+					"username":userID,
+				})
+			})
 			v1.GET("/app", func(c *gin.Context) {
 				apps := getApps(shell)
 				log.Infof("finish")
