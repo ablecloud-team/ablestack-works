@@ -2,7 +2,7 @@
   <a-space :size="size">
     <a-tooltip placement="top" v-if="addButton === true">
       <template #title>{{ add }}</template>
-      <a-button type="primary" shape="round" size="size" @click="changeAddModalValue">
+      <a-button type="primary" shape="round" size="size" @click="setAddModalValue(true)">
         <template #icon>
           {{ add }}
           <PlusOutlined />
@@ -10,75 +10,122 @@
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="power === true">
-      <template #title>{{ $t('tooltip.poweron') }}</template>
-      <a-button shape="circle">
+    <a-tooltip placement="top" v-if="start">
+      <template #title>{{ $t('tooltip.start') }}</template>
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.start')"
+      >
+        <CaretRightOutlined />
+      </a-button>
+    </a-tooltip>
+
+    <a-tooltip placement="top" v-if="stop" >
+      <template #title>{{ $t('tooltip.stop') }}</template>
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.stop')"
+      >
         <PoweroffOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="poweroff === true" >
-      <template #title>{{ $t('tooltip.poweroff') }}</template>
-      <a-button shape="circle">
-        <PoweroffOutlined/>
-      </a-button>
-    </a-tooltip>
-
-    <a-tooltip placement="top" v-if="reset === true">
+    <a-tooltip placement="top" v-if="reset">
       <template #title>{{ $t('tooltip.reset') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.reset')"
+      >
         <ReloadOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="reinstall === true">
+    <a-tooltip placement="top" v-if="reinstall">
       <template #title>{{ $t('tooltip.reinstall') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.reinstall')"
+      >
         <SyncOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="snapshot === true">
+    <a-tooltip placement="top" v-if="snapshot">
       <template #title>{{ $t('tooltip.snapshot') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.snapshot')"
+      >
         <CameraOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="volsnapshot === true">
+    <a-tooltip placement="top" v-if="volsnapshot">
       <template #title>{{ $t('tooltip.volsnapshot') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.volsnapshot')"
+      >
         <i class="fas fa-camera-retro"></i>
         <font-awesome-icon icon="camera-retro"/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="iso === true">
+    <a-tooltip placement="top" v-if="iso">
       <template #title>{{ $t('tooltip.isoattach') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.isoattach')"
+      >
         <PaperClipOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="edit === true">
+    <a-tooltip placement="top" v-if="edit">
       <template #title>{{ $t('tooltip.edit') }}</template>
-      <a-button shape="circle" >
+      <a-button
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.edit')"
+      >
         <EditOutlined/>
       </a-button>
     </a-tooltip>
 
-    <a-tooltip placement="top" v-if="destroy === true">
+    <a-tooltip placement="top" v-if="destroy">
       <template #title>{{ $t('tooltip.destroy') }}</template>
-      <a-button type="primary" shape="circle" danger>
+      <a-button
+          type="primary"
+          shape="circle"
+          @click="setCircleButtonModal('tooltip.destroy')"
+          danger
+      >
         <DeleteFilled/>
       </a-button>
     </a-tooltip>
+  <AddModal
+      :visible="showAddModal"
+      :actionFrom="'Actions'"
+      @changeAddModal="setAddModalValue"
+  />
+    <a-modal
+        :title="$t(modalTitle)"
+        :visible="visible"
+        :confirm-loading="confirmLoading"
+        @cancel="handleCancel"
+        @ok="handleCancel"
+    >
+      <p>{{ $t(modalTitle) }} 하시겠습니까?</p>
+    </a-modal>
   </a-space>
 </template>
 
 <script>
 import {defineComponent, ref} from 'vue';
+import AddModal from "@/components/AddModal";
 export default defineComponent({
+  components: {
+    AddModal
+  },
   props:{
     actionFrom:  {
       String,
@@ -94,11 +141,11 @@ export default defineComponent({
       Boolean,
       default: false,
     },
-    power: {
+    start: {
       Boolean,
       default: false,
     },
-    poweroff: {
+    stop: {
       Boolean,
       default: false,
     },
@@ -135,14 +182,24 @@ export default defineComponent({
     const sizeValue = 8;
     return {
       size: ref(sizeValue),
+      showAddModal: ref(false),
+      visible: ref(false),
+      modalTitle: ref('')
     };
   },
-  emits: [
-    'changeAddModal',
-  ],
+  // emits: [
+  //   'changeAddModal',
+  // ],
   methods: {
-    changeAddModalValue() {
-      this.$emit('changeAddModal', true);
+    setAddModalValue: function (value) {
+      this.showAddModal = value;
+    },
+    setCircleButtonModal: function (value) {
+      this.visible = true;
+      this.modalTitle = value;
+    },
+    handleCancel: function () {
+      this.visible = false;
     }
   },
 })

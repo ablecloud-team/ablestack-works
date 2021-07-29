@@ -10,7 +10,11 @@ import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine";
 import Favorites from '../views/favorites/Favorites';
 import UserDesktop from '../views/desktopApplication/DesktopApplication';
-import A from "../components/AddModal";
+import A from "../views/dashboard/A";
+import Users from "../views/users/Users";
+import UserDetail from "../views/users/UserDetail";
+import GroupPolicy from "../views/groupPolicy/GroupPolicy";
+import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail"
 
 const routes = [
   {
@@ -66,7 +70,29 @@ const routes = [
         name: 'VirtualMachineDetail',
         component: VirtualMachineDetail,
         props: true
-      }
+      },
+      {
+        path: '/users',
+        name: 'Users',
+        component: Users
+      },
+      {
+        path: '/userdetail/',
+        name: 'UserDetail',
+        component: UserDetail,
+        props: true
+      },
+      {
+        path: '/groupPolicy',
+        name: 'GroupPolicy',
+        component: GroupPolicy
+      },
+      {
+        path: '/groupPolicyDetail/',
+        name: 'GroupPolicyDetail',
+        component: GroupPolicyDetail,
+        props: true
+      },
     ]
   },
   {

@@ -1,6 +1,6 @@
 {
-  "tooltip.poweron": "Power On",
-  "tooltip.poweroff": "Power Off",
+  "tooltip.start": "Start",
+  "tooltip.stop": "Stop",
   "tooltip.reset": "Restart",
   "tooltip.edit": "Edit",
   "tooltip.reinstall": "Reinstall",

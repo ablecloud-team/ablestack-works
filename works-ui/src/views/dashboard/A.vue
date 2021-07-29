@@ -1,81 +1,48 @@
-<template>
-  <div class="dashboard-main-grid">
-    <div class="dashboard-left-grid">
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-      <a-card :loading="loading" class="dashboard-card">
-        <h3>워크스페이스 수</h3>
-        <a-progress
-            type="dashboard"
-            :percent="70"
-            :size="large" />
-        <p>20 / 30</p>
-      </a-card>
-    </div>
-    <div class="dashboard-right-grid">
-      <a-card title="공지사항 제목" :bordered="true" class="dashboard-right-card">
-        <p style="font-weight: bold">작성자 : ABLECLOUD</p>
-        <p class="dashboard-right-card-p">공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. </p>
-      </a-card>
-      <a-card title="공지사항 제목" :bordered="true" class="dashboard-right-card">
-        <p style="font-weight: bold">작성자 : ABLECLOUD</p>
-        <p class="dashboard-right-card-p">공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. </p>
-      </a-card>
-      <a-card title="공지사항 제목" :bordered="true" class="dashboard-right-card">
-        <p style="font-weight: bold">작성자 : ABLECLOUD</p>
-        <p class="dashboard-right-card-p">공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다.
-          공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. 공지사항 내용입니다. </p>
-      </a-card>
-    </div>
-  </div>
+<template style="text-align: center;">
+  <Actions
+      :actionFrom="status.actionFrom"
+      :add="$t('label.add.workspace')"
+      :showModal="status.showModal"
+      :addButton="status.addButton"
+      :start="status.power"
+      :stop="status.poweroff"
+      :reset="status.reset"
+      :reinstall="status.reinstall"
+      :snapshot="status.snapshot"
+      :volsnapshot="status.volsnapshot"
+      :iso="status.iso"
+      :destroy="status.destroy"
+      :edit="status.edit"
+  />
 </template>
-
 <script>
+import Actions from "../../components/Actions";
+import {reactive, ref} from "vue";
+
 export default {
-  name: "A"
+  name: "A",
+  components:{
+    Actions,
+  },
+  setup(){
+    const status = reactive({
+      actionFrom: ref('Workspaces'),
+      showModal: ref(true),
+      addButton: ref(true),
+      power: ref(true),
+      poweroff: ref(true),
+      reset: ref(true),
+      reinstall: ref(true),
+      snapshot: ref(true),
+      volsnapshot: ref(true),
+      iso: ref(true),
+      destroy: ref(true),
+      edit: ref(true),
+    })
+    return{
+      status
+    }
+  }
 }
 </script>
 

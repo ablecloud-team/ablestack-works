@@ -31,13 +31,15 @@
         </template>
         <span>{{ $t('label.vm') }}</span>
       </a-menu-item>
-      <a-menu-item key="4">
+      <a-menu-item key="4"
+                   @click="$router.push({name: 'Users'})">
         <template #icon>
           <TeamOutlined />
         </template>
         <span>{{ $t('label.users') }}</span>
       </a-menu-item>
-      <a-menu-item key="5">
+      <a-menu-item key="5"
+                   @click="$router.push({name: 'GroupPolicy'})">
         <template #icon>
           <ReconciliationOutlined />
         </template>

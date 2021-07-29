@@ -1,6 +1,6 @@
 {
-  "tooltip.poweron": "전원 켜기",
-  "tooltip.poweroff": "전원 끄기",
+  "tooltip.start": "시작",
+  "tooltip.stop": "Stop",
   "tooltip.reset": "재기동",
   "tooltip.edit": "편집",
   "tooltip.reinstall": "재설치",

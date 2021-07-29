@@ -219,6 +219,37 @@ export const UserListColumns = [
     },
 ];
 
+export const GroupPolicyColumns = [
+    {
+        dataIndex: 'Name',
+        key: 'Name',
+        slots: {customRender: 'nameRender'},
+        title: 'Name',
+        sorter: (a, b) => a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0,
+        sortDirections: ['descend', 'ascend']
+    },
+    // {
+    //     title: '',
+    //     key: 'action',
+    //     dataIndex: 'action',
+    //     slots: {customRender: 'actionRender'}
+    // },
+    {
+        title: 'State',
+        dataIndex: 'State',
+        key: 'State',
+        sorter: (a, b) => a.State < b.State ? -1 : a.State > b.State ? 1 : 0,
+        sortDirections: ['descend', 'ascend']
+    },
+    {
+        title: 'Allocated Desktop',
+        dataIndex: 'Desktop',
+        key: 'Desktop',
+        sorter: (a, b) => a.State < b.State ? -1 : a.State > b.State ? 1 : 0,
+        sortDirections: ['descend', 'ascend']
+    },
+];
+
 export const NWListData = JSON.parse(
     '[{"Name":"Network01","State":"Allocated"}]'
 )
@@ -226,3 +257,8 @@ export const NWListData = JSON.parse(
 export const UserListData = JSON.parse(
     '[{"Name":"user01","State":"Allocated","Desktop":"Desktop1"}]'
 )
+
+export const GroupPolicyData = JSON.parse(
+    '[{"Name":"user01","State":"Allocated","Desktop":"Desktop1"}]'
+)
+

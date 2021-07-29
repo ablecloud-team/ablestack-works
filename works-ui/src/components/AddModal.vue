@@ -1,6 +1,6 @@
 <template>
   <a-modal
-      v-model:visible="modalVisible"
+      v-model:visible="status.modalVisible"
       closable
       :footer="null"
       style="width: 100vw; top: 40px"
@@ -84,11 +84,11 @@
       <!--워크스페이스 템플릿 end-->
       <!--워크스페이스 전용 여부 start-->
       <a-form-item
-          v-show="state.desktopBoolean"
+          v-show="status.desktopBoolean"
           class="addmodal-aform-item"
       >
         <slot name="label">
-          {{ $t(state.switchLabel) }}
+          {{ $t(status.switchLabel) }}
 <!--          <span v-show>{{ $t('label.shared') }}</span>-->
           <a-tooltip placement="top">
             <template #title>
@@ -150,7 +150,7 @@
       <!--워크스페이스 디스크 오퍼링 end-->
       <!--데스크탑 생성 수량 start-->
       <a-form-item
-          v-show="state.desktopBoolean"
+          v-show="status.desktopBoolean"
           class="addmodal-aform-item"
       >
         <slot name="label">
@@ -171,8 +171,17 @@
       </a-form-item>
       <!--데스크탑 생성 수량 end-->
       <a-form-item class="addmodal-aform-item-button">
-        <a-button style="margin-left: 7px">{{ $t('label.cancel') }}</a-button>
-        <a-button type="primary" style="margin-left: 7px">{{ $t('label.ok') }}</a-button>
+        <a-button
+            @click="changeAddModal(false)"
+            style="margin-left: 7px"
+        >
+          {{ $t('label.cancel') }}
+        </a-button>
+        <a-button
+            type="primary"
+            @click="changeAddModal(false)"
+            style="margin-left: 7px"
+        >{{ $t('label.ok') }}</a-button>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -200,35 +209,33 @@ export default defineComponent({
       'changeAddModal'
   ],
   setup(){
-    // 모달 창 변수
-    const modalVisible = ref(false);
     // AddModal의 기본값 설정
-    const state = reactive({
+    const status = reactive({
       switchLabel: ref('label.dedicated'),
       desktopBoolean: ref(false),
+      modalVisible: ref(false)
     });
     // Type select box 의 변경에 따른 action
     const workstpaceTypeChange = value => {
       if (`${value}` === 'desktop'){
-        state.desktopBoolean = ref(true);
+        status.desktopBoolean = ref(true);
       }else{
-        state.desktopBoolean = ref(false);
+        status.desktopBoolean = ref(false);
       }
     };
     // switch 변경에 따른 라벨 변경
     const dedicatedChange = value => {
       console.log(`${value}`);
       if(`${value}` === 'true'){
-        state.switchLabel = ref('label.shared');
+        status.switchLabel = ref('label.shared');
         console.log(`참`);
       }else{
-        state.switchLabel = ref('label.dedicated');
+        status.switchLabel = ref('label.dedicated');
         console.log(`거짓`);
       }
     }
     return{
-      modalVisible,
-      state,
+      status,
       workstpaceTypeChange,
       dedicatedChange,
       desktopQuantity: ref(1),
@@ -239,6 +246,11 @@ export default defineComponent({
       workspacePublicBoolean: ref(false),
     }
   },
+  methods:{
+    changeAddModal: function (value) {
+      this.$emit('changeAddModal',value);
+    }
+  }
 });
 </script>
 
