@@ -1,28 +1,35 @@
 <template>
-  <div class="user-menu">
-    <a-popover placement="bottom">
-      <template #content>
-        <a-button type="text" @click="setI18nLanguage('ko')">한국어</a-button>
-        <br>
-        <a-button type="text" @click="setI18nLanguage('en')">English</a-button>
-      </template>
-      <a-button type="text" shape="circle" class="header-notice-button">
-        <template #icon>
-          <FontSizeOutlined class="header-notice-icon" />
-        </template>
-      </a-button>
-    </a-popover>
-    <a-button type="text" shape="circle" class="header-notice-button">
-      <template #icon>
-        <BellOutlined class="header-notice-icon" />
-      </template>
-    </a-button>
-    <a-button type="text" shape="circle" class="header-notice-button">
-      <template #icon>
-        <UserOutlined class="header-notice-icon" />
-      </template>
-    </a-button>
-  </div>
+  <a-row class="user-menu">
+    <a-col :span="12">
+      <MenuFoldOutlined class="header-notice-icon" />
+    </a-col>
+    <a-col :span="12" style="text-align: right;">
+      <a-space :align="end">
+        <a-popover placement="bottom">
+          <template #content>
+            <a-button type="text" @click="setI18nLanguage('ko')">한국어</a-button>
+            <br>
+            <a-button type="text" @click="setI18nLanguage('en')">English</a-button>
+          </template>
+          <a-button type="text" shape="circle" class="header-notice-button">
+            <template #icon>
+              <GlobalOutlined class="header-notice-icon" />
+            </template>
+          </a-button>
+        </a-popover>
+        <a-button type="text" shape="circle" class="header-notice-button">
+          <template #icon>
+            <BellOutlined class="header-notice-icon" />
+          </template>
+        </a-button>
+        <a-button type="text" shape="circle" class="header-notice-button">
+          <template #icon>
+            <UserOutlined class="header-notice-icon" />
+          </template>
+        </a-button>
+      </a-space>
+    </a-col>
+  </a-row>
 </template>
 
 <script>
@@ -46,14 +53,13 @@ export default {
   margin: 5px;
 }
 .header-notice-button{
-  font-size: 22px;
+  font-size: 21px;
   padding: 6px;
-  margin: 5px;
+  margin-right: 21px;
 }
 
 .user-menu{
   background: white;
-  float: right;
   height: 100%;
   padding: 0 2px;
 }

@@ -1,11 +1,11 @@
 <template>
   <div style="width: 256px; height: 100%;">
-    <Logo />
+    <Logo @click="toggleCollapsed"/>
     <a-menu
         mode="inline"
         theme="light"
-        :inline-collapsed="collapsed"
-        v-model:selectedKeys="selectedKeys"
+        :inline-collapsed="state.collapsed"
+        v-model:selectedKeys="state.selectedKeys"
         style="padding-top: 14px"
     >
       <a-menu-item
@@ -61,7 +61,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive, toRefs, watch } from 'vue';
+import {defineComponent, reactive, ref, watch} from 'vue';
 import {
   DashboardOutlined,
   CloudOutlined,
@@ -83,29 +83,57 @@ export default defineComponent({
     BarChartOutlined,
     CoffeeOutlined,
   },
-  setup() {
+  props:{
+    collapsed: Boolean,
+  },
+  emits: [
+    'changeToggleCollapsed'
+  ],
+  setup(props) {
     const state = reactive({
-      collapsed: false,
+      collapsed: ref(props.collapsed),
       selectedKeys: ['1'],
       openKeys: ['sub1'],
       preOpenKeys: ['sub1'],
     });
-
     watch(
         () => state.openKeys,
         (val, oldVal) => {
           state.preOpenKeys = oldVal;
         },
     );
-    const toggleCollapsed = () => {
-      state.collapsed = !state.collapsed;
-      state.openKeys = state.collapsed ? [] : state.preOpenKeys;
-    };
-
     return {
-      ...toRefs(state),
-      toggleCollapsed,
+      state,
     };
   },
+  methods:{
+    toggleCollapsed: function (){
+      this.$emit('changeToggleCollapsed');
+    }
+  }
 });
 </script>
+
+<style>
+#components-layout-demo-custom-trigger .trigger {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#components-layout-demo-custom-trigger .trigger:hover {
+  color: #1890ff;
+}
+
+#components-layout-demo-custom-trigger .logo {
+  height: 32px;
+  background: rgba(255, 255, 255, 0.3);
+  margin: 16px;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+</style>

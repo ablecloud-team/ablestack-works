@@ -17,7 +17,10 @@ import {
     HomeOutlined,
     BarcodeOutlined,
     PlusOutlined,
-    MoreOutlined, CaretRightOutlined
+    MoreOutlined,
+    CaretRightOutlined,
+    GlobalOutlined,
+    MenuFoldOutlined
 } from '@ant-design/icons-vue';
 import 'ant-design-vue/dist/antd.css';
 import App from './App';
@@ -62,6 +65,8 @@ app.addComponents(
     PlusOutlined,
     MoreOutlined,
     CaretRightOutlined,
+    GlobalOutlined,
+    MenuFoldOutlined
 )
 
 app.component('font-awesome-icon', FontAwesomeIcon)
