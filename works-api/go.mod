@@ -11,4 +11,5 @@ require (
 	github.com/korylprince/go-ad-auth/v3 v3.1.3
 	github.com/sirupsen/logrus v1.8.1
 	github.com/ycyun/go-powershell v0.1.1
+	golang.org/x/tools v0.1.5 // indirect
 )

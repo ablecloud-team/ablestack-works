@@ -85,7 +85,7 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	testLDAP()
+	//testLDAP()
 
 	conn, status, err := ConnectAD()
 	if err != nil {

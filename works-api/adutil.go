@@ -182,31 +182,91 @@ func testLDAP(){
 	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
 	sr.PrettyPrint(4)
 
+
+
 	groupname:="dev4"
+
+
 	//ou add
 	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
-
 	addReq.Attribute("objectClass", []string{"top", "organizationalUnit"})
 	addReq.Attribute("name", []string{groupname})
 	addReq.Attribute("ou", []string{groupname})
 	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
-	//addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004 | 0x80000000)})
-	log.Infoln(addReq.Attributes)
 	if err := l.Add(addReq); err != nil {
-		log.Fatal("error adding OU:", addReq, err)
+		log.Error("error adding OU:", addReq, err)
 	}
+
+
 	//group add
 	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,ou=%v,%v",groupname, groupname, ADbasedn), []ldap.Control{})
-
 	addReq.Attribute("objectClass", []string{"top", "group"})
 	addReq.Attribute("name", []string{groupname})
 	addReq.Attribute("sAMAccountName", []string{groupname})
 	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
 	addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004 | 0x80000000)})
-
 	if err := l.Add(addReq); err != nil {
-		log.Fatal("error adding group:", addReq, err)
+		log.Error("error adding group:", addReq, err)
 	}
-	//fmt.Println(tests)
+
+	//computer add
+	comname:="com4"
+	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v",comname, "Computers", ADbasedn), []ldap.Control{})
+	addReq.Attribute("objectClass", []string{"top", "computer", "organizationalPerson", "person", "user"})
+	addReq.Attribute("name", []string{comname})
+	addReq.Attribute("sAMAccountName", []string{fmt.Sprintf("%v$",comname)})
+	addReq.Attribute("dNSHostName", []string{fmt.Sprintf("%v.%v",comname,domain)})
+	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
+	if err := l.Add(addReq); err != nil {
+		log.Error("error adding computer:", addReq, err)
+	}
+
+	//user add
+	sn:="새"
+	givenName:="사용자"
+	initials:="이니셜"
+	username:=fmt.Sprintf("%v %v %v.", sn, givenName, initials)
+	accountname:="newuser"
+
+	//telephoneNumber:="010"//일반->전화
+	//pager:="011"//전화 -> 호출기
+	//mobile:="016"//전화->휴대폰
+	//facsimileTelephoneNumber:="팩스"//전화->팩스
+	//homePhone:="042"//전화->집
+	//ipPhone:="070"//전화->ip전화
+	//postalCode:="35200"//주소->우편번호
+	//countryCode :=410//주소->국가(한국?)
+	//o:="Able" // ldap 회사명
+	//manager:="CN=User3,CN=Users,DC=dc1,DC=local"//AD 상사이름
+	//wWWHomePage:="https://www."//홈페이지 주소
+	//c:="KR"//국가명
+	//sAMAccountName:=accountname
+	//mail:="ycyun@ablecloud.io"//메일주소
+	userPrincipalName:=fmt.Sprintf("%v@%v",accountname, domain)
+	//department:="개발팀"
+	//st:=
+	//	streetAddress:=
+	//		physicalDeliveryOfficeName:=
+	//			postOfficeBox:=
+	//				I:=
+	//					description:=
+	//						company:=
+	//
+
+
+	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v",username, "Users", ADbasedn), []ldap.Control{})
+	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
+	addReq.Attribute("name", []string{username})
+	addReq.Attribute("sn", []string{sn})
+	addReq.Attribute("givenName", []string{givenName})
+	addReq.Attribute("initials", []string{initials})
+	addReq.Attribute("displayName", []string{username})
+	addReq.Attribute("cn", []string{username})
+	addReq.Attribute("sAMAccountName", []string{accountname})
+	addReq.Attribute("userPrincipalName", []string{userPrincipalName})
+	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
+	if err := l.Add(addReq); err != nil {
+		log.Error("error adding user:", addReq, err)
+	}
 }
 
