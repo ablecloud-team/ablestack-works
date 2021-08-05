@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/contrib/static"
@@ -10,35 +9,17 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
 
 	//ps "github.com/zhongpei/go-powershell"
 	//"github.com/zhongpei/go-powershell/backend"
 	"github.com/ycyun/go-powershell"
 	"net/http"
-	"os"
-	"os/exec"
 )
 
 var log = logrus.New() //.WithField("who", "Main")
 var Version = "development"
 
-var (
-	nodeContextCancel context.CancelFunc
-)
-
-func StartClientApp() (*exec.Cmd, error) {
-	var err error
-
-	cmd := exec.Command("npm", "run", "serve")
-	cmd.Dir = "./app"
-	cmd.Stdout = os.Stdout
-
-	if err = cmd.Start(); err != nil {
-		return cmd, fmt.Errorf("error starting NPM: %w", err)
-	}
-
-	return cmd, nil
-}
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin")
@@ -72,21 +53,20 @@ func main() {
 	var (
 		err error
 	)
-	var pscmd PSCMD
 
-	l,err:=setupLdap()
-	user := NewADUser()
-	user.accountname= "testuser"
-	user.sn= "testsn"
-	user.givenName= "이름"
-
-	setPassword(l, user, "Ablecloud1!")
+	l, err := setupLdap()
 
 	shell, err := powershell.New()
 	if err != nil {
 		panic(err)
 	}
-	defer shell.Exit()
+	defer func() {
+		err := shell.Exit()
+		if err != nil {
+			log.Errorln(err)
+			return
+		}
+	}()
 
 	setup()
 
@@ -124,58 +104,171 @@ func main() {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
 			v1.POST("/login", func(c *gin.Context) {
-				userID := c.PostForm("id")
-				userPW := c.PostForm("pw")
-				result, groups, isAdmin, err := login(conn, userID, userPW)
+				username := c.PostForm("id")
+				userPW := c.PostForm("password")
+				result, groups, isAdmin, err := login(conn, username, userPW)
 				if err != nil {
-					c.JSON(http.StatusOK, gin.H{
+					c.JSON(http.StatusUnauthorized, gin.H{
 						"login":   result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-						"userID":  userID,
+						"userID":  -1,
+						"username":  username,
 						"groups":  nil,
 						"isAdmin": false})
+					return
 				}
 				c.JSON(http.StatusOK, gin.H{
 					"login":   result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-					"userID":  userID,
+					"userID":  1,
+					"username":  username,
 					"groups":  groups,
 					"isAdmin": isAdmin,
 				})
 			})
-			v1.GET("/cmd/:cmd/:arg", func(c *gin.Context) {
-				if err := c.ShouldBindUri(&pscmd); err != nil {
+			v1.GET("/cmd/", func(c *gin.Context) {
+				var pscmd PSCMD
+				if err := c.Bind(&pscmd); err != nil {
 					c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 					return
 				}
-
-				stdout, err := shell.Exec(fmt.Sprintf("%v %v", pscmd.CMD, pscmd.ARG))
-				if err != nil {
-					panic(err)
+				if pscmd.CMD == "" {
+					c.JSON(http.StatusNotFound, gin.H{"msg": "Command not found"})
+				}
+				if pscmd.TIMEOUT==0{
+					pscmd.TIMEOUT=1
 				}
 
-				log.Infof("cmd: %v, arg: %v, stdout: %v", pscmd.CMD, pscmd.ARG, stdout)
-				c.JSON(http.StatusOK, gin.H{"version": stdout})
+				c1 := make(chan []string, 1)
+				go func() {
+					stdout, err := shell.Exec(fmt.Sprintf("%v %v", pscmd.CMD, pscmd.ARG))
+
+					if err == nil {
+						c1 <- []string{stdout, ""}
+					} else {
+						c1 <- []string{stdout, err.Error()}
+					}
+
+				}()
+				var (
+					stdout string
+					stderr string
+				)
+				select {
+				case res := <-c1:
+					stdout = res[0]
+					stderr = res[1]
+				case <-time.After(time.Duration(pscmd.TIMEOUT) * time.Second):
+					stdout = "Timeout Reached"
+					stderr = "Timeout Reached"
+				}
+
+				log.Infof("cmd: %v, arg: %v, stdout: %v, stderr: %v", pscmd.CMD, pscmd.ARG, stdout, stderr)
+				c.JSON(http.StatusOK, gin.H{"stdout": stdout, "stderr": stderr})
 			})
 			v1.POST("/user", func(c *gin.Context) {
-				userID := c.PostForm("username")
+				userID := c.PostForm("id")
 				userPW := c.PostForm("password")
 				userPhone := c.PostForm("phone")
 				userMail := c.PostForm("email")
 				log.Infof("%v, %v, %v, %v", userID, userPW, userPhone, userMail)
+				if l.IsClosing() {
+					l, err = setupLdap()
+					if err != nil {
+						log.Errorln("AD Connection Failed")
+						c.JSON(http.StatusInternalServerError, gin.H{
+							"msg":      "AD Connection Failed",
+							"userID":   -1,
+							"username": "",
+						})
+						return
+					}
+				}
+				user := &ADUser{
+					accountname: userID,
+					telephoneNumber: userPhone,
+					mail: userMail,
+				}
+				err:=addUser(l, user)
+				if err != nil{
+					log.Errorln(err)
+					err2 := delUser(l, user)
+					if err2 != nil {
+						return
+					}
+					c.JSON(http.StatusBadRequest, gin.H{
+						"userID":   1,
+						"username": userID,
+					})
+					return
+				}
+				err = setPassword(l, user, userPW)
+				if err != nil{
+					log.Errorln(err)
+					err3 := delUser(l, user)
+					if err3 != nil {
+						return
+					}
+					c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
+						"userID":   1,
+						"username": userID,
+						"msg":err.Error(),
+					})
+					return
+				}
 				c.JSON(http.StatusCreated, gin.H{
-					"userID":1,
-					"username":userID,
+					"userID":   1,
+					"username": userID,
 				})
 			})
-			v1.PUT("/user", func(c *gin.Context) {
-			user := NewADUser()
-			user.username= c.PostForm("username")
+			v1.PATCH("/user", func(c *gin.Context) {
+				user := NewADUser()
+				user.username = c.PostForm("username")
 
-			cmd, _:=setPassword(l, user, c.PostForm("password"))
-			log.Infof("%v", cmd)
-			c.JSON(http.StatusCreated, gin.H{
-				"userID":1,
+				err := setPassword(l, user, c.PostForm("password"))
+				if err != nil{
+					log.Errorln(err)
+					//user 삭제
+					c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
+						"userID":   1,
+						"username": user.username,
+						"msg":err.Error(),
+					})
+					return
+				}
+				c.JSON(http.StatusCreated, gin.H{
+					"userID": 1,
+				})
 			})
-		})
+			v1.DELETE("/user", func(c *gin.Context) {
+				user := NewADUser()
+				user.accountname = c.PostForm("username")
+
+				err := delUser(l, user)
+				if err != nil{
+					log.Errorln(err)
+					c.JSON(http.StatusNotFound, gin.H{
+						"userID":   -1,
+						"username": user.username,
+						"msg":err.Error(),
+					})
+					return
+				}
+				c.JSON(http.StatusGone, gin.H{
+					"userID": 1,
+					"username": user.username,
+				})
+			})
+			v1.GET("/user/:username", func(c *gin.Context) {
+				setLog()
+				var user USER
+				err := c.ShouldBindUri(&user)
+				log.Infof("%v",user)
+				log.Infof("%v",err)
+				getUser(l, &user)
+				c.JSON(http.StatusGone, gin.H{
+					"userID": 1,
+					"username": user.Username,
+				})
+			})
 			v1.GET("/app", func(c *gin.Context) {
 				apps := getApps(shell)
 				log.Infof("finish")

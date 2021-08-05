@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
@@ -139,6 +140,40 @@ func setupLdap() (l *ldap.Conn, err error) {
 	return
 }
 
+func getUser(l *ldap.Conn, user *USER) {
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	var attributes = []string{
+		"dn",
+		"cn",
+		"description",
+		"memberOf",
+	}
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		fmt.Sprintf("(cn=%v)", user.Username),
+		attributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		//log.Fatal(err)
+	}
+	userentry := sr.Entries[0]
+	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+	//sr.PrettyPrint(4)
+	for i := range userentry.Attributes {
+		log.Infoln(i)
+		log.Infoln(userentry.Attributes[i].Name)
+		log.Infoln(userentry.Attributes[i].Values)
+	}
+}
+
 func testLDAP() {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
@@ -214,7 +249,7 @@ type ADUser struct {
 	initials                   string //:="이니셜"
 	accountname                string //= "newuser"
 	userPrincipalName          string //:=fmt.Sprintf("%v@%v",accountname, domain) //로그온 이름(accountname@domain 형식)
-	username                   string //:=fmt.Sprintf("%v %v %v.", sn, givenName, initials)
+	username                   string `uri:"username" binding:"required"` //:=fmt.Sprintf("%v %v %v.", sn, givenName, initials)
 	sAMAccountName             string //:=accountname //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
 	description                string //:="설명"//설명
 	info                       string //:="참고"//참고내용
@@ -282,13 +317,26 @@ func NewADUser() (user *ADUser) {
 //user add
 func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	if user.accountname == "" {
-		return errors.New("No user name")
+		return errors.New("no user name")
 	}
 
 	user.userPrincipalName = fmt.Sprintf("%v@%v", user.accountname, domain) //로그온 이름(accountname@domain 형식)
-	user.username = fmt.Sprintf("%v %v %v.", user.sn, user.givenName, user.initials)
-	user.sAMAccountName = user.accountname //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	//if user.givenName != "" {
+	//	if user.sn != "" {
+	//		if user.initials != "" {
+	//			user.username = fmt.Sprintf("%v %v %v.", user.sn, user.givenName, user.initials)
+	//		} else {
+	//			user.username = fmt.Sprintf("%v %v", user.sn, user.givenName)
+	//		}
+	//	} else {
+	//		user.username = fmt.Sprintf("%v", user.givenName)
+	//	}
+	//} else {
+	//	user.username = fmt.Sprintf("%v", user.accountname)
+	//}
+	user.username = fmt.Sprintf("%v", user.accountname)
 
+	user.sAMAccountName = user.accountname //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
 
 	//description:="설명"//설명
 	//info:="참고"//참고내용
@@ -318,7 +366,6 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 
 	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
 
-
 	//gtype := reflect.TypeOf(user)
 	target := reflect.ValueOf(user)
 	elements := target.Elem()
@@ -333,7 +380,7 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 		//	mType.Type, // 타입
 		//	mValue,     // 값
 		//)
-		if mType.Type.String()=="string" && (mValue.String()!="" && mType.Name!="accountname" && mType.Name!="username")  {
+		if mType.Type.String() == "string" && (mValue.String() != "" && mType.Name != "accountname" && mType.Name != "username") {
 			addReq.Attribute(mType.Name, []string{mValue.String()})
 		}
 	}
@@ -354,44 +401,65 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding user:", addReq, err)
 	}
+	ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
 	return err
 }
 
-type Person struct {
-	username string
-	password string
+//user delete
+func delUser(l *ldap.Conn, user *ADUser) (err error) {
+	if user.accountname == "" {
+		return errors.New("no user name")
+	}
+
+	user.userPrincipalName = fmt.Sprintf("%v@%v", user.accountname, domain)
+	user.username = fmt.Sprintf("%v", user.accountname)
+
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting user:", delreq, err)
+		return err
+	}
+	return err
 }
 
-func setPassword(l *ldap.Conn, user *ADUser, password string)(cmd string, err error){
-
+func setPassword(l *ldap.Conn, user *ADUser, password string) (err error) {
+	setLog()
 	client := &http.Client{}
 
 	data := url.Values{}
 	data.Set("username", user.username)
 	data.Set("password", password)
 
-	req, err := http.NewRequest(http.MethodPut, "http://10.1.1.8:8082/api/v1/user", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPatch, "http://10.1.1.8:8082/api/v1/user", strings.NewReader(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
-	req.Header.Add("Content-Type","application/x-www-form-urlencoded")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorln(err)
 		return
 	}
 	defer resp.Body.Close()
 
 	// Response 체크.
 	respBody, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		str := string(respBody)
-		println(str)
+	if err != nil {
+		log.Errorln(err)
+		log.Errorln(respBody)
+		return
 	}
-	fmt.Println("response Status : ", resp.Status)
-	fmt.Println("response Headers : ", resp.Header)
-	fmt.Println("response Body : ", string(respBody))
-	cmd=string(respBody)
-	return
+	var responseData = make(map[string]interface{})
+	err = json.Unmarshal(respBody, &responseData)
+	log.Println("response Status : ", resp.Status)
+	log.Println("response Headers : ", resp.Header)
+	log.Println("response Body : ", string(respBody))
+	log.Println("response Body_parsed : ", responseData)
+	if responseData["stderr"] != "" {
+		return errors.New(fmt.Sprint(responseData["stderr"]))
+	}
+	//cmd=string(respBody)
+	return nil
 }

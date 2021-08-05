@@ -8,8 +8,9 @@ import (
 )
 
 type PSCMD struct {
-	CMD string `uri:"cmd" binding:"required"`
-	ARG string `uri:"arg" binding:"required"`
+	CMD string `form:"cmd"`
+	ARG string `form:"arg"`
+	TIMEOUT int `form:"timeout"`
 }
 
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/contrib/static"
@@ -16,10 +15,6 @@ import (
 
 var log = logrus.New() //.WithField("who", "Main")
 var Version = "development"
-
-var (
-	nodeContextCancel context.CancelFunc
-)
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -51,20 +46,12 @@ func setup() {
 	log.SetReportCaller(true)
 }
 func main() {
-	l,err:=setupLdap()
-	user := NewADUser()
-	user.accountname= "testuser"
-	user.sn= "testsn"
-	user.givenName= "이름"
-
-	//setPassword(l, user, "Ablecloud1!")
-
-
+	var err error
 	setup()
+	//l, err := setupLdap()
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-
 
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
 	api := router.Group("/api")
@@ -81,27 +68,34 @@ func main() {
 				userMail := c.PostForm("email")
 				log.Infof("%v, %v, %v, %v", userID, userPW, userPhone, userMail)
 				c.JSON(http.StatusCreated, gin.H{
-					"userID":1,
-					"username":userID,
+					"userID":   1,
+					"username": userID,
 				})
 			})
-			v1.PUT("/user", func(c *gin.Context) {
-				user := NewADUser()
-				user.username= c.PostForm("username")
-				log.Infof("%v, %v", user, password)
+			v1.PATCH("/user", func(c *gin.Context) {
+				username = c.PostForm("username")
+				log.Infof("%v, %v", username, password)
 
-				output, stderr, err:=setPassword(l, user, c.PostForm("password"))
-				log.Infof("%v", user)
-				//cp:=exec.Command("bash", "-c", cmd)
-				//cpOut, err := cp.Output()
-				log.Infof(output)
-				log.Infof(stderr)
-				log.Infoln(err)
+				output, stderr, err := setPassword(username, c.PostForm("password"))
+				log.Println("stdout : ", output)
+				log.Println("stderr : ", stderr)
+				log.Println("err : ", err)
+				if err != nil {
 
-				c.JSON(http.StatusGone, gin.H{
-					"userID":1,
-					"cmd":string(output),
-					"err":err,
+					c.JSON(http.StatusBadRequest, gin.H{
+						"username": username,
+						"stdout":   output,
+						"stderr":   stderr,
+						"err":      err,
+					})
+					return
+				}
+
+				c.JSON(http.StatusAccepted, gin.H{
+					"username": username,
+					"stdout":   output,
+					"stderr":   stderr,
+					"err":      err,
 				})
 			})
 		}
@@ -111,6 +105,5 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	err = router.Run("0.0.0.0:8082")
-	//err = endless.ListenAndServe(":8083", router)
 	fmt.Println(err)
 }

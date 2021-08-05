@@ -5,34 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../domain-controller/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/.idea/domain-controller.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/psutil.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/users.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/utils.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/samba-ad.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/adutil.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/init.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/psutil.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/users.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../works-api/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../works-api/adutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../works-api/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../works-api/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../works-api/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../works-api/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../works-api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../works-api/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/go_build_samba_ad_linux_linux" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/psutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/psutil.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/adutil.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/samba-ad" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/samba_ad" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/users.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +51,7 @@
       <recent name="C:\Users\user\Documents\GitHub\ablestack-desktop\samba-ad" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Build.go build samba-ad linux">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
@@ -78,7 +61,7 @@
       <filePath value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
-    <configuration name="go build samba-ad" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <configuration name="go build samba-ad linux" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
@@ -86,6 +69,18 @@
         <env name="GOOS" value="linux" />
         <env name="GOARCH" value="amd64" />
       </envs>
+      <kind value="PACKAGE" />
+      <package value="samba-ad" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <output_directory value="$PROJECT_DIR$" />
+      <option name="run" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build samba-ad" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="samba-ad" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
       <kind value="PACKAGE" />
       <package value="samba-ad" />
       <directory value="$PROJECT_DIR$" />
@@ -102,6 +97,10 @@
       <framework value="gotest" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Go Build.go build samba-ad linux" />
+      <item itemvalue="Go Build.go build samba-ad" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
@@ -117,8 +116,12 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
   </component>
 </project>

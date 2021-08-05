@@ -5,8 +5,7 @@ import (
 )
 
 type USER struct {
-	id string `uri:"id" binding:"required"`
-	name string `uri:"username" binding:"optional"`
+	Username string `uri:"username" binding:"required"`
 }
 
 func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string, isAdmin bool, err error){
@@ -16,9 +15,12 @@ func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string,
 	//	log.Error(err)
 	//	return false, nil, false, err
 	//}
+	if conn.Conn.IsClosing(){
+		conn, _, _ = ConnectAD()
+	}
 	status, err := Auth(conn, id, pw)
 	if err != nil || status == false{
-		log.Error(err)
+		//log.Error(err)
 		return false, nil, false, err
 	}
 	_, _, groups, _ = listGroups(conn, id)

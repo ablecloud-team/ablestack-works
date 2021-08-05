@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
 	auth "github.com/korylprince/go-ad-auth/v3"
-	"io/ioutil"
-	"os/exec"
 	"reflect"
 
 	//"github.com/sirupsen/logrus"
@@ -316,8 +314,6 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 
 	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
 
-
-	//gtype := reflect.TypeOf(user)
 	target := reflect.ValueOf(user)
 	elements := target.Elem()
 	numFields := target.Elem().NumField()
@@ -337,49 +333,9 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	}
 	//
 	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
-	//addReq.Attribute("name", []string{user.username})
-	//addReq.Attribute("sn", []string{user.sn})
-	//addReq.Attribute("givenName", []string{user.givenName})
-	//addReq.Attribute("initials", []string{user.initials})
-	//addReq.Attribute("displayName", []string{user.username})
-	//addReq.Attribute("cn", []string{user.username})
-	//addReq.Attribute("sAMAccountName", []string{user.sAMAccountName})
-	//addReq.Attribute("userPrincipalName", []string{user.userPrincipalName})
-	//addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
-	//addReq.Attribute("countryCode", []string{fmt.Sprintf("%d", user.countryCode)})
-	//addReq.Attribute("c", []string{user.c})
-	//addReq.Attribute("co", []string{user.co})
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding user:", addReq, err)
 	}
 	return err
 }
 
-type Person struct {
-	username string
-	password string
-}
-
-func setPassword(l *ldap.Conn, user *ADUser, password string) (stdout string, stderr string, err error) {
-	setLog()
-	smbPassword:=exec.Command("/usr/local/samba/bin/smbpasswd", "-s", user.username)
-	pwIn, _:=smbPassword.StdinPipe()
-	pwOut, _:=smbPassword.StdoutPipe()
-	pwErr, _:=smbPassword.StderrPipe()
-
-	smbPassword.Start()
-
-	pwIn.Write([]byte(fmt.Sprintf("%v\n", password)))
-	pwIn.Write([]byte(fmt.Sprintf("%v\n", password)))
-	pwIn.Close()
-
-	bout, _ :=ioutil.ReadAll(pwOut)
-	berr, err :=ioutil.ReadAll(pwErr)
-	stdout = string(bout)
-	stderr = string(berr)
-	//cmd=fmt.Sprintf("'echo -e %v\\\\\\n%v\\\\\\n | /usr/local/samba/bin/smbpasswd -s %v'", password, password, user.username)
-	log.Infoln(stdout)
-	log.Errorln(stderr)
-
-	return stdout, stderr, err
-}
