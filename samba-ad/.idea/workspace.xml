@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/go_build_samba_ad_linux_linux" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/test" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/psutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/psutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/users.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/adutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samba-ad" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/samba_ad" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/users.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

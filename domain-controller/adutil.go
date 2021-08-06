@@ -140,6 +140,106 @@ func setupLdap() (l *ldap.Conn, err error) {
 	return
 }
 
+func SetUserField(source *ADUser, fieldName string, fieldValue string) {
+
+	if fieldName=="sn"{
+		source.sn = fieldValue
+	}
+	if fieldName=="givenName"{
+		source.givenName = fieldValue
+	}
+	if fieldName=="initials"{
+		source.initials = fieldValue
+	}
+	if fieldName=="accountname"{
+		source.accountname = fieldValue
+	}
+	if fieldName=="userPrincipalName"{
+		source.userPrincipalName = fieldValue
+	}
+	if fieldName=="username"{
+		source.username = fieldValue
+	}
+	if fieldName=="sAMAccountName"{
+		source.sAMAccountName = fieldValue
+	}
+	if fieldName=="description"{
+		source.description = fieldValue
+	}
+	if fieldName=="info"{
+		source.info = fieldValue
+	}
+	if fieldName=="title"{
+		source.title = fieldValue
+	}
+	if fieldName=="o"{
+		source.o = fieldValue
+	}
+	if fieldName=="company"{
+		source.company = fieldValue
+	}
+	if fieldName=="postOfficeBox"{
+		source.postOfficeBox = fieldValue
+	}
+	if fieldName=="physicalDeliveryOfficeName"{
+		source.physicalDeliveryOfficeName = fieldValue
+	}
+	if fieldName=="streetAddress"{
+		source.streetAddress = fieldValue
+	}
+	if fieldName=="I"{
+		source.I = fieldValue
+	}
+	if fieldName=="st"{
+		source.st = fieldValue
+	}
+	if fieldName=="department"{
+		source.department = fieldValue
+	}
+	if fieldName=="mail"{
+		source.mail = fieldValue
+	}
+	if fieldName=="telephoneNumber"{
+		source.telephoneNumber = fieldValue
+	}
+	if fieldName=="pager"{
+		source.pager = fieldValue
+	}
+	if fieldName=="mobile"{
+		source.mobile = fieldValue
+	}
+	if fieldName=="facsimileTelephoneNumber"{
+		source.facsimileTelephoneNumber = fieldValue
+	}
+	if fieldName=="homePhone"{
+		source.homePhone = fieldValue
+	}
+	if fieldName=="ipPhone"{
+		source.ipPhone = fieldValue
+	}
+	if fieldName=="postalCode"{
+		source.postalCode = fieldValue
+	}
+	if fieldName=="manager"{
+		source.manager = fieldValue
+	}
+	if fieldName=="wWWHomePage"{
+		source.wWWHomePage = fieldValue
+	}
+	if fieldName=="countryCode"{
+		source.countryCode,_ = strconv.Atoi(fieldValue)
+	}
+	if fieldName=="c"{
+		source.c = fieldValue
+	}
+	if fieldName=="co"{
+		source.co = fieldValue
+	}
+	if fieldName=="co"{
+		source.memberOf = strings.Split(fieldValue, " ")
+	}
+}
+
 func getUser(l *ldap.Conn, user *USER) {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
@@ -147,7 +247,37 @@ func getUser(l *ldap.Conn, user *USER) {
 	var attributes = []string{
 		"dn",
 		"cn",
+		"sn",
+		"givenName",
+		"initials",
+		"accountname",
+		"userPrincipalName",
+		"username",
+		"sAMAccountName",
 		"description",
+		"info",
+		"title",
+		"o",
+		"company",
+		"postOfficeBox",
+		"physicalDeliveryOfficeName",
+		"streetAddress",
+		"I",
+		"st",
+		"department",
+		"mail",
+		"telephoneNumber",
+		"pager",
+		"mobile",
+		"facsimileTelephoneNumber",
+		"homePhone",
+		"ipPhone",
+		"postalCode",
+		"manager",
+		"wWWHomePage",
+		"countryCode",
+		"c",
+		"co",
 		"memberOf",
 	}
 
@@ -166,12 +296,21 @@ func getUser(l *ldap.Conn, user *USER) {
 	}
 	userentry := sr.Entries[0]
 	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+
+	aduser := ADUser{}//NewADUser()
+	log.Infoln(aduser)
 	//sr.PrettyPrint(4)
 	for i := range userentry.Attributes {
 		log.Infoln(i)
 		log.Infoln(userentry.Attributes[i].Name)
 		log.Infoln(userentry.Attributes[i].Values)
+		val := ""
+		for _,item := range userentry.Attributes[i].Values{
+			val = fmt.Sprintf("%v, %v", val, item)
+		}
+		SetUserField(&aduser, userentry.Attributes[i].Name, val)
 	}
+	log.Infoln(json.Marshal(aduser))
 }
 
 func testLDAP() {
@@ -186,7 +325,37 @@ func testLDAP() {
 	var attributes = []string{
 		"dn",
 		"cn",
-		"description"}
+		"sn",
+		"givenName",
+		"initials",
+		"accountname",
+		"userPrincipalName",
+		"username",
+		"sAMAccountName",
+		"description",
+		"info",
+		"title",
+		"o",
+		"company",
+		"postOfficeBox",
+		"physicalDeliveryOfficeName",
+		"streetAddress",
+		"I",
+		"st",
+		"department",
+		"mail",
+		"telephoneNumber",
+		"pager",
+		"mobile",
+		"facsimileTelephoneNumber",
+		"homePhone",
+		"ipPhone",
+		"postalCode",
+		"manager",
+		"wWWHomePage",
+		"countryCode",
+		"c",
+		"co",}
 
 	l, _ := setupLdap()
 
@@ -242,7 +411,7 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 	return err
 
 }
-
+type ADUSER map[string] interface{}
 type ADUser struct {
 	sn                         string //:="새"
 	givenName                  string //:="사용자"
@@ -272,7 +441,7 @@ type ADUser struct {
 	postalCode                 string //:="35200"//주소->우편번호
 	manager                    string //:="CN=User3,CN=Users,DC=dc1,DC=local"//AD 상사이름
 	wWWHomePage                string //:="https://www."//홈페이지 주소
-
+	memberOf					[]string
 	countryCode int    //:= 410//주소->국가(한국?)
 	c           string //:="KR"//국가명
 	co          string //:=c
@@ -310,6 +479,7 @@ func NewADUser() (user *ADUser) {
 	user.wWWHomePage = ""                //"https://www."//홈페이지 주소
 	user.countryCode = 410               //:= 410//주소->국가(한국?)
 	user.c = ""                          //"KR"//국가명
+	user.memberOf=[]string{}
 	user.co = user.c
 	return user
 }
@@ -382,6 +552,8 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 		//)
 		if mType.Type.String() == "string" && (mValue.String() != "" && mType.Name != "accountname" && mType.Name != "username") {
 			addReq.Attribute(mType.Name, []string{mValue.String()})
+		}else if mType.Type.String() == "[]string" && mType.Name != "memberOf"{
+			addReq.Attribute(mType.Name, user.memberOf)
 		}
 	}
 	//
