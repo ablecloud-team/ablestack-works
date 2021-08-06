@@ -3,16 +3,14 @@
 </template>
 
 <script>
-import AdminBaseLayout from "./AdminBaseLayout";
+import AdminBaseLayout from "./AdminBaseLayout.vue";
 
 export default {
-  name: "`AdminApp`",
+  name: "AdminApp",
   components: {
     AdminBaseLayout,
-  }
-}
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

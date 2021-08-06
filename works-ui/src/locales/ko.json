@@ -1,4 +1,10 @@
 {
+  "message.logging": "로그인중 입니다.",
+  "message.login.validation": "아이디 또는 계정을 입력해주세요.",
+  "message.login.completed": "로그인이 완료되었습니다.",
+  "message.login.failure": "로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.",
+  "message.please.enter.your.id": "아이디를 입력 하셔야 합니다.",
+  "message.please.enter.your.password": "패스워드를 입력 하셔야 합니다.",
   "tooltip.start": "시작",
   "tooltip.stop": "Stop",
   "tooltip.reset": "재기동",
@@ -41,5 +47,8 @@
   "label.cancel": "취소",
   "label.template": "템플릿",
   "label.dedicated": "전용",
-  "label.shared": "공유"
+  "label.shared": "공유",
+  "label.login": "로그인",
+  "label.user.id": "사용자 아이디",
+  "label.password": "비밀번호"
 }

@@ -5,25 +5,21 @@
         <div>
           <a-row>
             <!-- 왼쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.workspace')]"
-              />
-
+            <a-col id="content-path" :span="12">
+              <Apath v-bind:paths="[$t('label.workspace')]" />
             </a-col>
 
             <!-- 오른쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :poweroff=true :destroy="true" :reset="true"/>
+              <actions :poweroff="true" :destroy="true" :reset="true" />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-
           <ACard bordered>
-            <TableContent :data="data2" :columns="columns" :bordered="true"/>
+            <TableContent :data="data2" :columns="columns" :bordered="true" />
           </ACard>
         </div>
       </a-layout-content>
@@ -35,27 +31,28 @@
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import TableContent from "./TableContent";
-import {data2, columns} from "@/data"
+import { data2, columns } from "@/data";
 
 export default {
   props: {
-    msg: String
+    msg: String,
   },
-  components: {TableContent, Apath, Actions},
+  components: { TableContent, Apath, Actions },
 
   setup() {
     return {
       data2,
-      columns
+      columns,
     };
-  }
-}
+  },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#content-layout, #content-body{
-  width:calc(100%);
+#content-layout,
+#content-body {
+  width: calc(100%);
 }
 #content-layout .ant-layout-header {
   text-align: left;
@@ -70,7 +67,6 @@ export default {
   text-align: left;
   /*background: #ea7da3;*/
 }
-
 
 #content-layout .ant-layout-header #content-action {
   text-align: right;
@@ -91,5 +87,4 @@ export default {
 #content-layout > .ant-layout:last-child {
   margin: 0;
 }
-
 </style>

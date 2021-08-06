@@ -5,23 +5,24 @@
         <div>
           <a-row>
             <!-- 오른쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[{name:$t('label.workspace'), component: 'Workspaces'}, {name:name, component: null}]"
+            <a-col id="content-path" :span="12">
+              <Apath
+                v-bind:paths="[
+                  { name: $t('label.workspace'), component: 'Workspaces' },
+                  { name: name, component: null },
+                ]"
               />
-
             </a-col>
-
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :poweroff=true :destroy="true" :reset="true"/>
+              <actions :actionFrom="actionFrom" />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody :name="name" :info="info"/>
+          <WorkSpaceBody :name="name" :info="info" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -32,19 +33,23 @@
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceBody from "@/views/workSpace/WorkSpaceBody";
-import {defineComponent} from "vue";
+import { defineComponent, ref } from "vue";
 export default defineComponent({
   props: {
     name: String,
-    info: Object
+    info: Object,
   },
-  components: {Apath, Actions, WorkSpaceBody},
-})
+  components: { Apath, Actions, WorkSpaceBody },
+  setup() {
+    return {
+      actionFrom: ref("WorkspaceDetail"),
+    };
+  },
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
 #content-layout .ant-layout-content {
   background: #f0f2f5;
   padding: 10px;
@@ -69,5 +74,4 @@ export default defineComponent({
 #content-action {
   text-align: right;
 }
-
 </style>

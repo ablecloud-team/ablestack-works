@@ -1,5 +1,5 @@
 {
-  "name": "ABLESTACKWorks",
+  "name": "qqqq",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -14,8 +14,9 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/vue-fontawesome": "^3.0.0-4",
-    "@vue/composition-api": "^1.0.3",
+    "@vue/cli-shared-utils": "^4.5.13",
     "ant-design-vue": "^2.2.2",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "sass": "^1.35.2",
     "sass-loader": "^10.0.0-rc.0",
@@ -26,40 +27,20 @@
   },
   "devDependencies": {
     "@intlify/vue-i18n-loader": "^2.1.0",
-    "@vue/cli-plugin-babel": "^4.5.13",
-    "@vue/cli-plugin-eslint": "^3.1.1",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "^4.5.13",
     "@vue/compiler-sfc": "^3.0.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",
-    "babel-plugin-import": "^1.13.3",
     "eslint": "^6.7.2",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0",
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
-    "vue-cli-plugin-i18n": "~2.1.1",
-    "vue-loader": "^16.3.1"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead"
-  ]
+    "prettier": "^2.2.1",
+    "vue-cli-plugin-i18n": "~2.1.2"
+  }
 }

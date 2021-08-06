@@ -5,23 +5,25 @@
         <div>
           <a-row>
             <!-- 오른쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[{name:$t('label.workspace'), component: 'Workspaces'}, {name:$t('label.WorkspaceDetail'), component: null}]"
+            <a-col id="content-path" :span="12">
+              <Apath
+                v-bind:paths="[
+                  { name: $t('label.workspace'), component: 'Workspaces' },
+                  { name: $t('label.WorkspaceDetail'), component: null },
+                ]"
               />
-
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :poweroff=true :destroy="true" :reset="true"/>
+              <actions />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <Bodycontent :name="name" :info="info"/>
+          <BodyContent :name="name" :info="info" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -29,22 +31,27 @@
 </template>
 
 <script>
-import Bodycontent from "@/components/BodyContent";
-import Actions from "@/components/Actions";
-import Apath from "@/components/Apath";
+import BodyContent from "./BodyContent";
+import Actions from "./Actions";
+import Apath from "./Apath";
 export default {
   props: {
-    name: String,
-    info: Object
+    name: {
+      String,
+    },
+    info: {
+      Object,
+    },
   },
-  components: {Apath, Actions, Bodycontent},
-}
+  components: { Apath, Actions, BodyContent },
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-#content-layout, #content-body{
-  width:calc(100%);
+#content-layout,
+#content-body {
+  width: calc(100%);
 }
 #content-layout .ant-layout-header {
   text-align: left;
@@ -59,7 +66,6 @@ export default {
   text-align: left;
   /*background: #ea7da3;*/
 }
-
 
 #content-layout .ant-layout-header #content-action {
   text-align: right;
@@ -80,5 +86,4 @@ export default {
 #content-layout > .ant-layout:last-child {
   margin: 0;
 }
-
 </style>

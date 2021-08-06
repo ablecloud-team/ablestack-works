@@ -1,42 +1,51 @@
 <template>
   <a-button
-      type="dashed"
-      block
-      style="margin-bottom: 14px;"
-      @click="changeModal(true)"
-      v-show="state.addButtonBoolean"
+    type="dashed"
+    block
+    style="margin-bottom: 14px"
+    @click="changeModal(true)"
+    v-if="state.addButtonBoolean"
   >
     <PlusOutlined />
     {{ state.addButtontext }}
   </a-button>
   <a-table
-      size="middle"
-      class="ant-table-striped"
-      :columns="columns"
-      :data-source="data"
-      :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
-      :bordered="bordered?bordered:false"
-      style="overflow-y: auto; overflow: auto"
-      :row-selection="rowSelection"
-      :pagination="pagination"
+    size="middle"
+    class="ant-table-striped"
+    :columns="columns"
+    :data-source="data"
+    :rowClassName="
+      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
+    "
+    :bordered="bordered ? bordered : false"
+    style="overflow: auto"
+    :row-selection="rowSelection"
+    :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <span v-if="comp!==undefined">
-      <router-link :to="{ name: comp, params: { name: record.Name, info:[record.IPAddress, record.Account, record.Zone] }}">
-        {{ record.Name }}
-      </router-link>
+      <span v-if="comp !== undefined">
+        <router-link
+          :to="{
+            name: comp,
+            params: {
+              name: record.Name,
+              info: [record.IPAddress, record.Account, record.Zone],
+            },
+          }"
+        >
+          {{ record.Name }}
+        </router-link>
       </span>
       <span v-else>
-        {{record.Name}}
+        {{ record.Name }}
       </span>
-
     </template>
 
-    <template #actionRender="{ record }">
+    <template #actionRender>
       <a-Popover placement="top">
         <template #content>
           <ASpace direction="horizontal">
-            <actions :power="record.State === 'Running'" :destroy="true" :reset="true" :iso="true" />
+            <actions :actionFrom="actionFrom" />
           </ASpace>
         </template>
         <MoreOutlined />
@@ -46,9 +55,11 @@
     <template #tags="{ text: tags }">
       <span>
         <a-tag
-            v-for="tag in tags"
-            :key=tag
-            :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
+          v-for="tag in tags"
+          :key="tag"
+          :color="
+            tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
+          "
         >
           {{ tag.toUpperCase() }}
         </a-tag>
@@ -59,31 +70,37 @@
   </a-table>
 
   <a-modal
-      v-model:title="state.addButtontext"
-      v-model:visible="state.modalBoolean"
-      @ok="changeModal(false)"
-      width="400px"
+    v-model:title="state.addButtontext"
+    v-model:visible="state.modalBoolean"
+    @ok="changeModal(false)"
+    width="400px"
   >
-    Desktop Quantity
     <a-input-number
-        id="inputNumber"
-        v-model:value="addDesktopQuantity"
-        :min="1"
-        :max="10"
-        style="width: 100%; margin-top: 7px;"
+      id="inputNumber"
+      :title="'Desktop Quantity'"
+      v-model:value="addDesktopQuantity"
+      :min="1"
+      :max="10"
+      style="width: 100%; margin-top: 7px"
+      v-if="state.callTapName === 'desktop'"
     />
+    <a-select v-if="state.callTapName === 'user'" style="width: 100%">
+    </a-select>
   </a-modal>
-
 </template>
 
 <script>
 // import {SmileOutlined} from '@ant-design/icons-vue';
-import {defineComponent, reactive, ref} from 'vue';
-import Actions from "@/components/Actions";
+import { defineComponent, reactive, ref } from "vue";
+import Actions from "../components/Actions";
 
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      "selectedRows: ",
+      selectedRows
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
@@ -98,26 +115,27 @@ export default defineComponent({
     data: Object,
     columns: Object,
     bordered: Boolean,
-    comp: String
+    comp: String,
   },
   setup(props) {
-    console.log('TableContent.vue props.tapName');
+    console.log("TableContent.vue props.tapName");
     console.log(props.tapName);
     const state = reactive({
       modalBoolean: ref(false),
       callTapName: ref(props.tapName),
       addButtonBoolean: ref(),
-      addButtontext: ref(''),
+      addButtontext: ref(""),
+      callModal: ref("desktop"),
     });
-    if(state.callTapName === 'desktop'){
+    if (state.callTapName === "desktop") {
       state.addButtonBoolean = ref(true);
-      state.addButtontext = ref('데스크탑 추가')
-    }else if (state.callTapName === 'user'){
+      state.addButtontext = ref("데스크탑 추가");
+    } else if (state.callTapName === "user") {
       state.addButtonBoolean = ref(true);
-      state.addButtontext = ref('유저 추가')
-    }else if (state.callTapName === 'datadisk'){
+      state.addButtontext = ref("유저 추가");
+    } else if (state.callTapName === "datadisk") {
       state.addButtonBoolean = ref(false);
-    }else if (state.callTapName === 'network'){
+    } else if (state.callTapName === "network") {
       state.addButtonBoolean = ref(false);
     }
     const addDesktopQuantity = ref(1);
@@ -128,20 +146,21 @@ export default defineComponent({
       pagination: {
         pageSize: 20,
         showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ['10', '20', '30', '40'], // number of pages per option
-        showTotal: total => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => this.pageSize = pageSize, // update display when changing the number of pages per page
+        pageSizeOptions: ["10", "20", "30", "40"], // number of pages per option
+        showTotal: (total) => `Total ${total} items`, // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
+      actionFrom: ref("VirtualMachineList"),
     };
   },
   components: {
     Actions,
   },
   methods: {
-    changeModal(value){
+    changeModal(value) {
       this.state.modalBoolean = ref(value);
-    }
-  }
+    },
+  },
 });
 </script>
 
@@ -183,7 +202,6 @@ export default defineComponent({
     font-size: 10px;
     transform: rotate(90deg);
   }
-
 }
 
 .alert-notification-threshold {

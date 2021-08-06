@@ -1,23 +1,14 @@
 <template>
   <div style="width: 256px">
     <Logo />
-    <a-menu
-        mode="inline"
-        theme="light"
-        style="padding-top: 14px"
-    >
-      <a-menu-item
-          key="1"
-      >
+    <a-menu mode="inline" theme="light" style="padding-top: 14px">
+      <a-menu-item key="1">
         <template #icon>
           <StarOutlined />
         </template>
         <span>즐겨찾기</span>
       </a-menu-item>
-      <a-menu-item
-          key="2"
-          @click="$router.push({name: 'UserDesktop'})"
-      >
+      <a-menu-item key="2" @click="$router.push({ name: 'UserDesktop' })">
         <template #icon>
           <DesktopOutlined />
         </template>
@@ -39,13 +30,13 @@
   </div>
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 import {
   AppstoreAddOutlined,
   CoffeeOutlined,
   DesktopOutlined,
   StarOutlined,
-} from '@ant-design/icons-vue';
+} from "@ant-design/icons-vue";
 import Logo from "./Logo";
 export default defineComponent({
   components: {

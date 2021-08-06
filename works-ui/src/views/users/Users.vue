@@ -5,23 +5,24 @@
         <div id="content-header-body">
           <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.users')]"
-              />
-
+            <a-col id="content-path" :span="12">
+              <Apath v-bind:paths="[$t('label.users')]" />
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :addButton="true" :add="$t('label.users')" :destroy="true"/>
+              <actions :actionFrom="actionFrom" :add="actionFrom" />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UsersList :data="UserListData" :columns="UserListColumns" :bordered="false"/>
+          <UsersList
+            :data="UserListData"
+            :columns="UserListColumns"
+            :bordered="false"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -31,22 +32,24 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import {UserListColumns, UserListData} from "@/data"
+import { UserListColumns, UserListData } from "@/data";
 import UsersList from "@/views/users/UsersList";
-import {defineComponent} from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: {
-    msg: String
+    msg: String,
   },
-  components: {UsersList,  Apath, Actions},
+  components: { UsersList, Apath, Actions },
 
   setup() {
     return {
-      UserListColumns, UserListData
+      actionFrom: ref("User"),
+      UserListColumns,
+      UserListData,
     };
-  }
-})
+  },
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -75,5 +78,4 @@ export default defineComponent({
 #content-action {
   text-align: right;
 }
-
 </style>

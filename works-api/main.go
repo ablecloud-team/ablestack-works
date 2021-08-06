@@ -7,9 +7,7 @@ import (
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	logrus "github.com/sirupsen/logrus"
-	//ps "github.com/zhongpei/go-powershell"
-	//"github.com/zhongpei/go-powershell/backend"
-	"github.com/ycyun/go-powershell"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -19,6 +17,7 @@ var log = logrus.New() //.WithField("who", "Main")
 var Version = "development"
 
 var (
+	//nodeContextCancel
 	nodeContextCancel context.CancelFunc
 )
 
@@ -54,7 +53,6 @@ func CORSMiddleware() gin.HandlerFunc {
 func setup() {
 	log.SetFormatter(&nested.Formatter{
 		HideKeys: false,
-		//FieldsOrder: []string{"component", "category"},
 		CallerFirst: false,
 	})
 	log.SetReportCaller(true)
@@ -63,83 +61,58 @@ func main() {
 	var (
 		err error
 	)
-	var pscmd PSCMD
-
-	shell, err := powershell.New()
-	if err != nil {
-		panic(err)
-	}
-	defer shell.Exit()
-
 	setup()
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	conn, status, err := ConnectAD()
-	if err != nil {
-		log.Errorln(err)
-	}
-	if !status {
-		log.Errorln(status, err)
-	}
 	//router.LoadHTMLGlob("templates/*")
-
-	/*
-		go func() {
-			//login check
-			for i=0; i>0;  {
-
-					Get-EventLog System -Source Microsoft-Windows-WinLogon | where {($_.instanceID -eq 7001) -or ($_.instanceID -eq 7002)} | select *| ogv
-					Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4624) -or ($_.instanceID -eq 4625)} | select * |ogv
-
-			}
-		}()
-	*/
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
 	api := router.Group("/api")
 	{
 		v1 := api.Group("/v1")
 		{
 			v1.GET("/version", func(c *gin.Context) {
+				login1()
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
 			v1.POST("/login", func(c *gin.Context) {
-				userID := c.PostForm("id")
-				userPW := c.PostForm("pw")
-				result, groups, isAdmin, err := login(conn, userID, userPW)
-				if err != nil {
-					c.JSON(http.StatusOK, gin.H{
-						"login":   result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-						"userID":  userID,
-						"groups":  nil,
-						"isAdmin": false})
-				}
+				var result map[string]interface{}
+				userId := c.PostForm("id")
+				userPassword := c.PostForm("password")
+				result = login(userId, userPassword)
 				c.JSON(http.StatusOK, gin.H{
-					"login":   result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-					"userID":  userID,
-					"groups":  groups,
-					"isAdmin": isAdmin,
+					"result":  result,
 				})
 			})
-			v1.GET("/cmd/:cmd/:arg", func(c *gin.Context) {
-				if err := c.ShouldBindUri(&pscmd); err != nil {
-					c.JSON(400, gin.H{"msg": err})
-					return
+			v1.GET("/test", func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"version": Version})
+				request := map[string]string{
+					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
+					"command": "listVolumes",
+					"response": "json",
 				}
-
-				stdout, err := shell.Exec(fmt.Sprintf("%v %v", pscmd.CMD, pscmd.ARG))
+				sig := makeSignature(request)
+				fmt.Println("========================")
+				fmt.Println(sig)
+				baseurl := "https://mold.ablecloud.io/client/api?"
+				var strurl string
+				for key, value := range request{
+					strurl = strurl + key+"="+value+"&"
+				}
+				endUrl := baseurl+strurl+"signature="+sig
+				fmt.Println(endUrl)
+				resp, err := http.Get(endUrl)
 				if err != nil {
 					panic(err)
 				}
 
-				log.Infof("cmd: %v, arg: %v, stdout: %v", pscmd.CMD, pscmd.ARG, stdout)
-				c.JSON(http.StatusOK, gin.H{"version": stdout})
-			})
+				defer resp.Body.Close()
 
-			v1.GET("/app", func(c *gin.Context) {
-				apps := getApps(shell)
-				log.Infof("finish")
-				c.JSON(http.StatusOK, gin.H{"app": apps})
+				data, err := ioutil.ReadAll(resp.Body)
+				if err != nil{
+					panic(err)
+				}
+				fmt.Println("%s\n", string(data))
 			})
 		}
 	}
@@ -148,6 +121,5 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	err = router.Run("0.0.0.0:8083")
-	//err = endless.ListenAndServe(":8083", router)
 	fmt.Println(err)
 }

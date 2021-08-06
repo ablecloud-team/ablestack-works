@@ -1,20 +1,25 @@
 <template>
   <a-list
-      size="small"
-      :dataSource="data"
-      :pagination="false"
-      style="overflow-y: auto"
+    size="small"
+    :dataSource="data"
+    :pagination="false"
+    style="overflow-y: auto"
   >
     <template #renderItem="{ item }">
       <a-list-item>
         <template #actions>
-          <actions :power="item.State!=='Running'" :edit="item.State!=='Running'" :poweroff="item.State === 'Running'" :destroy="true" :reset="item.State === 'Running'"/>
+          <actions
+            :power="item.State !== 'Running'"
+            :edit="item.State !== 'Running'"
+            :poweroff="item.State === 'Running'"
+            :destroy="true"
+            :reset="item.State === 'Running'"
+          />
         </template>
-        <a-list-item-meta :description="item.State"  >
-
-        <template #title>
-          {{ item.Name }}
-        </template>
+        <a-list-item-meta :description="item.State">
+          <template #title>
+            {{ item.Name }}
+          </template>
         </a-list-item-meta>
       </a-list-item>
     </template>
@@ -29,21 +34,21 @@
 </template>
 
 <script>
-
-import Actions from "@/components/Actions";
-export default {
+import Actions from "../components/Actions";
+import { defineComponent } from "vue";
+export default defineComponent({
   components: {
-    Actions
+    Actions,
   },
   props: {
-    data,
-    listdata,
+    data: {
+      String,
+    },
   },
-  setup(){
-    return {
-    };
-  }
-}
+  setup() {
+    return {};
+  },
+});
 </script>
 
 <style scoped>
@@ -84,7 +89,6 @@ export default {
     font-size: 10px;
     transform: rotate(90deg);
   }
-
 }
 
 .alert-notification-threshold {

@@ -1,32 +1,34 @@
 <template>
   <a-breadcrumb>
-
     <a-breadcrumb-item href="">
-      <HomeOutlined style="font-size: 16px"/>
+      <HomeOutlined style="font-size: 16px" />
     </a-breadcrumb-item>
 
-
-    <a-breadcrumb-item href="" v-for="path in paths" v-bind:key="paths.indexOf(path)">
-      <span v-if="path.component !== undefined"><router-link :to="{ name: path.component}">{{ path.name }}</router-link></span>
+    <a-breadcrumb-item
+      href=""
+      v-for="path in paths"
+      v-bind:key="paths.indexOf(path)"
+    >
+      <span v-if="path.component !== undefined"
+        ><router-link :to="{ name: path.component }">{{
+          path.name
+        }}</router-link></span
+      >
       <span v-else-if="path.name !== undefined">{{ path.name }}</span>
       <span v-else>{{ path }}</span>
     </a-breadcrumb-item>
-
-
   </a-breadcrumb>
 </template>
 
 <script>
 export default {
-  props:{
+  props: {
     paths: Array,
   },
-  setup(){
-    return
-  }
-}
+  setup() {
+    return;
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

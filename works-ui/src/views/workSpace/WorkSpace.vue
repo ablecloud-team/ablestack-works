@@ -5,35 +5,38 @@
         <div id="content-header-body">
           <a-row id="content-header-row">
             <!-- 왼쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.workspace')]"
-              />
-
+            <a-col id="content-path" :span="12">
+              <Apath v-bind:paths="[$t('label.workspace')]" />
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
               <actions
-                  :add="$t('label.add.workspace')"
-                  :addButton="true"
-                  :actionFrom="name"
-                  :showModal="showAddModal"
-                  @changeAddModal="setShowAddModal"/>
+                :add="$t('label.add.workspace')"
+                :addButton="true"
+                :actionFrom="name"
+                :showModal="showAddModal"
+                @changeAddModal="setShowAddModal"
+              />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-            <WorkSpaceList :data="WorkspaceListData" :columns="WorkspaceListColumns" :bordered="false"/>
+          <WorkSpaceList
+            :data="WorkspaceListData"
+            :columns="WorkspaceListColumns"
+            :bordered="false"
+          />
         </div>
         <AddModal
-            v-model:visible="showAddModal"
-            :add="$t('label.add.workspace')"
-            :actionFrom="name"
-            :showModal="showAddModal"
-            @changeAddModal="setShowAddModal"/>
+          v-model:visible="showAddModal"
+          :add="$t('label.add.workspace')"
+          :actionFrom="name"
+          :showModal="showAddModal"
+          @changeAddModal="setShowAddModal"
+        />
       </a-layout-content>
     </a-layout>
   </div>
@@ -42,26 +45,26 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import {WorkspaceListData, WorkspaceListColumns} from "@/data"
+import { WorkspaceListData, WorkspaceListColumns } from "@/data";
 import WorkSpaceList from "./WorkSpaceList";
-import {defineComponent, ref} from "vue";
+import { defineComponent, ref } from "vue";
 import AddModal from "@/components/AddModal";
 
 export default defineComponent({
   name: "WorkSpace",
   props: {
-    msg: String
+    msg: String,
   },
   components: {
     AddModal,
     WorkSpaceList,
     Apath,
-    Actions
+    Actions,
   },
-  data(){
-    return{
-      name: 'Workspace',
-    }
+  data() {
+    return {
+      name: "Workspace",
+    };
   },
   setup() {
     const showAddModal = ref(false);
@@ -72,11 +75,11 @@ export default defineComponent({
     };
   },
   methods: {
-    setShowAddModal: function (params){
+    setShowAddModal: function (params) {
       this.showAddModal = params;
-    }
-  }
-})
+    },
+  },
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -105,5 +108,4 @@ export default defineComponent({
 #content-action {
   text-align: right;
 }
-
 </style>

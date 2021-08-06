@@ -2,71 +2,176 @@
   <div class="user-layout desktop">
     <div class="user-layout-container">
       <div class="user-layout-container">
-        <img src="@/assets/ablestack-logo.png" alt="logo" class="user-layout-logo">
+        <img
+          src="../../assets/ablestack-logo.png"
+          alt="logo"
+          class="user-layout-logo"
+        />
       </div>
-      <div tabindex="0" role="presentation" style="width: 0px; height: 0px; overflow: hidden; position: absolute;"></div>
+      <!--      <div-->
+      <!--        tabindex="0"-->
+      <!--        role="presentation"-->
+      <!--        style="width: 0; height: 0; overflow: hidden; position: absolute"-->
+      <!--      ></div>-->
       <a-form
-          layout="horizontal"
-          :model="formState"
-          @finish="handleFinish"
-          @finishFailed="handleFinishFailed"
-          class="user-layout-login"
+        ref="formRef"
+        layout="horizontal"
+        :model="formState"
+        :rules="rules"
+        class="user-layout-login"
       >
-        <a-form-item>
-          <a-input v-model:value="formState.user" placeholder="Username" size="large">
-            <template #prefix><UserOutlined style="color: rgba(0, 0, 0, 0.25)" /></template>
+        <a-form-item name="id">
+          <a-input
+            v-model:value="formState.id"
+            :placeholder="$t('label.user.id')"
+            size="large"
+          >
+            <template #prefix>
+              <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input>
         </a-form-item>
-        <a-form-item>
-          <a-input-password v-model:value="formState.password" type="password" placeholder="Password" size="large">
-            <template #prefix><LockOutlined style="color: rgba(0, 0, 0, 0.25)" /></template>
+        <a-form-item name="password">
+          <a-input-password
+            v-model:value="formState.password"
+            type="password"
+            :placeholder="$t('label.password')"
+            size="large"
+          >
+            <template #prefix>
+              <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+            </template>
           </a-input-password>
         </a-form-item>
-        <a-form-item>
-          <a-button
-              type="primary"
-              @click="$router.push({name: 'home'})"
-              block
-              class="login-button"
-          >
-            로그인
+        <a-form-item style="margin-bottom: 0">
+          <a-button type="primary" @click="onSubmit" block class="login-button">
+            {{ $t("label.login") }}
           </a-button>
         </a-form-item>
+        <!--   언어변환 버튼 start     -->
+        <a-popover placement="bottom">
+          <template #content>
+            <a-button type="text" @click="$i18n.locale = 'ko'">
+              한국어
+            </a-button>
+            <br />
+            <a-button type="text" @click="$i18n.locale = 'en'">
+              English
+            </a-button>
+          </template>
+          <a-button type="text">
+            <template #icon>
+              <font-awesome-icon
+                :icon="['fas', 'language']"
+                size="4x"
+                style="color: #666"
+                class="login-ico"
+              />
+            </template>
+          </a-button>
+        </a-popover>
+        <!--   언어변환 버튼 끝     -->
       </a-form>
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, reactive } from 'vue';
+import { defineComponent, reactive, ref, toRaw } from "vue";
+import axios from "axios";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
   name: "Login",
-  setup(){
+  setup() {
+    let params = new URLSearchParams();
+    const formRef = ref();
     const formState = reactive({
-      user: '',
-      password: '',
+      id: "",
+      password: "",
     });
+    const rules = {
+      id: [
+        {
+          required: true,
+          message: "Please input Activity ID",
+          trigger: "blur",
+        }
+      ],
+      password: [
+        {
+          required: true,
+          message: "Please input Activity Password",
+          trigger: "blur",
+        }
+      ]
+    };
+    // const message1 = (0, _vue.createVNode)(
+    //   "div",
+    //   {
+    //     class: "custom-content",
+    //   },
+    //   [
+    //     args.icon || iconNode,
+    //     (0, _vue.createVNode)("span", null, [args.content]),
+    //   ]
+    // );
 
-    const handleFinish = values => {
-      console.log(values, formState);
+    const message1 = <i18n path="message.login.failure" />;
+
+    const onSubmit = () => {
+      formRef.value
+        .validate()
+        .then(() => {
+          message.loading({
+            content: message1,
+            duration: 0,
+          });
+          console.log("values", this.formState.id, toRaw(this.formState.id));
+          params.append("id", formState.id);
+          params.append("password", formState.password);
+          axios
+            .post("/v1/login", params)
+            .then((res) => {
+              console.log(res.data.result);
+              console.log(res.data.result.isAdmin);
+              message.destroy();
+              if (res.data.result.login) {
+                message.success({
+                  content: "message.login.completed",
+                  duration: 3
+                });
+              } else if (!res.data.result.login) {
+                message.error({
+                  content: this.$t("message.login.failure"),
+                  duration: 3
+                });
+              }
+            })
+            .catch((error) => console.log(error));
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     };
 
-    const handleFinishFailed = errors => {
-      console.log(errors);
-    };
     return {
+      formRef,
       formState,
-      handleFinish,
-      handleFinishFailed,
+      rules,
+      message1,
+      onSubmit
     };
   },
+  data() {
+    return {};
+  },
+  methods: {},
 });
 </script>
 
 <style lang="less" scoped>
-.user-layout{
-  background: #42b983;
+.user-layout {
   height: 100%;
 
   button.login-button {
@@ -100,18 +205,18 @@ export default defineComponent({
     }
   }
 }
-.user-layout-container{
+.user-layout-container {
   padding: 3rem 0;
   width: 100%;
 }
 
-.user-layout-login{
+.user-layout-login {
   min-width: 260px;
   width: 368px;
   margin: 0 auto;
 }
 
-.user-layout-logo{
+.user-layout-logo {
   width: 600px;
   height: 80px;
   margin: 0 auto 2rem;
@@ -124,5 +229,9 @@ export default defineComponent({
   font-size: 16px;
   height: 40px;
   width: 100%;
+}
+
+.login-ico {
+  font-size: 30px;
 }
 </style>

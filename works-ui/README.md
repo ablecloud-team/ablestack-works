@@ -1,4 +1,4 @@
-# works-ui
+# qqqq
 
 ## Project setup
 ```
@@ -18,6 +18,15 @@ yarn build
 ### Lints and fixes files
 ```
 yarn lint
+```
+
+### Lints and fixes files
+```
+npm i --save ant-design-vue@next
+npm install --save @ant-design/icons-vue
+npm i @vue/cli-shared-utils
+vue add i18n
+npm install axios --save
 ```
 
 ### Customize configuration

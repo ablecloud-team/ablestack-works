@@ -8,18 +8,18 @@
 
 <script>
 export default {
-  name: "AdminHeader"
-}
+  name: "AdminHeader",
+};
 </script>
 
 <style scoped>
-.header-notice-icon{
+.header-notice-icon {
   font-size: 22px;
   padding: 6px;
   margin: 5px;
 }
 
-.user-menu{
+.user-menu {
   background: white;
   float: right;
   height: 100%;

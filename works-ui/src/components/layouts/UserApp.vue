@@ -6,12 +6,10 @@
 import UserBaseLayout from "./UserBaseLayout";
 export default {
   name: "UserApp",
-  components:{
+  components: {
     UserBaseLayout,
-  }
-}
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

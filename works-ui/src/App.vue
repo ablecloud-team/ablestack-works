@@ -1,9 +1,9 @@
 <template>
-  <router-view/>
+  <router-view />
 </template>
 
 <style lang="less">
 #app {
-  height: 100%
+  height: 100%;
 }
 </style>

@@ -1,4 +1,10 @@
 {
+  "message.logging": "Logging in.",
+  "message.login.validation": "Please enter your ID or account.",
+  "message.login.completed": "Login is complete.",
+  "message.login.failure": "Login failed. Please check your ID or password.",
+  "message.please.enter.your.id": "Please enter your ID.",
+  "message.please.enter.your.password": "Please enter your password.",
   "tooltip.start": "Start",
   "tooltip.stop": "Stop",
   "tooltip.reset": "Restart",
@@ -41,5 +47,8 @@
   "label.cancel": "Cancel",
   "label.template": "Template",
   "label.dedicated": "Dedicated",
-  "label.shared": "Shared"
+  "label.shared": "Shared",
+  "label.login": "Login",
+  "label.user.id": "User ID",
+  "label.password": "Password"
 }

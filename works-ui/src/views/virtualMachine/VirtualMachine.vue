@@ -5,23 +5,24 @@
         <div id="content-header-body">
           <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
-            <a-col id='content-path' :span="12">
-              <Apath v-bind:paths="[$t('label.vm')]"
-              />
-
+            <a-col id="content-path" :span="12">
+              <Apath v-bind:paths="[$t('label.vm')]" />
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :poweroff=true :destroy="true" :reset="true"/>
+              <actions :actionFrom="actionFrom" />
             </a-col>
-
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-            <VirtualMachineList :data="VMListData" :columns="VMListColumns" :bordered="false"/>
+          <VirtualMachineList
+            :data="VMListData"
+            :columns="VMListColumns"
+            :bordered="false"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -31,22 +32,24 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import {VMListColumns, VMListData} from "@/data"
+import { VMListColumns, VMListData } from "@/data";
 import VirtualMachineList from "@/views/virtualMachine/VirtualMachineList";
-import {defineComponent} from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   props: {
-    msg: String
+    msg: String,
   },
-  components: {VirtualMachineList,  Apath, Actions},
+  components: { VirtualMachineList, Apath, Actions },
 
   setup() {
     return {
-      VMListColumns, VMListData
+      actionFrom: ref("VirtualMachine"),
+      VMListColumns,
+      VMListData,
     };
-  }
-})
+  },
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -75,5 +78,4 @@ export default defineComponent({
 #content-action {
   text-align: right;
 }
-
 </style>

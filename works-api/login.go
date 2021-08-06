@@ -1,28 +1,30 @@
 package main
 
 import (
-	auth "github.com/korylprince/go-ad-auth/v3"
-	//log "github.com/sirupsen/logrus"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"time"
 )
 
-//var log = logrus.New().WithField("who", "LOGIN")
-
-func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string, isAdmin bool, err error){
+//login
+func login(id string, password string) map[string]interface{} {
 	setLog()
-	_, status, err := ConnectAD()
-	if err != nil{
-		log.Error(err)
-		return false, nil, false, err
+	params := url.Values{
+		"id": {id},
+		"password": {password},
 	}
-	status, err = Auth(conn, id, pw)
-	if err != nil || status == false{
-		log.Error(err)
-		return false, nil, false, err
+	client := http.Client{
+		Timeout: 5 * time.Second,
 	}
-	_, _, groups, _ = listGroups(conn, id)
+	resp, err := client.PostForm(DCInfo+"/v1/login", params)
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println(resp)
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
 
-	isAdmin, err = inGroup(conn, id, "Administrators")
-
-	return status, groups, isAdmin, err
-
+	return res
 }

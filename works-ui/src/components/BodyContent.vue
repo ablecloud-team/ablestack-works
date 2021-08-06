@@ -3,7 +3,7 @@
     <ARow style="min-height: 400px" id="content-row">
       <ACol :span="8" style="background: #ececec; padding: 8px">
         <!-- 왼쪽 detail 창 -->
-        <ACard bordered style=" min-height: 300px">
+        <ACard bordered style="min-height: 300px">
           <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
         </ACard>
       </ACol>
@@ -23,20 +23,19 @@ import TabbedContent from "./TabbedContent";
 import InfoCard from "@/components/InfoCard";
 
 export default {
-  components: {InfoCard, TabbedContent,},
+  components: { InfoCard, TabbedContent },
   props: {
     name: String,
-    info: Object
-  }
-
+    info: Object,
+  },
 };
 </script>
 <style>
-#content-space, #content-row{
+#content-space,
+#content-row {
   width: 100%;
 }
-#content-space > .ant-space-item{
+#content-space > .ant-space-item {
   width: 100%;
 }
-
 </style>

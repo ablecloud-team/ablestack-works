@@ -8,8 +8,6 @@ import (
 	"runtime"
 )
 
-
-
 func setLog(){
 	startlogger := logrus.New()
 	startlogger.SetFormatter(&nested.Formatter{

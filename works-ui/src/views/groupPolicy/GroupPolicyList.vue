@@ -1,29 +1,39 @@
 <template>
   <a-table
-      size="middle"
-      class="ant-table-striped"
-      :columns="columns"
-      :data-source="data"
-      :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
-      :bordered="bordered?bordered:false"
-      style="overflow-y: auto; overflow: auto"
-      :row-key="(record, index) => index"
-      :row-selection="rowSelection"
+    size="middle"
+    class="ant-table-striped"
+    :columns="columns"
+    :data-source="data"
+    :rowClassName="
+      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
+    "
+    :bordered="bordered ? bordered : false"
+    style="overflow-y: auto; overflow: auto"
+    :row-key="(record, index) => index"
+    :row-selection="rowSelection"
   >
     <template #nameRender="{ record }">
-      <router-link :to="{ name: 'GroupPolicyDetail', params: { name: record.Name, info:[record.IPAddress, record.Account, record.Zone] }}">{{ record.Name }}</router-link>
+      <router-link
+        :to="{
+          name: 'GroupPolicyDetail',
+          params: {
+            name: record.Name,
+            info: [record.IPAddress, record.Account, record.Zone],
+          },
+        }"
+        >{{ record.Name }}</router-link
+      >
     </template>
 
     <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
-
         <template #content>
           <ASpace direction="horizontal">
             <Actions
-                :power="record.State === 'Running'"
-                :destroy="true"
-                :reset="true"
-                :iso="true"
+              :power="record.State === 'Running'"
+              :destroy="true"
+              :reset="true"
+              :iso="true"
             />
           </ASpace>
         </template>
@@ -34,26 +44,30 @@
     <template #tags="{ text: tags }">
       <span>
         <a-tag
-            v-for="tag in tags"
-            :key=tag
-            :color="tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'"
+          v-for="tag in tags"
+          :key="tag"
+          :color="
+            tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
+          "
         >
           {{ tag.toUpperCase() }}
         </a-tag>
       </span>
     </template>
-
   </a-table>
-
 </template>
 
 <script>
-import {defineComponent} from 'vue';
+import { defineComponent } from "vue";
 import Actions from "@/components/Actions";
 
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+    console.log(
+      `selectedRowKeys: ${selectedRowKeys}`,
+      "selectedRows: ",
+      selectedRows
+    );
   },
   onSelect: (record, selected, selectedRows) => {
     console.log(record, selected, selectedRows);
@@ -66,12 +80,11 @@ export default defineComponent({
   props: {
     data: Object,
     columns: Object,
-    bordered: Boolean
+    bordered: Boolean,
   },
   setup() {
     return {
       rowSelection,
-
     };
   },
   components: {
@@ -118,7 +131,6 @@ export default defineComponent({
     font-size: 10px;
     transform: rotate(90deg);
   }
-
 }
 
 .alert-notification-threshold {

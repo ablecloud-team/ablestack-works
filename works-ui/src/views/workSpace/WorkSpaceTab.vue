@@ -1,38 +1,38 @@
 <template>
   <div id="ContentTab">
     <a-tabs
-        type="card"
-        v-model:activeKey="activeKey"
-        :tab-position="tabPosition"
-        @change="changeTap"
+      type="card"
+      v-model:activeKey="activeKey"
+      :tab-position="tabPosition"
+      @change="changeTap"
     >
       <a-tab-pane key="1" :tab="$t('label.vm.list')">
         <TableContent
-            v-model:tapName="status.callTap"
-            :data="VMListData"
-            :columns="VMListColumns"
-            comp="VirtualMachineDetail"
+          v-model:tapName="state.callTap"
+          :data="VMListData"
+          :columns="VMListColumns"
+          comp="VirtualMachineDetail"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
-            v-model:tapName="status.callTap"
-            :data="UserListData"
-            :columns="UserListColumns"
+          v-model:tapName="state.callTap"
+          :data="UserListData"
+          :columns="UserListColumns"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.disk.list')">
         <TableContent
-            v-model:tapName="status.callTap"
-            :data="VMDiskListData"
-            :columns="VMDiskListColumns"
+          v-model:tapName="state.callTap"
+          :data="VMDiskListData"
+          :columns="VMDiskListColumns"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
         <TableContent
-            v-model:tapName="status.callTap"
-            :data="NWListData"
-            :columns="NWListColumns"
+          v-model:tapName="state.callTap"
+          :data="NWListData"
+          :columns="NWListColumns"
         />
       </a-tab-pane>
     </a-tabs>
@@ -40,12 +40,11 @@
 </template>
 
 <script>
-import TableContent from "@/components/TableContent";
+import { defineComponent, reactive, ref } from "vue";
+import TableContent from "../../components/TableContent";
 
-import {defineComponent, reactive, ref} from 'vue';
-// import ListView from "@/components/ListView";
-
-import {VMListData,
+import {
+  VMListData,
   VMListColumns,
   VMDiskListData,
   VMDiskListColumns,
@@ -53,31 +52,31 @@ import {VMListData,
   NWListColumns,
   UserListData,
   UserListColumns,
-} from "@/data"
+} from "../../data";
 export default defineComponent({
   components: { TableContent },
   setup() {
-    const tabPosition = ref('top');
-    const activeKey = ref('1');
-    const status = reactive({
-      callTap: ref('desktop'),
+    const tabPosition = ref("top");
+    const activeKey = ref("1");
+    const state = reactive({
+      callTap: ref("desktop"),
     });
-    const changeTap = value =>{
+    const changeTap = (value) => {
       console.log(`${value}`);
-      if(`${value}` === '1'){
-        status.callTap = ref('desktop');
-      }else if(`${value}` === '2'){
-        status.callTap = ref('user');
-      }else if(`${value}` === '3'){
-        status.callTap = ref('datadisk');
-      }else if(`${value}` === '4'){
-        status.callTap = ref('network');
+      if (`${value}` === "1") {
+        state.callTap = ref("desktop");
+      } else if (`${value}` === "2") {
+        state.callTap = ref("user");
+      } else if (`${value}` === "3") {
+        state.callTap = ref("datadisk");
+      } else if (`${value}` === "4") {
+        state.callTap = ref("network");
       }
-      console.log('sdfsdfsdf');
-      console.log(status.callTap);
-    }
+      console.log("sdfsdfsdf");
+      console.log(state.callTap);
+    };
     return {
-      status,
+      state,
       changeTap,
       tabPosition,
       activeKey,
@@ -95,7 +94,7 @@ export default defineComponent({
 </script>
 
 <style>
-#ContentTab{
+#ContentTab {
   text-align: left;
 }
 </style>

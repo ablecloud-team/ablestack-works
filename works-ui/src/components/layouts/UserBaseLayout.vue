@@ -1,14 +1,14 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-sider class="user-sider-layout">
-      <UserSider/>
+      <UserSider />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="user-layout-header">
         <UserHeader />
       </a-layout-header>
       <a-layout-content class="user-layout-content">
-        <router-view/>
+        <router-view />
       </a-layout-content>
       <a-layout-footer class="user-layout-footer">
         <UserFooter />
@@ -22,18 +22,18 @@ import UserSider from "./sider/UserSider";
 import UserHeader from "./header/UserHeader";
 import UserFooter from "./footer/UserFooter";
 
-export default ({
-  name: 'UserBaseLayout',
-  components:{
+export default {
+  name: "UserBaseLayout",
+  components: {
     UserSider,
     UserHeader,
     UserFooter,
-  }
-})
+  },
+};
 </script>
 
 <style>
-.user-sider-layout{
+.user-sider-layout {
   flex: 0 0 256px !important;
   max-width: 256px !important;
   min-width: 256px !important;
@@ -41,17 +41,17 @@ export default ({
   background: white;
 }
 
-.user-layout-header{
+.user-layout-header {
   background: white;
 }
 
-.user-layout-content{
+.user-layout-content {
   background: #f0f2f5;
   height: 100%;
 }
 
-.user-layout-footer{
-  background: #f0f2f5;;
+.user-layout-footer {
+  background: #f0f2f5;
   text-align: center;
 }
 </style>
