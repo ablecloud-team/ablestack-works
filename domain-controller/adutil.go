@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strconv"
 
 	//"github.com/sirupsen/logrus"
@@ -27,9 +26,9 @@ var domain = "dc1.local"
 var ADserver = "dc1.local"
 var ADport = 636
 var ADbasedn = "DC=dc1,DC=local"
-
-var username = "user"
-var password = "Ablecloud1!"
+//
+//var username = "user"
+//var password = "Ablecloud1!"
 
 var config = &auth.Config{
 	Server:   ADserver,
@@ -139,7 +138,7 @@ func setupLdap() (l *ldap.Conn, err error) {
 	}
 	return
 }
-
+/*
 func SetUserField(source *ADUser, fieldName string, fieldValue string) {
 
 	if fieldName=="sn"{
@@ -239,8 +238,8 @@ func SetUserField(source *ADUser, fieldName string, fieldValue string) {
 		source.memberOf = strings.Split(fieldValue, " ")
 	}
 }
-
-func getUser(l *ldap.Conn, user *USER) {
+*/
+func getUser(l *ldap.Conn, user *USER) (retuser ADUSER){
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
 
@@ -297,7 +296,7 @@ func getUser(l *ldap.Conn, user *USER) {
 	userentry := sr.Entries[0]
 	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
 
-	aduser := ADUser{}//NewADUser()
+	aduser := ADUSER{}//NewADUser()
 	log.Infoln(aduser)
 	//sr.PrettyPrint(4)
 	for i := range userentry.Attributes {
@@ -308,9 +307,11 @@ func getUser(l *ldap.Conn, user *USER) {
 		for _,item := range userentry.Attributes[i].Values{
 			val = fmt.Sprintf("%v, %v", val, item)
 		}
-		SetUserField(&aduser, userentry.Attributes[i].Name, val)
+		aduser[userentry.Attributes[i].Name] = val
 	}
-	log.Infoln(json.Marshal(aduser))
+	ret, err :=json.Marshal(aduser)
+	log.Infoln(string(ret))
+	return aduser
 }
 
 func testLDAP() {
@@ -355,7 +356,8 @@ func testLDAP() {
 		"wWWHomePage",
 		"countryCode",
 		"c",
-		"co",}
+		"co",
+	}
 
 	l, _ := setupLdap()
 
@@ -412,6 +414,7 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 
 }
 type ADUSER map[string] interface{}
+/*
 type ADUser struct {
 	sn                         string //:="새"
 	givenName                  string //:="사용자"
@@ -446,7 +449,9 @@ type ADUser struct {
 	c           string //:="KR"//국가명
 	co          string //:=c
 }
+*/
 
+/*
 func NewADUser() (user *ADUser) {
 	user = &ADUser{}
 	user.sn = ""
@@ -483,14 +488,14 @@ func NewADUser() (user *ADUser) {
 	user.co = user.c
 	return user
 }
-
+*/
 //user add
-func addUser(l *ldap.Conn, user *ADUser) (err error) {
-	if user.accountname == "" {
+func addUser(l *ldap.Conn, user ADUSER) (err error) {
+	if val, ok := user["accountname"]; !ok || val=="" {
 		return errors.New("no user name")
 	}
 
-	user.userPrincipalName = fmt.Sprintf("%v@%v", user.accountname, domain) //로그온 이름(accountname@domain 형식)
+	user["userPrincipalName"] = fmt.Sprintf("%v@%v", user["accountname"], domain) //로그온 이름(accountname@domain 형식)
 	//if user.givenName != "" {
 	//	if user.sn != "" {
 	//		if user.initials != "" {
@@ -504,9 +509,9 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	//} else {
 	//	user.username = fmt.Sprintf("%v", user.accountname)
 	//}
-	user.username = fmt.Sprintf("%v", user.accountname)
+	user["username"] = fmt.Sprintf("%v", user["accountname"])
 
-	user.sAMAccountName = user.accountname //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	user["sAMAccountName"] = user["accountname"] //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
 
 	//description:="설명"//설명
 	//info:="참고"//참고내용
@@ -530,12 +535,28 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	//manager:="CN=User3,CN=Users,DC=dc1,DC=local"//AD 상사이름
 	//wWWHomePage:="https://www."//홈페이지 주소
 
-	user.countryCode = 410 //주소->국가(한국?)
-	user.c = "KR"          //국가명
-	user.co = user.c
+	user["countryCode"] = 410 //주소->국가(한국?)
+	user["c"] = "KR"          //국가명
+	user["co"] = user["c"]
 
-	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
+	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
 
+
+	for key, val := range user{
+		log.Infof("%v:%v", key, val)
+		switch val.(type){
+		case string:
+			if key != "accountname" && key != "username" {
+				addReq.Attribute(key, []string{val.(string)})
+			}
+		case int:
+			i := val.(int)
+			addReq.Attribute(key, []string{strconv.Itoa(i)})
+		default:
+			log.Errorf("%v:%T, %v", key, val, val)
+		}
+	}
+	/*
 	//gtype := reflect.TypeOf(user)
 	target := reflect.ValueOf(user)
 	elements := target.Elem()
@@ -553,10 +574,12 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 		if mType.Type.String() == "string" && (mValue.String() != "" && mType.Name != "accountname" && mType.Name != "username") {
 			addReq.Attribute(mType.Name, []string{mValue.String()})
 		}else if mType.Type.String() == "[]string" && mType.Name != "memberOf"{
-			addReq.Attribute(mType.Name, user.memberOf)
+			addReq.Attribute(mType.Name, user["memberOf"].([]string))
 		}
 	}
 	//
+
+	 */
 	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
 	//addReq.Attribute("name", []string{user.username})
 	//addReq.Attribute("sn", []string{user.sn})
@@ -573,20 +596,20 @@ func addUser(l *ldap.Conn, user *ADUser) (err error) {
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding user:", addReq, err)
 	}
-	ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
+	ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
 	return err
 }
 
 //user delete
-func delUser(l *ldap.Conn, user *ADUser) (err error) {
-	if user.accountname == "" {
+func delUser(l *ldap.Conn, user ADUSER) (err error) {
+	if user["accountname"] == "" {
 		return errors.New("no user name")
 	}
 
-	user.userPrincipalName = fmt.Sprintf("%v@%v", user.accountname, domain)
-	user.username = fmt.Sprintf("%v", user.accountname)
+	user["userPrincipalName"] = fmt.Sprintf("%v@%v", user["accountname"], domain)
+	user["username"] = fmt.Sprintf("%v", user["accountname"])
 
-	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user.username, "Users", ADbasedn), []ldap.Control{})
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
 
 	if err := l.Del(delreq); err != nil {
 		log.Error("error deleting user:", delreq, err)
@@ -595,12 +618,12 @@ func delUser(l *ldap.Conn, user *ADUser) (err error) {
 	return err
 }
 
-func setPassword(l *ldap.Conn, user *ADUser, password string) (err error) {
+func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	setLog()
 	client := &http.Client{}
 
 	data := url.Values{}
-	data.Set("username", user.username)
+	data.Set("username", user["username"].(string))
 	data.Set("password", password)
 
 	req, err := http.NewRequest(http.MethodPatch, "http://10.1.1.8:8082/api/v1/user", strings.NewReader(data.Encode()))

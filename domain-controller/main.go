@@ -182,10 +182,10 @@ func main() {
 						return
 					}
 				}
-				user := &ADUser{
-					accountname: userID,
-					telephoneNumber: userPhone,
-					mail: userMail,
+				user := ADUSER{
+					"accountname": userID,
+					"telephoneNumber": userPhone,
+					"mail": userMail,
 				}
 				err:=addUser(l, user)
 				if err != nil{
@@ -220,8 +220,7 @@ func main() {
 				})
 			})
 			v1.PATCH("/user", func(c *gin.Context) {
-				user := NewADUser()
-				user.username = c.PostForm("username")
+				user := ADUSER{"username":c.PostForm("username")}
 
 				err := setPassword(l, user, c.PostForm("password"))
 				if err != nil{
@@ -229,7 +228,7 @@ func main() {
 					//user 삭제
 					c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
 						"userID":   1,
-						"username": user.username,
+						"username": user["username"],
 						"msg":err.Error(),
 					})
 					return
@@ -239,22 +238,22 @@ func main() {
 				})
 			})
 			v1.DELETE("/user", func(c *gin.Context) {
-				user := NewADUser()
-				user.accountname = c.PostForm("username")
+				user := ADUSER{
+				"accountname" : c.PostForm("username")}
 
 				err := delUser(l, user)
 				if err != nil{
 					log.Errorln(err)
 					c.JSON(http.StatusNotFound, gin.H{
 						"userID":   -1,
-						"username": user.username,
+						"username": user["username"],
 						"msg":err.Error(),
 					})
 					return
 				}
 				c.JSON(http.StatusGone, gin.H{
 					"userID": 1,
-					"username": user.username,
+					"username": user["username"],
 				})
 			})
 			v1.GET("/user/:username", func(c *gin.Context) {
@@ -263,11 +262,11 @@ func main() {
 				err := c.ShouldBindUri(&user)
 				log.Infof("%v",user)
 				log.Infof("%v",err)
-				getUser(l, &user)
-				c.JSON(http.StatusGone, gin.H{
+				u := getUser(l, &user)
+				c.JSON(http.StatusGone, u)/*gin.H{
 					"userID": 1,
 					"username": user.Username,
-				})
+				})*/
 			})
 			v1.GET("/app", func(c *gin.Context) {
 				apps := getApps(shell)
