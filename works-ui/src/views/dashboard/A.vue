@@ -95,16 +95,6 @@ export default defineComponent({
       },
     };
 
-    // const onSubmit = () => {
-    //   formRef.value
-    //     .validate()
-    //     .then(() => {
-    //       console.log('values', formState, toRaw(formState));
-    //     })
-    //     .catch(error => {
-    //       console.log('error', error);
-    //     });
-    // };
     return {
       formRef,
       formState,
@@ -113,12 +103,18 @@ export default defineComponent({
     };
   },
   data() {
-    console.log();
-    return {};
+    let rulesIdMeassage = this.$t("message.please.enter.your.id")
+    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
+    return {
+      rulesIdMeassage,
+      rulesPasswordMeassage
+    };
   },
-  mounted() {},
+  watch: {},
   methods: {
     onSubmit() {
+      this.rules.id.message = this.rulesIdMeassage;
+      this.rules.password.message = this.rulesPasswordMeassage;
       let params = new URLSearchParams();
       console.log("this.formRef");
       console.log(this.formRef);
