@@ -165,7 +165,7 @@ func main() {
 				c.JSON(http.StatusOK, gin.H{"stdout": stdout, "stderr": stderr})
 			})
 			v1.POST("/user", func(c *gin.Context) {
-				userID := c.PostForm("id")
+				userID := c.PostForm("username")
 				userPW := c.PostForm("password")
 				userPhone := c.PostForm("phone")
 				userMail := c.PostForm("email")
@@ -183,7 +183,7 @@ func main() {
 					}
 				}
 				user := ADUSER{
-					"accountname": userID,
+					"username": userID,
 					"telephoneNumber": userPhone,
 					"mail": userMail,
 				}
@@ -219,13 +219,16 @@ func main() {
 					"username": userID,
 				})
 			})
-			v1.PATCH("/user", func(c *gin.Context) {
-				user := ADUSER{"username":c.PostForm("username")}
+			v1.PATCH("/user/:username", func(c *gin.Context) {
 
-				err := setPassword(l, user, c.PostForm("password"))
+				var user = make(ADUSER)
+				var user_ USER
+				err := c.ShouldBindUri(&user_)
+				user["username"]=user_.Username
+
+				err = setPassword(l, user, c.PostForm("password"))
 				if err != nil{
 					log.Errorln(err)
-					//user 삭제
 					c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
 						"userID":   1,
 						"username": user["username"],
@@ -237,14 +240,16 @@ func main() {
 					"userID": 1,
 				})
 			})
-			v1.DELETE("/user", func(c *gin.Context) {
-				user := ADUSER{
-				"accountname" : c.PostForm("username")}
+			v1.DELETE("/user/:username", func(c *gin.Context) {
 
-				err := delUser(l, user)
+				var user = make(ADUSER)
+				var user_ USER
+				err := c.ShouldBindUri(&user_)
+				user["username"]=user_.Username
+				err = delUser(l, user)
 				if err != nil{
 					log.Errorln(err)
-					c.JSON(http.StatusNotFound, gin.H{
+					c.JSON(http.StatusGone, gin.H{
 						"userID":   -1,
 						"username": user["username"],
 						"msg":err.Error(),
@@ -263,6 +268,14 @@ func main() {
 				log.Infof("%v",user)
 				log.Infof("%v",err)
 				u := getUser(l, &user)
+				c.JSON(http.StatusGone, u)/*gin.H{
+					"userID": 1,
+					"username": user.Username,
+				})*/
+			})
+			v1.GET("/user/", func(c *gin.Context) {
+				setLog()
+				u := searchUser(l)
 				c.JSON(http.StatusGone, u)/*gin.H{
 					"userID": 1,
 					"username": user.Username,
