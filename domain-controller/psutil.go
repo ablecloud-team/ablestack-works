@@ -8,18 +8,18 @@ import (
 )
 
 type PSCMD struct {
-	CMD string `form:"cmd"`
-	ARG string `form:"arg"`
-	TIMEOUT int `form:"timeout"`
+	CMD     string `form:"cmd"`
+	ARG     string `form:"arg"`
+	TIMEOUT int    `form:"timeout"`
 }
-
 
 type APPVAL struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
 	Desc string `json:"desc"`
 }
-func getApps(shell *powershell.Shell) (apps []*APPVAL){
+
+func getApps(shell *powershell.Shell) (apps []*APPVAL) {
 	setLog()
 	stdout, err := shell.Exec("$WScript = New-Object -ComObject WScript.Shell")
 	if err != nil {
