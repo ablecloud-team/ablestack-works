@@ -19,6 +19,21 @@ type APPVAL struct {
 	Desc string `json:"desc"`
 }
 
+func setupShell() (shell *powershell.Shell, err error) {
+	shell, err = powershell.New()
+	if err != nil {
+		panic(err)
+	}
+	defer func() {
+		err := shell.Exit()
+		if err != nil {
+			log.Errorln(err)
+			return
+		}
+	}()
+	return shell, err
+}
+
 func getApps(shell *powershell.Shell) (apps []*APPVAL) {
 	setLog()
 	stdout, err := shell.Exec("$WScript = New-Object -ComObject WScript.Shell")

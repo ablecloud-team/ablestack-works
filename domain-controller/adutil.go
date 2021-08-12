@@ -337,6 +337,7 @@ func testLDAP() {
 	sr.PrettyPrint(4)
 
 }
+
 func addGroup(l *ldap.Conn, groupname string) (err error) {
 	//ou add
 	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
@@ -408,17 +409,6 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 		}
 	}
 	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
-	//addReq.Attribute("name", []string{user.username})
-	//addReq.Attribute("sn", []string{user.sn})
-	//addReq.Attribute("givenName", []string{user.givenName})
-	//addReq.Attribute("initials", []string{user.initials})
-	//addReq.Attribute("displayName", []string{user.username})
-	//addReq.Attribute("cn", []string{user.username})
-	//addReq.Attribute("userPrincipalName", []string{user.userPrincipalName})
-	//addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
-	//addReq.Attribute("countryCode", []string{fmt.Sprintf("%d", user.countryCode)})
-	//addReq.Attribute("c", []string{user.c})
-	//addReq.Attribute("co", []string{user.co})
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding user:", addReq, err)
 	}
@@ -426,35 +416,19 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	return err
 }
 
-//user add
+//user mod
 func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 	if val, ok := user["username"]; !ok || val == "" {
 		return user_, errors.New("no user name")
 	}
-
-	//user["userPrincipalName"] = fmt.Sprintf("%v@%v", user["username"], domain) //로그온 이름(username@domain 형식)
-	//
-	//user["sAMAccountName"] = user["username"] //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
-	//
-	//user["countryCode"] = 410 //주소->국가(한국?)
-	//user["c"] = "KR"          //국가명
-	//user["co"] = user["c"]
-
 	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
-	//modReq.Replace("description", []string{"An example user"})
-	//modReq.Replace("mail", []string{"user@example.org"})
-	//
-	//err = l.Modify(modReq)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
+
 	user_ = NewADUser(user).ToMap()
 
 	for key, val := range user_ {
 		switch val.(type) {
 		case []string:
-			if key != "username" && key != "memberOf"{
+			if key != "username" && key != "memberOf" {
 				log.Infof("%v:%v", key, len(val.([]string)))
 				modReq.Replace(key, val.([]string))
 			}
