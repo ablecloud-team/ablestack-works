@@ -3,23 +3,23 @@
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-          src="../../assets/ablestack-logo.png"
-          alt="logo"
-          class="user-layout-logo"
+            src="../../assets/ablestack-logo.png"
+            alt="logo"
+            class="user-layout-logo"
         />
       </div>
       <a-form
-        ref="formRef"
-        layout="horizontal"
-        :model="formState"
-        :rules="rules"
-        class="user-layout-login"
+          ref="formRef"
+          layout="horizontal"
+          :model="formState"
+          :rules="rules"
+          class="user-layout-login"
       >
         <a-form-item name="id">
           <a-input
-            v-model:value="formState.id"
-            :placeholder="$t('label.user.id')"
-            size="large"
+              v-model:value="formState.id"
+              :placeholder="$t('label.user.id')"
+              size="large"
           >
             <template #prefix>
               <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -28,10 +28,10 @@
         </a-form-item>
         <a-form-item name="password">
           <a-input-password
-            v-model:value="formState.password"
-            type="password"
-            :placeholder="$t('label.password')"
-            size="large"
+              v-model:value="formState.password"
+              type="password"
+              :placeholder="$t('label.password')"
+              size="large"
           >
             <template #prefix>
               <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -57,10 +57,10 @@
           <a-button type="text">
             <template #icon>
               <font-awesome-icon
-                :icon="['fas', 'language']"
-                size="4x"
-                style="color: #666"
-                class="login-ico"
+                  :icon="['fas', 'language']"
+                  size="4x"
+                  style="color: #666"
+                  class="login-ico"
               />
             </template>
           </a-button>
@@ -72,18 +72,24 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref, toRaw } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import axios from "axios";
+import { axiosLogin } from "../../api/index";
+import store from "../../store/index"
+import router from "../../router";
 
 export default defineComponent({
   name: "Login",
   setup() {
     const formRef = ref();
     const formState = reactive({
-      id: "",
-      password: "",
+      id: "administrator",
+      password: "Ablecloud1!",
+      // id: "",
+      // password: "",
     });
+    const rulesIdMeassage = ref();
+    const rulesPasswordMeassage = ref();
     const rules = {
       id: {
         required: true,
@@ -99,52 +105,59 @@ export default defineComponent({
       formRef,
       formState,
       rules,
-      // onSubmit,
-    };
-  },
-  data() {
-    let rulesIdMeassage = this.$t("message.please.enter.your.id")
-    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
-    return {
       rulesIdMeassage,
       rulesPasswordMeassage
     };
   },
-  watch: {},
+  data() {
+    let rulesIdMeassage = this.$t(`message.please.enter.your.id`)
+    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
+    return {
+      rulesIdMeassage,
+      rulesPasswordMeassage,
+    };
+  },
+  computed: {
+
+  },
   methods: {
     onSubmit() {
       this.rules.id.message = this.rulesIdMeassage;
       this.rules.password.message = this.rulesPasswordMeassage;
       let params = new URLSearchParams();
-      console.log("this.formRef");
-      console.log(this.formRef);
-      console.log(this.formRef.name);
+      let res
       this.formRef
-        .validate()
-        .then(() => {
-          console.log("values", this.formState, toRaw(this.formState));
-          message.loading(this.$t("message.logging"), 0);
-          params.append("id", this.formState.id);
-          params.append("password", this.formState.password);
-          axios
-            .post("/v1/login", params)
-            .then((res) => {
-              console.log(res.data.result);
-              console.log(res.data.result.isAdmin);
-              message.destroy();
-              if (res.data.result.login) {
+          .validate()
+          .then(async () => {
+            message.loading(this.$t("message.logging"), 0);
+            params.append("id", this.formState.id);
+            params.append("password", this.formState.password);
+            try {
+              res = await axiosLogin(params)
+              console.log(res);
+              if (res.status === 200) {
+                message.destroy();
                 message.success(this.$t("message.login.completed"), 2);
-              } else if (!res.data.result.login) {
-                message.error(this.$t("message.login.failure"), 2);
+                await store.dispatch("loginCommit", res.data)
+                await router.push({name: "home"})
+                // console.log("res.data.result");
+                // console.log(res.data);
+                // console.log(store.state.user.accessToken);
               }
-            })
-            .catch((error) => console.log(error));
-        })
-        .catch((error) => {
-          console.log("error", error);
-        });
+            }catch (error){
+              message.error("error")
+            }
+
+          })
+          .catch((error) => {
+            console.log("error", error);
+          });
     },
   },
+  loginBefor(payload){
+    store.dispatch("loginCommit", res.data)
+    return router.push({name: "home"})
+  }
 });
 </script>
 

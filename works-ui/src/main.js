@@ -5,7 +5,6 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-import axios from "axios";
 
 import {
   faCameraRetro,
@@ -36,6 +35,7 @@ import {
   CaretRightOutlined,
   GlobalOutlined,
   MenuFoldOutlined,
+  LogoutOutlined,
 } from "@ant-design/icons-vue";
 
 library.add(faCameraRetro);
@@ -45,7 +45,6 @@ library.add(faUserSecret);
 library.add(faLanguage);
 
 const app = createApp(App); //.use(loadLocaleMessages);
-axios.defaults.baseURL = process.env.VUE_APP_API_URL + "/api";
 
 app.component("font-awesome-icon", FontAwesomeIcon);
 app.component("BackwardFilled", BackwardFilled);
@@ -68,5 +67,6 @@ app.component("MoreOutlined", MoreOutlined);
 app.component("CaretRightOutlined", CaretRightOutlined);
 app.component("GlobalOutlined", GlobalOutlined);
 app.component("MenuFoldOutlined", MenuFoldOutlined);
+app.component("LogoutOutlined", LogoutOutlined);
 
 app.use(i18n).use(store).use(router).use(Antd).mount("#app");

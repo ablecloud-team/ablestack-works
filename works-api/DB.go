@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	"os"
 )
 
 func checkError(err error) {
@@ -16,7 +16,7 @@ func login1() {
 	//var name, email, phone string
 	q := getWorksInfo()
 	fmt.Println(q.Database.User.ID)
-	db, err := sql.Open(MsqlType, DbInfo)
+	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
 	checkError(err)
 	defer db.Close()
 

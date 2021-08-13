@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { axiosUserDetail } from "../api";
+// import store from "../store/index";
 import Login from "../views/auth/Login.vue";
 import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
@@ -21,6 +23,7 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    meta: { requiresAuth: false },
   },
   {
     path: "/adminApp",
@@ -31,12 +34,13 @@ const routes = [
     path: "/a",
     name: "A",
     component: A,
+    meta: { requiresAuth: false },
   },
   {
     path: "/",
     name: "home",
     component: AdminBaseLayout,
-    meta: { icon: "home" },
+    meta: { requiresAuth: true },
     redirect: "/dashboard",
     // beforeEnter: (to, from, failure) => {},
     children: [
@@ -44,6 +48,7 @@ const routes = [
         path: "/dashboard",
         name: "Dashboard",
         component: Dashboard,
+        meta: { requiresAuth: true },
       },
       {
         path: "/workspaces",
@@ -115,6 +120,37 @@ const routes = [
 const index = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+index.beforeEach(async (to, from, next) => {
+  // let isLogin = store.state.user.isLogin;
+  // if (isLogin === undefined) isLogin = false;
+  // // console.log("router index.beforeEach isLogin = " + isLogin);
+  // if (!isLogin) {
+  //   // console.log("router index.beforeEach if(!isLogin)");
+  //   if (to.name === "Login" || to.name === "A") {
+  //     // console.log(
+  //     //   'router index.beforeEach (to.name === "Login" || to.name === "A")'
+  //     // );
+  //     return next();
+  //   }
+  //   next({ name: "Login" });
+  // } else if (isLogin === to.meta.requiresAuth) {
+  //   next();
+  // } else {
+  //   next({ name: "Login" });
+  // }
+  const res = await axiosUserDetail();
+  if (res.status === 202) {
+    if (to.name === "Login" || to.name === "A") {
+      // console.log(
+      //   'router index.beforeEach (to.name === "Login" || to.name === "A")'
+      // );
+      return next();
+    }
+    next({ name: "Login" });
+  }
+  next();
 });
 
 export default index;

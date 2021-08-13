@@ -3,10 +3,18 @@
     <option name="myName" value="Project Default" />
     <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="GrazieInspection" enabled="false" level="TYPO" enabled_by_default="false" />
+    <inspection_tool class="HtmlUnknownAttribute" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="myValues">
+        <value>
+          <list size="0" />
+        </value>
+      </option>
+      <option name="myCustomValuesEnabled" value="true" />
+    </inspection_tool>
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="15">
+          <list size="20">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -22,6 +30,11 @@
             <item index="12" class="java.lang.String" itemvalue="a-row" />
             <item index="13" class="java.lang.String" itemvalue="a-layout-header" />
             <item index="14" class="java.lang.String" itemvalue="a-layout-content" />
+            <item index="15" class="java.lang.String" itemvalue="menufoldoutlined" />
+            <item index="16" class="java.lang.String" itemvalue="globaloutlined" />
+            <item index="17" class="java.lang.String" itemvalue="belloutlined" />
+            <item index="18" class="java.lang.String" itemvalue="a-list-item-meta" />
+            <item index="19" class="java.lang.String" itemvalue="logoutoutlined" />
           </list>
         </value>
       </option>

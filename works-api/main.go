@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	logrus "github.com/sirupsen/logrus"
@@ -34,21 +35,6 @@ func StartClientApp() (*exec.Cmd, error) {
 
 	return cmd, nil
 }
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin")
-		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, DELETE, POST")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	}
-}
 
 func setup() {
 	log.SetFormatter(&nested.Formatter{
@@ -62,29 +48,71 @@ func main() {
 		err error
 	)
 	setup()
+	setenv()
 
 	router := gin.Default()
-	router.Use(CORSMiddleware())
+	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
 	api := router.Group("/api")
 	{
+		api.POST("/login", func(c *gin.Context) {
+			var result map[string]interface{}
+			userId := c.PostForm("id")
+			userPassword := c.PostForm("password")
+			result = login(userId, userPassword)
+			token, err := createToken(userId)
+			if err != nil{
+				if err == jwt.ErrSignatureInvalid{
+					c.JSON(http.StatusUnauthorized,
+						gin.H{"status": http.StatusUnauthorized, "error": "token is expired"})
+					c.Abort()
+					return
+				}
+				c.JSON(http.StatusUnprocessableEntity, err.Error())
+				c.Abort()
+				return
+			}
+			c.SetCookie("access-token", token, 1800, "", "", false, false)
+			c.JSON(http.StatusOK, gin.H{
+				"result":  result,
+			})
+		})
 		v1 := api.Group("/v1")
+		v1.Use(checkToken)
 		{
 			v1.GET("/version", func(c *gin.Context) {
-				login1()
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
-			v1.POST("/login", func(c *gin.Context) {
-				var result map[string]interface{}
-				userId := c.PostForm("id")
-				userPassword := c.PostForm("password")
-				result = login(userId, userPassword)
+			v1.GET("/logout", func(c *gin.Context) {
+				result := map[string]interface{}{}
+				cookieUserId := c.MustGet("cookie-user-id").(string)
+				fmt.Println("cookieUserId = "+cookieUserId)
+				result["login"] = false
+				result["username"] = cookieUserId
+				c.SetCookie("access-token", "", -1, "", "", false, false)
 				c.JSON(http.StatusOK, gin.H{
 					"result":  result,
 				})
 			})
-			v1.GET("/test", func(c *gin.Context) {
+			v1.GET("/user", func(c *gin.Context) {
+				var result map[string]interface{}
+				//userId := c.Param("userId")
+				cookieUserId := c.MustGet("cookie-user-id").(string)
+				fmt.Println("cookieUserId = "+cookieUserId)
+				result = userInfo(cookieUserId)
+				c.JSON(http.StatusOK, gin.H{
+					"result":  result,
+				})
+			})
+		}
+		test := api.Group("/test")
+		test.Use(checkToken)
+		{
+			test.GET("/version", func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"version": Version})
+			})
+			test.GET("/test", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 				request := map[string]string{
 					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
@@ -110,9 +138,49 @@ func main() {
 
 				data, err := ioutil.ReadAll(resp.Body)
 				if err != nil{
+					fmt.Println(err)
+				}
+				fmt.Println("%s\n", string(data))
+			})
+			test.GET("/test1", func(c *gin.Context) {
+				c.JSON(http.StatusOK, gin.H{"version": Version})
+				request := map[string]string{
+					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
+					"command": "listVolumes",
+					"response": "json",
+				}
+				sig := makeSignature(request)
+				baseurl := "https://mold.ablecloud.io/client/api?"
+				var strurl string
+				for key, value := range request{
+					strurl = strurl + key+"="+value+"&"
+				}
+				endUrl := baseurl+strurl+"signature="+sig
+				fmt.Println(endUrl)
+				resp, err := http.Get(endUrl)
+				if err != nil {
+					panic(err)
+				}
+
+				defer resp.Body.Close()
+
+				data, err := ioutil.ReadAll(resp.Body)
+				if err != nil{
 					panic(err)
 				}
 				fmt.Println("%s\n", string(data))
+			})
+			test.GET("/user/", func(c *gin.Context) {
+				var result map[string]interface{}
+				//userId := c.Param("userId")
+				cookieUserId := c.MustGet("cookie-user-id").(string)
+				fmt.Println("userId")
+				fmt.Println(cookieUserId)
+				fmt.Println(cookieUserId)
+				result = userInfo(cookieUserId)
+				c.JSON(http.StatusOK, gin.H{
+					"result":  result,
+				})
 			})
 		}
 	}

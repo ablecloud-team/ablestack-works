@@ -50,5 +50,7 @@
   "label.shared": "Shared",
   "label.login": "Login",
   "label.user.id": "User ID",
-  "label.password": "Password"
+  "label.password": "Password",
+  "label.profile": "Profile",
+  "label.logout": "LogOut"
 }
