@@ -60,6 +60,24 @@ func appListHandler(c *gin.Context) {
 	return
 }
 
+
+type loginModel struct {
+	Login    bool `json:"login"`
+	Username string `json:"username"`
+	Groups   []string `json:"groups"`
+	IsAdmin  bool        `json:"isAdmin"`
+}
+// loginHandler godoc
+// @Summary List accounts
+// @Description 사용자 로그인 체크
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param username formData string true "사용자 이름"
+// @Param password formData string true "사용자 암호"
+// @Success 200 {object} loginModel "로그인 성공"
+// @Failure 401 {object} loginModel "로그인 실패"
+// @Failure default {objects} string
+// @Router /login [post]
 func loginHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -72,22 +90,19 @@ func loginHandler(c *gin.Context) {
 	username := c.PostForm("username")
 	userPW := c.PostForm("password")
 	result, groups, isAdmin, err := login(conn, username, userPW)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"login":    result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-			"userID":   -1,
-			"username": username,
-			"groups":   nil,
-			"isAdmin":  false})
+	//loginResult :=
+	ret :=loginModel{
+		Login: result,
+		IsAdmin: isAdmin,
+		Username: username,
+		Groups: groups,
+	}
+	if err != nil || !result  {
+		c.JSON(http.StatusUnauthorized, ret)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"login":    result, //fmt.Sprintf("%v %v %v %v",userID, result, groups, isAdmin),
-		"userID":   1,
-		"username": username,
-		"groups":   groups,
-		"isAdmin":  isAdmin,
-	})
+
+	c.JSON(http.StatusOK, ret)
 }
 
 func addUserHandler(c *gin.Context) {

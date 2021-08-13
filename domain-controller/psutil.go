@@ -24,13 +24,7 @@ func setupShell() (shell *powershell.Shell, err error) {
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		err := shell.Exit()
-		if err != nil {
-			log.Errorln(err)
-			return
-		}
-	}()
+
 	return shell, err
 }
 

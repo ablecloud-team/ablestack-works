@@ -1,0 +1,100 @@
+basePath: /api/v1
+definitions:
+  main.loginModel:
+    properties:
+      groups:
+        items:
+          type: string
+        type: array
+      isAdmin:
+        type: boolean
+      login:
+        type: boolean
+      username:
+        type: string
+    type: object
+host: 10.10.1.25:8083
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: 이 API는 Ablecloud Works의 Domain Controller(DC)를 제어하는 역할을 합니다.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Ablecloud Works Domain-Controller API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 사용자 로그인 체크
+      parameters:
+      - description: 사용자 이름
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: 사용자 암호
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 로그인 성공
+          schema:
+            $ref: '#/definitions/main.loginModel'
+        "401":
+          description: 로그인 실패
+          schema:
+            $ref: '#/definitions/main.loginModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: List accounts
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+  BasicAuth:
+    type: basic
+  OAuth2AccessCode:
+    authorizationUrl: https://example.com/oauth/authorize
+    flow: accessCode
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+  OAuth2Application:
+    flow: application
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      write: ' Grants write access'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+  OAuth2Implicit:
+    authorizationUrl: https://example.com/oauth/authorize
+    flow: implicit
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      write: ' Grants write access'
+    type: oauth2
+  OAuth2Password:
+    flow: password
+    scopes:
+      admin: ' Grants read and write access to administrative information'
+      read: ' Grants read access'
+      write: ' Grants write access'
+    tokenUrl: https://example.com/oauth/token
+    type: oauth2
+swagger: "2.0"
+x-extension-openapi:
+  example: value on a json format
