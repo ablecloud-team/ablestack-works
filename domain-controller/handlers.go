@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -60,13 +61,13 @@ func appListHandler(c *gin.Context) {
 	return
 }
 
-
 type loginModel struct {
-	Login    bool `json:"login"`
-	Username string `json:"username"`
+	Login    bool     `json:"login"`
+	Username string   `json:"username"`
 	Groups   []string `json:"groups"`
-	IsAdmin  bool        `json:"isAdmin"`
+	IsAdmin  bool     `json:"isAdmin"`
 }
+
 // loginHandler godoc
 // @Summary List accounts
 // @Description 사용자 로그인 체크
@@ -91,13 +92,13 @@ func loginHandler(c *gin.Context) {
 	userPW := c.PostForm("password")
 	result, groups, isAdmin, err := login(conn, username, userPW)
 	//loginResult :=
-	ret :=loginModel{
-		Login: result,
-		IsAdmin: isAdmin,
+	ret := loginModel{
+		Login:    result,
+		IsAdmin:  isAdmin,
 		Username: username,
-		Groups: groups,
+		Groups:   groups,
 	}
-	if err != nil || !result  {
+	if err != nil || !result {
 		c.JSON(http.StatusUnauthorized, ret)
 		return
 	}
@@ -400,6 +401,13 @@ func deleteUserHandler(c *gin.Context) {
 
 func addGroupHandler(c *gin.Context) {
 	setLog()
+
+	tmpval, err := c.MultipartForm()
+	addgroup := make(map[string][]string)
+	for key, val := range tmpval.Value {
+		addgroup[key] = val
+	}
+
 	conn, status, err := ConnectAD()
 	if err != nil {
 		log.Errorln(err)
@@ -408,16 +416,37 @@ func addGroupHandler(c *gin.Context) {
 		log.Errorln(status, err)
 	}
 	l := conn.Conn
-	//l, err := setupLdap()
-	if err != nil {
+
+	addstr, _ := json.Marshal(addgroup)
+	groupname := ""
+
+	if _, ok := addgroup["groupname"]; ok {
+		groupname = addgroup["groupname"][0]
+		err = addGroup(l, groupname)
+		if err != nil {
+			log.Infof("%v", err.Error())
+
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"err": err.Error(),
+			})
+			return
+		}
+	} else if !ok {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"err": err.Error(),
+			"err": "Groupname is not provided",
+		})
+		return
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "Unknown Error",
 		})
 		return
 
 	}
-	u := searchUser(l)
-	c.JSON(http.StatusGone, u)
+	//u := searchUser(l)
+	addstr, _ = json.Marshal(addgroup)
+	log.Infof(string(addstr))
+	c.JSON(http.StatusGone, addgroup)
 	return
 }
 func listGroupHandler(c *gin.Context) {
@@ -488,6 +517,7 @@ func setGroupHandler(c *gin.Context) {
 }
 func deleteGroupHandler(c *gin.Context) {
 	setLog()
+
 	conn, status, err := ConnectAD()
 	if err != nil {
 		log.Errorln(err)
@@ -504,7 +534,31 @@ func deleteGroupHandler(c *gin.Context) {
 		return
 
 	}
-	u := searchUser(l)
-	c.JSON(http.StatusGone, u)
+
+	var group_ GROUP
+	err = c.ShouldBindUri(&group_)
+
+	groupname := ""
+	if err != nil  || group_.Groupname == ""{
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "Groupname is not provided",
+		})
+		return
+	} else if group_.Groupname != "" && err == nil{
+		err = delGroup(l, group_.Groupname)
+		if err != nil{
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"err": "Delete group failed",
+			})
+			return
+		}
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "Unknown error",
+		})
+		return
+	}
+
+	c.JSON(http.StatusGone, groupname)
 	return
 }

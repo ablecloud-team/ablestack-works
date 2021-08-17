@@ -4,6 +4,7 @@ import (
 	_ "domain-controller/docs"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -13,6 +14,9 @@ import (
 	"path"
 	"runtime"
 	"strings"
+	"time"
+
+	"github.com/getsentry/sentry-go"
 )
 
 var log = logrus.New() //.WithField("who", "Main")
@@ -102,9 +106,19 @@ func main() {
 	//l, err := setupLdap()
 
 	setup()
+	err = sentry.Init(sentry.ClientOptions{
+		TracesSampleRate: 1,
+		Dsn: "https://f0f2fdd530cc4bfe86f60ba333bc3d6f@o961393.ingest.sentry.io/5909805",
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+
 
 	router := gin.Default()
 	router.Use(CORSMiddleware())
+	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	//testLDAP()
 

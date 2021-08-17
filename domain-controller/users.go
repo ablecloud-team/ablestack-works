@@ -7,7 +7,9 @@ import (
 type USER struct {
 	Username string `uri:"username" binding:"required"`
 }
-
+type GROUP struct {
+	Groupname string `uri:"groupname" binding:"required"`
+}
 func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string, isAdmin bool, err error) {
 	setLog()
 	//_, status, err := ConnectAD()

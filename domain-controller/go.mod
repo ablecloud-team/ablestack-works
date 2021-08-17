@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.1
+	github.com/getsentry/sentry-go v0.11.0
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-ldap/ldap/v3 v3.3.0

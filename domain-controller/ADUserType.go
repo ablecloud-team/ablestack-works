@@ -7,6 +7,8 @@ import (
 
 type ADUSER map[string]interface{}
 
+type ADGROUP map[string]interface{}
+
 type ADUser struct {
 	sn                         string   `uri:"sn" form:"sn"`                                                 //성
 	givenName                  string   `uri:"givenName" form:"givenName"`                                   //이름

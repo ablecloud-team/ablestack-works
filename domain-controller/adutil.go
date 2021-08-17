@@ -103,6 +103,7 @@ func ConnectAD() (conn *auth.Conn, status bool, err error) {
 
 func Auth(conn *auth.Conn, username string, password string) (status bool, err error) {
 	status, err = auth.Authenticate(config, username, password)
+	conn=conn
 	return status, err
 }
 func listGroups(conn *auth.Conn, username string) (status bool, entry *ldap.Entry, userGroups []string, err error) {
@@ -249,12 +250,12 @@ func searchUser(l *ldap.Conn) (retusers []ADUSER) {
 	var adusers = []ADUSER{}
 	for _, userentry := range sr.Entries {
 		aduser := ADUSER{} //NewADUser()
-		log.Infoln(aduser)
+		//log.Infoln(aduser)
 		//sr.PrettyPrint(4)
 		for i := range userentry.Attributes {
-			log.Infoln(i)
-			log.Infoln(userentry.Attributes[i].Name)
-			log.Infoln(userentry.Attributes[i].Values)
+			//log.Infoln(i)
+			//log.Infoln(userentry.Attributes[i].Name)
+			//log.Infoln(userentry.Attributes[i].Values)
 			//val := ""
 			if len(userentry.Attributes[i].Values) >= 2 {
 				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
@@ -338,17 +339,27 @@ func testLDAP() {
 
 }
 
-func addGroup(l *ldap.Conn, groupname string) (err error) {
+func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
+
+	existOU := false
+	existCN := false
+	var (
+		err error
+		err2 error
+	)
 	//ou add
 	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "organizationalUnit"})
 	addReq.Attribute("name", []string{groupname})
 	addReq.Attribute("ou", []string{groupname})
 	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
-	if err := l.Add(addReq); err != nil {
+	if err = l.Add(addReq); err != nil {
 		log.Error("error adding OU:", addReq, err)
-	}
 
+		if strings.Contains(err.Error(), "Already Exists"){
+			existOU = true
+		}
+	}
 	//group add
 	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "group"})
@@ -356,11 +367,57 @@ func addGroup(l *ldap.Conn, groupname string) (err error) {
 	addReq.Attribute("sAMAccountName", []string{groupname})
 	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
 	addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004|0x80000000)})
-	if err := l.Add(addReq); err != nil {
-		log.Error("error adding group:", addReq, err)
+	if err2 = l.Add(addReq); err2 != nil {
+		log.Error("error adding group:", addReq, err2)
+		if strings.Contains(err2.Error(), "Already Exists"){
+			existCN = true
+		}
+	}
+	if existOU{
+		if existCN{
+			return errors.New("Entry Already Exists, OU, CN")
+		} else{
+			if err2 != nil {
+				return errors.New(fmt.Sprintf("Entry Already Exists, OU and error %v", err2))
+			} else{
+				return errors.New("Entry Already Exists, OU")
+			}
+		}
+	} else{
+		if existCN{
+			return errors.New("Entry Already Exists, CN")
+		} else{
+			if err != nil{
+				return err
+			}
+			return nil
+		}
+	}
+}
+func delGroup(l *ldap.Conn, groupname string) (err error) {
+	log.Debugf("groupname : %v", groupname)
+	if groupname == "" {
+		return errors.New("no groupname name")
+	}
+
+	log.Debugf("groupname : %v", groupname)
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting groupname:", delreq, err)
+		return err
+	}
+
+
+	delreq = ldap.NewDelRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting groupname:", delreq, err)
+		return err
 	}
 	return err
 }
+
 func addComputer(l *ldap.Conn, comname string) (err error) {
 	//computer add
 	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", comname, "Computers", ADbasedn), []ldap.Control{})
@@ -469,7 +526,7 @@ func delUser(l *ldap.Conn, user ADUSER) (err error) {
 func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	setLog()
 	client := &http.Client{}
-
+	l=l
 	data := url.Values{}
 	data.Set("username", user["username"].(string))
 	data.Set("password", password)
@@ -485,7 +542,11 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 		log.Errorln(err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil{
+			log.Errorf("response cannot close, %v",err)
+		}
+	}()
 
 	// Response 체크.
 	respBody, err := ioutil.ReadAll(resp.Body)
