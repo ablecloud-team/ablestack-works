@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
+
+var DCInfo = os.Getenv("DCUrl")
 
 //login
 func login(id string, password string) map[string]interface{} {
@@ -33,7 +36,7 @@ func userInfo(id string) map[string]interface{} {
 		Timeout: 5 * time.Second,
 	}
 	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
-	resp, err := client.Get(DCInfo+"/v1/user/"+id)
+	resp, err := client.Get(DCInfo + "/v1/user/" + id)
 	if err != nil {
 		log.Fatal(err)
 		fmt.Println(resp)

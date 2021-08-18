@@ -5,22 +5,29 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"strings"
 )
 
-func makeSignature(params map[string]string ) string {
-	baseurl := "https://mold.ablecloud.io/client/api?"
-	secretkey := "64YHQCLtc0Ad_k-0NmeupaAwpsOJsirmVz52YSfYd-5RQs4F2deFen4O4SncOQ8I_M4Peew-JfMP2A2ZmKEnXg"
-
-	var strurl string
-	for key, value := range params{
-		strurl = strurl + key+"="+value+"&"
+func makeStringParams(params map[string]string) string {
+	var result string
+	for key, value := range params {
+		result = result + key + "=" + value + "&"
 	}
-	strurl = strings.Replace(strurl, "+", "%20", -1)
-	strurl = strings.TrimRight(strings.ToLower(strurl),"&")
-	fmt.Println("baseurl = " + baseurl)
+	result = strings.Replace(result, "+", "%20", -1)
+	result = strings.TrimRight(result, "&")
+	//result = strings.TrimRight(strings.ToLower(result),"&")
+	return result
+}
+
+func makeSignature(params map[string]string) string {
+	//baseurl := "https://mold.ablecloud.io/client/api?"
+	secretkey := os.Getenv("MoldSecretKey")
+	//strurl := strings.ToLower(makeStringParams(params))
+	strurl := makeStringParams(params)
+
 	fmt.Println("secretkey = " + secretkey)
-	fmt.Println("params ="+strurl)
+	fmt.Println("params =" + strurl)
 
 	secret := []byte(secretkey)
 	message := []byte(strurl)

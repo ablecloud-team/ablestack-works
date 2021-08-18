@@ -2,40 +2,49 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"os"
+	"encoding/json"
 )
 
-func checkError(err error) {
+func rowsToString(rows *sql.Rows) (string, error) {
+	columns, err := rows.Columns()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-}
 
-func login1() {
-	//var name, email, phone string
-	q := getWorksInfo()
-	fmt.Println(q.Database.User.ID)
-	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
-	checkError(err)
-	defer db.Close()
+	tableData := make([]map[string]interface{}, 0)
 
-	fmt.Println("connect success")
+	count := len(columns)
+	values := make([]interface{}, count)
+	scanArgs := make([]interface{}, count)
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
 
-	count := 0
-	//rows, err := db.Query("SELECT user FROM works.users WHERE user='abc' AND password='abc'")
-	err = db.QueryRow("SELECT count(user) as count FROM works.users WHERE user='abc' AND password='abc'").Scan(&count)
-	checkError(err)
-	//defer rows.Close()
-	//user := rows.Scan(&user)
+	for rows.Next() {
+		err := rows.Scan(scanArgs...)
+		if err != nil {
+			return "", err
+		}
 
+		entry := make(map[string]interface{})
+		for i, col := range columns {
+			v := values[i]
 
-	fmt.Println("jkoweojpwerpoeqwropkqweopkqwe")
-	fmt.Println(count)
+			b, ok := v.([]byte)
+			if ok {
+				entry[col] = string(b)
+			} else {
+				entry[col] = v
+			}
+		}
 
-	//for rows.Next() {
-	//	checkError(err)
-	//	fmt.Println("rows", name, email, phone)
-	//}
-	return
+		tableData = append(tableData, entry)
+	}
+
+	jsonData, err := json.Marshal(tableData)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonData), nil
 }

@@ -38,7 +38,7 @@ func StartClientApp() (*exec.Cmd, error) {
 
 func setup() {
 	log.SetFormatter(&nested.Formatter{
-		HideKeys: false,
+		HideKeys:    false,
 		CallerFirst: false,
 	})
 	log.SetReportCaller(true)
@@ -48,7 +48,9 @@ func main() {
 		err error
 	)
 	setup()
-	setenv()
+	DBSetting()   //DB 접속정보 셋팅
+	MoldSetting() //Mold 정보 셋팅
+	DCSetting()   //DC 정보 셋팅
 
 	router := gin.Default()
 	router.Use(SetHeader)
@@ -62,8 +64,8 @@ func main() {
 			userPassword := c.PostForm("password")
 			result = login(userId, userPassword)
 			token, err := createToken(userId)
-			if err != nil{
-				if err == jwt.ErrSignatureInvalid{
+			if err != nil {
+				if err == jwt.ErrSignatureInvalid {
 					c.JSON(http.StatusUnauthorized,
 						gin.H{"status": http.StatusUnauthorized, "error": "token is expired"})
 					c.Abort()
@@ -75,9 +77,10 @@ func main() {
 			}
 			c.SetCookie("access-token", token, 1800, "", "", false, false)
 			c.JSON(http.StatusOK, gin.H{
-				"result":  result,
+				"result": result,
 			})
 		})
+		api.GET("/workspace", getWorkspaces)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
@@ -87,27 +90,27 @@ func main() {
 			v1.GET("/logout", func(c *gin.Context) {
 				result := map[string]interface{}{}
 				cookieUserId := c.MustGet("cookie-user-id").(string)
-				fmt.Println("cookieUserId = "+cookieUserId)
+				fmt.Println("cookieUserId = " + cookieUserId)
 				result["login"] = false
 				result["username"] = cookieUserId
 				c.SetCookie("access-token", "", -1, "", "", false, false)
 				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
+					"result": result,
 				})
 			})
 			v1.GET("/user", func(c *gin.Context) {
 				var result map[string]interface{}
 				//userId := c.Param("userId")
 				cookieUserId := c.MustGet("cookie-user-id").(string)
-				fmt.Println("cookieUserId = "+cookieUserId)
+				fmt.Println("cookieUserId = " + cookieUserId)
 				result = userInfo(cookieUserId)
 				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
+					"result": result,
 				})
 			})
 		}
 		test := api.Group("/test")
-		test.Use(checkToken)
+		//test.Use(checkToken)
 		{
 			test.GET("/version", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
@@ -115,8 +118,8 @@ func main() {
 			test.GET("/test", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 				request := map[string]string{
-					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
-					"command": "listVolumes",
+					"apikey":   "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
+					"command":  "listVolumes",
 					"response": "json",
 				}
 				sig := makeSignature(request)
@@ -124,10 +127,10 @@ func main() {
 				fmt.Println(sig)
 				baseurl := "https://mold.ablecloud.io/client/api?"
 				var strurl string
-				for key, value := range request{
-					strurl = strurl + key+"="+value+"&"
+				for key, value := range request {
+					strurl = strurl + key + "=" + value + "&"
 				}
-				endUrl := baseurl+strurl+"signature="+sig
+				endUrl := baseurl + strurl + "signature=" + sig
 				fmt.Println(endUrl)
 				resp, err := http.Get(endUrl)
 				if err != nil {
@@ -137,7 +140,7 @@ func main() {
 				defer resp.Body.Close()
 
 				data, err := ioutil.ReadAll(resp.Body)
-				if err != nil{
+				if err != nil {
 					fmt.Println(err)
 				}
 				fmt.Println("%s\n", string(data))
@@ -145,17 +148,17 @@ func main() {
 			test.GET("/test1", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 				request := map[string]string{
-					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
-					"command": "listVolumes",
+					"apikey":   "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
+					"command":  "listVolumes",
 					"response": "json",
 				}
 				sig := makeSignature(request)
 				baseurl := "https://mold.ablecloud.io/client/api?"
 				var strurl string
-				for key, value := range request{
-					strurl = strurl + key+"="+value+"&"
+				for key, value := range request {
+					strurl = strurl + key + "=" + value + "&"
 				}
-				endUrl := baseurl+strurl+"signature="+sig
+				endUrl := baseurl + strurl + "signature=" + sig
 				fmt.Println(endUrl)
 				resp, err := http.Get(endUrl)
 				if err != nil {
@@ -165,7 +168,7 @@ func main() {
 				defer resp.Body.Close()
 
 				data, err := ioutil.ReadAll(resp.Body)
-				if err != nil{
+				if err != nil {
 					panic(err)
 				}
 				fmt.Println("%s\n", string(data))
@@ -179,7 +182,7 @@ func main() {
 				fmt.Println(cookieUserId)
 				result = userInfo(cookieUserId)
 				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
+					"result": result,
 				})
 			})
 		}
