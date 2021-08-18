@@ -82,6 +82,7 @@ type loginModel struct {
 func loginHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -109,6 +110,7 @@ func loginHandler(c *gin.Context) {
 func addUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -182,6 +184,7 @@ func addUserHandler(c *gin.Context) {
 func listUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -208,6 +211,7 @@ func getUserHandler(c *gin.Context) {
 
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -238,6 +242,7 @@ func setUserHandler(c *gin.Context) {
 
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -338,6 +343,7 @@ func setUserPasswordHandler(c *gin.Context) {
 
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -370,6 +376,7 @@ func deleteUserHandler(c *gin.Context) {
 
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -409,6 +416,7 @@ func addGroupHandler(c *gin.Context) {
 	}
 
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -452,6 +460,7 @@ func addGroupHandler(c *gin.Context) {
 func listGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -467,13 +476,14 @@ func listGroupHandler(c *gin.Context) {
 		return
 
 	}
-	u := searchUser(l)
+	u := searchGroup(l)
 	c.JSON(http.StatusGone, u)
 	return
 }
 func getGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -489,13 +499,27 @@ func getGroupHandler(c *gin.Context) {
 		return
 
 	}
-	u := searchUser(l)
-	c.JSON(http.StatusGone, u)
-	return
+
+
+	var group GROUP
+	err = c.ShouldBindUri(&group)
+	u, err := getGroup(l, &group)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"groupname": group.Groupname,
+			"err":      err.Error(),
+		})
+		return
+	} else {
+		u["groupname"] = group.Groupname
+		c.JSON(http.StatusOK, u)
+		return
+	}
 }
 func setGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}
@@ -519,6 +543,7 @@ func deleteGroupHandler(c *gin.Context) {
 	setLog()
 
 	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
 	if err != nil {
 		log.Errorln(err)
 	}

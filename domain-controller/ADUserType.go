@@ -9,6 +9,10 @@ type ADUSER map[string]interface{}
 
 type ADGROUP map[string]interface{}
 
+type ADOU map[string]interface{}
+
+type ABLEGROUP map[string]interface{}
+
 type ADUser struct {
 	sn                         string   `uri:"sn" form:"sn"`                                                 //성
 	givenName                  string   `uri:"givenName" form:"givenName"`                                   //이름
@@ -42,6 +46,7 @@ type ADUser struct {
 	countryCode                int      `uri:"countryCode" form:"countryCode"`                               //주소->국가숫자코드(한국:410, 일본:392. 미국:840)
 	c                          string   `uri:"c" form:"c"`                                                   //주소->국가영문코드명(한국:KR, 일본:JP, 미국:US)
 	co                         string   `uri:"co" form:"co"`                                                 //:=c
+	distinguishedName          string   `uri:"distinguishedName" form:"distinguishedName"`
 }
 type COUNTRY map[string]string
 type COUNTRYMAP map[string]COUNTRY
@@ -395,6 +400,9 @@ func NewADUser(aduser ADUSER) (aduserstruct *ADUser) {
 	}
 	if val, ok := aduser["memberOf"]; ok {
 		aduserstruct.memberOf = val.([]string)
+	}
+	if val, ok := aduser["distinguishedName"]; ok {
+		aduserstruct.distinguishedName = val.(string)
 	}
 	if val, ok := aduser["countryCode"]; ok {
 
