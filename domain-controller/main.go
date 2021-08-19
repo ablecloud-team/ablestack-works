@@ -160,6 +160,7 @@ func main() {
 			v1.GET("/group", listGroupHandler)
 			v1.GET("/group/:groupname", getGroupHandler)
 			v1.PUT("/group/:groupname", setGroupHandler)
+			v1.PATCH("/group/:groupname/:username", addUserToGroupHandler)
 			v1.DELETE("/group/:groupname", deleteGroupHandler)
 
 			/* TODO:
@@ -170,10 +171,6 @@ func main() {
 			그룹에 정책 제거
 			적용 가능한 정책 목록
 			https://github.com/ablecloud-team/ablestack-desktop/issues/84
-			 사용자 그룹 추가
-			 사용자 그룹 제거
-			 사용자 그룹 정보 조회
-			 사용자 그룹 목록 조회
 			 사용자 그룹 정보 변경
 			 사용자 그룹에 사용자 추가
 			 사용자 그룹에서 사용자 목록 조회

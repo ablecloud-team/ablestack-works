@@ -184,105 +184,7 @@ func setupLdap() (l *ldap.Conn, err error) {
 	return
 }
 
-func getUser(l *ldap.Conn, user *USER) (retuser ADUSER, err error) {
-	setLog()
-	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
 
-	l, _ = setupLdap()
-
-	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
-		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
-		fmt.Sprintf("(&(cn=%v)(objectclass=user))", user.Username),
-		UserAttributes,
-		nil)
-
-	sr, err := l.Search(searchRequest)
-	if err != nil {
-		return nil, err
-	}
-	if len(sr.Entries) >= 1 {
-		userentry := sr.Entries[0]
-		log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
-
-		aduser := ADUSER{} //NewADUser()
-		log.Infoln(aduser)
-		//sr.PrettyPrint(4)
-		for i := range userentry.Attributes {
-			log.Infoln(i)
-			log.Infoln(userentry.Attributes[i].Name)
-			log.Infoln(userentry.Attributes[i].Values)
-			//val := ""
-			if len(userentry.Attributes[i].Values) >= 2 {
-				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
-			} else {
-				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
-			}
-			//for j, item := range userentry.Attributes[i].Values {
-			//	if j == 0 {
-			//		val = item
-			//	} else {
-			//		val = fmt.Sprintf("%v, %v", val, item)
-			//	}
-			//}
-			//aduser[userentry.Attributes[i].Name] = val
-		}
-		ret, err := json.Marshal(aduser)
-		log.Infoln(string(ret))
-		return aduser, err
-	} else {
-		return nil, errors.New(http.StatusText(http.StatusNotFound))
-	}
-}
-
-func searchUser(l *ldap.Conn) (retusers []ADUSER) {
-	setLog()
-	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
-
-	l, _ = setupLdap()
-
-	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
-		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
-		"(&(objectCategory=person)(objectClass=user))",
-		UserAttributes,
-		nil)
-
-	sr, err := l.Search(searchRequest)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
-	var adusers = []ADUSER{}
-	for _, userentry := range sr.Entries {
-		aduser := ADUSER{} //NewADUser()
-		//log.Infoln(aduser)
-		//sr.PrettyPrint(4)
-		for i := range userentry.Attributes {
-			//log.Infoln(i)
-			//log.Infoln(userentry.Attributes[i].Name)
-			//log.Infoln(userentry.Attributes[i].Values)
-			//val := ""
-			if len(userentry.Attributes[i].Values) >= 2 {
-				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
-			} else {
-				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
-			}
-			//for j, item := range userentry.Attributes[i].Values {
-			//	if j == 0 {
-			//		val = item
-			//	} else {
-			//		val = fmt.Sprintf("%v, %v", val, item)
-			//	}
-			//}
-			//aduser[userentry.Attributes[i].Name] = val
-		}
-		adusers = append(adusers, aduser)
-	}
-	ret, err := json.Marshal(adusers)
-	log.Infoln(string(ret))
-	return adusers
-}
 func testLDAP() {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
@@ -345,6 +247,7 @@ func testLDAP() {
 
 }
 
+//add group
 func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 
 	existOU := false
@@ -400,29 +303,8 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 		}
 	}
 }
-func delGroup(l *ldap.Conn, groupname string) (err error) {
-	log.Debugf("groupname : %v", groupname)
-	if groupname == "" {
-		return errors.New("no groupname name")
-	}
 
-	log.Debugf("groupname : %v", groupname)
-	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
-
-	if err := l.Del(delreq); err != nil {
-		log.Error("error deleting groupname:", delreq, err)
-		return err
-	}
-
-
-	delreq = ldap.NewDelRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
-
-	if err := l.Del(delreq); err != nil {
-		log.Error("error deleting groupname:", delreq, err)
-		return err
-	}
-	return err
-}
+//get group info
 func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
@@ -464,6 +346,7 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 	}
 }
 
+//list group
 func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
@@ -526,10 +409,10 @@ func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 		for _,valueO :=range adOUs{
 			if valueO["name"] == valueG["name"]{
 				retResult := ABLEGROUP{}
-				for key, value :=range valueG{
+				for key, value :=range valueO{
 					retResult[key] = value
 				}
-				for key, value :=range valueO{
+				for key, value :=range valueG{
 					retResult[key] = value
 				}
 				retResults=append(retResults, retResult)
@@ -543,22 +426,97 @@ func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 	log.Infoln(string(ret))
 	return retResults
 }
-func addComputer(l *ldap.Conn, comname string) (err error) {
-	//computer add
-	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", comname, "Computers", ADbasedn), []ldap.Control{})
-	addReq.Attribute("objectClass", []string{"top", "computer", "organizationalPerson", "person", "user"})
-	addReq.Attribute("name", []string{comname})
-	addReq.Attribute("sAMAccountName", []string{fmt.Sprintf("%v$", comname)})
-	addReq.Attribute("dNSHostName", []string{fmt.Sprintf("%v.%v", comname, domain)})
-	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
-	if err := l.Add(addReq); err != nil {
-		log.Error("error adding computer:", addReq, err)
-	}
-	return err
 
+//user mod
+func modGroup(l *ldap.Conn, user ADGROUP) (group_ ADGROUP, err error) {
+	if val, ok := user["groupname"]; !ok || val == "" {
+		return group_, errors.New("no group name")
+	}
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", user["groupname"], user["groupname"], ADbasedn), []ldap.Control{})
+
+	group_ = NewADGroup(user).ToMap()
+
+	for key, val := range group_ {
+		switch val.(type) {
+		case []string:
+			if key != "groupname" && key != "memberOf" && key != "distinguishedName" {
+				log.Infof("%v:%v", key, len(val.([]string)))
+				modReq.Replace(key, val.([]string))
+			}
+		case int:
+			i := val.(int)
+			modReq.Replace(key, []string{strconv.Itoa(i)})
+		case string:
+			if key != "groupname" && val.(string) != ""  && key != "distinguishedName" {
+				modReq.Replace(key, []string{val.(string)})
+			}
+		default:
+			log.Errorf("%v:%T, %v", key, val, val)
+		}
+	}
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
+	}
+	return group_, err
 }
 
-//user add
+//delete group
+func delGroup(l *ldap.Conn, groupname string) (err error) {
+	log.Debugf("groupname : %v", groupname)
+	if groupname == "" {
+		return errors.New("no groupname name")
+	}
+
+	log.Debugf("groupname : %v", groupname)
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting groupname:", delreq, err)
+		return err
+	}
+
+
+	delreq = ldap.NewDelRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting groupname:", delreq, err)
+		return err
+	}
+	return err
+}
+
+//add user to group
+func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, err error){
+	//group.member=userDN
+	if val, ok := group["groupname"]; !ok || val == "" {
+		return group_, errors.New("no group name")
+	}
+
+	if val, ok := user["username"]; !ok || val == "" {
+		return group_, errors.New("no user name")
+	}else{
+		var user_ = &USER{Username: user["username"].(string)}
+		user, err = getUser(l, user_)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADbasedn), []ldap.Control{})
+
+	group_ = NewADGroup(group).ToMap()
+
+
+	modReq.Add("member", []string{user["distinguishedName"].(string)})
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
+	}
+	return group_, err
+}
+
+//add user
 func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	if val, ok := user["username"]; !ok || val == "" {
 		return errors.New("no user name")
@@ -598,6 +556,108 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	return err
 }
 
+//get user info
+func getUser(l *ldap.Conn, user *USER) (retuser ADUSER, err error) {
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		fmt.Sprintf("(&(cn=%v)(objectclass=user))", user.Username),
+		UserAttributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+	if len(sr.Entries) >= 1 {
+		userentry := sr.Entries[0]
+		log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+
+		aduser := ADUSER{} //NewADUser()
+		log.Infoln(aduser)
+		//sr.PrettyPrint(4)
+		for i := range userentry.Attributes {
+			log.Infoln(i)
+			log.Infoln(userentry.Attributes[i].Name)
+			log.Infoln(userentry.Attributes[i].Values)
+			//val := ""
+			if len(userentry.Attributes[i].Values) >= 2 {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
+			} else {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
+			}
+			//for j, item := range userentry.Attributes[i].Values {
+			//	if j == 0 {
+			//		val = item
+			//	} else {
+			//		val = fmt.Sprintf("%v, %v", val, item)
+			//	}
+			//}
+			//aduser[userentry.Attributes[i].Name] = val
+		}
+		ret, err := json.Marshal(aduser)
+		log.Infoln(string(ret))
+		return aduser, err
+	} else {
+		return nil, errors.New(http.StatusText(http.StatusNotFound))
+	}
+}
+
+//list user
+func listUser(l *ldap.Conn) (retusers []ADUSER) {
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		"(&(objectCategory=person)(objectClass=user))",
+		UserAttributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+	var adusers = []ADUSER{}
+	for _, userentry := range sr.Entries {
+		aduser := ADUSER{} //NewADUser()
+		//log.Infoln(aduser)
+		//sr.PrettyPrint(4)
+		for i := range userentry.Attributes {
+			//log.Infoln(i)
+			//log.Infoln(userentry.Attributes[i].Name)
+			//log.Infoln(userentry.Attributes[i].Values)
+			//val := ""
+			if len(userentry.Attributes[i].Values) >= 2 {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
+			} else {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
+			}
+			//for j, item := range userentry.Attributes[i].Values {
+			//	if j == 0 {
+			//		val = item
+			//	} else {
+			//		val = fmt.Sprintf("%v, %v", val, item)
+			//	}
+			//}
+			//aduser[userentry.Attributes[i].Name] = val
+		}
+		adusers = append(adusers, aduser)
+	}
+	ret, err := json.Marshal(adusers)
+	log.Infoln(string(ret))
+	return adusers
+}
+
 //user mod
 func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 	if val, ok := user["username"]; !ok || val == "" {
@@ -631,30 +691,7 @@ func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 	return user_, err
 }
 
-//user delete
-func delUser(l *ldap.Conn, user ADUSER) (err error) {
-	log.Debugf("user : %v", user)
-	if user != nil && user["username"] == "" {
-		return errors.New("no user name")
-	}
-
-	log.Debugf("username : %v", user["username"])
-	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
-
-	if err := l.Del(delreq); err != nil {
-		log.Error("error deleting user:", delreq, err)
-		return err
-	}
-	return err
-}
-
-
-//add user to group
-func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(err error){
-	//group.member=userDN
-	log.Infof("%v, %v, %v", l, user, group)
-	return nil
-}
+//user password change
 func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	setLog()
 	client := &http.Client{}
@@ -698,4 +735,37 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	}
 	//cmd=string(respBody)
 	return nil
+}
+
+//delete user
+func delUser(l *ldap.Conn, user ADUSER) (err error) {
+	log.Debugf("user : %v", user)
+	if user != nil && user["username"] == "" {
+		return errors.New("no user name")
+	}
+
+	log.Debugf("username : %v", user["username"])
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting user:", delreq, err)
+		return err
+	}
+	return err
+}
+
+
+func addComputer(l *ldap.Conn, comname string) (err error) {
+	//computer add
+	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", comname, "Computers", ADbasedn), []ldap.Control{})
+	addReq.Attribute("objectClass", []string{"top", "computer", "organizationalPerson", "person", "user"})
+	addReq.Attribute("name", []string{comname})
+	addReq.Attribute("sAMAccountName", []string{fmt.Sprintf("%v$", comname)})
+	addReq.Attribute("dNSHostName", []string{fmt.Sprintf("%v.%v", comname, domain)})
+	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
+	if err := l.Add(addReq); err != nil {
+		log.Error("error adding computer:", addReq, err)
+	}
+	return err
+
 }

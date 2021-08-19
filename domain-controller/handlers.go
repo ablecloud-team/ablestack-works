@@ -200,7 +200,7 @@ func listUserHandler(c *gin.Context) {
 		return
 
 	}
-	u := searchUser(l)
+	u := listUser(l)
 	c.JSON(http.StatusGone, u)
 	return /*gin.H{
 		"userID": 1,
@@ -267,75 +267,6 @@ func setUserHandler(c *gin.Context) {
 	log.Infoln(aduserStruct)
 	aduser, err = modUser(l, aduser)
 	log.Errorln(err)
-	//userPW := c.PostForm("password")
-	//userPhone := c.PostForm("phone")
-	//userMail := c.PostForm("email")
-	//
-	//givenName := c.PostForm("givenName")
-	//title := c.PostForm("title")
-	//sn := c.PostForm("sn")
-	//
-	//if l.IsClosing() {
-	//	l, err = setupLdap()
-	//	if err != nil {
-	//		log.Errorln("AD Connection Failed")
-	//		c.JSON(http.StatusInternalServerError, gin.H{
-	//			"msg":      "AD Connection Failed",
-	//			"userID":   -1,
-	//			"username": "",
-	//		})
-	//		return
-	//	}
-	//}
-	//user := ADUSER{
-	//	"username":        userID,
-	//	"telephoneNumber": userPhone,
-	//	"mail":            userMail,
-	//	"givenName":       givenName,
-	//	"title":           title,
-	//	"sn":              sn,
-	//}
-	//err = modUser(l, user)
-	//if err != nil {
-	//	log.Errorln(err)
-	//	err2 := delUser(l, user)
-	//	if err2 != nil {
-	//		return
-	//	}
-	//	c.JSON(http.StatusBadRequest, gin.H{
-	//		"userID":   1,
-	//		"username": userID,
-	//	})
-	//	return
-	//}
-	//err = setPassword(l, user, userPW)
-	//if err != nil {
-	//	log.Errorln(err)
-	//	err3 := delUser(l, user)
-	//	if err3 != nil {
-	//		return
-	//	}
-	//	c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
-	//		"userID":   1,
-	//		"username": userID,
-	//		"msg":      err.Error(),
-	//	})
-	//	return
-	//}
-	//u, err:=getUser(l, &user_)
-	//if err != nil {
-	//	log.Errorln(err)
-	//	err3 := delUser(l, user)
-	//	if err3 != nil {
-	//		return
-	//	}
-	//	c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
-	//		"userID":   1,
-	//		"username": userID,
-	//		"msg":      err.Error(),
-	//	})
-	//	return
-	//}
 	c.JSON(http.StatusAccepted, aduser)
 	return
 }
@@ -451,7 +382,7 @@ func addGroupHandler(c *gin.Context) {
 		return
 
 	}
-	//u := searchUser(l)
+	//u := listUser(l)
 	addstr, _ = json.Marshal(addgroup)
 	log.Infof(string(addstr))
 	c.JSON(http.StatusGone, addgroup)
@@ -528,15 +459,53 @@ func setGroupHandler(c *gin.Context) {
 	}
 	l := conn.Conn
 	//l, err := setupLdap()
-	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"err": err.Error(),
-		})
-		return
-
+	var adgroupStruct *ADGroup
+	adgroup := ADGROUP{}
+	var group GROUP
+	err = c.ShouldBindUri(&group)
+	tmpval, err := c.MultipartForm()
+	for key, val := range tmpval.Value {
+		adgroup[key] = val
 	}
-	u := searchUser(l)
-	c.JSON(http.StatusGone, u)
+	adgroup["groupname"] = group.Groupname
+	//err = c.ShouldBind(&adgroupStruct)
+	log.Infoln(err)
+	log.Infoln(adgroup)
+	adgroupStruct = NewADGroup(adgroup)
+	log.Infoln(adgroupStruct)
+	adgroup, err = modGroup(l, adgroup)
+	log.Errorln(err)
+	c.JSON(http.StatusAccepted, adgroup)
+	return
+}
+func addUserToGroupHandler(c *gin.Context){
+	setLog()
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+
+	adgroup := ADGROUP{}
+	var group GROUP
+	err = c.ShouldBindUri(&group)
+
+	adgroup["groupname"] = group.Groupname
+
+	aduser := ADUSER{}
+	var user USER
+	err = c.ShouldBindUri(&user)
+
+	aduser["username"] = user.Username
+
+
+	group_, err := addUserToGroup(l, aduser, adgroup)
+
+	c.JSON(http.StatusAccepted, group_)
 	return
 }
 func deleteGroupHandler(c *gin.Context) {

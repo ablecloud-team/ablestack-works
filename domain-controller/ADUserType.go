@@ -311,6 +311,51 @@ func codeToString(code int) (country COUNTRY, err error) {
 	return nil, errors.New("Can not find country")
 }
 
+type ADGroup struct {
+	groupname         string   `uri:"groupname" form:"groupname"`           //works 로그인명
+	sAMAccountName    string   `uri:"sAMAccountName" form:"sAMAccountName"` //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	description       string   `uri:"description" form:"description"`       //설명
+	memberOf          []string `uri:"memberOf" form:"memberOf"`             //그룹 dn 목록
+	member            []string `uri:"member" form:"member"`                 //그룹 dn 목록
+	distinguishedName string   `uri:"distinguishedName" form:"distinguishedName"`
+}
+
+func NewADGroup(adgroup ADGROUP) (adgroupstruct *ADGroup) {
+	adgroupstruct = &ADGroup{}
+
+	if val, ok := adgroup["groupname"]; ok {
+		adgroupstruct.groupname = val.(string)
+	}
+	if val, ok := adgroup["sAMAccountName"]; ok {
+		adgroupstruct.sAMAccountName = val.([]string)[0]
+	}
+	if val, ok := adgroup["description"]; ok {
+		adgroupstruct.description = val.([]string)[0]
+	}
+	if val, ok := adgroup["memberOf"]; ok {
+		adgroupstruct.memberOf = val.([]string)
+	}
+	if val, ok := adgroup["member"]; ok {
+		adgroupstruct.member = val.([]string)
+	}
+	if val, ok := adgroup["distinguishedName"]; ok {
+		adgroupstruct.distinguishedName = val.([]string)[0]
+	}
+	return adgroupstruct
+}
+
+func (aduserstruct *ADGroup) ToMap() (adgroup ADGROUP) {
+	adgroup = ADGROUP{
+		"groupname":         aduserstruct.groupname,
+		"sAMAccountName":    aduserstruct.sAMAccountName,
+		"description":       aduserstruct.description,
+		"memberOf":          aduserstruct.memberOf,
+		"member":            aduserstruct.member,
+		"distinguishedName": aduserstruct.distinguishedName,
+	}
+	return adgroup
+}
+
 func NewADUser(aduser ADUSER) (aduserstruct *ADUser) {
 	aduserstruct = &ADUser{}
 
