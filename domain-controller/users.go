@@ -25,7 +25,7 @@ func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string,
 		//log.Error(err)
 		return false, nil, false, err
 	}
-	_, _, groups, _ = listGroups(conn, id)
+	_, _, groups, _ = listUserGroups(conn, id)
 
 	isAdmin, err = inGroup(conn, id, "Administrators")
 

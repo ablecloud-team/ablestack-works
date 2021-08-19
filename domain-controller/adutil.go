@@ -112,7 +112,7 @@ func Auth(conn *auth.Conn, username string, password string) (status bool, err e
 	conn=conn
 	return status, err
 }
-func listGroups(conn *auth.Conn, username string) (status bool, entry *ldap.Entry, userGroups []string, err error) {
+func listUserGroups(conn *auth.Conn, username string) (status bool, entry *ldap.Entry, userGroups []string, err error) {
 	setLog()
 	upn, err := config.UPN(username)
 	if err != nil {
@@ -149,7 +149,7 @@ func listGroups(conn *auth.Conn, username string) (status bool, entry *ldap.Entr
 }
 func inGroup(conn *auth.Conn, username string, groupname string) (bool, error) {
 	setLog()
-	_, _, groups, err := listGroups(conn, username)
+	_, _, groups, err := listUserGroups(conn, username)
 	if err != nil {
 		return false, err
 	}
@@ -193,7 +193,7 @@ func getUser(l *ldap.Conn, user *USER) (retuser ADUSER, err error) {
 	searchRequest := ldap.NewSearchRequest(
 		ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
-		fmt.Sprintf("(cn=%v)", user.Username),
+		fmt.Sprintf("(&(cn=%v)(objectclass=user))", user.Username),
 		UserAttributes,
 		nil)
 
@@ -432,7 +432,7 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 	searchRequest := ldap.NewSearchRequest(
 		ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
-		fmt.Sprintf("(cn=%v)", group.Groupname),
+		fmt.Sprintf("(&(cn=%v)(objectclass=group))", group.Groupname),
 		UserAttributes,
 		nil)
 
