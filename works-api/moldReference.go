@@ -1,35 +1,46 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"os"
 )
 
-func getTemplate(params map[string]string) *http.Response {
-	var secretKey string = os.Getenv("MoldSecretKey")
-	var apiKey string = os.Getenv("MoldApiKey")
+func getTemplate(params []MoldParams) map[string]interface{} {
 	var baseurl string = os.Getenv("MoldUrl")
-	params["apikey"] = apiKey
-	params["command"] = "listTemplates"
-	params["templatefilter"] = "all"
-	params["response"] = "json"
-	sig := makeSignature(params)
-	stringParams := makeStringParams(params)
-	fmt.Println("123123123123")
-	fmt.Println(apiKey)
-	fmt.Println(secretKey)
-	fmt.Println(baseurl)
-	fmt.Println(stringParams)
-	fmt.Println(sig)
+	params1 := []MoldParams{
+		{"templatefilter": "all"},
+		{"command": "listTemplates"},
+	}
+
+	stringParams := makeStringParams(params1)
+	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	fmt.Println("endUrl")
-	fmt.Println(endUrl)
 	resp, err := http.Get(endUrl)
 	if err != nil {
 
 	}
-	fmt.Println("resp")
-	fmt.Println(resp)
-	return resp
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
+func getComputeOffering(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "listServiceOfferings"},
+	}
+
+	stringParams := makeStringParams(params1)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	resp, err := http.Get(endUrl)
+	if err != nil {
+
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
 }
