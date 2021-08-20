@@ -35,21 +35,42 @@ func getWorkspaces(c *gin.Context) {
 		fmt.Println(err.Error())
 	}
 	defer rows.Close()
+	fmt.Println(Version)
 
 	result, err := rowsToString(rows)
 	fmt.Println(result)
-	jsonUnmarshal := []Workspace{}
-	err = json.Unmarshal([]byte(result), &jsonUnmarshal)
+	resultData := []Workspace{}
+	err = json.Unmarshal([]byte(result), &resultData)
 	if err != nil {
 		fmt.Println("err")
 		fmt.Println(err)
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"result": resultData,
+	})
+}
+
+func getOffering(c *gin.Context) {
 	var params []MoldParams
 	templateResult := getTemplate(params)
 	serviceOfferingResult := getComputeOffering(params)
+	networkResult := getNetwork(params)
+	diskOfferingResult := getDiskOffering(params)
 	c.JSON(http.StatusOK, gin.H{
-		"result":              jsonUnmarshal,
 		"templateList":        templateResult,
 		"serviceOfferingList": serviceOfferingResult,
+		"networkList":         networkResult,
+		"diskOfferingList":    diskOfferingResult,
 	})
+}
+
+func putWorkspaces(c *gin.Context) {
+	workspace := Workspace{}
+	workspace.Name = c.PostForm("name")
+	workspace.Description = c.PostForm("description")
+	workspace.Type = c.PostForm("type")
+	workspace.TemplateUuid = c.PostForm("templateUuid")
+	workspace.ComputeOfferingUuid = c.PostForm("computeOfferingUuid")
+	workspace.DiskOfferingUuid = c.PostForm("diskOfferingUuid")
+	c.JSON(http.StatusOK, gin.H{})
 }

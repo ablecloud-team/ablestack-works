@@ -58,6 +58,8 @@ func main() {
 	{
 		api.POST("/login", loginController)
 		api.GET("/workspace", getWorkspaces)
+		api.PUT("/workspace", putWorkspaces)
+		api.GET("/offering", getOffering)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
@@ -68,7 +70,6 @@ func main() {
 			v1.GET("/user", userDetailController)
 		}
 		test := api.Group("/test")
-		//test.Use(checkToken)
 		{
 			test.GET("/test", testFunc)
 		}

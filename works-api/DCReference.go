@@ -9,10 +9,9 @@ import (
 	"time"
 )
 
-var DCInfo = os.Getenv("DCUrl")
-
 //login
 func login(id string, password string) map[string]interface{} {
+	var DCInfo = os.Getenv("DCUrl")
 	params := url.Values{
 		"username": {id},
 		"password": {password},
@@ -32,6 +31,7 @@ func login(id string, password string) map[string]interface{} {
 }
 
 func userInfo(id string) map[string]interface{} {
+	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
