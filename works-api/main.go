@@ -6,7 +6,7 @@ import (
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	logrus "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/exec"
@@ -60,6 +60,7 @@ func main() {
 		api.GET("/workspace", getWorkspaces)
 		api.PUT("/workspace", putWorkspaces)
 		api.GET("/offering", getOffering)
+		api.POST("/workspaceAgent", putWorkspacesAgent)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
