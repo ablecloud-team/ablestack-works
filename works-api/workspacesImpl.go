@@ -4,7 +4,18 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 )
+
+type Workspace struct {
+	Id, Quantity                             int
+	Name, Description, Uuid, State, Type     string
+	NetworkName, NetworkType, NetworkUuid    string
+	ComputeOfferingName, ComputeOfferingUuid string
+	TemplateName, TemplateUuid               string
+	DiskOfferingName, DiskOfferingUuid       string
+	CreateDate, Removed                      time.Time
+}
 
 func insertWorkspace(workspace Workspace) string {
 	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
@@ -66,7 +77,7 @@ func selectZoneId() string {
 	return zoneId
 }
 
-func insertWrokspaceAgent(payload string) string {
+func insertWrokspaceAgent(workspaceUuid string, asyncJobUuid string) string {
 	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
 	message := ""
 	if err != nil {
@@ -76,16 +87,28 @@ func insertWrokspaceAgent(payload string) string {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE workspaces set template_ok_check='AgentOK' where uuid=?", payload)
+	result1, err := db.Exec("UPDATE workspaces set template_ok_check='AgentOK' where uuid=?", workspaceUuid)
 	if err != nil {
 		log.Error("Agent 체크 쿼리중 에러가 발생했습니다.")
 		log.Error(err)
 		message = "An error occurred during agent check query."
 	}
-	n, err := result.RowsAffected()
-	if n == 1 {
-		log.Info("템플릿 Agent 체크가 완료되었습니다.")
-		message = "Template Agent check is completed."
+	n1, err := result1.RowsAffected()
+	if n1 == 1 {
+		result2, err := db.Exec("UPDATE async_job set ready=1 where id=?", asyncJobUuid)
+		if err != nil {
+			log.Error("Async Job 쿼리중 에러가 발생했습니다.")
+			log.Error(err)
+		}
+		n2, err := result2.RowsAffected()
+		if n2 == 1 {
+			log.Info("템플릿 Agent 체크가 완료되었습니다.")
+			message = "Template Agent check is completed."
+		} else {
+			log.Error("요청하신 async_job UUID 가 없습니다.")
+		}
+	} else {
+		log.Error("요청하신 workspace UUID 가 없습니다.")
 	}
 
 	return message

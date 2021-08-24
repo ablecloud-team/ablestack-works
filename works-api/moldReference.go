@@ -122,3 +122,25 @@ func getDeployVirtualMachine(params []MoldParams) map[string]interface{} {
 
 	return res
 }
+
+func getDestroyVirtualMachine(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "destroyVirtualMachine"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.Info("Mold 통신 URL [" + endUrl + "]")
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
+		log.Error(err.Error())
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}

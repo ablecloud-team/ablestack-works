@@ -41,10 +41,7 @@ func rowsToString(rows *sql.Rows) (string, error) {
 		tableData = append(tableData, entry)
 	}
 
-	jsonData, err := json.Marshal(tableData)
-	if err != nil {
-		return "", err
-	}
+	jsonData, _ := json.Marshal(tableData)
 
 	return string(jsonData), nil
 }

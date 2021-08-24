@@ -79,6 +79,7 @@ func main() {
 	log.WithFields(logrus.Fields{
 		"serverVersion": Version,
 	}).Infof("Starting application")
+	go asyncJobMonitoring()
 	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
 }

@@ -7,18 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
-	"time"
 )
-
-type Workspace struct {
-	Id, Quantity                             int
-	Name, Description, Uuid, State, Type     string
-	NetworkName, NetworkType, NetworkUuid    string
-	ComputeOfferingName, ComputeOfferingUuid string
-	TemplateName, TemplateUuid               string
-	DiskOfferingName, DiskOfferingUuid       string
-	CreateDate, Removed                      time.Time
-}
 
 func getWorkspaces(c *gin.Context) {
 	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
@@ -67,7 +56,7 @@ func getOffering(c *gin.Context) {
 func putWorkspaces(c *gin.Context) {
 	workspace := Workspace{}
 
-	workspace.Uuid = getUuid("workspace(" + c.PostForm("name") + ")")
+	workspace.Uuid = getUuid()
 	workspace.Name = c.PostForm("name")
 	workspace.Description = c.PostForm("description")
 	workspace.Type = c.PostForm("type")
@@ -82,18 +71,27 @@ func putWorkspaces(c *gin.Context) {
 		{"templateid": workspace.TemplateUuid},
 		{"zoneid": selectZoneId()},
 	}
+
 	resultDeploy := getDeployVirtualMachine(params)
+	asyncJob := AsyncJob{}
+	asyncJob.Name = "VMDestroy"
+	asyncJob.ExecUuid = resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
+	asyncJob.Ready = 0
+	asyncJob.Parameter = "expunge=true"
+	resultAsyncJob := insertAsyncJob(asyncJob)
 
 	c.JSON(http.StatusOK, gin.H{
-		"result":        result,
-		"resultDeploty": resultDeploy,
+		"result":         result,
+		"resultDeploy":   resultDeploy,
+		"resultAsyncJob": resultAsyncJob,
 	})
 }
 
 func putWorkspacesAgent(c *gin.Context) {
 	uuidParams := c.PostForm("uuid")
+	jobId := c.PostForm("jobId")
 
-	result := insertWrokspaceAgent(uuidParams)
+	result := insertWrokspaceAgent(uuidParams, jobId)
 
 	c.JSON(http.StatusOK, gin.H{
 		"result": result,

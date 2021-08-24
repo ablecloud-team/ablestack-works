@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/hmac"
 	"crypto/sha1"
-	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"github.com/gofrs/uuid"
@@ -80,41 +79,8 @@ func makeSignature(payload string) string {
 	return strHash
 }
 
-func getUuid(payload string) string {
+func getUuid() string {
+	uuidValue, _ := uuid.NewV4()
 
-	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
-	if err != nil {
-		fmt.Println("DB connect error")
-		fmt.Println(err)
-	}
-	defer db.Close()
-	var uuidValue uuid.UUID
-	fmt.Println("DB connect success")
-	for i := 0; i < 10; i++ {
-		var count int
-		uuidValue, err = uuid.NewV4()
-		if err != nil {
-			log.Error("UUID 생성 오류가 발생하였습니다.")
-		}
-		err = db.QueryRow("SELECT count(*) FROM uuids where uuid = ? and removed is null", uuidValue).Scan(&count)
-		if err != nil {
-			log.Error("UUID 중복 확인 쿼리에서 에러가 발생하였습니다.")
-			log.Error(err.Error())
-		}
-		if count == 0 {
-			result, err := db.Exec("INSERT INTO uuids(uuid, uuid_use, create_date) VALUES (?, ?, now())", uuidValue, payload)
-			if err != nil {
-				log.Error("UUID 생성 후 DB Insert 중 오류가 발생하였습니다.")
-				log.Error(err)
-				break
-			}
-			n, err := result.RowsAffected()
-			if n == 1 {
-				log.Info("UUID 값이 정상적으로 생성되었습니다.")
-				goto END
-			}
-		}
-	}
-END:
 	return uuidValue.String()
 }
