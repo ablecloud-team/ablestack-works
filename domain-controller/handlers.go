@@ -508,6 +508,37 @@ func addUserToGroupHandler(c *gin.Context){
 	c.JSON(http.StatusAccepted, group_)
 	return
 }
+
+func deleteUserFromGroupHandler(c *gin.Context){
+	setLog()
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+
+	adgroup := ADGROUP{}
+	var group GROUP
+	err = c.ShouldBindUri(&group)
+
+	adgroup["groupname"] = group.Groupname
+
+	aduser := ADUSER{}
+	var user USER
+	err = c.ShouldBindUri(&user)
+
+	aduser["username"] = user.Username
+
+
+	group_, err := deleteUserFromGroup(l, aduser, adgroup)
+
+	c.JSON(http.StatusAccepted, group_)
+	return
+}
 func deleteGroupHandler(c *gin.Context) {
 	setLog()
 

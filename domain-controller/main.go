@@ -160,11 +160,28 @@ func main() {
 			v1.GET("/group", listGroupHandler)
 			v1.GET("/group/:groupname", getGroupHandler)
 			v1.PUT("/group/:groupname", setGroupHandler)
-			v1.PATCH("/group/:groupname/:username", addUserToGroupHandler)
+			v1.PUT("/group/:groupname/:username", addUserToGroupHandler)
+			v1.DELETE("/group/:groupname/:username", deleteUserFromGroupHandler)
 			v1.DELETE("/group/:groupname", deleteGroupHandler)
+
+			//생성
+			v1.POST("/policy", addPolicyHandler)
+
+			//목록
+			v1.GET("/policy", listPolicyHandler)
+
+			//정보
+			v1.GET("/policy/:policyname", getPolicyHandler)
+
+			//그룹에 적용
+			v1.PUT("/policy/:policyname/:groupname", attachPolicyHandler)
+
+			//그룹에 해제
+			v1.DELETE("/policy/:policyname/:groupname", detachPolicyHandler)
 
 			/* TODO:
 			사용자를 그룹에 추가(or그룹에 사용자를 추가)
+			https://mpain.tistory.com/tag/group%20policy
 			GPO 생성(?그냥 그룹이랑 같이?)
 			GPO 읽기(적용된 정책 확인)
 			그룹에 정책 적용
@@ -172,9 +189,7 @@ func main() {
 			적용 가능한 정책 목록
 			https://github.com/ablecloud-team/ablestack-desktop/issues/84
 			 사용자 그룹 정보 변경
-			 사용자 그룹에 사용자 추가
 			 사용자 그룹에서 사용자 목록 조회
-			 사용자 그룹에서 사용자 제거
 			*/
 
 		}
@@ -187,4 +202,40 @@ func main() {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
+}
+
+func detachPolicyHandler(c *gin.Context) {
+	c.Param("policyname")
+	c.Param("groupname")
+}
+
+func attachPolicyHandler(c *gin.Context) {
+	c.Param("policyname")
+	c.Param("groupname")
+
+}
+
+func getPolicyHandler(c *gin.Context) {
+	c.Param("policyname")
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	stdout, err := shell.Exec("Get-GPInheritance -Target \"ou=dev3,dc=dc1,dc=local\"")
+	log.Infof("%v", stdout)
+	log.Infof("%v", err)
+}
+
+func listPolicyHandler(c *gin.Context) {
+
+}
+
+func addPolicyHandler(c *gin.Context) {
+	c.Param("policyname")
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	shell.Exec("import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\\reports\\' -CreateIfNeeded")
+
 }

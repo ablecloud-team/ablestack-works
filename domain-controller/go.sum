@@ -237,6 +237,8 @@ github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:
 github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0/go.mod h1:/LWChgwKmvncFJFHJ7Gvn9wZArjbV5/FppcK2fKk/tI=
 github.com/ycyun/go-powershell v0.1.1 h1:pTGn4VPdOeeLzySVXeAs81P3tKlIJ9W1jtY6oD7tKkI=
 github.com/ycyun/go-powershell v0.1.1/go.mod h1:AQB5L4d4ynFXs0ZgpCam9uvQO1/DeiXGKvkgZ29ZF/8=
+github.com/ycyun/go-powershell v0.1.2 h1:n/ROPxiJQmV8bEu4igkvEA3QCR59GH9KzXZC7U4YegE=
+github.com/ycyun/go-powershell v0.1.2/go.mod h1:AQB5L4d4ynFXs0ZgpCam9uvQO1/DeiXGKvkgZ29ZF/8=
 github.com/yudai/gojsondiff v1.0.0/go.mod h1:AY32+k2cwILAkW1fbgxQ5mUmMiZFgLIV+FBNExI05xg=
 github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82/go.mod h1:lgjkn3NuSvDfVJdfcVVdX+jpBxNmX4rDAzaS45IcYoM=
 github.com/yudai/pp v2.0.1+incompatible/go.mod h1:PuxR/8QJ7cyCkFp/aUDS+JY727OFEZkTdatxwunjIkc=

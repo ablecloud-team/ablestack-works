@@ -516,6 +516,35 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, er
 	return group_, err
 }
 
+//delete user from group
+func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, err error){
+	//group.member=userDN
+	if val, ok := group["groupname"]; !ok || val == "" {
+		return group_, errors.New("no group name")
+	}
+
+	if val, ok := user["username"]; !ok || val == "" {
+		return group_, errors.New("no user name")
+	}else{
+		var user_ = &USER{Username: user["username"].(string)}
+		user, err = getUser(l, user_)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADbasedn), []ldap.Control{})
+
+	group_ = NewADGroup(group).ToMap()
+
+
+	modReq.Delete("member", []string{user["distinguishedName"].(string)})
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
+	}
+	return group_, err
+}
 //add user
 func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	if val, ok := user["username"]; !ok || val == "" {
