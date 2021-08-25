@@ -1,6 +1,6 @@
 {
   "database": {
-    "type": "mySQL",
+    "type": "mysql",
     "user":{
       "id":"works",
       "password":"Ablecloud1!"

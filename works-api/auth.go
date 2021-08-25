@@ -1,45 +1,53 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"net/http"
-	"net/url"
-	"time"
 )
 
-//login
-func login(id string, password string) map[string]interface{} {
-	params := url.Values{
-		"username": {id},
-		"password": {password},
-	}
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	resp, err := client.PostForm(DCInfo+"/v1/login", params)
+func loginController(c *gin.Context) {
+	var result map[string]interface{}
+	userId := c.PostForm("id")
+	userPassword := c.PostForm("password")
+	result = login(userId, userPassword)
+	token, err := createToken(userId)
 	if err != nil {
-		log.Fatal(err)
-		fmt.Println(resp)
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(http.StatusUnauthorized,
+				gin.H{"status": http.StatusUnauthorized, "error": "token is expired"})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.Abort()
+		return
 	}
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
-
-	return res
+	c.SetCookie("access-token", token, 1800, "", "", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+	})
+}
+func logoutController(c *gin.Context) {
+	result := map[string]interface{}{}
+	cookieUserId := c.MustGet("cookie-user-id").(string)
+	fmt.Println("cookieUserId = " + cookieUserId)
+	result["login"] = false
+	result["username"] = cookieUserId
+	c.SetCookie("access-token", "", -1, "", "", false, false)
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+	})
 }
 
-func userInfo(id string) map[string]interface{} {
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
-	resp, err := client.Get(DCInfo+"/v1/user/"+id)
-	if err != nil {
-		log.Fatal(err)
-		fmt.Println(resp)
-	}
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
-
-	return res
+func userDetailController(c *gin.Context) {
+	var result map[string]interface{}
+	//userId := c.Param("userId")
+	cookieUserId := c.MustGet("cookie-user-id").(string)
+	fmt.Println("cookieUserId = " + cookieUserId)
+	result = userInfo(cookieUserId)
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+	})
 }

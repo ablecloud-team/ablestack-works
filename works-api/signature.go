@@ -5,22 +5,70 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"fmt"
+	"github.com/gofrs/uuid"
+	"os"
+	"sort"
 	"strings"
+	"time"
 )
 
-func makeSignature(params map[string]string ) string {
-	baseurl := "https://mold.ablecloud.io/client/api?"
-	secretkey := "64YHQCLtc0Ad_k-0NmeupaAwpsOJsirmVz52YSfYd-5RQs4F2deFen4O4SncOQ8I_M4Peew-JfMP2A2ZmKEnXg"
+type SortMoldParams []MoldParams
+type MoldParams map[string]string
+type Uuids struct {
+	Uuid, UuidUse       string
+	CreateDate, Removed time.Time
+}
 
-	var strurl string
-	for key, value := range params{
-		strurl = strurl + key+"="+value+"&"
+func (s SortMoldParams) Len() int {
+	return len(s)
+}
+func (s SortMoldParams) Less(i, j int) bool {
+	for keyi, _ := range s[i] {
+		for keyj, _ := range s[j] {
+			return keyi < keyj
+		}
 	}
-	strurl = strings.Replace(strurl, "+", "%20", -1)
-	strurl = strings.TrimRight(strings.ToLower(strurl),"&")
-	fmt.Println("baseurl = " + baseurl)
-	fmt.Println("secretkey = " + secretkey)
-	fmt.Println("params ="+strurl)
+	return false
+}
+
+func (s SortMoldParams) Swap(i, j int) {
+	for keyi, valuei := range s[i] {
+		for keyj, valuej := range s[j] {
+			s[i][keyj] = valuej
+			s[j][keyi] = valuei
+			delete(s[i], keyi)
+			delete(s[j], keyj)
+			return
+		}
+	}
+}
+func makeStringParams(params []MoldParams) string {
+	var result string
+
+	params1 := []MoldParams{
+		{"apikey": os.Getenv("MoldApiKey")},
+		{"response": "json"},
+	}
+	params = append(params, params1...)
+	sort.Sort(SortMoldParams(params))
+	fmt.Println("--------------------------------------------------")
+	fmt.Println(params)
+	fmt.Println("--------------------------------------------------")
+	for _, tuple := range params {
+		for key, value := range tuple {
+			result = result + key + "=" + value + "&"
+		}
+	}
+	result = strings.TrimRight(result, "&")
+	fmt.Println("makeStringParams 결과")
+	fmt.Println(result)
+
+	return result
+}
+
+func makeSignature(payload string) string {
+	secretkey := os.Getenv("MoldSecretKey")
+	strurl := strings.Replace(strings.ToLower(payload), "+", "%20", -1)
 
 	secret := []byte(secretkey)
 	message := []byte(strurl)
@@ -28,8 +76,11 @@ func makeSignature(params map[string]string ) string {
 	hash.Write(message)
 	strHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 
-	fmt.Println("strhash =")
-	fmt.Println(strHash)
-
 	return strHash
+}
+
+func getUuid() string {
+	uuidValue, _ := uuid.NewV4()
+
+	return uuidValue.String()
 }
