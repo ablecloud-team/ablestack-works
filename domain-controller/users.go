@@ -22,13 +22,17 @@ func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string,
 	}
 	status, err := Auth(conn, id, pw)
 	if err != nil || status == false {
-		//log.Error(err)
+		log.Errorf("%v, %v",status, err)
 		return false, nil, false, err
 	}
 	_, _, groups, _ = listUserGroups(conn, id)
 
 	isAdmin, err = inGroup(conn, id, "Administrators")
 
+	if err != nil || status == false {
+		log.Errorf("%v, %v",status, err)
+		return false, nil, false, err
+	}
 	return status, groups, isAdmin, err
 
 }

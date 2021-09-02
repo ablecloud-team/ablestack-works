@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	//"github.com/sirupsen/logrus"
@@ -20,12 +21,19 @@ import (
 
 //var log = logrus.New().WithField("who", "AD")
 
-var ADusername = "Administrator"
-var ADpassword = "Ablecloud1!"
-var domain = "dc1.local"
-var ADserver = "dc1.local"
-var ADport = 636
-var ADbasedn = "DC=dc1,DC=local"
+type ADConfig struct {
+	ADusername string
+	ADpassword string
+	ADdomain   string
+	ADserver   string
+	ADport     int
+	ADbasedn   string
+	Silent     bool
+	PolicyPATH string
+	PolicyLIST string
+}
+
+var ADconfig = ADConfig{}
 var UserAttributes = []string{
 	"dn",
 	"distinguishedName",
@@ -69,52 +77,140 @@ var GroupAttributes = []string{
 	"cn",
 	"distinguishedName",
 }
+
 //
 //var username = "user"
 //var password = "Ablecloud1!"
 
-var config = &auth.Config{
-	Server:   ADserver,
-	Port:     ADport,
-	BaseDN:   ADbasedn,
-	Security: auth.SecurityInsecureTLS,
+var authconfig = &auth.Config{}
+
+func ADsave() (err error) {
+
+	ADconfig.ADusername = "Administrator"
+	ADconfig.ADpassword = "Ablecloud1!"
+	ADconfig.ADdomain = "dc1.local"
+	ADconfig.ADserver = "dc1.local"
+	ADconfig.ADport = 636
+	ADconfig.ADbasedn = "DC=dc1,DC=local"
+	ADconfig.PolicyPATH = "./grouppolicy"
+	ADconfig.PolicyLIST = "policylist.json"
+
+	byteValue, err := json.MarshalIndent(ADconfig, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile("authconfig.json", byteValue, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
+func ADinit() (err error) {
+	data, err := os.Open("config.json")
+	if err != nil {
+		return err
+	}
+
+	byteValue, err := ioutil.ReadAll(data)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(byteValue, &ADconfig)
+	if err != nil {
+		return err
+	}
+
+	authconfig = &auth.Config{
+		Server:   ADconfig.ADserver,
+		Port:     ADconfig.ADport,
+		BaseDN:   ADconfig.ADbasedn,
+		Security: auth.SecurityInsecureTLS,
+	}
+
+
+	err2 := ""
+	currentWorkingDirectory, err := os.Getwd()
+
+	data, err = os.Open(fmt.Sprintf("%v/%v/%v",currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST))
+	if err != nil {
+		return err
+	}
+
+	byteValue, err = ioutil.ReadAll(data)
+	if err != nil {
+		return err
+	}
+	var policyList []map[string]string
+	err = json.Unmarshal(byteValue, &policyList)
+	if err != nil {
+		return err
+	}
+
+	for _, policyItem := range policyList {
+		shell, err := setupShell()
+		if err != nil{
+			log.Errorf("%v", err)
+			return err
+		}
+		policy := policyItem["name"]
+		description := policyItem["description"]
+		stdout, err := shell.Exec(fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
+		log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+		if err != nil {
+			err2 = fmt.Sprintf("%v, %v", err2, err)
+		}
+		shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
+		shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
+
+	}
+
+	if err2 == ""{
+		return nil
+	}
+	return errors.New(err2)
+
+}
 func ConnectAD() (conn *auth.Conn, status bool, err error) {
 	setLog()
 	//connect
-	conn, err = config.Connect()
+	setLog(fmt.Sprintf("ADconfig: %v", ADconfig))
+	conn, err = authconfig.Connect()
 	if err != nil {
 		//log.Errorln(err)
 		return conn, false, err
 	}
 
+	setLog(fmt.Sprintf("ADconfig: %v", ADconfig))
 	//bind
-	upn, err := config.UPN(ADusername)
+	upn, err := authconfig.UPN(ADconfig.ADusername)
 	if err != nil {
 		//log.Errorln(err)
-		upn = ADusername
+		upn = ADconfig.ADusername
 	}
-	status, err = conn.Bind(upn, ADpassword)
+	status, err = conn.Bind(upn, ADconfig.ADpassword)
 	if err != nil {
 		log.Errorln(err)
 		return conn, false, err
 	}
 	if !status {
-		log.Errorf("Connection Failed with %v %v", upn, ADpassword)
+		log.Errorf("Connection Failed with %v %v", upn, ADconfig.ADpassword)
 		return conn, false, nil
 	}
 	return conn, status, err
 }
 
 func Auth(conn *auth.Conn, username string, password string) (status bool, err error) {
-	status, err = auth.Authenticate(config, username, password)
-	conn=conn
+	status, err = auth.Authenticate(authconfig, username, password)
+	conn = conn
 	return status, err
 }
 func listUserGroups(conn *auth.Conn, username string) (status bool, entry *ldap.Entry, userGroups []string, err error) {
 	setLog()
-	upn, err := config.UPN(username)
+	upn, err := authconfig.UPN(username)
 	if err != nil {
 		//log.Errorln(err)
 		upn = username
@@ -164,26 +260,25 @@ func inGroup(conn *auth.Conn, username string, groupname string) (bool, error) {
 }
 
 func setupLdap() (l *ldap.Conn, err error) {
-	ldapsServer := fmt.Sprintf("ldaps://%v:%v", ADserver, ADport)
-	//ldapServer := fmt.Sprintf("ldap://%v:%v", ADserver, ADport)
+	ldapsServer := fmt.Sprintf("ldaps://%v:%v", ADconfig.ADserver, ADconfig.ADport)
+	//ldapServer := fmt.Sprintf("ldap://%v:%v", ADconfig.ADserver, ADconfig.ADport)
 	l, err = ldap.DialURL(ldapsServer, ldap.DialWithTLSConfig(&tls.Config{InsecureSkipVerify: true}))
 	if err != nil {
 		//log.Fatal(err)
 	}
 
-	upn, err := config.UPN(ADusername)
+	upn, err := authconfig.UPN(ADconfig.ADusername)
 	if err != nil {
 		//log.Errorln(err)
-		upn = ADusername
+		upn = ADconfig.ADusername
 	}
-	err = l.Bind(upn, ADpassword)
+	err = l.Bind(upn, ADconfig.ADpassword)
 	if err != nil {
 		//log.Fatal(err)
 		return nil, err
 	}
 	return
 }
-
 
 func testLDAP() {
 	setLog()
@@ -232,7 +327,7 @@ func testLDAP() {
 	l, _ := setupLdap()
 
 	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		filter[0],
 		attributes,
@@ -253,11 +348,11 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 	existOU := false
 	existCN := false
 	var (
-		err error
+		err  error
 		err2 error
 	)
 	//ou add
-	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
+	addReq := ldap.NewAddRequest(fmt.Sprintf("ou=%v,%v", groupname, ADconfig.ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "organizationalUnit"})
 	addReq.Attribute("name", []string{groupname})
 	addReq.Attribute("ou", []string{groupname})
@@ -265,12 +360,12 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 	if err = l.Add(addReq); err != nil {
 		log.Error("error adding OU:", addReq, err)
 
-		if strings.Contains(err.Error(), "Already Exists"){
+		if strings.Contains(err.Error(), "Already Exists") {
 			existOU = true
 		}
 	}
 	//group add
-	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
+	addReq = ldap.NewAddRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADconfig.ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "group"})
 	addReq.Attribute("name", []string{groupname})
 	addReq.Attribute("sAMAccountName", []string{groupname})
@@ -278,25 +373,25 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 	addReq.Attribute("groupType", []string{fmt.Sprintf("%d", 0x00000004|0x80000000)})
 	if err2 = l.Add(addReq); err2 != nil {
 		log.Error("error adding group:", addReq, err2)
-		if strings.Contains(err2.Error(), "Already Exists"){
+		if strings.Contains(err2.Error(), "Already Exists") {
 			existCN = true
 		}
 	}
-	if existOU{
-		if existCN{
+	if existOU {
+		if existCN {
 			return errors.New("Entry Already Exists, OU, CN")
-		} else{
+		} else {
 			if err2 != nil {
 				return errors.New(fmt.Sprintf("Entry Already Exists, OU and error %v", err2))
-			} else{
+			} else {
 				return errors.New("Entry Already Exists, OU")
 			}
 		}
-	} else{
-		if existCN{
+	} else {
+		if existCN {
 			return errors.New("Entry Already Exists, CN")
-		} else{
-			if err != nil{
+		} else {
+			if err != nil {
 				return err
 			}
 			return nil
@@ -312,7 +407,7 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 	l, _ = setupLdap()
 
 	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		fmt.Sprintf("(&(cn=%v)(objectclass=group))", group.Groupname),
 		UserAttributes,
@@ -354,7 +449,7 @@ func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 	l, _ = setupLdap()
 
 	searchGroupRequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		"(&(objectCategory=group)(objectClass=group))",
 		UserAttributes,
@@ -379,7 +474,7 @@ func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 	}
 
 	searchOURequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		//"(&(objectCategory=Organizational-Unit)(objectClass=organizationalUnit))",
 		"(objectClass=organizationalUnit)",
@@ -405,17 +500,17 @@ func searchGroup(l *ldap.Conn) (retusers []ABLEGROUP) {
 	}
 
 	var retResults []ABLEGROUP
-	for _, valueG := range adGroups{
-		for _,valueO :=range adOUs{
-			if valueO["name"] == valueG["name"]{
+	for _, valueG := range adGroups {
+		for _, valueO := range adOUs {
+			if valueO["name"] == valueG["name"] {
 				retResult := ABLEGROUP{}
-				for key, value :=range valueO{
+				for key, value := range valueO {
 					retResult[key] = value
 				}
-				for key, value :=range valueG{
+				for key, value := range valueG {
 					retResult[key] = value
 				}
-				retResults=append(retResults, retResult)
+				retResults = append(retResults, retResult)
 			}
 		}
 	}
@@ -432,7 +527,7 @@ func modGroup(l *ldap.Conn, user ADGROUP) (group_ ADGROUP, err error) {
 	if val, ok := user["groupname"]; !ok || val == "" {
 		return group_, errors.New("no group name")
 	}
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", user["groupname"], user["groupname"], ADbasedn), []ldap.Control{})
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", user["groupname"], user["groupname"], ADconfig.ADbasedn), []ldap.Control{})
 
 	group_ = NewADGroup(user).ToMap()
 
@@ -447,7 +542,7 @@ func modGroup(l *ldap.Conn, user ADGROUP) (group_ ADGROUP, err error) {
 			i := val.(int)
 			modReq.Replace(key, []string{strconv.Itoa(i)})
 		case string:
-			if key != "groupname" && val.(string) != ""  && key != "distinguishedName" {
+			if key != "groupname" && val.(string) != "" && key != "distinguishedName" {
 				modReq.Replace(key, []string{val.(string)})
 			}
 		default:
@@ -469,15 +564,14 @@ func delGroup(l *ldap.Conn, groupname string) (err error) {
 	}
 
 	log.Debugf("groupname : %v", groupname)
-	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADbasedn), []ldap.Control{})
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,ou=%v,%v", groupname, groupname, ADconfig.ADbasedn), []ldap.Control{})
 
 	if err := l.Del(delreq); err != nil {
 		log.Error("error deleting groupname:", delreq, err)
 		return err
 	}
 
-
-	delreq = ldap.NewDelRequest(fmt.Sprintf("ou=%v,%v", groupname, ADbasedn), []ldap.Control{})
+	delreq = ldap.NewDelRequest(fmt.Sprintf("ou=%v,%v", groupname, ADconfig.ADbasedn), []ldap.Control{})
 
 	if err := l.Del(delreq); err != nil {
 		log.Error("error deleting groupname:", delreq, err)
@@ -487,7 +581,7 @@ func delGroup(l *ldap.Conn, groupname string) (err error) {
 }
 
 //add user to group
-func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, err error){
+func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP) (group_ ADGROUP, err error) {
 	//group.member=userDN
 	if val, ok := group["groupname"]; !ok || val == "" {
 		return group_, errors.New("no group name")
@@ -495,7 +589,7 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, er
 
 	if val, ok := user["username"]; !ok || val == "" {
 		return group_, errors.New("no user name")
-	}else{
+	} else {
 		var user_ = &USER{Username: user["username"].(string)}
 		user, err = getUser(l, user_)
 		if err != nil {
@@ -503,10 +597,9 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, er
 		}
 	}
 
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADbasedn), []ldap.Control{})
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADconfig.ADbasedn), []ldap.Control{})
 
 	group_ = NewADGroup(group).ToMap()
-
 
 	modReq.Add("member", []string{user["distinguishedName"].(string)})
 	err = l.Modify(modReq)
@@ -517,7 +610,7 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, er
 }
 
 //delete user from group
-func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROUP, err error){
+func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP) (group_ ADGROUP, err error) {
 	//group.member=userDN
 	if val, ok := group["groupname"]; !ok || val == "" {
 		return group_, errors.New("no group name")
@@ -525,7 +618,7 @@ func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROU
 
 	if val, ok := user["username"]; !ok || val == "" {
 		return group_, errors.New("no user name")
-	}else{
+	} else {
 		var user_ = &USER{Username: user["username"].(string)}
 		user, err = getUser(l, user_)
 		if err != nil {
@@ -533,10 +626,9 @@ func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROU
 		}
 	}
 
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADbasedn), []ldap.Control{})
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,OU=%v,%v", group["groupname"], group["groupname"], ADconfig.ADbasedn), []ldap.Control{})
 
 	group_ = NewADGroup(group).ToMap()
-
 
 	modReq.Delete("member", []string{user["distinguishedName"].(string)})
 	err = l.Modify(modReq)
@@ -545,27 +637,28 @@ func deleteUserFromGroup(l *ldap.Conn, user ADUSER, group ADGROUP)(group_ ADGROU
 	}
 	return group_, err
 }
+
 //add user
 func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	if val, ok := user["username"]; !ok || val == "" {
 		return errors.New("no user name")
 	}
 
-	user["userPrincipalName"] = fmt.Sprintf("%v@%v", user["username"], domain) //로그온 이름(accountname@domain 형식)
+	user["userPrincipalName"] = fmt.Sprintf("%v@%v", user["username"], ADconfig.ADdomain) //로그온 이름(accountname@ADdomain 형식)
 
-	user["sAMAccountName"] = user["username"] //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	user["sAMAccountName"] = user["username"] //windows 2000 이전 사용자 로그온 이름(ADdomain\sAMAccountName 형식)
 
 	user["countryCode"] = 410 //주소->국가(한국?)
 	user["c"] = "KR"          //국가명
 	user["co"] = user["c"]
 
-	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
+	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADconfig.ADbasedn), []ldap.Control{})
 
 	for key, val := range user {
 		log.Infof("%v:%v", key, val)
 		switch val.(type) {
 		case string:
-			if key != "username" && key != "distinguishedName"{
+			if key != "username" && key != "distinguishedName" {
 				if val != "" {
 					addReq.Attribute(key, []string{val.(string)})
 				}
@@ -581,7 +674,7 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding user:", addReq, err)
 	}
-	//ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
+	//ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADconfig.ADbasedn), []ldap.Control{})
 	return err
 }
 
@@ -593,7 +686,7 @@ func getUser(l *ldap.Conn, user *USER) (retuser ADUSER, err error) {
 	l, _ = setupLdap()
 
 	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		fmt.Sprintf("(&(cn=%v)(objectclass=user))", user.Username),
 		UserAttributes,
@@ -611,23 +704,15 @@ func getUser(l *ldap.Conn, user *USER) (retuser ADUSER, err error) {
 		log.Infoln(aduser)
 		//sr.PrettyPrint(4)
 		for i := range userentry.Attributes {
-			log.Infoln(i)
-			log.Infoln(userentry.Attributes[i].Name)
-			log.Infoln(userentry.Attributes[i].Values)
+			//log.Infoln(i)
+			//log.Infoln(userentry.Attributes[i].Name)
+			//log.Infoln(userentry.Attributes[i].Values)
 			//val := ""
 			if len(userentry.Attributes[i].Values) >= 2 {
 				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
 			} else {
 				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
 			}
-			//for j, item := range userentry.Attributes[i].Values {
-			//	if j == 0 {
-			//		val = item
-			//	} else {
-			//		val = fmt.Sprintf("%v, %v", val, item)
-			//	}
-			//}
-			//aduser[userentry.Attributes[i].Name] = val
 		}
 		ret, err := json.Marshal(aduser)
 		log.Infoln(string(ret))
@@ -645,7 +730,7 @@ func listUser(l *ldap.Conn) (retusers []ADUSER) {
 	l, _ = setupLdap()
 
 	searchRequest := ldap.NewSearchRequest(
-		ADbasedn,
+		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		"(&(objectCategory=person)(objectClass=user))",
 		UserAttributes,
@@ -692,7 +777,7 @@ func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 	if val, ok := user["username"]; !ok || val == "" {
 		return user_, errors.New("no user name")
 	}
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADconfig.ADbasedn), []ldap.Control{})
 
 	user_ = NewADUser(user).ToMap()
 
@@ -707,7 +792,7 @@ func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 			i := val.(int)
 			modReq.Replace(key, []string{strconv.Itoa(i)})
 		case string:
-			if key != "username" && val.(string) != ""  && key != "distinguishedName" {
+			if key != "username" && val.(string) != "" && key != "distinguishedName" {
 				modReq.Replace(key, []string{val.(string)})
 			}
 		default:
@@ -724,12 +809,12 @@ func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	setLog()
 	client := &http.Client{}
-	l=l
+	l = l
 	data := url.Values{}
 	data.Set("username", user["username"].(string))
 	data.Set("password", password)
 
-	req, err := http.NewRequest(http.MethodPatch, "http://10.1.1.8:8082/api/v1/user", strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("http://%v:8082/api/v1/user", ADconfig.ADserver), strings.NewReader(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
@@ -741,8 +826,8 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 		return
 	}
 	defer func() {
-		if err = resp.Body.Close(); err != nil{
-			log.Errorf("response cannot close, %v",err)
+		if err = resp.Body.Close(); err != nil {
+			log.Errorf("response cannot close, %v", err)
 		}
 	}()
 
@@ -774,7 +859,7 @@ func delUser(l *ldap.Conn, user ADUSER) (err error) {
 	}
 
 	log.Debugf("username : %v", user["username"])
-	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADbasedn), []ldap.Control{})
+	delreq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADconfig.ADbasedn), []ldap.Control{})
 
 	if err := l.Del(delreq); err != nil {
 		log.Error("error deleting user:", delreq, err)
@@ -783,14 +868,13 @@ func delUser(l *ldap.Conn, user ADUSER) (err error) {
 	return err
 }
 
-
 func addComputer(l *ldap.Conn, comname string) (err error) {
 	//computer add
-	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", comname, "Computers", ADbasedn), []ldap.Control{})
+	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=%v,%v", comname, "Computers", ADconfig.ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "computer", "organizationalPerson", "person", "user"})
 	addReq.Attribute("name", []string{comname})
 	addReq.Attribute("sAMAccountName", []string{fmt.Sprintf("%v$", comname)})
-	addReq.Attribute("dNSHostName", []string{fmt.Sprintf("%v.%v", comname, domain)})
+	addReq.Attribute("dNSHostName", []string{fmt.Sprintf("%v.%v", comname, ADconfig.ADdomain)})
 	addReq.Attribute("instanceType", []string{fmt.Sprintf("%d", 0x00000004)})
 	if err := l.Add(addReq); err != nil {
 		log.Error("error adding computer:", addReq, err)

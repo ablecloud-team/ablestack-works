@@ -21,11 +21,40 @@ type APPVAL struct {
 
 func setupShell() (shell *powershell.Shell, err error) {
 	shell, err = powershell.New()
+	shell.Exec("$pshost = get-host;$pswindow = $pshost.ui.rawui;$newsize = $pswindow.buffersize;$newsize.width = 400;$pswindow.buffersize = $newsize;")
 	if err != nil {
 		panic(err)
 	}
 
 	return shell, err
+}
+
+func PowershellOut2map(stdout string) (output []map[string]string){
+	setLog()
+	std3:=strings.TrimSpace(stdout)
+	std2:=strings.Split(std3, "\n")
+	log.Infof("3\n%v\n", std3)
+	dict := map[string]string{}
+	log.Infof("2\n%v\n", std2[0])
+	defer log.Errorf("error\n")
+	for _, j := range std2{
+
+		if strings.TrimSpace(j) != "" {
+			splited := strings.SplitN(j, ":", 2)
+			key := strings.TrimSpace(splited[0])
+			val := strings.TrimSpace(splited[1])
+			dict[key]=val
+			//fmt.Println(dict)
+			//fmt.Printf("%v, %v: %v, %v\n", i, j, key, val)
+		} else {
+			//fmt.Printf("%v, %v\n", i, j)
+			output = append(output, dict)
+			dict = map[string]string{}
+		}
+	}
+	output = append(output, dict)
+	log.Infof("o\n%v\n", output)
+	return output
 }
 
 func getApps(shell *powershell.Shell) (apps []*APPVAL) {

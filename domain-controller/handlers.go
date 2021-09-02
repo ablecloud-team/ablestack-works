@@ -5,11 +5,33 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 	"time"
 )
-
+type shellReturnModel struct{
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
+}
+// exeShellHandler godoc
+// @Summary powershell 명령 처리기
+// @Description powershell 명령 처리기
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param cmd formData string true "사용자 이름"
+// @Param arg formData string true "사용자 암호"
+// @Param timeout formData int false "시간제한, 기본값"
+// @Success 200 {object} loginModel "로그인 성공"
+// @Failure 401 {object} loginModel "로그인 실패"
+// @Failure default {objects} string
+// @Router /login [post]
+//return shellReturnModel
 func exeShellHandler(c *gin.Context) {
-	var pscmd PSCMD
+
+	var (
+		pscmd PSCMD
+		stdout string
+	stderr string
+	)
 	if err := c.Bind(&pscmd); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
 		return
@@ -35,10 +57,7 @@ func exeShellHandler(c *gin.Context) {
 		}
 
 	}()
-	var (
-		stdout string
-		stderr string
-	)
+
 	select {
 	case res := <-c1:
 		stdout = res[0]
@@ -49,7 +68,7 @@ func exeShellHandler(c *gin.Context) {
 	}
 
 	log.Infof("cmd: %v, arg: %v, stdout: %v, stderr: %v", pscmd.CMD, pscmd.ARG, stdout, stderr)
-	c.JSON(http.StatusOK, gin.H{"stdout": stdout, "stderr": stderr})
+	c.JSON(http.StatusOK, shellReturnModel{Stdout: stdout, Stderr: stderr})
 	return
 }
 func appListHandler(c *gin.Context) {
@@ -61,13 +80,27 @@ func appListHandler(c *gin.Context) {
 	return
 }
 
+type simpleReturnModel struct {
+	Msg string `json:"msg"`
+}
 type loginModel struct {
 	Login    bool     `json:"login"`
 	Username string   `json:"username"`
 	Groups   []string `json:"groups"`
 	IsAdmin  bool     `json:"isAdmin"`
 }
-
+type userModel struct {
+	Username string `json:"username"`
+	Msg      string `json:"msg"`
+}
+type policyModel struct{
+	Name string `json:"name"`
+	Description string `json:"description"`
+}
+type errorModel struct{
+	Msg string `json:"msg"`
+	Target string `json:"target"`
+}
 // loginHandler godoc
 // @Summary List accounts
 // @Description 사용자 로그인 체크
@@ -84,14 +117,18 @@ func loginHandler(c *gin.Context) {
 	conn, status, err := ConnectAD()
 	defer conn.Conn.Close()
 	if err != nil {
-		log.Errorln(err)
+		log.Errorf("%v",err)
 	}
 	if !status {
-		log.Errorln(status, err)
+		log.Errorf("%v, %v",status, err)
 	}
 	username := c.PostForm("username")
 	userPW := c.PostForm("password")
 	result, groups, isAdmin, err := login(conn, username, userPW)
+	setLog(fmt.Sprintf("%v, %v, %v, %v", result, groups, isAdmin, err))
+	if !status {
+		log.Errorf("%v, %v",result, err)
+	}
 	//loginResult :=
 	ret := loginModel{
 		Login:    result,
@@ -103,10 +140,26 @@ func loginHandler(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, ret)
 		return
 	}
-
+	setLog(fmt.Sprintf("%v", ret))
 	c.JSON(http.StatusOK, ret)
 }
 
+// addUserHandler godoc
+// @Summary add New User account
+// @Description 사용자 생성
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param username formData string true "사용자 이름"
+// @Param password formData string true "사용자 암호"
+// @Param phone formData string true "전화번호"
+// @Param email formData string true "이메일"
+// @Param givenName formData string true "이름"
+// @Param sn formData string true "성"
+// @Param title formData string true "직급"
+// @Success 200 {object} userModel "로그인 성공"
+// @Failure 401 {object} userModel "로그인 실패"
+// @Failure default {objects} string
+// @Router /user [post]
 func addUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -133,10 +186,9 @@ func addUserHandler(c *gin.Context) {
 		l, err = setupLdap()
 		if err != nil {
 			log.Errorln("AD Connection Failed")
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"msg":      "AD Connection Failed",
-				"userID":   -1,
-				"username": "",
+			c.JSON(http.StatusInternalServerError, userModel{
+				Msg:      "AD Connection Failed",
+				Username: "",
 			})
 			return
 		}
@@ -156,9 +208,9 @@ func addUserHandler(c *gin.Context) {
 		if err2 != nil {
 			return
 		}
-		c.JSON(http.StatusBadRequest, gin.H{
-			"userID":   1,
-			"username": userID,
+		c.JSON(http.StatusBadRequest, userModel{
+			Username: userID,
+			Msg:		err.Error()+err2.Error(),
 		})
 		return
 	}
@@ -169,16 +221,15 @@ func addUserHandler(c *gin.Context) {
 		if err3 != nil {
 			return
 		}
-		c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
-			"userID":   1,
-			"username": userID,
-			"msg":      err.Error(),
+		c.JSON(http.StatusRequestedRangeNotSatisfiable, userModel{
+			Username: userID,
+			Msg:      err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{
-		"userID":   1,
-		"username": userID,
+	c.JSON(http.StatusCreated, userModel{
+		Username: userID,
+		Msg:	"OK",
 	})
 }
 func listUserHandler(c *gin.Context) {
@@ -586,4 +637,138 @@ func deleteGroupHandler(c *gin.Context) {
 
 	c.JSON(http.StatusGone, groupname)
 	return
+}
+
+
+
+func detachPolicyHandler(c *gin.Context) {
+	policyname:=c.PostForm("policyname")
+	groupname:=c.Param("groupname")
+	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	stdout, err := shell.Exec(fmt.Sprintf("Remove-GPLink -name %v -Target \"ou=%v,%v\"", policyname, groupname, ADconfig.ADbasedn))
+	if err != nil{
+		errorlines:=strings.Split(err.Error(), "\r\n")
+		for i, line :=range errorlines{
+
+			log.Errorf("%v, %v", i, line)
+		}
+		c.JSON(http.StatusNotFound, errorModel{Msg: errorlines[0], Target: errorlines[3]})
+		return
+	}
+	ret := PowershellOut2map(stdout)
+	c.JSON(http.StatusOK, ret)
+}
+
+func attachPolicyHandler(c *gin.Context) {
+	policyname:=c.PostForm("policyname")
+	groupname:=c.Param("groupname")
+	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	stdout, err := shell.Exec(fmt.Sprintf("New-GPLink -name %v -Target \"ou=%v,%v\" -Enforced Yes", policyname, groupname, ADconfig.ADbasedn))
+	if err != nil{
+		errorlines:=strings.Split(err.Error(), "\r\n")
+		for i, line :=range errorlines{
+
+			log.Errorf("%v, %v", i, line)
+		}
+		c.JSON(http.StatusNotFound, errorModel{Msg: errorlines[0], Target: errorlines[2]})
+		return
+	}
+	ret := PowershellOut2map(stdout)
+	c.JSON(http.StatusOK, ret)
+}
+
+func getGroupPolicyHandler(c *gin.Context) {
+	setLog()
+	groupname:=c.Param("groupname")
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+
+	stdout, err := shell.Exec(fmt.Sprintf("(Get-GPInheritance -Target \"ou=%v,%v\").GpoLinks.DisplayName", groupname, ADconfig.ADbasedn))
+
+	//groups := PowershellOut2map(stdout)
+	//log.Infof("%v", stdout)
+	//log.Infof("%v", err)
+	lines := strings.Split(stdout, "\r\n")
+	var policylist []policyModel
+	for _, line := range lines{
+		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != ""{
+			log.Infof("policy: %v\n", line)
+			description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
+			if err != nil{
+				log.Errorf("%v:, %v", description, err)
+			}
+			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
+		}
+	}
+	//log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+
+	c.JSON(http.StatusOK, policylist)
+}
+
+func getPolicyHandler(c *gin.Context) {
+	setLog()
+	policyname:=c.Param("policyname")
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+
+	stdout, err := shell.Exec(fmt.Sprintf("Get-GPO -name %v", policyname))
+
+	groups := PowershellOut2map(stdout)
+	log.Infof("%v", stdout)
+	log.Infof("%v", err)
+	//lines := strings.Split(stdout, "\r\n")
+	//var policylist []policyModel
+	//for _, line := range lines{
+	//	if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != ""{
+	//		log.Infof("policy: %v\n", line)
+	//		description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
+	//		if err != nil{
+	//			log.Errorf("%v:, %v", description, err)
+	//		}
+	//		policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
+	//	}
+	//}
+	////log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+
+	c.JSON(http.StatusOK, groups)
+}
+
+func listPolicyHandler(c *gin.Context) {
+	shell, err := setupShell()
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	stdout, err := shell.Exec("(get-gpo -all).displayname")
+	if err != nil{
+		log.Errorf("%v", err)
+	}
+	lines := strings.Split(stdout, "\r\n")
+	var policylist []policyModel
+	for _, line := range lines{
+		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != ""{
+			log.Infof("policy: %v\n", line)
+			description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
+			if err != nil{
+				log.Errorf("%v:, %v", description, err)
+			}
+			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
+		}
+	}
+	//log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+
+	c.JSON(http.StatusOK, policylist)
 }

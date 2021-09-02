@@ -18,9 +18,9 @@ type ADUser struct {
 	givenName                  string   `uri:"givenName" form:"givenName"`                                   //이름
 	initials                   string   `uri:"initials" form:"initials"`                                     //이니셜
 	accountname                string   `uri:"accountname" form:"accountname"`                               //어카운트명
-	userPrincipalName          string   `uri:"userPrincipalName" form:"userPrincipalName"`                   //로그온 이름(accountname@domain 형식)
+	userPrincipalName          string   `uri:"userPrincipalName" form:"userPrincipalName"`                   //로그온 이름(accountname@ADdomain 형식)
 	username                   string   `uri:"username" form:"username"`                                     //works 로그인명
-	sAMAccountName             string   `uri:"sAMAccountName" form:"sAMAccountName"`                         //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	sAMAccountName             string   `uri:"sAMAccountName" form:"sAMAccountName"`                         //windows 2000 이전 사용자 로그온 이름(ADdomain\sAMAccountName 형식)
 	description                string   `uri:"description" form:"description"`                               //설명
 	info                       string   `uri:"info" form:"info"`                                             //참고내용
 	title                      string   `uri:"title" form:"title"`                                           //직함
@@ -313,7 +313,7 @@ func codeToString(code int) (country COUNTRY, err error) {
 
 type ADGroup struct {
 	groupname         string   `uri:"groupname" form:"groupname"`           //works 로그인명
-	sAMAccountName    string   `uri:"sAMAccountName" form:"sAMAccountName"` //windows 2000 이전 사용자 로그온 이름(domain\sAMAccountName 형식)
+	sAMAccountName    string   `uri:"sAMAccountName" form:"sAMAccountName"` //windows 2000 이전 사용자 로그온 이름(ADdomain\sAMAccountName 형식)
 	description       string   `uri:"description" form:"description"`       //설명
 	memberOf          []string `uri:"memberOf" form:"memberOf"`             //그룹 dn 목록
 	member            []string `uri:"member" form:"member"`                 //그룹 dn 목록

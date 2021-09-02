@@ -4,6 +4,8 @@ import (
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
+	"io"
+	"os"
 	"path"
 	"runtime"
 )
@@ -17,6 +19,7 @@ func setLog(msg ...string) {
 		HideKeys: false,
 		//FieldsOrder: []string{"component", "category"},
 		CallerFirst: false,
+		NoColors: true,
 		CustomCallerFormatter: func(f *runtime.Frame) string {
 
 			File := make([]string, 0)
@@ -46,6 +49,21 @@ func setLog(msg ...string) {
 			//return fmt.Sprintf("start [%s]",names)
 		},
 	})
+
+	startlogger.SetLevel(logrus.TraceLevel)
+
+	var writers []io.Writer
+	if !ADconfig.Silent {
+		writers = append(writers, os.Stdout)
+	}
+	file, err := os.OpenFile("logrus.log", os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
+	if err == nil {
+		writers = append(writers, file)
+	} else {
+		startlogger.Infof("Failed to log to file, using default stderr: %v", err)
+	}
+	w := io.MultiWriter(writers...)
+	startlogger.SetOutput(w)
 	startlogger.SetReportCaller(true)
 	startlogger.Infof("%v", msg)
 }

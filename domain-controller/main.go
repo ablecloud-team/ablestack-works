@@ -10,7 +10,9 @@ import (
 	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"io"
 	"net/http"
+	"os"
 	"path"
 	"runtime"
 	"strings"
@@ -19,7 +21,7 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-var log = logrus.New() //.WithField("who", "Main")
+var log = logrus.New() //.WithField("who", "Main")[
 var Version = "development"
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -41,6 +43,7 @@ func CORSMiddleware() gin.HandlerFunc {
 func setup() {
 	log.SetFormatter(&nested.Formatter{
 		HideKeys: false,
+		NoColors: true,
 		//FieldsOrder: []string{"component", "category"},
 		CallerFirst: false,
 		CustomCallerFormatter: func(f *runtime.Frame) string {
@@ -49,7 +52,25 @@ func setup() {
 			return fmt.Sprintf(" [%s:%d][%s()]", path.Base(f.File), f.Line, funcName)
 		},
 	})
+
+	log.SetLevel(logrus.TraceLevel)
+
+	var writers []io.Writer
+	if !ADconfig.Silent {
+		writers = append(writers, os.Stdout)
+	}
+	file, err := os.OpenFile("logrus.log", os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
+	if err == nil {
+		writers = append(writers, file)
+	} else {
+		log.Infof("Failed to log to file, using default stderr: %v", err)
+	}
+	w := io.MultiWriter(writers...)
+
+	log.SetOutput(w)
+
 	log.SetReportCaller(true)
+
 }
 
 
@@ -66,7 +87,7 @@ func setup() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 10.10.1.25:8083
+// @host ad-api.ablecloud.io
 // @BasePath /api/v1
 // @query.collection.format multi
 
@@ -104,7 +125,6 @@ func main() {
 	)
 
 	//l, err := setupLdap()
-
 	setup()
 	err = sentry.Init(sentry.ClientOptions{
 		TracesSampleRate: 1,
@@ -116,6 +136,10 @@ func main() {
 	defer sentry.Flush(2 * time.Second)
 
 
+	err = ADinit()
+	if err != nil {
+		log.Fatalf("ADinit: %s", err)
+	}
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 	router.Use(sentrygin.New(sentrygin.Options{}))
@@ -164,8 +188,25 @@ func main() {
 			v1.DELETE("/group/:groupname/:username", deleteUserFromGroupHandler)
 			v1.DELETE("/group/:groupname", deleteGroupHandler)
 
-			//생성
-			v1.POST("/policy", addPolicyHandler)
+			v1.GET("/group/:groupname/policy", getGroupPolicyHandler)
+			v1.PUT("/group/:groupname/policy", attachPolicyHandler)
+			v1.DELETE("/group/:groupname/policy", detachPolicyHandler)
+
+			/*
+			backup-gpo usb_block
+			import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded
+
+			New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+			Remove-GPLink  -name usb_block -target "ou=dev3,dc=dc1,dc=local"
+			Get-GPInheritance -Target "ou=dev3,dc=dc1,dc=local"
+
+			clipboard_block:{2020CB72-2E18-420A-97FC-887557FB916A}
+			usb_block:{4ACB1953-468E-4AA1-9203-CF8417197981}
+			share_block:{05df62ba-64f1-4b73-be1c-b63e76bf3075}
+			remotefx:{0f35f16e-9eaf-4b1a-9507-fa9dfe0e0028}
+			install_block:{91ad635c-2486-4dd4-ba0c-7a361ba947d8}
+			update_block:{142cae05-9f35-4a33-8da5-ce00af5d2af0}
+			 */
 
 			//목록
 			v1.GET("/policy", listPolicyHandler)
@@ -200,42 +241,7 @@ func main() {
 	}).Infof("Starting application")
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-	err = router.Run("0.0.0.0:8083")
+	err = router.Run("0.0.0.0:8084")
 	fmt.Println(err)
 }
 
-func detachPolicyHandler(c *gin.Context) {
-	c.Param("policyname")
-	c.Param("groupname")
-}
-
-func attachPolicyHandler(c *gin.Context) {
-	c.Param("policyname")
-	c.Param("groupname")
-
-}
-
-func getPolicyHandler(c *gin.Context) {
-	c.Param("policyname")
-	shell, err := setupShell()
-	if err != nil{
-		log.Errorf("%v", err)
-	}
-	stdout, err := shell.Exec("Get-GPInheritance -Target \"ou=dev3,dc=dc1,dc=local\"")
-	log.Infof("%v", stdout)
-	log.Infof("%v", err)
-}
-
-func listPolicyHandler(c *gin.Context) {
-
-}
-
-func addPolicyHandler(c *gin.Context) {
-	c.Param("policyname")
-	shell, err := setupShell()
-	if err != nil{
-		log.Errorf("%v", err)
-	}
-	shell.Exec("import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\\reports\\' -CreateIfNeeded")
-
-}

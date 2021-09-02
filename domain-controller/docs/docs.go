@@ -79,6 +79,89 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/user": {
+            "post": {
+                "description": "사용자 생성",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "add New User account",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "사용자 암호",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "전화번호",
+                        "name": "phone",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "이메일",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "이름",
+                        "name": "givenName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "성",
+                        "name": "sn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "직급",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "로그인 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.userModel"
+                        }
+                    },
+                    "401": {
+                        "description": "로그인 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.userModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "objects"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -96,6 +179,17 @@ var doc = `{
                 },
                 "login": {
                     "type": "boolean"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.userModel": {
+            "type": "object",
+            "properties": {
+                "msg": {
+                    "type": "string"
                 },
                 "username": {
                     "type": "string"
@@ -167,7 +261,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "10.10.1.25:8083",
+	Host:        "ad-api.ablecloud.io",
 	BasePath:    "/api/v1",
 	Schemes:     []string{},
 	Title:       "Ablecloud Works Domain-Controller API",

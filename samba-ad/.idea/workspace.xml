@@ -5,20 +5,86 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Abledc.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/go_build_domain_controller.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/policylist.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/Preferences/NetworkShares/NetworkShares.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/logrus.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{2020CB72-2E18-420A-97FC-887557FB916A}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{2020CB72-2E18-420A-97FC-887557FB916A}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{2020CB72-2E18-420A-97FC-887557FB916A}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{2020CB72-2E18-420A-97FC-887557FB916A}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{2020CB72-2E18-420A-97FC-887557FB916A}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{68938666-46A0-4719-82C6-4D256376C376}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{68938666-46A0-4719-82C6-4D256376C376}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{68938666-46A0-4719-82C6-4D256376C376}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{68938666-46A0-4719-82C6-4D256376C376}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{68938666-46A0-4719-82C6-4D256376C376}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{F0AF099A-0759-4E72-B0E9-BE32A05EEA1D}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{F0AF099A-0759-4E72-B0E9-BE32A05EEA1D}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{F0AF099A-0759-4E72-B0E9-BE32A05EEA1D}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{F0AF099A-0759-4E72-B0E9-BE32A05EEA1D}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/{F0AF099A-0759-4E72-B0E9-BE32A05EEA1D}/gpreport.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/ADUserType.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/ADUserType.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/handlers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/psutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/psutil.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/users.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/users.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go_build_samba_ad_linux_linux" beforeDir="false" afterPath="$PROJECT_DIR$/go_build_samba_ad_linux_linux" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.6" />
+  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.17" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/users.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/utils.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/main.go" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="1wCn0CkRCZ9t3lShKP3cscmH5yo" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -46,15 +112,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Go Build.go build samba-ad linux">
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="samba-ad" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="FILE" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
     <configuration name="go build samba-ad linux" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
@@ -79,16 +136,6 @@
       <package value="samba-ad" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="samba-ad" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <list>

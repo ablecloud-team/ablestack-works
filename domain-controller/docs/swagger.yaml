@@ -13,7 +13,14 @@ definitions:
       username:
         type: string
     type: object
-host: 10.10.1.25:8083
+  main.userModel:
+    properties:
+      msg:
+        type: string
+      username:
+        type: string
+    type: object
+host: ad-api.ablecloud.io
 info:
   contact:
     email: support@swagger.io
@@ -59,6 +66,63 @@ paths:
           schema:
             type: objects
       summary: List accounts
+  /user:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 사용자 생성
+      parameters:
+      - description: 사용자 이름
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: 사용자 암호
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: 전화번호
+        in: formData
+        name: phone
+        required: true
+        type: string
+      - description: 이메일
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: 이름
+        in: formData
+        name: givenName
+        required: true
+        type: string
+      - description: 성
+        in: formData
+        name: sn
+        required: true
+        type: string
+      - description: 직급
+        in: formData
+        name: title
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 로그인 성공
+          schema:
+            $ref: '#/definitions/main.userModel'
+        "401":
+          description: 로그인 실패
+          schema:
+            $ref: '#/definitions/main.userModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: add New User account
 securityDefinitions:
   ApiKeyAuth:
     in: header
