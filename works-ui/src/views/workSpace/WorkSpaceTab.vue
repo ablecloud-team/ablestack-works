@@ -41,7 +41,7 @@
 
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import TableContent from "../../components/TableContent";
+import TableContent from "@/components/TableContent";
 
 import {
   VMListData,

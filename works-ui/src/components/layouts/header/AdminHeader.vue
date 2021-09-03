@@ -1,8 +1,12 @@
 <template>
-    
     <a-row class="user-menu">
     <a-col :span="12">
-      <!--<MenuFoldOutlined class="header-notice-icon" />-->
+        <menu-unfold-outlined
+          v-if="state.collapsed"
+          class="trigger3"
+          @click="setCollapsed()"
+        />
+        <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
     <a-col :span="12" style="float:right; text-align: right; padding-right: 14px">
       <a-popover placement="bottom">
@@ -119,6 +123,10 @@ export default defineComponent({
         message.success("로그아웃되었습니다.", 2);
       }
     },
+    setCollapsed() {
+      this.state.collapsed = !this.state.collapsed;
+      this.$emit("setCollapsed");
+    },
   },
 });
 </script>
@@ -148,4 +156,15 @@ export default defineComponent({
   border-top: 1px solid #e8e8e8;
 }
 
+.trigger3 {
+  font-size: 18px;
+  line-height: 64px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.trigger3:hover {
+  color: #1890ff;
+}
 </style>
