@@ -1,50 +1,52 @@
 <template>
-  <div style="width: 256px; height: 100%">
-    <Logo @click="toggleCollapsed" />
+  <div style="width: 100%; height: 100%">
+    <Logo 
+      @click="$router.push({ name: 'Dashboard' }); selectedKeysSetting(1)" 
+    />
     <a-menu
       mode="inline"
       theme="light"
-      :inline-collapsed="state.collapsed"
+      inline="true"
       v-model:selectedKeys="state.selectedKeys"
       style="padding-top: 14px"
     >
-      <a-menu-item key="1" @click="$router.push({ name: 'Dashboard' })">
+      <a-menu-item key="1" @click="$router.push({ name: 'Dashboard' }); selectedKeysSetting(1)">
         <template #icon>
           <DashboardOutlined />
         </template>
         <span>{{ $t("label.dashboard") }}</span>
       </a-menu-item>
-      <a-menu-item key="2" @click="$router.push({ name: 'Workspaces' })">
+      <a-menu-item key="2" @click="$router.push({ name: 'Workspaces' }); selectedKeysSetting(2)">
         <template #icon>
           <CloudOutlined />
         </template>
         <span>{{ $t("label.workspace") }}</span>
       </a-menu-item>
-      <a-menu-item key="3" @click="$router.push({ name: 'Virtualmachine' })">
+      <a-menu-item key="3" @click="$router.push({ name: 'Virtualmachine' }); selectedKeysSetting(3)">
         <template #icon>
           <DesktopOutlined />
         </template>
         <span>{{ $t("label.vm") }}</span>
       </a-menu-item>
-      <a-menu-item key="4" @click="$router.push({ name: 'Users' })">
+      <a-menu-item key="4" @click="$router.push({ name: 'Users' }); selectedKeysSetting(4)">
         <template #icon>
           <TeamOutlined />
         </template>
         <span>{{ $t("label.users") }}</span>
       </a-menu-item>
-      <a-menu-item key="5" @click="$router.push({ name: 'GroupPolicy' })">
+      <a-menu-item key="5" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(5)">
         <template #icon>
           <ReconciliationOutlined />
         </template>
         <span>{{ $t("label.group.policy") }}</span>
       </a-menu-item>
-      <a-menu-item key="6">
+      <a-menu-item key="6" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(6)">
         <template #icon>
           <BarChartOutlined />
         </template>
         <span>{{ $t("label.audit") }}</span>
       </a-menu-item>
-      <a-menu-item key="7">
+      <a-menu-item key="7" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(7)">
         <template #icon>
           <CoffeeOutlined />
         </template>
@@ -83,13 +85,16 @@ export default defineComponent({
   setup(props) {
     const state = reactive({
       collapsed: ref(props.collapsed),
-      selectedKeys: ["1"],
+      selectedKeys: [ "" ? "1" : localStorage.getItem("menukey")],
       openKeys: ["sub1"],
       preOpenKeys: ["sub1"],
     });
     watch(
       () => state.openKeys,
       (val, oldVal) => {
+        console.log(val)
+        console.log(oldVal)
+
         state.preOpenKeys = oldVal;
       }
     );
@@ -98,33 +103,13 @@ export default defineComponent({
     };
   },
   methods: {
-    toggleCollapsed: function () {
-      this.$emit("changeToggleCollapsed");
+    // toggleCollapsed: function () {
+    //   this.$emit("changeToggleCollapsed");
+    // },
+    selectedKeysSetting: function (key) {
+      localStorage.setItem("menukey",key);
+      //this.selectedKeys = [key];
     },
   },
 });
 </script>
-
-<style>
-#components-layout-demo-custom-trigger .trigger {
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 24px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-#components-layout-demo-custom-trigger .trigger:hover {
-  color: #1890ff;
-}
-
-#components-layout-demo-custom-trigger .logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 16px;
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
-}
-</style>

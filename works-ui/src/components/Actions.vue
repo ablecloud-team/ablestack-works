@@ -1,7 +1,7 @@
 <template class="able-action">
   <a-space :size="size">
-    <a-tooltip placement="top" v-if="state.buttonBoolean.addButton">
-      <template #title>{{ add }}</template>
+    <a-tooltip v-if="state.buttonBoolean.addButton" placement="top">
+      <template #title>{{ title }}</template>
       <a-button
         type="primary"
         shape="round"
@@ -9,13 +9,13 @@
         @click="setAddModalValue(true)"
       >
         <template #icon>
-          {{ add }}
+          {{ title }}
           <PlusOutlined />
         </template>
       </a-button>
     </a-tooltip>
     <!--Start circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.start">
+    <a-tooltip v-if="state.buttonBoolean.start" placement="top">
       <template #title>{{ $t("tooltip.start") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('tooltip.start')">
         <CaretRightOutlined />
@@ -23,7 +23,7 @@
     </a-tooltip>
     <!--Start circle button end-->
     <!--Stop circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.stop">
+    <a-tooltip v-if="state.buttonBoolean.stop" placement="top">
       <template #title>{{ $t("tooltip.stop") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('tooltip.stop')">
         <PoweroffOutlined />
@@ -31,14 +31,14 @@
     </a-tooltip>
     <!--Stop circle button end-->
     <!--reset circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.reset">
+    <a-tooltip v-if="state.buttonBoolean.reset" placement="top">
       <template #title>{{ $t("tooltip.reset") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('tooltip.reset')">
         <ReloadOutlined />
       </a-button>
     </a-tooltip>
     <!--reinstall circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.reinstall">
+    <a-tooltip v-if="state.buttonBoolean.reinstall" placement="top">
       <template #title>{{ $t("tooltip.reinstall") }}</template>
       <a-button
         shape="circle"
@@ -49,7 +49,7 @@
     </a-tooltip>
     <!--reinstall circle button end-->
     <!--snapshot circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.snapshot">
+    <a-tooltip v-if="state.buttonBoolean.snapshot" placement="top">
       <template #title>{{ $t("tooltip.snapshot") }}</template>
       <a-button
         shape="circle"
@@ -60,7 +60,7 @@
     </a-tooltip>
     <!--snapshot circle button end-->
     <!--volsnapshot circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.volsnapshot">
+    <a-tooltip v-if="state.buttonBoolean.volsnapshot" placement="top">
       <template #title>{{ $t("tooltip.volsnapshot") }}</template>
       <a-button
         shape="circle"
@@ -72,7 +72,7 @@
     </a-tooltip>
     <!--volsnapshot circle button end-->
     <!--isoattach circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.isoattach">
+    <a-tooltip v-if="state.buttonBoolean.isoattach" placement="top">
       <template #title>{{ $t("tooltip.isoattach") }}</template>
       <a-button
         shape="circle"
@@ -83,7 +83,7 @@
     </a-tooltip>
     <!--isoattach circle button end-->
     <!--edit circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.edit">
+    <a-tooltip v-if="state.buttonBoolean.edit" placement="top">
       <template #title>{{ $t("tooltip.edit") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('tooltip.edit')">
         <EditOutlined />
@@ -91,38 +91,38 @@
     </a-tooltip>
     <!--edit circle button end-->
     <!--pause circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.destroy">
-      <template #title>{{ "pause" }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.destroy')">
-        <PauseCircleOutlined />
+    <a-tooltip v-if="state.buttonBoolean.pause" placement="top">
+      <template #title>{{ $t("tooltip.pause") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('tooltip.pause')">
+        <PauseOutlined />
       </a-button>
     </a-tooltip>
     <!--pause circle button end-->
     <!--destroy circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.destroy">
+    <a-tooltip v-if="state.buttonBoolean.destroy" placement="top">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
-        @click="setCircleButtonModal('tooltip.destroy')"
         danger
+        @click="setCircleButtonModal('tooltip.destroy')"
       >
         <DeleteFilled />
       </a-button>
     </a-tooltip>
     <!--destroy circle button ens-->
     <!--AddModal start-->
-    <AddModal
+    <!-- <AddModal
       :visible="showAddModal"
-      :actionFrom="'Actions'"
-      :add="add"
+      :action-from="actionFrom"
+      :title="title"
       @changeAddModal="setAddModalValue"
-    />
+    /> -->
     <!--AddModal end-->
     <!--circle button check modal start-->
     <a-modal
       :title="$t(modalTitle)"
-      :visible="visible"
+      :visible="confirmModalView"
       @cancel="handleCancel"
       @ok="handleCancel"
     >
@@ -135,22 +135,26 @@
 <script>
 import { defineComponent, onMounted, reactive, ref } from "vue";
 import AddModal from "@/components/AddModal";
+
 export default defineComponent({
   components: {
     AddModal,
   },
   props: {
     actionFrom: {
-      String,
+      type: String,
+      requires: true,
+      default: "",
     },
-    add: {
-      String,
+    title: {
+      type: String,
+      requires: false,
+      default: "",
     },
   },
   setup(props) {
     const sizeValue = 8;
-    console.log("==================== props.actionFrom ====================");
-    console.log(props.actionFrom);
+    console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
     const state = reactive({
       callComponent: ref(props.actionFrom),
       buttonBoolean: {
@@ -171,11 +175,18 @@ export default defineComponent({
     onMounted(() => {
       if (state.callComponent === "Workspace") {
         state.buttonBoolean.addButton = true;
+      } else if (state.callComponent === "WorkspaceList") {
+        state.buttonBoolean.start = true;
+        state.buttonBoolean.stop = true;
+        state.buttonBoolean.edit = true;
+        state.buttonBoolean.destroy = true;
+        state.buttonBoolean.pause = true;
       } else if (state.callComponent === "WorkspaceDetail") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
         state.buttonBoolean.edit = true;
         state.buttonBoolean.destroy = true;
+        state.buttonBoolean.pause = true;
       } else if (state.callComponent === "VirtualMachine") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
@@ -200,11 +211,10 @@ export default defineComponent({
     });
     return {
       size: ref(sizeValue),
-      showAddModal: ref(false),
-      visible: ref(false),
+      confirmModalView: ref(false),
       //TODO:2021.07.30 mobalTitle i18n 적용필요
       //fixm
-      modalTitle: ref("tooltip.start"),
+      modalTitle: "",
       state,
     };
   },
@@ -212,15 +222,12 @@ export default defineComponent({
   //   'changeAddModal',
   // ],
   methods: {
-    setAddModalValue: function (value) {
-      this.showAddModal = value;
-    },
     setCircleButtonModal: function (value) {
-      this.visible = true;
+      this.confirmModalView = true;
       this.modalTitle = value;
     },
     handleCancel: function () {
-      this.visible = false;
+      this.confirmModalView = false;
     },
   },
 });

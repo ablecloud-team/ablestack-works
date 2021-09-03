@@ -4,7 +4,7 @@
     :footer="null"
     style="width: 100vw; top: 40px"
   >
-    <template #title>{{ add }}</template>
+    <template #title>{{ title }}</template>
     <a-form layout="vertical">
       <!--===============워크스페이스 추가 시작=======================-->
       <a-space
@@ -59,7 +59,7 @@
             v-bind:placeholder="$t('tooltip.workspace.type')"
             show-search
             class="addmodal-aform-item-div"
-            @change="workstpaceTypeChange"
+            @change="workspaceTypeChange"
           >
             <a-select-option value="desktop">Desktop</a-select-option>
             <a-select-option value="application">Application</a-select-option>
@@ -170,6 +170,17 @@
           />
         </a-form-item>
         <!--데스크탑 생성 수량 end-->
+        <a-form-item class="addmodal-aform-item-button">
+          <a-button @click="changeAddModal(false)" style="margin-left: 7px">
+            {{ $t("label.cancel") }}
+          </a-button>
+          <a-button
+            type="primary"
+            @click="putWorkspace()"
+            style="margin-left: 7px"
+            >{{ $t("label.ok") }}
+            </a-button>
+        </a-form-item>
       </a-space>
       <!--===============워크스페이스 추가  끝========================-->
       <!--===============유저 추가 시작=======================-->
@@ -240,19 +251,20 @@
           />
         </a-form-item>
         <!--워크스페이스 비밀번호 확인 end-->
+        <a-form-item class="addmodal-aform-item-button">
+          <a-button @click="changeAddModal(false)" style="margin-left: 7px">
+            {{ $t("label.cancel") }}
+          </a-button>
+          <a-button
+            type="primary"
+            @click="putUser()"
+            style="margin-left: 7px"
+            >{{ $t("label.ok") }}
+            </a-button>
+        </a-form-item>
       </a-space>
       <!--===============유저 추가  끝========================-->
-      <a-form-item class="addmodal-aform-item-button">
-        <a-button @click="changeAddModal(false)" style="margin-left: 7px">
-          {{ $t("label.cancel") }}
-        </a-button>
-        <a-button
-          type="primary"
-          @click="changeAddModal(false)"
-          style="margin-left: 7px"
-          >{{ $t("label.ok") }}</a-button
-        >
-      </a-form-item>
+
     </a-form>
   </a-modal>
 </template>
@@ -268,35 +280,37 @@ export default defineComponent({
   },
   props: {
     actionFrom: {
-      String,
-      required: true,
+      type: String,
+      requires: true,
+      default: "",
     },
-    add: {
-      String,
+    title: {
+      type: String,
+      requires: true,
+      default: "",
     },
   },
   emits: ["changeAddModal"],
   setup(props) {
     // AddModal의 기본값 설정
-    console.log("AddModal.vue setup");
-    console.log(props.add);
+    //console.log("AddModal.vue setup");
+    //console.log(props.add);
     const state = reactive({
       switchLabel: ref("label.dedicated"),
       desktopBoolean: ref(false),
       modalVisible: ref(false),
       workspaceBoolean: ref(false),
       userBoolean: ref(false),
-      callButton: ref(props.add),
     });
     onMounted(() => {
-      if (state.callButton === "Add Workspace") {
+      if (props.actionFrom === "Workspace") {
         state.workspaceBoolean = true;
-      } else if (state.callButton === "User") {
+      } else if (props.actionFrom === "User") {
         state.userBoolean = true;
       }
     });
     // Type select box 의 변경에 따른 action start
-    const workstpaceTypeChange = (value) => {
+    const workspaceTypeChange = (value) => {
       if (`${value}` === "desktop") {
         state.desktopBoolean = ref(true);
       } else {
@@ -307,15 +321,15 @@ export default defineComponent({
     const dedicatedChange = (value) => {
       if (`${value}` === "true") {
         state.switchLabel = ref("label.shared");
-        console.log(`참`);
+        console.log("true");
       } else {
         state.switchLabel = ref("label.dedicated");
-        console.log(`거짓`);
+        console.log("false");
       }
     }; // switch 변경에 따른 라벨 변경 ens
     return {
       state,
-      workstpaceTypeChange,
+      workspaceTypeChange,
       dedicatedChange,
       desktopQuantity: ref(1),
       workspaceType: ref(undefined),
@@ -326,8 +340,38 @@ export default defineComponent({
     };
   },
   methods: {
-    changeAddModal: function (value) {
+    changeAddModal (value) {
       this.$emit("changeAddModal", value);
+    },
+    putWorkspace() {
+      alert("워크스페이스 생성!!!!!!!!!!!!!!!!!!!");
+      // worksApi
+      //   .get("/api/v1/workspace", { withCredentials: true })
+      //   .then((response) => {
+      //     if (response.status == 200) {
+      //       this.dataList = response.data.result.list;
+      //     } else {
+      //       console.log(response.message);
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+    },
+    putUser() {
+      alert("유저 생성!!!!!!!!!!!!!!!!!!!");
+      // worksApi
+      //   .get("/api/v1/workspace", { withCredentials: true })
+      //   .then((response) => {
+      //     if (response.status == 200) {
+      //       this.dataList = response.data.result.list;
+      //     } else {
+      //       console.log(response.message);
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
     },
   },
 });

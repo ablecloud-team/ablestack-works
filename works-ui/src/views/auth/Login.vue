@@ -88,8 +88,7 @@ export default defineComponent({
       // id: "",
       // password: "",
     });
-    const rulesIdMeassage = ref();
-    const rulesPasswordMeassage = ref();
+
     const rules = {
       id: {
         required: true,
@@ -104,14 +103,12 @@ export default defineComponent({
     return {
       formRef,
       formState,
-      rules,
-      rulesIdMeassage,
-      rulesPasswordMeassage
+      rules
     };
   },
   data() {
-    let rulesIdMeassage = this.$t(`message.please.enter.your.id`)
-    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
+    let rulesIdMeassage = this.$t(`message.please.enter.your.id`);
+    let rulesPasswordMeassage = this.$t("message.please.enter.your.password");
     return {
       rulesIdMeassage,
       rulesPasswordMeassage,
@@ -134,15 +131,13 @@ export default defineComponent({
             params.append("password", this.formState.password);
             try {
               res = await axiosLogin(params)
-              // console.log(res);
-              if (res.status === 200) {
+              console.log(res);
+              if (res.data.result.status === 200) {
+                localStorage.setItem("token", res.data.result.token);
                 message.destroy();
                 message.success(this.$t("message.login.completed"), 2);
-                await store.dispatch("loginCommit", res.data)
-                await router.push({name: "home"})
-                // console.log("res.data.result");
-                // console.log(res.data);
-                // console.log(store.state.user.accessToken);
+                store.dispatch("loginCommit", res.data)
+                router.push({name: "Dashboard"})
               }
             }catch (error){
               message.destroy();
