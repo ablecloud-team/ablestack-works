@@ -30,6 +30,12 @@ export default defineComponent({
     name: String,
     info: Object,
   },
+  setup(props) {
+    return {
+      id: props.uuid,
+      actionFrom: ref("WorkspaceDetail"),
+    };
+  },
 });
 </script>
 <style>

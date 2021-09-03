@@ -28,7 +28,6 @@ export default {
 .logo-image {
   display: inline-block;
   vertical-align: middle;
-  width: 291px;
   height: 43px;
 }
 </style>

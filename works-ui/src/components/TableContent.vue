@@ -118,8 +118,8 @@ export default defineComponent({
     comp: String,
   },
   setup(props) {
-    console.log("TableContent.vue props.tapName");
-    console.log(props.tapName);
+    //console.log("TableContent.vue props.tapName");
+    //console.log(props.tapName);
     const state = reactive({
       modalBoolean: ref(false),
       callTapName: ref(props.tapName),
