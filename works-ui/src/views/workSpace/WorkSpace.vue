@@ -9,74 +9,291 @@
               <Apath v-bind:paths="[$t('label.workspace')]" />
             </a-col>
 
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions
-                :add="$t('label.add.workspace')"
-                :addButton="true"
-                :actionFrom="name"
-                :showModal="showAddModal"
-                @changeAddModal="setShowAddModal"
-              />
+              <div>
+                <a-button type="primary" shape="round" @click="showModal(true)">{{ addModalTitle }}
+                  <template #icon>
+                      {{ title }}
+                      <PlusOutlined />
+                    </template>
+                </a-button>
+              </div>
+              <!-- <Actions
+                :title="$t('label.add.workspace')"
+                :add-button="true"
+                :action-from="actionFrom"
+                :show-modal="showAddModal"
+              /> -->
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceList
-            :data="WorkspaceListData"
-            :columns="WorkspaceListColumns"
-            :bordered="false"
-          />
+          <WorkSpaceList :data="dataList" :bordered="false" />
         </div>
-        <AddModal
-          v-model:visible="showAddModal"
-          :add="$t('label.add.workspace')"
-          :actionFrom="name"
-          :showModal="showAddModal"
-          @changeAddModal="setShowAddModal"
-        />
       </a-layout-content>
     </a-layout>
+    <!-- ADD WORKSPACE MODAL START  -->
+    <a-modal v-model:visible="visible" :title="addModalTitle" >
+      <template #title>asdfasdf
+      </template>
+      <template #footer>
+        <a-button key="close" @click="showModal(false)">{{$t("label.cancel")}}</a-button>
+        <a-button key="submit" type="primary" :loading="loading" @click="putWorkspace">{{$t("label.ok")}}</a-button>
+      </template>
+      <a-form
+        ref="formRef"
+        :model="formState"
+        :rules="rules"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+        layout="vertical"
+      >
+          <!--워크스페이스 이름 start-->
+          <a-form-item name="name" :label="$t('label.name')">
+            <a-input 
+              v-model:value="formState.name" 
+              :placeholder="$t('tooltip.workspace.name')"/>
+          </a-form-item>
+          <!--워크스페이스 이름 end-->
+          <!--워크스페이스 설명 start-->
+          <a-form-item name="description" :label="$t('label.description')">
+            <a-input
+              v-model:value="formState.description"
+              :placeholder="$t('tooltip.workspace.description')"
+              class="addmodal-aform-item-div"
+            />
+          </a-form-item>
+          <!--워크스페이스 설명 end-->
+          <!--워크스페이스 타입 start-->
+          <a-form-item name="workspaceType" :label="$t('label.type')">
+            <a-select
+              v-model:value="formState.workspaceType"
+              :placeholder="$t('tooltip.workspace.type')"
+              class="addmodal-aform-item-div"
+              @change="workspaceTypeChange"
+            >
+              <a-select-option value="desktop">Desktop</a-select-option>
+              <a-select-option value="application">Application</a-select-option>
+            </a-select>
+          </a-form-item>
+          <!--워크스페이스 타입 end-->
+          <!--워크스페이스 전용 여부 start-->
+          <a-form-item v-show="desktopBoolean">
+              {{ $t(switchLabel) }}
+            <a-switch
+              v-model:checked="formState.dedicatedOrSharedBoolean"
+              @change="dedicatedChange"
+            />
+          </a-form-item>
+          <!--워크스페이스 전용 여부 end-->
+          <!--워크스페이스 템플릿 start-->
+          <a-form-item name="selectedTemplateId" :label="$t('label.template')">
+            <a-select
+              v-model:value="formState.selectedTemplateId"
+              :placeholder="$t('tooltip.workspace.template')"
+              show-search
+              option-filter-prop="label"
+              class="addmodal-aform-item-div"
+            >
+              <a-select-option v-for="option in templates" :key="option.name" :value="option.id" :label="option.name">
+                {{ option.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+          <!--워크스페이스 템플릿 end-->
+          <!--워크스페이스 컴퓨트 오퍼링 start-->
+          <a-form-item name="selectedOfferingId" :label="$t('label.compute.offering')">
+            <a-select
+              v-model:value="formState.selectedOfferingId"
+              :placeholder="$t('tooltip.workspace.compute.offering')"
+              show-search
+              option-filter-prop="label"
+              class="addmodal-aform-item-div"
+            >
+              <a-select-option v-for="option in offerings" :key="option.name" :value="option.id" :label="option.name">
+                {{ option.name }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+          <!--워크스페이스 컴퓨트 오퍼링 end-->
+      </a-form>
+    </a-modal>
+    <!-- ADD WORKSPACE MODAL END  -->
   </div>
 </template>
 
 <script>
-import Actions from "@/components/Actions";
+//import AddWorkspaceModal from "@/components/AddWorkspaceModal";
 import Apath from "@/components/Apath";
-import { WorkspaceListData, WorkspaceListColumns } from "@/data";
 import WorkSpaceList from "./WorkSpaceList";
-import { defineComponent, ref } from "vue";
-import AddModal from "@/components/AddModal";
+import { defineComponent, onMounted, reactive, ref, toRaw } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
-export default defineComponent({
+export default defineComponent ({
   name: "WorkSpace",
-  props: {
-    msg: String,
-  },
   components: {
-    AddModal,
     WorkSpaceList,
     Apath,
-    Actions,
+  },
+  props: {},
+  setup() {
+    const visible = ref(false);
+    const showModal = (state) => {
+      visible.value = state;
+    };
+    const formRef = ref();
+    const formState = reactive({
+      name: ref(undefined),
+      description: ref(undefined),
+      selectedTemplateId: ref(undefined),
+      selectedOfferingId: ref(undefined),
+      workspaceType: ref(undefined),
+      dedicatedOrSharedBoolean: ref(false),
+    });
+    const rules = {
+      name: { required: true, },
+      description: { required: true, },
+      workspaceType: { required: true, },
+      dedicatedOrSharedBoolean: { required: false, },
+      selectedTemplateId: { required: true, },
+      selectedOfferingId: { required: true, },
+    };
+    const templates = [];
+    const offerings = [];
+    return {
+      templates,
+      offerings,
+      labelCol: { span: 10 },
+      wrapperCol: { span: 40 },
+      formRef,
+      formState,
+      rules,
+      switchLabel: ref("label.dedicated"),
+      visible,
+      showModal,
+    };
   },
   data() {
     return {
-      name: "Workspace",
+      addModalTitle: this.$t("label.workspace.add"),
+      dataList: [],
+      desktopBoolean: ref(false),
     };
   },
-  setup() {
-    const showAddModal = ref(false);
-    return {
-      WorkspaceListData,
-      WorkspaceListColumns,
-      showAddModal,
-    };
+  created() {
+    this.fetchData();
+    this.fetchOfferingsAndTemplates();
+
   },
   methods: {
-    setShowAddModal: function (params) {
-      this.showAddModal = params;
+    fetchData() {
+      worksApi
+        .get("/api/v1/workspace", { withCredentials: true })
+        .then((response) => {
+          if (response.data.result.status == 200) {
+            this.dataList = response.data.result.list;
+          } else {
+            message.error(this.$t('message.response.data.fail'));
+            //console.log(response.message);
+          }
+        })
+        .catch(function (error) {
+          message.error(this.$t('message.response.data.fail'));
+          //console.log(error);
+        });
+    },
+    dedicatedChange(value) {
+      this.dedicatedOrSharedBoolean = value
+      if (this.dedicatedOrSharedBoolean) {
+        this.switchLabel = ref("label.shared");
+        console.log("true");
+      } else {
+        this.switchLabel = ref("label.dedicated");
+        console.log("false");
+      }
+    },
+    workspaceTypeChange(value) {
+      if (value === "desktop") {
+        this.desktopBoolean = ref(true);
+      } else {
+        this.desktopBoolean = ref(false);
+      }
+    },
+    templateChange(value) {
+      this.formState.selectedTemplateId = value;
+      //console.log(value);
+    },
+    offeringChange(value) {
+      this.formState.selectedOfferingId = value;
+      //console.log(value);
+    },
+    putWorkspace() {
+      this.rules.name.message = this.$t('input.workspace.name');
+      this.rules.description.message = this.$t('input.workspace.description');
+      this.rules.workspaceType.message = this.$t('input.workspace.workspaceType');
+      this.rules.selectedTemplateId.message = this.$t('input.workspace.selectedTemplateId'); 
+      this.rules.selectedOfferingId.message = this.$t('input.workspace.selectedOfferingId');
+
+      let params = new URLSearchParams();
+      params.append("name", this.formState.name);
+      params.append("description", this.formState.description);
+      params.append("type", this.formState.workspaceType);
+      params.append("shared", this.formState.dedicatedOrSharedBoolean);
+      params.append("templateUuid", this.formState.selectedTemplateId);
+      params.append("computeOfferingUuid", this.formState.selectedOfferingId);
+      //console.log(params);
+      this.formRef
+          .validate()
+          .then( () => {
+          //console.log(toRaw(formState));
+          message.loading(this.$t("message.workspace.createing"), 1);
+          try {
+            worksApi
+              .put("/api/v1/workspace", params, { withCredentials: true })
+              .then((response) => {
+                if (response.data.result.status === 200) {
+                  message.loading(this.$t("message.workspace.create.success"), 1);
+                  setTimeout(() => {
+                    location.reload();
+                  }, 1500);
+                } else {
+                  message.error(response.data.result.deployvirtualmachineresponse.errortext);
+                }
+                this.showModal(false);
+              })
+              .catch(function (error) {
+                message.error(error.message);
+              });
+          }catch (error){
+            console.log(error)
+            message.error(this.$t("message.workspace.create.fail"))
+          }
+        })
+        .catch(error => {
+          console.log('error', error);
+          //message.error(error);
+          
+        });
+    },
+    fetchOfferingsAndTemplates() {
+      worksApi
+        .get("/api/v1/offering", { withCredentials: true })
+        .then((response) => {
+          if (response.status == 200) {
+            //console.log(response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering);
+            this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
+            this.templates = response.data.templateList.listtemplatesresponse.template;
+          } else {
+            console.log(response.message);
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 });

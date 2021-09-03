@@ -9,11 +9,11 @@
               <Apath
                 v-bind:paths="[
                   { name: $t('label.workspace'), component: 'Workspaces' },
-                  { name: name, component: null },
+                  { name: workspaceDataList.Name, component: null }, 
                 ]"
               />
             </a-col>
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <actions :actionFrom="actionFrom" />
             </a-col>
@@ -22,8 +22,13 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody :name="name" :info="info" />
+          <WorkSpaceBody
+          :workspaceDataList="workspaceDataList"
+          :templateDataList="templateDataList"
+          :networkDataList="networkDataList"
+          :offeringDataList="offeringDataList"/>
         </div>
+        
       </a-layout-content>
     </a-layout>
   </div>
@@ -34,18 +39,53 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceBody from "@/views/workSpace/WorkSpaceBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
 export default defineComponent({
   props: {
-    name: String,
-    info: Object,
+
   },
   components: { Apath, Actions, WorkSpaceBody },
-  setup() {
+  setup(props) {
     return {
       actionFrom: ref("WorkspaceDetail"),
     };
   },
+  data() {
+    return {
+      workspaceDataList: [],
+      templateDataList: [],
+      networkDataList: [],
+      offeringDataList: [],
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      //alert(this.$route.params.uuid);
+      worksApi
+        .get("/api/v1/workspace/"+this.$route.params.uuid, { withCredentials: true })
+        .then((response) => {
+          if (response.data.result.status == 200) {
+            this.workspaceDataList = response.data.result.workspaceInfo;
+            this.templateDataList = response.data.result.templateInfo.listtemplatesresponse.template[0];
+            this.networkDataList = response.data.result.networkInfo.listnetworksresponse.network[0];
+            this.offeringDataList = response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];
+            //this.workspaceName = response.data.result.workspaceInfo.Name;
+          } else {
+            console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+  },
 });
+
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

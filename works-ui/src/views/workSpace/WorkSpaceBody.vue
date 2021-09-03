@@ -4,14 +4,21 @@
       <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
+          <InfoCard 
+          :actionFrom="actionFrom"
+          :workspaceDataList="workspaceDataList"
+          :templateDataList="templateDataList"
+          :networkDataList="networkDataList"
+          :offeringDataList="offeringDataList"/>
         </ACard>
       </a-col>
 
       <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
-          <WorkSpaceTab />
+          <WorkSpaceTab 
+          :workspaceDataList="workspaceDataList"
+          :networkDataList="networkDataList"/>
         </a-card>
       </a-col>
     </a-row>
@@ -21,13 +28,36 @@
 <script>
 import InfoCard from "../../components/InfoCard";
 import WorkSpaceTab from "./WorkSpaceTab";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: { WorkSpaceTab, InfoCard },
   props: {
-    name: String,
-    info: Object,
+    workspaceDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+    templateDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+    networkDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+    offeringDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+  },
+  setup(props) {
+    return {
+      actionFrom: ref("WorkspaceDetail"),
+    };
   },
 });
 </script>

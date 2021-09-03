@@ -2,38 +2,25 @@
   <a-table
     size="middle"
     class="ant-table-striped"
-    :columns="columns"
+    :columns="listColumns"
     :data-source="data"
-    :rowClassName="
+    :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
     :row-selection="rowSelection"
+    :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <router-link
-        :to="{
-          name: 'WorkspacesDetail',
-          params: {
-            name: record.Name,
-            info: [record.IPAddress, record.Account, record.Zone],
-          },
-        }"
-        >{{ record.Name }}</router-link
-      >
+      <router-link :to="{ path: '/workspaceDetail/'+record.Uuid}">{{ record.Name }}</router-link>
     </template>
 
-    <template #actionRender="{ record }">
+    <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
-          <Actions
-            :power="record.State === 'Running'"
-            :destroy="true"
-            :reset="true"
-            :iso="true"
-          />
+          <actions :action-from="actionFrom" />
         </template>
         <MoreOutlined />
       </a-Popover>
@@ -56,7 +43,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import Actions from "@/components/Actions";
 
 const rowSelection = {
@@ -75,18 +62,100 @@ const rowSelection = {
   },
 };
 export default defineComponent({
+  components: {
+    Actions,
+  },
   props: {
-    data: Object,
-    columns: Object,
-    bordered: Boolean,
+    data: {
+      type: Object,
+      requires: true,
+      default: null,
+    },
+    bordered: {
+      type: Boolean,
+      requires: true,
+      default: null,
+    },
   },
   setup() {
     return {
       rowSelection,
+      actionFrom: ref("WorkspaceList"),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
+        showTotal: (total) => `Total ${total} items`, // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
+      listColumns: [
+        {
+          dataIndex: "Name",
+          key: "Name",
+          slots: { customRender: "nameRender" },
+          title: "Name",
+          sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          slots: { customRender: "actionRender" },
+        },
+        {
+          title: "State",
+          dataIndex: "State",
+          key: "State",
+          sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "Type",
+          dataIndex: "Type",
+          key: "Type",
+          sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "Number Of Desktop",
+          dataIndex: "NoD",
+          key: "Nod",
+          sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "Number Of Connection",
+          dataIndex: "NoC",
+          key: "NoC",
+          sorter: (a, b) => (a.NoC < b.NoC ? -1 : a.NoC > b.NoC ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "Network Type",
+          dataIndex: "NetType",
+          key: "NetType",
+          sorter: (a, b) =>
+            a.NetType < b.NetType ? -1 : a.NetType > b.NetType ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "Restrict",
+          dataIndex: "Restrict",
+          key: "Restrict",
+          sorter: (a, b) =>
+            a.Restrict < b.Restrict ? -1 : a.Restrict > b.Restrict ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        // ,
+        // {
+        //     title: 'Tags',
+        //     key: 'tags',
+        //     dataIndex: 'tag',
+        //     slots: {customRender: 'tags'},
+        // }
+      ],
     };
-  },
-  components: {
-    Actions,
   },
 });
 </script>

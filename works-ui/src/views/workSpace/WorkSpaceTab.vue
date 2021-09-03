@@ -1,8 +1,8 @@
 <template>
   <div id="ContentTab">
     <a-tabs
-      type="card"
       v-model:activeKey="activeKey"
+      type="card"
       :tab-position="tabPosition"
       @change="changeTap"
     >
@@ -55,6 +55,18 @@ import {
 } from "../../data";
 export default defineComponent({
   components: { TableContent },
+  props: {
+    workspaceDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+    networkDataList: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+  },
   setup() {
     const tabPosition = ref("top");
     const activeKey = ref("1");
@@ -72,7 +84,6 @@ export default defineComponent({
       } else if (`${value}` === "4") {
         state.callTap = ref("network");
       }
-      console.log("sdfsdfsdf");
       console.log(state.callTap);
     };
     return {
