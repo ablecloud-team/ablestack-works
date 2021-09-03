@@ -12,19 +12,19 @@ type shellReturnModel struct{
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
 }
+
 // exeShellHandler godoc
 // @Summary powershell 명령 처리기
 // @Description powershell 명령 처리기
 // @Accept  multipart/form-data
 // @Produce  json
-// @Param cmd formData string true "사용자 이름"
-// @Param arg formData string true "사용자 암호"
-// @Param timeout formData int false "시간제한, 기본값"
-// @Success 200 {object} loginModel "로그인 성공"
-// @Failure 401 {object} loginModel "로그인 실패"
+// @Param cmd query string true "명령어"
+// @Param arg query string false "인자"
+// @Param timeout query int false "시간제한, 기본값"
+// @Success 200 {object} shellReturnModel "로그인 성공"
+// @Failure 401 {object} errorModel "로그인 실패"
 // @Failure default {objects} string
-// @Router /login [post]
-//return shellReturnModel
+// @Router /cmd/ [get]
 func exeShellHandler(c *gin.Context) {
 
 	var (
@@ -41,7 +41,7 @@ func exeShellHandler(c *gin.Context) {
 		return
 	}
 	if pscmd.TIMEOUT == 0 {
-		pscmd.TIMEOUT = 1
+		pscmd.TIMEOUT = 3
 	}
 
 	c1 := make(chan []string, 1)

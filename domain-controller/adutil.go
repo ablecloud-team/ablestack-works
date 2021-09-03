@@ -31,6 +31,7 @@ type ADConfig struct {
 	Silent     bool
 	PolicyPATH string
 	PolicyLIST string
+	UpdatePolicy bool
 }
 
 var ADconfig = ADConfig{}
@@ -94,6 +95,8 @@ func ADsave() (err error) {
 	ADconfig.ADbasedn = "DC=dc1,DC=local"
 	ADconfig.PolicyPATH = "./grouppolicy"
 	ADconfig.PolicyLIST = "policylist.json"
+	ADconfig.UpdatePolicy = false
+	ADconfig.Silent = false
 
 	byteValue, err := json.MarshalIndent(ADconfig, "", "  ")
 	if err != nil {
@@ -109,7 +112,7 @@ func ADsave() (err error) {
 }
 
 func ADinit() (err error) {
-	data, err := os.Open("config.json")
+	data, err := os.Open("authconfig.json")
 	if err != nil {
 		return err
 	}
@@ -149,25 +152,25 @@ func ADinit() (err error) {
 	if err != nil {
 		return err
 	}
+	if ADconfig.UpdatePolicy {
+		for _, policyItem := range policyList {
+			shell, err := setupShell()
+			if err != nil {
+				log.Errorf("%v", err)
+				return err
+			}
+			policy := policyItem["name"]
+			description := policyItem["description"]
+			stdout, err := shell.Exec(fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
+			log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+			if err != nil {
+				err2 = fmt.Sprintf("%v, %v", err2, err)
+			}
+			shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
+			shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
 
-	for _, policyItem := range policyList {
-		shell, err := setupShell()
-		if err != nil{
-			log.Errorf("%v", err)
-			return err
 		}
-		policy := policyItem["name"]
-		description := policyItem["description"]
-		stdout, err := shell.Exec(fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
-		log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
-		if err != nil {
-			err2 = fmt.Sprintf("%v, %v", err2, err)
-		}
-		shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
-		shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
-
 	}
-
 	if err2 == ""{
 		return nil
 	}

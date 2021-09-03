@@ -7789,3 +7789,267 @@ Sep  1 17:46:59.799 [ERRO] 5,     + CategoryInfo          : ObjectNotFound: (Mic
 Sep  1 17:46:59.799 [ERRO] 6,     + FullyQualifiedErrorId : GpoLinkNotFound,Microsoft.GroupPolicy.Commands.RemoveGPLinkCommand [handlers.go:641][detachPolicyHandler()]
 Sep  1 17:46:59.799 [ERRO] 7,   [handlers.go:641][detachPolicyHandler()]
 Sep  1 17:46:59.799 [ERRO] 8,  [handlers.go:641][detachPolicyHandler()]
+Sep  2 18:04:51.046 [INFO] stdout: 
+
+DisplayName      : clipboard_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : e8d6ac92-e809-47bd-adc2-acd78e17ad5c
+GpoStatus        : AllSettingsEnabled
+Description      : 클립보드 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:29
+ModificationTime : 2021-09-02 오후 6:04:59
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:52.596 [INFO] stdout: 
+
+DisplayName      : usb_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : fd67b529-a014-410d-8415-013ae088c25b
+GpoStatus        : AllSettingsEnabled
+Description      : usb 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:31
+ModificationTime : 2021-09-02 오후 6:05:01
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:54.410 [INFO] stdout: 
+
+DisplayName      : share_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 5a65a092-ae03-492c-9c0e-b37e068c741f
+GpoStatus        : AllSettingsEnabled
+Description      : 공유 스토리지 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:33
+ModificationTime : 2021-09-02 오후 6:05:03
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:56.603 [INFO] stdout: 
+
+DisplayName      : remotefx
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 54721b30-86e2-4682-b270-ec1231447609
+GpoStatus        : AllSettingsEnabled
+Description      : RemoteFX 기능 사용
+CreationTime     : 2021-09-01 오후 4:11:35
+ModificationTime : 2021-09-02 오후 6:05:05
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:58.201 [INFO] stdout: 
+
+DisplayName      : install_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 9d060778-374c-4406-8807-1d4ecf5a2a94
+GpoStatus        : AllSettingsEnabled
+Description      : 신규 설치 금지
+CreationTime     : 2021-09-01 오후 4:11:37
+ModificationTime : 2021-09-02 오후 6:05:06
+UserVersion      : AD 버전: 22, SysVol 버전: 22
+ComputerVersion  : AD 버전: 22, SysVol 버전: 22
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:59.698 [INFO] stdout: 
+
+DisplayName      : update_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 33549a8f-5177-4e83-9269-7051179172f4
+GpoStatus        : AllSettingsEnabled
+Description      : 업데이트 금지
+CreationTime     : 2021-09-01 오후 4:11:39
+ModificationTime : 2021-09-02 오후 6:05:08
+UserVersion      : AD 버전: 22, SysVol 버전: 22
+ComputerVersion  : AD 버전: 22, SysVol 버전: 22
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:04:59.782 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  2 18:06:01.825 [INFO] stdout: 
+
+DisplayName      : clipboard_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : e8d6ac92-e809-47bd-adc2-acd78e17ad5c
+GpoStatus        : AllSettingsEnabled
+Description      : 클립보드 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:29
+ModificationTime : 2021-09-02 오후 6:06:10
+UserVersion      : AD 버전: 24, SysVol 버전: 24
+ComputerVersion  : AD 버전: 24, SysVol 버전: 24
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:03.506 [INFO] stdout: 
+
+DisplayName      : usb_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : fd67b529-a014-410d-8415-013ae088c25b
+GpoStatus        : AllSettingsEnabled
+Description      : usb 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:31
+ModificationTime : 2021-09-02 오후 6:06:12
+UserVersion      : AD 버전: 24, SysVol 버전: 24
+ComputerVersion  : AD 버전: 24, SysVol 버전: 24
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:05.339 [INFO] stdout: 
+
+DisplayName      : share_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 5a65a092-ae03-492c-9c0e-b37e068c741f
+GpoStatus        : AllSettingsEnabled
+Description      : 공유 스토리지 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:33
+ModificationTime : 2021-09-02 오후 6:06:14
+UserVersion      : AD 버전: 24, SysVol 버전: 24
+ComputerVersion  : AD 버전: 24, SysVol 버전: 24
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:07.054 [INFO] stdout: 
+
+DisplayName      : remotefx
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 54721b30-86e2-4682-b270-ec1231447609
+GpoStatus        : AllSettingsEnabled
+Description      : RemoteFX 기능 사용
+CreationTime     : 2021-09-01 오후 4:11:35
+ModificationTime : 2021-09-02 오후 6:06:15
+UserVersion      : AD 버전: 24, SysVol 버전: 24
+ComputerVersion  : AD 버전: 24, SysVol 버전: 24
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:08.753 [INFO] stdout: 
+
+DisplayName      : install_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 9d060778-374c-4406-8807-1d4ecf5a2a94
+GpoStatus        : AllSettingsEnabled
+Description      : 신규 설치 금지
+CreationTime     : 2021-09-01 오후 4:11:37
+ModificationTime : 2021-09-02 오후 6:06:17
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:10.454 [INFO] stdout: 
+
+DisplayName      : update_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 33549a8f-5177-4e83-9269-7051179172f4
+GpoStatus        : AllSettingsEnabled
+Description      : 업데이트 금지
+CreationTime     : 2021-09-01 오후 4:11:39
+ModificationTime : 2021-09-02 오후 6:06:19
+UserVersion      : AD 버전: 23, SysVol 버전: 23
+ComputerVersion  : AD 버전: 23, SysVol 버전: 23
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  2 18:06:10.545 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 10:26:16.556 [INFO] stdout: 
+
+DisplayName      : clipboard_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : e8d6ac92-e809-47bd-adc2-acd78e17ad5c
+GpoStatus        : AllSettingsEnabled
+Description      : 클립보드 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:29
+ModificationTime : 2021-09-03 오전 10:26:26
+UserVersion      : AD 버전: 26, SysVol 버전: 26
+ComputerVersion  : AD 버전: 26, SysVol 버전: 26
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  3 10:26:18.154 [INFO] stdout: 
+
+DisplayName      : usb_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : fd67b529-a014-410d-8415-013ae088c25b
+GpoStatus        : AllSettingsEnabled
+Description      : usb 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:31
+ModificationTime : 2021-09-03 오전 10:26:28
+UserVersion      : AD 버전: 26, SysVol 버전: 26
+ComputerVersion  : AD 버전: 26, SysVol 버전: 26
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  3 10:26:19.785 [INFO] stdout: 
+
+DisplayName      : share_block
+DomainName       : dc1.local
+Owner            : MYDOMAIN\Domain Admins
+Id               : 5a65a092-ae03-492c-9c0e-b37e068c741f
+GpoStatus        : AllSettingsEnabled
+Description      : 공유 스토리지 사용 금지
+CreationTime     : 2021-09-01 오후 4:11:33
+ModificationTime : 2021-09-03 오전 10:26:29
+UserVersion      : AD 버전: 26, SysVol 버전: 26
+ComputerVersion  : AD 버전: 26, SysVol 버전: 26
+WmiFilter        : 
+
+, 
+stderr: <nil>
+ [adutil.go:162][ADinit()]
+Sep  3 10:29:12.114 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 10:34:14.289 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 10:39:28.667 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 10:42:00.714 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 10:49:45.286 [INFO] [serverVersion:development] Starting application [main.go:241][main()]
+Sep  3 11:02:24.872 [INFO] [serverVersion:development] Starting application [main.go:214][main()]
+Sep  3 11:19:58.302 [INFO] [serverVersion:development] Starting application [main.go:214][main()]

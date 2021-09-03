@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  main.errorModel:
+    properties:
+      msg:
+        type: string
+      target:
+        type: string
+    type: object
   main.loginModel:
     properties:
       groups:
@@ -11,6 +18,13 @@ definitions:
       login:
         type: boolean
       username:
+        type: string
+    type: object
+  main.shellReturnModel:
+    properties:
+      stderr:
+        type: string
+      stdout:
         type: string
     type: object
   main.userModel:
@@ -34,6 +48,41 @@ info:
   title: Ablecloud Works Domain-Controller API
   version: "1.0"
 paths:
+  /cmd/:
+    get:
+      consumes:
+      - multipart/form-data
+      description: powershell 명령 처리기
+      parameters:
+      - description: 명령어
+        in: query
+        name: cmd
+        required: true
+        type: string
+      - description: 인자
+        in: query
+        name: arg
+        type: string
+      - description: 시간제한, 기본값
+        in: query
+        name: timeout
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 로그인 성공
+          schema:
+            $ref: '#/definitions/main.shellReturnModel'
+        "401":
+          description: 로그인 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: powershell 명령 처리기
   /login:
     post:
       consumes:
@@ -123,42 +172,6 @@ paths:
           schema:
             type: objects
       summary: add New User account
-securityDefinitions:
-  ApiKeyAuth:
-    in: header
-    name: Authorization
-    type: apiKey
-  BasicAuth:
-    type: basic
-  OAuth2AccessCode:
-    authorizationUrl: https://example.com/oauth/authorize
-    flow: accessCode
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-    tokenUrl: https://example.com/oauth/token
-    type: oauth2
-  OAuth2Application:
-    flow: application
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-      write: ' Grants write access'
-    tokenUrl: https://example.com/oauth/token
-    type: oauth2
-  OAuth2Implicit:
-    authorizationUrl: https://example.com/oauth/authorize
-    flow: implicit
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-      write: ' Grants write access'
-    type: oauth2
-  OAuth2Password:
-    flow: password
-    scopes:
-      admin: ' Grants read and write access to administrative information'
-      read: ' Grants read access'
-      write: ' Grants write access'
-    tokenUrl: https://example.com/oauth/token
-    type: oauth2
 swagger: "2.0"
 x-extension-openapi:
   example: value on a json format

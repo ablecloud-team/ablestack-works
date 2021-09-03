@@ -18,6 +18,59 @@
     "host": "ad-api.ablecloud.io",
     "basePath": "/api/v1",
     "paths": {
+        "/cmd/": {
+            "get": {
+                "description": "powershell 명령 처리기",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "powershell 명령 처리기",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "명령어",
+                        "name": "cmd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "인자",
+                        "name": "arg",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "시간제한, 기본값",
+                        "name": "timeout",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "로그인 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.shellReturnModel"
+                        }
+                    },
+                    "401": {
+                        "description": "로그인 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "objects"
+                        }
+                    }
+                }
+            }
+        },
         "/login": {
             "post": {
                 "description": "사용자 로그인 체크",
@@ -151,6 +204,17 @@
         }
     },
     "definitions": {
+        "main.errorModel": {
+            "type": "object",
+            "properties": {
+                "msg": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                }
+            }
+        },
         "main.loginModel": {
             "type": "object",
             "properties": {
@@ -171,6 +235,17 @@
                 }
             }
         },
+        "main.shellReturnModel": {
+            "type": "object",
+            "properties": {
+                "stderr": {
+                    "type": "string"
+                },
+                "stdout": {
+                    "type": "string"
+                }
+            }
+        },
         "main.userModel": {
             "type": "object",
             "properties": {
@@ -180,53 +255,6 @@
                 "username": {
                     "type": "string"
                 }
-            }
-        }
-    },
-    "securityDefinitions": {
-        "ApiKeyAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        },
-        "BasicAuth": {
-            "type": "basic"
-        },
-        "OAuth2AccessCode": {
-            "type": "oauth2",
-            "flow": "accessCode",
-            "authorizationUrl": "https://example.com/oauth/authorize",
-            "tokenUrl": "https://example.com/oauth/token",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information"
-            }
-        },
-        "OAuth2Application": {
-            "type": "oauth2",
-            "flow": "application",
-            "tokenUrl": "https://example.com/oauth/token",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information",
-                "write": " Grants write access"
-            }
-        },
-        "OAuth2Implicit": {
-            "type": "oauth2",
-            "flow": "implicit",
-            "authorizationUrl": "https://example.com/oauth/authorize",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information",
-                "write": " Grants write access"
-            }
-        },
-        "OAuth2Password": {
-            "type": "oauth2",
-            "flow": "password",
-            "tokenUrl": "https://example.com/oauth/token",
-            "scopes": {
-                "admin": " Grants read and write access to administrative information",
-                "read": " Grants read access",
-                "write": " Grants write access"
             }
         }
     },
