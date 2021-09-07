@@ -14,7 +14,6 @@
               <div>
                 <a-button type="primary" shape="round" @click="showModal(true)">{{ addModalTitle }}
                   <template #icon>
-                      {{ title }}
                       <PlusOutlined />
                     </template>
                 </a-button>
@@ -37,7 +36,7 @@
     </a-layout>
     <!-- ADD WORKSPACE MODAL START  -->
     <a-modal v-model:visible="visible" :title="addModalTitle" >
-      <template #title>asdfasdf
+      <template #title>
       </template>
       <template #footer>
         <a-button key="close" @click="showModal(false)">{{$t("label.cancel")}}</a-button>
@@ -187,7 +186,6 @@ export default defineComponent ({
   created() {
     this.fetchData();
     this.fetchOfferingsAndTemplates();
-
   },
   methods: {
     fetchData() {
@@ -197,12 +195,12 @@ export default defineComponent ({
           if (response.data.result.status == 200) {
             this.dataList = response.data.result.list;
           } else {
-            message.error(this.$t('message.response.data.fail'));
+            message.error(this.t('message.response.data.fail'));
             //console.log(response.message);
           }
         })
         .catch(function (error) {
-          message.error(this.$t('message.response.data.fail'));
+          message.error(error.message);
           //console.log(error);
         });
     },
@@ -267,6 +265,7 @@ export default defineComponent ({
               })
               .catch(function (error) {
                 message.error(error.message);
+              //console.log(error);
               });
           }catch (error){
             console.log(error)
@@ -292,7 +291,8 @@ export default defineComponent ({
           }
         })
         .catch(function (error) {
-          console.log(error);
+          message.error(error.message);
+          //console.log(error);
         });
     },
   },

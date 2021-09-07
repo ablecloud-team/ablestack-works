@@ -88,12 +88,17 @@ export default defineComponent({
         showTotal: (total) => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
+      
+    };
+  },
+  data() {
+    return {
       listColumns: [
         {
           dataIndex: "Name",
           key: "Name",
           slots: { customRender: "nameRender" },
-          title: "Name",
+          title: this.$t('label.name'),
           sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -104,35 +109,35 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: "State",
+          title: this.$t('label.state'),
           dataIndex: "State",
           key: "State",
           sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "Type",
+          title: this.$t('label.type'),
           dataIndex: "Type",
           key: "Type",
           sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "Number Of Desktop",
-          dataIndex: "NoD",
-          key: "Nod",
+          title: this.$t('label.desktop.quantity'),
+          dataIndex: "Quantity",
+          key: "Quantity",
           sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "Number Of Connection",
+          title: this.$t('label.desktop.connection.quantity'),
           dataIndex: "NoC",
           key: "NoC",
           sorter: (a, b) => (a.NoC < b.NoC ? -1 : a.NoC > b.NoC ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "Network Type",
+          title: this.$t('label.network.type'),
           dataIndex: "NetType",
           key: "NetType",
           sorter: (a, b) =>
@@ -140,7 +145,7 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "Restrict",
+          title: this.$t('label.restrict'),
           dataIndex: "Restrict",
           key: "Restrict",
           sorter: (a, b) =>
@@ -155,8 +160,8 @@ export default defineComponent({
         //     slots: {customRender: 'tags'},
         // }
       ],
-    };
-  },
+    }
+  }
 });
 </script>
 

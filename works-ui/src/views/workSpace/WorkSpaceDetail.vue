@@ -42,7 +42,6 @@ import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 export default defineComponent({
   props: {
-
   },
   components: { Apath, Actions, WorkSpaceBody },
   setup(props) {
@@ -70,11 +69,12 @@ export default defineComponent({
           if (response.data.result.status == 200) {
             this.workspaceDataList = response.data.result.workspaceInfo;
             this.templateDataList = response.data.result.templateInfo.listtemplatesresponse.template[0];
-            this.networkDataList = response.data.result.networkInfo.listnetworksresponse.network[0];
+            this.networkDataList = response.data.result.networkInfo.listnetworksresponse.network;
             this.offeringDataList = response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];
             //this.workspaceName = response.data.result.workspaceInfo.Name;
           } else {
-            console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            message.error(this.$t('message.response.data.fail'));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
 
         })

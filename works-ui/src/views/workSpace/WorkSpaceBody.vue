@@ -4,11 +4,9 @@
       <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard 
-          :actionFrom="actionFrom"
+          <WorkspaceInfoCard
           :workspaceDataList="workspaceDataList"
           :templateDataList="templateDataList"
-          :networkDataList="networkDataList"
           :offeringDataList="offeringDataList"/>
         </ACard>
       </a-col>
@@ -26,12 +24,12 @@
 </template>
 
 <script>
-import InfoCard from "../../components/InfoCard";
 import WorkSpaceTab from "./WorkSpaceTab";
 import { defineComponent, ref } from "vue";
+import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
 export default defineComponent({
-  components: { WorkSpaceTab, InfoCard },
+  components: { WorkSpaceTab, WorkspaceInfoCard },
   props: {
     workspaceDataList: {
       type: Object,
@@ -54,9 +52,8 @@ export default defineComponent({
       default: null,
     },
   },
-  setup(props) {
+  setup() {
     return {
-      actionFrom: ref("WorkspaceDetail"),
     };
   },
 });
