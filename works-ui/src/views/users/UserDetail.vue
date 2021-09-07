@@ -9,7 +9,7 @@
               <Apath
                 v-bind:paths="[
                   { name: $t('label.users'), component: 'Users' },
-                  { name: name, component: null },
+                  { name: userDataInfo.name, component: null },
                 ]"
               />
             </a-col>
@@ -23,7 +23,8 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody :name="name" :info="info" />
+          <UserBody 
+          :userDataInfo="userDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -37,14 +38,39 @@ import UserBody from "./UserBody";
 import { defineComponent, ref } from "vue";
 export default defineComponent({
   props: {
-    name: String,
-    info: Object,
   },
   components: { UserBody, Apath, Actions },
   setup() {
     return {
       actionFrom: ref("UserDetail"),
     };
+  },
+  data() {
+    return {
+      userDataInfo: [],
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      this.userDataInfo = {"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "desktop":"Desktop1"};
+      // worksApi
+      //   .get("/api/v1/user/"+this.$route.params.uuid, { withCredentials: true })
+      //   .then((response) => {
+      //     if (response.data.result.status == 200) {
+      //       this.userDataInfo = response.data.result.vmInfo;
+      //     } else {
+      //       message.error(this.$t('message.response.data.fail'));
+      //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+      //     }
+
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+    },
   },
 });
 </script>

@@ -2,7 +2,7 @@
   <a-table
     size="middle"
     class="ant-table-striped"
-    :columns="columns"
+    :columns="UserListColumns"
     :data-source="data"
     :rowClassName="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
@@ -11,18 +11,11 @@
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
     :row-selection="rowSelection"
+    :pagination="pagination"
+
   >
     <template #nameRender="{ record }">
-      <router-link
-        :to="{
-          name: 'UserDetail',
-          params: {
-            name: record.Name,
-            info: [record.IPAddress, record.Account, record.Zone],
-          },
-        }"
-        >{{ record.Name }}</router-link
-      >
+        <router-link :to="{ path: '/userDetail/'+record.uuid}">{{ record.name }}</router-link>
     </template>
 
     <template #actionRender>
@@ -74,17 +67,57 @@ const rowSelection = {
 export default defineComponent({
   props: {
     data: Object,
-    columns: Object,
     bordered: Boolean,
   },
   setup() {
     return {
       rowSelection,
       actionFrom: ref("UserDetail"),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
+        showTotal: (total) => `Total ${total} items`, // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
     };
   },
   components: {
     Actions,
+  },
+  data() {
+    return{
+      UserListColumns : [
+        {
+          dataIndex: "name",
+          key: "name",
+          slots: { customRender: "nameRender" },
+          title: this.$t('label.name'),
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        // {
+        //     title: '',
+        //     key: 'action',
+        //     dataIndex: 'action',
+        //     slots: {customRender: 'actionRender'}
+        // },
+        {
+          title: this.$t('label.state'),
+          dataIndex: "state",
+          key: "state",
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.allocated.desktop'),
+          dataIndex: "desktop",
+          key: "desktop",
+          sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+      ],
+    }
   },
 });
 </script>
