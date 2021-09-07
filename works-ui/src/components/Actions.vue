@@ -1,19 +1,5 @@
 <template class="able-action">
   <a-space :size="size">
-    <a-tooltip v-if="state.buttonBoolean.addButton" placement="top">
-      <template #title>{{ title }}</template>
-      <a-button
-        type="primary"
-        shape="round"
-        size="size"
-        @click="setAddModalValue(true)"
-      >
-        <template #icon>
-          {{ title }}
-          <PlusOutlined />
-        </template>
-      </a-button>
-    </a-tooltip>
     <!--Start circle button start-->
     <a-tooltip v-if="state.buttonBoolean.start" placement="top">
       <template #title>{{ $t("tooltip.start") }}</template>
@@ -110,16 +96,6 @@
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <!--destroy circle button ens-->
-    <!--AddModal start-->
-    <!-- <AddModal
-      :visible="showAddModal"
-      :action-from="actionFrom"
-      :title="title"
-      @changeAddModal="setAddModalValue"
-    /> -->
-    <!--AddModal end-->
-    <!--circle button check modal start-->
     <a-modal
       :title="$t(modalTitle)"
       :visible="confirmModalView"
@@ -133,12 +109,12 @@
 </template>
 
 <script>
+import { PauseOutlined } from '@ant-design/icons-vue';
 import { defineComponent, onMounted, reactive, ref } from "vue";
-import AddModal from "@/components/AddModal";
 
 export default defineComponent({
   components: {
-    AddModal,
+    PauseOutlined
   },
   props: {
     actionFrom: {
@@ -159,7 +135,6 @@ export default defineComponent({
       callComponent: ref(props.actionFrom),
       buttonBoolean: {
         showModal: ref(false),
-        addButton: ref(false),
         start: ref(false),
         stop: ref(false),
         reset: ref(false),
@@ -173,38 +148,21 @@ export default defineComponent({
       },
     });
     onMounted(() => {
-      if (state.callComponent === "Workspace") {
-        state.buttonBoolean.addButton = true;
-      } else if (state.callComponent === "WorkspaceList") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
-        state.buttonBoolean.destroy = true;
-        state.buttonBoolean.pause = true;
-      } else if (state.callComponent === "WorkspaceDetail") {
+      if (state.callComponent === "WorkspaceList" || state.callComponent === "WorkspaceDetail") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
         state.buttonBoolean.edit = true;
         state.buttonBoolean.destroy = true;
         state.buttonBoolean.pause = true;
       } else if (state.callComponent === "VirtualMachine") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.reset = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "VirtualMachineList") {
+
+      } else if (state.callComponent === "VirtualMachineList" || state.callComponent === "VirtualMachineDetail") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
         state.buttonBoolean.edit = true;
+        state.buttonBoolean.iso = true;
         state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "VirtualMachineDetail") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "User") {
-        state.buttonBoolean.addButton = true;
-      } else if (state.callComponent === "UserDetail") {
+      } else if (state.callComponent === "UserList" || state.callComponent === "UserDetail") {
         state.buttonBoolean.destroy = true;
         state.buttonBoolean.pause = true;
       }

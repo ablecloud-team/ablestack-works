@@ -28,16 +28,16 @@
           :to="{
             name: comp,
             params: {
-              name: record.Name,
+              name: record.name,
               info: [record.IPAddress, record.Account, record.Zone],
             },
           }"
         >
-          {{ record.Name }}
+          {{ record.name }}
         </router-link>
       </span>
       <span v-else>
-        {{ record.Name }}
+        {{ record.name }}
       </span>
     </template>
 
@@ -65,8 +65,6 @@
         </a-tag>
       </span>
     </template>
-    {{ data }}
-    {{ comp }}
   </a-table>
 
   <a-modal
@@ -96,17 +94,17 @@ import Actions from "../components/Actions";
 
 const rowSelection = {
   onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
+    // console.log(
+    //   `selectedRowKeys: ${selectedRowKeys}`,
+    //   "selectedRows: ",
+    //   selectedRows
+    // );
   },
   onSelect: (record, selected, selectedRows) => {
-    console.log(record, selected, selectedRows);
+    //console.log(record, selected, selectedRows);
   },
   onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
+    //console.log(selected, selectedRows, changeRows);
   },
 };
 export default defineComponent({
@@ -116,6 +114,7 @@ export default defineComponent({
     columns: Object,
     bordered: Boolean,
     comp: String,
+    actionFrom: String,
   },
   setup(props) {
     //console.log("TableContent.vue props.tapName");
@@ -123,21 +122,10 @@ export default defineComponent({
     const state = reactive({
       modalBoolean: ref(false),
       callTapName: ref(props.tapName),
-      addButtonBoolean: ref(),
+      addButtonBoolean: ref(false),
       addButtontext: ref(""),
       callModal: ref("desktop"),
-    });
-    if (state.callTapName === "desktop") {
-      state.addButtonBoolean = ref(true);
-      state.addButtontext = ref("데스크탑 추가");
-    } else if (state.callTapName === "user") {
-      state.addButtonBoolean = ref(true);
-      state.addButtontext = ref("유저 추가");
-    } else if (state.callTapName === "datadisk") {
-      state.addButtonBoolean = ref(false);
-    } else if (state.callTapName === "network") {
-      state.addButtonBoolean = ref(false);
-    }
+    });  
     const addDesktopQuantity = ref(1);
     return {
       rowSelection,
@@ -150,7 +138,14 @@ export default defineComponent({
         showTotal: (total) => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
-      actionFrom: ref("VirtualMachineList"),
+      actionFrom: ref(props.actionFrom),
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  data() {
+    return {
     };
   },
   components: {
@@ -159,6 +154,19 @@ export default defineComponent({
   methods: {
     changeModal(value) {
       this.state.modalBoolean = ref(value);
+    },
+    fetchData() {
+      if (this.state.callTapName === "desktop") {
+        this.state.addButtonBoolean = ref(true);
+        this.state.addButtontext = this.$t("label.desktop.vm.add");
+      } else if (this.state.callTapName === "user") {
+        this.state.addButtonBoolean = ref(true);
+        this.state.addButtontext = this.$t("label.desktop.user.add");
+      } else if (this.state.callTapName === "datadisk") {
+        this.state.addButtonBoolean = ref(false);
+      } else if (this.state.callTapName === "network") {
+        this.state.addButtonBoolean = ref(false);
+      }
     },
   },
 });
