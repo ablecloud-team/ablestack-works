@@ -22,7 +22,7 @@
         </template>
         <span>{{ $t("label.workspace") }}</span>
       </a-menu-item>
-      <a-menu-item key="3" @click="$router.push({ name: 'Virtualmachine' }); selectedKeysSetting(3)">
+      <a-menu-item key="3" @click="$router.push({ name: 'VirtualMachines' }); selectedKeysSetting(3)">
         <template #icon>
           <DesktopOutlined />
         </template>
