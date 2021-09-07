@@ -68,6 +68,7 @@ const requireAuth = async (to, from, next) => {
 };
 
 const routes = [
+  { path: "/:catchAll(.*)", redirect: '/' },//없는 path 일 경우 root path로 이동함.
   {
     path: "/login",
     name: "Login",
@@ -105,13 +106,13 @@ const routes = [
         props: true,
       },
       {
-        path: "/virtualmachine",
-        name: "VirtualMachine",
+        path: "/virtualMachines",
+        name: "VirtualMachines",
         component: VirtualMachine,
         beforeEnter: requireAuth,
       },
       {
-        path: "/vmdetail/",
+        path: "/virtualMachineDetail/:uuid",
         name: "VirtualMachineDetail",
         component: VirtualMachineDetail,
         beforeEnter: requireAuth,
@@ -124,7 +125,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/userdetail/",
+        path: "/userDetail/:uuid",
         name: "UserDetail",
         component: UserDetail,
         beforeEnter: requireAuth,

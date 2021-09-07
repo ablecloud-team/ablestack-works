@@ -143,7 +143,7 @@ export default defineComponent({
               message.destroy();
               //TODO i18n 적용
               console.log(error)
-              message.error("로그인에 실패했습니다. 관리자에게 문의해주세요")
+              message.error(this.$t("message.login.wrong"))
             }
           })
           .catch((error) => {
