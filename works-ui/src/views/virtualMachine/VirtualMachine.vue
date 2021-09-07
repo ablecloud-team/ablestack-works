@@ -11,16 +11,14 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineList
-            :data="VMListData"
-            :columns="VMListColumns"
+          <virtual-machine-list
             :bordered="false"
           />
         </div>
@@ -32,21 +30,20 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import { VMListColumns, VMListData } from "@/data";
-import VirtualMachineList from "@/views/virtualMachine/VirtualMachineList";
 import { defineComponent, ref } from "vue";
+import VirtualMachineList from "./VirtualMachineList.vue";
 
-export default defineComponent({
-  props: {
-    msg: String,
+export default defineComponent ({
+  name: "VirtualMachine",
+  props: {},
+  components: {
+    VirtualMachineList,
+    Apath,
+    Actions,
   },
-  components: { VirtualMachineList, Apath, Actions },
-
   setup() {
     return {
       actionFrom: ref("VirtualMachine"),
-      VMListColumns,
-      VMListData,
     };
   },
 });

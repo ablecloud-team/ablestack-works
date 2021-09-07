@@ -4,14 +4,17 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
+          <VmInfoCard
+          :actionFrom="actionFrom"
+          :vmDataInfo="vmDataInfo" />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <VirtualMachineTab />
+          <VirtualMachineTab 
+          :vmDataInfo="vmDataInfo"/>
         </ACard>
       </ACol>
     </ARow>
@@ -20,15 +23,23 @@
 
 <script>
 // import TabbedContent from "@/components/TabbedContent";
-import InfoCard from "@/components/InfoCard";
 import VirtualMachineTab from "@/views/virtualMachine/VirtualMachineTab";
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
+import VmInfoCard from "./VirtualMachineInfoCard.vue";
 
 export default defineComponent({
-  components: { VirtualMachineTab, InfoCard },
+  components: { VirtualMachineTab, VmInfoCard },
   props: {
-    name: String,
-    info: Object,
+    vmDataInfo:{
+      type: Object,
+      required: true,
+      default: null,
+    },
+ },
+  setup() {
+    return {
+      actionFrom: ref("VirtualMachineDetail"),
+    };
   },
 });
 </script>

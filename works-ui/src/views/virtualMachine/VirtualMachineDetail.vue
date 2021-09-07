@@ -8,8 +8,8 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.vm'), component: 'Virtualmachine' },
-                  { name: name, component: null },
+                  { name: $t('label.vm'), component: 'VirtualMachines' },
+                  { name: vmDataInfo.Name, component: null },
                 ]"
               />
             </a-col>
@@ -23,7 +23,8 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody :name="name" :info="info" />
+          <VirtualMachineBody 
+          :vmDataInfo="vmDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -35,6 +36,8 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import VirtualMachineBody from "@/views/virtualMachine/VirtualMachineBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+
 export default defineComponent({
   props: {
     name: String,
@@ -45,6 +48,35 @@ export default defineComponent({
     return {
       actionFrom: ref("VirtualMachineDetail"),
     };
+  },
+  data() {
+    return {
+      vmDataInfo: [],
+      networkDataList: [],
+      diskDtaList: [],
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      this.vmDataInfo= {"Uuid":"sdfasdfasdfasdf", "Name":"VM1","State":"Running","User":"user01","Conn":"TRUE","Workspace":"test1"};
+      // worksApi
+      //   .get("/api/v1/vm/"+this.$route.params.uuid, { withCredentials: true })
+      //   .then((response) => {
+      //     if (response.data.result.status == 200) {
+      //       this.vmDataList = response.data.result.vmInfo;
+      //     } else {
+      //       message.error(this.$t('message.response.data.fail'));
+      //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+      //     }
+
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+    },
   },
 });
 </script>

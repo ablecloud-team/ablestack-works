@@ -2,8 +2,8 @@
   <a-table
     size="middle"
     class="ant-table-striped"
-    :columns="columns"
-    :data-source="data"
+    :columns="VMListColumns"
+    :data-source="VMListData"
     :rowClassName="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
@@ -11,9 +11,10 @@
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
     :row-selection="rowSelection"
+    :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <router-link
+      <!-- <router-link
         :to="{
           name: 'VirtualMachineDetail',
           params: {
@@ -22,7 +23,8 @@
           },
         }"
         >{{ record.Name }}</router-link
-      >
+      > -->
+      <router-link :to="{ path: '/virtualMachineDetail/'+record.Uuid}">{{ record.Name }}</router-link>
     </template>
 
     <template #actionRender="{ record }">
@@ -58,7 +60,7 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import Actions from "@/components/Actions";
 
 const rowSelection = {
@@ -82,13 +84,75 @@ export default defineComponent({
     columns: Object,
     bordered: Boolean,
   },
+  components: {
+    Actions,
+  },
   setup() {
     return {
       rowSelection,
+      actionFrom: ref("VirtualMachineList"),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
+        showTotal: (total) => `Total ${total} items`, // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
     };
   },
-  components: {
-    Actions,
+  data() {
+    return {
+      VMListColumns : [
+        {
+          dataIndex: "Name",
+          key: "Name",
+          slots: { customRender: "nameRender" },
+          title: this.$t('label.name'),
+          sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          slots: { customRender: "actionRender" },
+        },
+        {
+          title: this.$t('label.state'),
+          dataIndex: "State",
+          key: "State",
+          sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.workspace'),
+          dataIndex: "Workspace",
+          key: "Workspace",
+          sorter: (a, b) =>
+            a.Workspace < b.Workspace ? -1 : a.Workspace > b.Workspace ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.users'),
+          dataIndex: "User",
+          key: "User",
+          sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.desktop.connect.boolean'),
+          dataIndex: "Conn",
+          key: "Conn",
+          sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+      ],
+      VMListData : [
+        {"Uuid":"sdfasdfasdfasdf", "Name":"VM1","State":"Running","User":"user01","Conn":"TRUE","Workspace":"test1"},
+        {"Uuid":"sdfasdfasdfasdf", "Name":"VM2","State":"Stopped","User":"user03","Conn":"FALSE","Workspace":"test1"},
+        {"Uuid":"sdfasdfasdfasdf", "Name":"VM3","State":"Running","User":"user02","Conn":"TRUE","Workspace":"test1"}
+      ],
+    }
   },
 });
 </script>
