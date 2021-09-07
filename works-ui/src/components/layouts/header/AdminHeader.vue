@@ -8,10 +8,57 @@
         />
         <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
-    <a-col :span="12" style="float:right; text-align: right; padding-right: 14px">
-      <a-popover placement="bottom">
+    <a-col :span="12" style="float:right; text-align: right; padding-right: 40px">
+      <a-dropdown>
+
+        <a-button type="text" shape="circle" class="header-notice-button">
+          <a class="ant-dropdown-link" @click.prevent>
+            <font-awesome-icon 
+              :icon="['fas', 'language']"
+              style="color: #666; margin-bottom: -2px;"
+              class="login-icon"/>
+            <!-- <GlobalOutlined /> -->
+          </a>
+        </a-button>
+        <template #overlay>
+          <a-menu
+            :selectedKeys="[language]"
+            @click="setLocaleClick">
+            <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+            <a-menu-item key="en" value="enUS"> English </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+      <a-button type="text" shape="circle" class="header-notice-button">
+        <a class="ant-dropdown-link" @click.prevent>
+          <BellOutlined class="header-notice-icon" />
+        </a>
+      </a-button>
+      <a-dropdown>
+        <a-button type="text" shape="circle" class="header-notice-button">
+          <a class="ant-dropdown-link" @click.prevent>
+            <UserOutlined class="header-notice-icon" />
+          </a>
+        </a-button>
+        <template #overlay>
+          <a-menu >
+            <a-menu-item key="0" >
+              <a-button type="text" class="">
+                <UserOutlined />{{ $t("label.profile") }}
+              </a-button>
+            </a-menu-item>
+            <a-menu-divider />
+            <a-menu-item key="1">
+              <a-button type="text" class="" @click="logoutSubmit">
+                <LogoutOutlined />{{ $t("label.logout") }}
+              </a-button>
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
+      <!-- <a-popover placement="bottom">
         <template #content>
-          <a-button type="text" @click="$i18n.locale = 'ko'">한국어</a-button>
+          <a-button type="text" @click="setLocaleClick() $i18n.locale = 'ko'">한국어</a-button>
           <br />
           <a-button type="text" @click="$i18n.locale = 'en'">English</a-button>
         </template>
@@ -25,12 +72,8 @@
             />
           </template>
         </a-button>
-      </a-popover>
-      <a-button type="text" shape="circle" class="header-notice-button">
-        <template #icon>
-          <BellOutlined class="header-notice-icon" />
-        </template>
-      </a-button>
+      </a-popover> -->
+
       <!-- <a-popover style="text-align: left">
         <template #content>
           <a-card size="small" style="width: 150px" :bordered="false" >
@@ -51,26 +94,7 @@
         </a-button>
       </a-popover> -->
 
-      <a-dropdown :trigger="['click']">
-        <a class="ant-dropdown-link" @click.prevent>
-          <UserOutlined class="header-notice-icon" />
-        </a>
-        <template #overlay>
-          <a-menu style="width: 200px; padding: 0;">
-            <a-menu-item key="0" >
-              <a-button type="text" class="">
-                <UserOutlined />{{ $t("label.profile") }}
-              </a-button>
-            </a-menu-item>
-            <a-menu-divider />
-            <a-menu-item key="1">
-              <a-button type="text" class="" @click="logoutSubmit">
-                <LogoutOutlined />{{ $t("label.logout") }}
-              </a-button>
-            </a-menu-item>
-          </a-menu>
-        </template>
-      </a-dropdown>
+
     </a-col>
   </a-row>
 </template>
@@ -80,12 +104,13 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   DownOutlined,
+  StarOutlined
 } from '@ant-design/icons-vue';
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosUserDetail, axiosLogout } from "../../../api";
-import store from "../../../store/index";
-import router from "../../../router";
+import { axiosUserDetail, axiosLogout } from "@/api/index";
+import store from "@/store/index";
+import router from "@/router";
 
 export default defineComponent({
   name: "AdminHeader",
@@ -97,6 +122,12 @@ export default defineComponent({
   props: {
     collapsed: Boolean,
   },
+  data() {
+    return {
+      language: 'ko',
+      loadedLanguage: [],
+    }
+  },
   setup(props) {
     let res;
     const state = reactive({
@@ -107,26 +138,71 @@ export default defineComponent({
       state,
     };
   },
-  async mounted() {
+  mounted() {
     // const res = await axiosUserDetail()
     // if(res.status === 200){
     //   this.$store.dispatch("loginCommit",res.data);
     //   this.state.userID = res.data.result.name;
     // }
+    this.language = localStorage.getItem('locale') || 'ko';
+    this.setLocale(this.language);
   },
   methods: {
-    async logoutSubmit() {
-      const res = await axiosLogout();
-      if (res.data.result.login === false || res.data.result.status > 200) {
-        await store.dispatch("logoutCommit");
-        await router.push({ name: "Login" });
-        message.success("로그아웃되었습니다.", 2);
-      }
-    },
     setCollapsed() {
       this.state.collapsed = !this.state.collapsed;
       this.$emit("setCollapsed");
     },
+    setLocaleClick (e) {
+      let localeValue = e.key
+      if (!localeValue) {
+        localeValue = 'ko'
+      }
+      this.setLocale(localeValue)
+    },
+    setLocale (localeValue) {
+      this.$locale = localeValue;
+      this.$i18n.locale = localeValue;
+      this.language = localeValue;
+      localStorage.setItem('locale', localeValue);
+      //this.loadLanguageAsync(localeValue);
+    },
+    async logoutSubmit() {
+      const res = await axiosLogout();
+      if (res.data.result.login === false || res.data.result.status > 200) {
+        message.success(this.$t('message.logout.success'), 2);
+        await store.dispatch("logoutCommit");
+        await router.push({ name: "Login" });
+      }
+    },
+    loadLanguageAsync(lang) {
+      if (!lang) {
+        lang = Vue.ls ? Vue.ls.get('LOCALE') || 'en' : 'en';
+      }
+      if (this.loadedLanguage.includes(lang)) {
+        return Promise.resolve(this.setLanguage(lang));
+      }
+
+      return fetch(`locales/${lang}.json`)
+        .then(response => response.json())
+        .then(json => Promise.resolve(this.setLanguage(lang, json)))
+    },
+    setLanguage(lang, message) {
+      if (i18n) {
+        i18n.locale = lang;
+
+        if (message && Object.keys(message).length > 0) {
+          i18n.setLocaleMessage(lang, message);
+        }
+      }
+
+      if (!this.loadedLanguage.includes(lang)) {
+        this.loadedLanguage.push(lang);
+      }
+
+      if (message && Object.keys(message).length > 0) {
+        messages[lang] = message;
+      }
+    }
   },
 });
 </script>
@@ -136,6 +212,7 @@ export default defineComponent({
   font-size: 18px;
 }
 .header-notice-button {
+  margin-left: 10px;
   margin-right: 10px;
 }
 
@@ -144,7 +221,7 @@ export default defineComponent({
   height: 100%;
 }
 .login-icon {
-  font-size: 27px;
+  font-size: 24px;
 }
 .header-popover-button {
   width: 100%;
