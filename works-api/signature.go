@@ -4,20 +4,14 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"os"
 	"sort"
 	"strings"
-	"time"
 )
 
 type SortMoldParams []MoldParams
 type MoldParams map[string]string
-type Uuids struct {
-	Uuid, UuidUse       string
-	CreateDate, Removed time.Time
-}
 
 func (s SortMoldParams) Len() int {
 	return len(s)
@@ -51,31 +45,27 @@ func makeStringParams(params []MoldParams) string {
 	}
 	params = append(params, params1...)
 	sort.Sort(SortMoldParams(params))
-	fmt.Println("--------------------------------------------------")
-	fmt.Println(params)
-	fmt.Println("--------------------------------------------------")
+
 	for _, tuple := range params {
 		for key, value := range tuple {
 			result = result + key + "=" + value + "&"
 		}
 	}
 	result = strings.TrimRight(result, "&")
-	fmt.Println("makeStringParams 결과")
-	fmt.Println(result)
-
+	log.Infof("Mold 통신전 params[%v]\n", result)
 	return result
 }
 
 func makeSignature(payload string) string {
 	secretkey := os.Getenv("MoldSecretKey")
 	strurl := strings.Replace(strings.ToLower(payload), "+", "%20", -1)
-
+	log.Infof("makeSignature payload [%v]\n", payload)
 	secret := []byte(secretkey)
 	message := []byte(strurl)
 	hash := hmac.New(sha1.New, secret)
 	hash.Write(message)
 	strHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
-
+	log.Infof("makeSignature payload [%v]\n", payload)
 	return strHash
 }
 

@@ -1,25 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"time"
 )
 
 var expirationTime = 5 * time.Minute
+var allowUrl string
 
-func SetHeader(c *gin.Context)  {
-	//c.Header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0")
-	//c.Header("Last-Modified", time.Now().String())
-	//c.Header("Pragma", "no-cache")
-	//c.Header("Expires", "-1")
+func SetHeader(c *gin.Context) {
+	allowUrlList := []string{"http://localhost:8080", "http://172.16.0.85:8083", "http://172.16.0.89:8080", "http://172.16.0.85:8081"}
+	for _, url := range allowUrlList {
+		if c.Request.Header.Get("Origin") == url {
+			allowUrl = url
+			break
+		}
+	}
 	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin")
 	c.Header("Access-Control-Allow-Credentials", "true")
-	c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
-	c.Header("Access-Control-Allow-Methods", "GET, DELETE, POST")
+	c.Header("Access-Control-Allow-Origin", allowUrl)
+	c.Header("Access-Control-Allow-Methods", "GET, DELETE, POST, PUT")
 
 	if c.Request.Method == "OPTIONS" {
 		c.AbortWithStatus(204)
@@ -28,11 +32,11 @@ func SetHeader(c *gin.Context)  {
 	c.Next()
 }
 
-func createToken(userid string) (string,error){
+func createToken(userid string) (string, error) {
 	var JwtKey = []byte(os.Getenv("MoldSecretKey"))
 	expirationTime := time.Now().Add(expirationTime)
 
-	type WorksClaims struct{
+	type WorksClaims struct {
 		UserID string
 		jwt.StandardClaims
 	}
@@ -53,51 +57,67 @@ func createToken(userid string) (string,error){
 	}
 }
 
-func checkToken(c *gin.Context){
+func checkToken(c *gin.Context) {
+	result := map[string]interface{}{}
 	var JwtKey = []byte(os.Getenv("MoldSecretKey"))
-	token, err := c.Request.Cookie("access-token")
-	if err != nil {
-		c.JSON(http.StatusAccepted, gin.H{
-			"result": http.StatusUnauthorized,
-			"message": "Authentication failed(token is None)",
-			"error": err,
+
+	tknStr := c.Request.Header.Get("Authorization")
+
+	//token, err := c.Request.Cookie("access-token")
+	if tknStr == "works" || tknStr == "" {
+		result["status"] = http.StatusUnauthorized
+		result["message"] = "token is None"
+		result["errorCode"] = "9999"
+		c.JSON(http.StatusOK, gin.H{
+			"result": result,
 		})
 		c.Abort()
 		return
 	}
-	tknStr := token.Value
-	if tknStr == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"status": http.StatusUnauthorized,
-			"message": "token is None",
-			"error": err,
-		})
-		c.Abort()
-		return
-	}
-	type WorksClaims struct{
+	type WorksClaims struct {
 		UserID string
 		jwt.StandardClaims
 	}
-	at(time.Unix(0,0), func(){
-		token, err := jwt.ParseWithClaims(tknStr, &WorksClaims{}, func(token *jwt.Token) (interface{}, error) {
+	log.WithFields(logrus.Fields{
+		"serverVersion": Version,
+	}).Infof("Starting application")
+	log.Debugf("%v", tknStr)
+	tokenString := tknStr[5:]
+	log.Info(tokenString)
+	at(time.Unix(0, 0), func() {
+		token, err := jwt.ParseWithClaims(tokenString, &WorksClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return JwtKey, nil
 		})
+		if err != nil {
+			log.Errorf("The token value is invalid.\n")
+			log.Errorf("%v\n", err)
+			result["status"] = http.StatusUnauthorized
+			result["message"] = "The token value is invalid."
+			result["errorCode"] = "9998"
+			c.JSON(http.StatusOK, gin.H{
+				"result": result,
+			})
+			c.Abort()
+			return
+		}
 		if claims, ok := token.Claims.(*WorksClaims); ok && token.Valid {
-			fmt.Printf("%v %v", claims.UserID, claims.StandardClaims.ExpiresAt)
-			fmt.Println("Token check OK!!!")
-			c.Set("cookie-user-id",claims.UserID)
+			log.WithFields(logrus.Fields{
+				"claims.UserID": claims.UserID,
+			}).Infof("Token check OK!!!\n")
+			c.Set("cookie-user-id", claims.UserID)
 			c.Next()
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"status": http.StatusUnauthorized,
-				"message": "token is expired",
-				"error": err,
+			result["status"] = http.StatusUnauthorized
+			result["message"] = "token is expired."
+			result["errorCode"] = "9997"
+			c.JSON(http.StatusOK, gin.H{
+				"result": result,
 			})
 			c.Abort()
 			return
 		}
 	})
+	//c.Set("cookie-user-id","administrator")
 }
 
 func at(t time.Time, f func()) {

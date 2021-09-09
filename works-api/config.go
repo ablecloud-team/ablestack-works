@@ -7,7 +7,7 @@ import (
 )
 
 type settingInfo struct {
-	Database struct{
+	Database struct {
 		TYPE string `json:"type"`
 		User struct {
 			ID       string `json:"id"`
@@ -20,23 +20,6 @@ type settingInfo struct {
 		} `json:"host"`
 		DB string `json:"db"`
 	} `json:"database"`
-	Mold struct {
-		Protocol string `json:"protocol"`
-		Url      string `json:"url"`
-		Port     string `json:"port"`
-		Postfix   string `json:"postfix"`
-		User    struct {
-			Account   string `json:"account"`
-			ApiKey    string `json:"apiKey"`
-			SecretKey string `json:"secretKey"`
-		} `json:"user"`
-	} `json:"mold"`
-	DomainController struct {
-		Protocol string `json:"protocol"`
-		Url      string `json:"url"`
-		Port     string `json:"port"`
-		Postfix   string `json:"postfix"`
-	} `json:"domainController"`
 }
 
 //WorksConfig

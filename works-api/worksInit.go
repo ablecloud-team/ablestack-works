@@ -15,7 +15,7 @@ type Configuration struct {
 }
 
 func DBSetting() {
-	os.Setenv("MsqlType", getWorksInfo().Database.TYPE)
+	os.Setenv("MysqlType", getWorksInfo().Database.TYPE)
 	os.Setenv("MysqlUser", getWorksInfo().Database.User.ID)
 	os.Setenv("MysqlPassword", getWorksInfo().Database.User.Password)
 	os.Setenv("MysqlProtocol", getWorksInfo().Database.Host.Protocol)
@@ -26,7 +26,10 @@ func DBSetting() {
 }
 
 func MoldSetting() {
-	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	log.Debug("||||||||||||||||||||||||||||||")
+	log.Debug(os.Getenv("MysqlType"))
+	log.Debug(os.Getenv("DbInfo"))
 	if err != nil {
 		fmt.Println("DB connect error")
 		fmt.Println(err)
@@ -76,7 +79,7 @@ func MoldSetting() {
 }
 
 func DCSetting() {
-	db, err := sql.Open(os.Getenv("MsqlType"), os.Getenv("DbInfo"))
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
 		fmt.Println("DB connect error")
 		fmt.Println(err)

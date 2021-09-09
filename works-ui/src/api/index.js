@@ -12,12 +12,12 @@ function axiosLogin(userData) {
   return worksApi.post("/api/login", userData, { withCredentials: true });
 }
 
-function axiosUserDetail() {
-  return worksApi.get("/api/v1/user", { withCredentials: true });
+function axiosTokenAuth() {
+  return worksApi.get("/api/v1/token", { withCredentials: true });
 }
 
 function axiosLogout() {
   return worksApi.get("/api/v1/logout", { withCredentials: true });
 }
 
-export { worksApi, axiosLogin, axiosLogout, axiosUserDetail };
+export { worksApi, axiosLogin, axiosLogout, axiosTokenAuth };
