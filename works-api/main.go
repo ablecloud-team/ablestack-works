@@ -7,9 +7,12 @@ import (
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
 	"os"
 	"os/exec"
+	_ "works-api/docs"
 )
 
 var log = logrus.New() //.WithField("who", "Main")
@@ -40,6 +43,7 @@ func setup() {
 		CallerFirst: false,
 	})
 	log.SetReportCaller(true)
+	log.SetLevel(logrus.DebugLevel)
 }
 func main() {
 	var (
@@ -54,21 +58,33 @@ func main() {
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
+	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
 	api := router.Group("/api")
 	{
-		api.POST("/login", loginController)
-		api.GET("/workspace", getWorkspaces)
-		api.PUT("/workspace", putWorkspaces)
-		api.GET("/offering", getOffering)
+		api.POST("/login", getLogin)
 		api.POST("/workspaceAgent", putWorkspacesAgent)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
+			v1.GET("/token", getUserToken)
+
+			v1.GET("/workspace", getWorkspaces)
+			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
+			v1.PUT("/workspace", putWorkspaces)
+
+			v1.GET("/offering", getOffering)
+
+			v1.PUT("/instance", putInstances)
+
 			v1.GET("/version", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
-			v1.GET("/logout", logoutController)
-			v1.GET("/user", userDetailController)
+
+			v1.GET("/logout", getLogout)
+
+			v1.GET("/user:username", getUserDetail)
+			v1.GET("/user", getUser)
+			v1.PUT("/user", putUser)
 		}
 		test := api.Group("/test")
 		{
@@ -80,6 +96,8 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	go asyncJobMonitoring()
+	url := ginSwagger.URL("/swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
 }

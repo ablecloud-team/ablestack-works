@@ -10,6 +10,24 @@ import (
 	"runtime"
 )
 
+const (
+	WorkspaceString    = "workspace"
+	InstanceString     = "instance"
+	ServiceDaaS        = "ServiceDaaS"
+	ServiceWorks       = "ServiceWorks"
+	WorkspaceName      = "WorkspaceName"
+	AblecloudWorks     = "Ablecloud.Works"
+	AgentOK            = "AgentOK"
+	Enable             = "Enable"
+	Disable            = "Disable"
+	UserVm             = "UserVm"
+	MsgDBConnectError  = "DB connect error"
+	MsgDBConnectOK     = "DB connect success"
+	BaseErrorCode      = 9000
+	SignatureErrorCode = 9001
+	SQLQueryError      = 9100
+)
+
 func setLog() {
 	startlogger := logrus.New()
 	startlogger.SetFormatter(&nested.Formatter{
@@ -52,4 +70,8 @@ func mapInterfaceToJson(m map[string]interface{}) {
 	if err != nil {
 		log.Info(err)
 	}
+}
+
+func postfixFill(value int) string {
+	return fmt.Sprintf("%06d", value)
 }
