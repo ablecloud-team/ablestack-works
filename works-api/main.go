@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	logrus "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"github.com/sirupsen/logrus"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
 	"os"
 	"os/exec"
+	_ "works-api/docs"
 )
 
 var log = logrus.New() //.WithField("who", "Main")
@@ -38,156 +39,65 @@ func StartClientApp() (*exec.Cmd, error) {
 
 func setup() {
 	log.SetFormatter(&nested.Formatter{
-		HideKeys: false,
+		HideKeys:    false,
 		CallerFirst: false,
 	})
 	log.SetReportCaller(true)
+	log.SetLevel(logrus.DebugLevel)
 }
 func main() {
 	var (
 		err error
 	)
 	setup()
-	setenv()
+	DBSetting()   //DB 접속정보 셋팅
+	MoldSetting() //Mold 정보 셋팅
+	DCSetting()   //DC 정보 셋팅
 
 	router := gin.Default()
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
+	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
 	api := router.Group("/api")
 	{
-		api.POST("/login", func(c *gin.Context) {
-			var result map[string]interface{}
-			userId := c.PostForm("id")
-			userPassword := c.PostForm("password")
-			result = login(userId, userPassword)
-			token, err := createToken(userId)
-			if err != nil{
-				if err == jwt.ErrSignatureInvalid{
-					c.JSON(http.StatusUnauthorized,
-						gin.H{"status": http.StatusUnauthorized, "error": "token is expired"})
-					c.Abort()
-					return
-				}
-				c.JSON(http.StatusUnprocessableEntity, err.Error())
-				c.Abort()
-				return
-			}
-			c.SetCookie("access-token", token, 1800, "", "", false, false)
-			c.JSON(http.StatusOK, gin.H{
-				"result":  result,
-			})
-		})
+		api.POST("/login", getLogin)
+		api.POST("/workspaceAgent", putWorkspacesAgent)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
+			v1.GET("/token", getUserToken)
+
+			v1.GET("/workspace", getWorkspaces)
+			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
+			v1.PUT("/workspace", putWorkspaces)
+
+			v1.GET("/offering", getOffering)
+
+			v1.PUT("/instance", putInstances)
+
 			v1.GET("/version", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
-			v1.GET("/logout", func(c *gin.Context) {
-				result := map[string]interface{}{}
-				cookieUserId := c.MustGet("cookie-user-id").(string)
-				fmt.Println("cookieUserId = "+cookieUserId)
-				result["login"] = false
-				result["username"] = cookieUserId
-				c.SetCookie("access-token", "", -1, "", "", false, false)
-				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
-				})
-			})
-			v1.GET("/user", func(c *gin.Context) {
-				var result map[string]interface{}
-				//userId := c.Param("userId")
-				cookieUserId := c.MustGet("cookie-user-id").(string)
-				fmt.Println("cookieUserId = "+cookieUserId)
-				result = userInfo(cookieUserId)
-				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
-				})
-			})
+
+			v1.GET("/logout", getLogout)
+
+			v1.GET("/user:username", getUserDetail)
+			v1.GET("/user", getUser)
+			v1.PUT("/user", putUser)
 		}
 		test := api.Group("/test")
-		test.Use(checkToken)
 		{
-			test.GET("/version", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version})
-			})
-			test.GET("/test", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version})
-				request := map[string]string{
-					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
-					"command": "listVolumes",
-					"response": "json",
-				}
-				sig := makeSignature(request)
-				fmt.Println("========================")
-				fmt.Println(sig)
-				baseurl := "https://mold.ablecloud.io/client/api?"
-				var strurl string
-				for key, value := range request{
-					strurl = strurl + key+"="+value+"&"
-				}
-				endUrl := baseurl+strurl+"signature="+sig
-				fmt.Println(endUrl)
-				resp, err := http.Get(endUrl)
-				if err != nil {
-					panic(err)
-				}
-
-				defer resp.Body.Close()
-
-				data, err := ioutil.ReadAll(resp.Body)
-				if err != nil{
-					fmt.Println(err)
-				}
-				fmt.Println("%s\n", string(data))
-			})
-			test.GET("/test1", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version})
-				request := map[string]string{
-					"apikey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
-					"command": "listVolumes",
-					"response": "json",
-				}
-				sig := makeSignature(request)
-				baseurl := "https://mold.ablecloud.io/client/api?"
-				var strurl string
-				for key, value := range request{
-					strurl = strurl + key+"="+value+"&"
-				}
-				endUrl := baseurl+strurl+"signature="+sig
-				fmt.Println(endUrl)
-				resp, err := http.Get(endUrl)
-				if err != nil {
-					panic(err)
-				}
-
-				defer resp.Body.Close()
-
-				data, err := ioutil.ReadAll(resp.Body)
-				if err != nil{
-					panic(err)
-				}
-				fmt.Println("%s\n", string(data))
-			})
-			test.GET("/user/", func(c *gin.Context) {
-				var result map[string]interface{}
-				//userId := c.Param("userId")
-				cookieUserId := c.MustGet("cookie-user-id").(string)
-				fmt.Println("userId")
-				fmt.Println(cookieUserId)
-				fmt.Println(cookieUserId)
-				result = userInfo(cookieUserId)
-				c.JSON(http.StatusOK, gin.H{
-					"result":  result,
-				})
-			})
+			test.GET("/test", testFunc)
 		}
 	}
 
 	log.WithFields(logrus.Fields{
 		"serverVersion": Version,
 	}).Infof("Starting application")
+	go asyncJobMonitoring()
+	url := ginSwagger.URL("/swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
 }

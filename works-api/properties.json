@@ -1,6 +1,6 @@
 {
   "database": {
-    "type": "mySQL",
+    "type": "mysql",
     "user":{
       "id":"works",
       "password":"Ablecloud1!"
@@ -11,22 +11,5 @@
       "protocol": "tcp"
     },
     "db": "works"
-  },
-  "mold": {
-    "protocol": "https://",
-    "url": "mold.ablecloud.io",
-    "port": "80",
-    "postfix": "/client/api",
-    "user": {
-      "account": "smlee",
-      "apiKey": "h1IxdO9RWxtznF4V_nPpIWO0GoHg5oHdR8kHeve1dJD3f4rH14owxcZAu2n4ALpuCA6GzIy8akGHp83dhbeJuA",
-      "secretKey": "64YHQCLtc0Ad_k-0NmeupaAwpsOJsirmVz52YSfYd-5RQs4F2deFen4O4SncOQ8I_M4Peew-JfMP2A2ZmKEnXg"
-    }
-  },
-  "domainController": {
-    "protocol": "http://",
-    "url": "10.10.1.25",
-    "port": "8083",
-    "postfix": "/api"
   }
 }
