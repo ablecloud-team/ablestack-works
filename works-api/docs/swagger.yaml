@@ -1,0 +1,285 @@
+info:
+  contact: {}
+paths:
+  /api/login:
+    put:
+      consumes:
+      - application/json
+      description: 사용자 로그인 하는 API 입니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 사용자 비밀번호
+        in: path
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 로그인 하는 API
+  /api/v1/instance:
+    put:
+      consumes:
+      - application/json
+      description: 워크스페이스의 instance 를 추가하는 API 입니다.
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: 워크스페이스에 추가할 Instance 수량
+        in: path
+        name: quantity
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스의 instance 를 추가하는 API
+  /api/v1/logout:
+    get:
+      consumes:
+      - application/json
+      description: 사용자 로그아웃 하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 로그아웃 하는 API
+  /api/v1/offering:
+    get:
+      consumes:
+      - application/json
+      description: 템플릿, 서비스 오퍼링, 디스크 오퍼링 정보를 Mold 에서 조회하여 제공하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 템플릿 및 각종 오퍼링을 조회하는 API
+  /api/v1/token:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        사용자 토큰을 조회를 위한 API 입니다.
+        해더에 로그인시 생성된 토큰값을 "Authorization" 키값에 넣어주시면 됩니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 토큰을 조회하는 API
+  /api/v1/user:
+    get:
+      consumes:
+      - application/json
+      description: 사용자 리스트를 조회를 위한 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 리스트를 조회 하는 API
+    put:
+      consumes:
+      - application/json
+      description: 사용자 생성을 위한 API 입니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 사용자 계정 비밀번호
+        in: path
+        name: password
+        required: true
+        type: string
+      - description: 사용자 전화번호
+        in: path
+        name: phone
+        required: true
+        type: string
+      - description: 사용자 이메일
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: 사용자 성
+        in: path
+        name: firstName
+        required: true
+        type: string
+      - description: 사용자 이름
+        in: path
+        name: lastName
+        required: true
+        type: string
+      - description: 사용자 직급
+        in: path
+        name: title
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 생성하는 하는 API
+  /api/v1/user/:username:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        사용자 상세 조회를 위한 API 입니다.
+        해더에 로그인시 생성된 토큰값을 "Authorization" 키값에 넣어주시면 됩니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 상세조회 하는 API
+  /api/v1/workspace:
+    get:
+      consumes:
+      - application/json
+      description: 워크 스페이스 리스트를 조회하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스 리스트를 조회하는 API
+    put:
+      consumes:
+      - application/json
+      description: 워크스페이를 추가하는 API 입니다.
+      parameters:
+      - description: 워크스페이스 이름
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 워크스페이스 설명
+        in: path
+        name: description
+        required: true
+        type: string
+      - description: 워크스페이스 타입(Desktop or Application)
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: 워크스페이스에서 사용할 Compute offering UUID
+        in: path
+        name: computeOfferingUuid
+        required: true
+        type: string
+      - description: 워크스페이스에서 사용할 Template UUID
+        in: path
+        name: templateUuid
+        required: true
+        type: string
+      - description: 워크스페이스에서 Shard 여부 전용이면 'false', 공용이면 'true'
+        in: path
+        name: shared
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스를 추가하는 API
+  /api/v1/workspace/:workspaceUuid:
+    get:
+      consumes:
+      - application/json
+      description: 워크 스페이스 리스트를 조회하는 API 입니다.
+      parameters:
+      - description: 워크스페이스 UUID
+        in: path
+        name: workspaceUuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스 리스트를 조회하는 API
+  /api/v1/workspaceAgent:
+    post:
+      consumes:
+      - application/json
+      description: 워크스페이를 추가하는 API 입니다.
+      parameters:
+      - description: UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      - description: async job UUID
+        in: path
+        name: asyncJobId
+        required: true
+        type: string
+      - description: workspace or instance
+        in: path
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스를 추가하는 API
+swagger: "2.0"
