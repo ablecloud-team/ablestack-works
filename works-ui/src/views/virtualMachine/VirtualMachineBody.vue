@@ -23,7 +23,7 @@
 
 <script>
 // import TabbedContent from "@/components/TabbedContent";
-import VirtualMachineTab from "@/views/virtualMachine/VirtualMachineTab";
+import VirtualMachineTab from "./VirtualMachineTab";
 import { defineComponent, ref } from "vue";
 import VmInfoCard from "./VirtualMachineInfoCard.vue";
 

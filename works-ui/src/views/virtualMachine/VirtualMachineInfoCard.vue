@@ -7,24 +7,24 @@
         </template>
       </a-avatar>
       <h4 style="margin-left:20px;">
-        {{ vmDataInfo.Name }}
+        {{ vmDataInfo.name }}
       </h4>
     </div>
   </div>
   <div id="Status" class="CardItem" >
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
-      <a-badge class="Status" :color="vmDataInfo.State == 'Disable' ?'grey' : vmDataInfo.State == 'Running' ? 'green' : 'red'" :text="vmDataInfo.State" />
+      <a-badge class="Status" :color="vmDataInfo.state == 'Disable' ?'grey' : vmDataInfo.state == 'Running' ? 'green' : 'red'" :text="vmDataInfo.state" />
     </div>
   </div>
 
   <div id="ID" class="CardItem">
-    <div class="ItemName">ID</div>
+    <div class="ItemName">{{ $t("label.uuid") }}</div>
     <div class="Item">
       <a-button shape="circle" type="dashed">
         <BarcodeOutlined />
       </a-button>
-      {{ vmDataInfo.Uuid }}
+      {{ vmDataInfo.uuid }}
     </div>
   </div>
 
@@ -35,25 +35,6 @@
 import { DesktopOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
 
-// function guid() {
-//   function _s4() {
-//     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-//   }
-//   return (
-//     _s4() +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     _s4() +
-//     _s4()
-//   );
-// }
 export default defineComponent({
   components: {
     DesktopOutlined,
@@ -71,8 +52,7 @@ export default defineComponent({
     },
   },
   setup() {
-    //let infoID = guid();
-    return { infoID:null };
+    return {};
   },
 });
 </script>

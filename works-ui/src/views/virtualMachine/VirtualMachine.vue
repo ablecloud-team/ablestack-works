@@ -4,22 +4,28 @@
       <a-layout-header id="content-header">
         <div id="content-header-body">
           <a-row id="content-header-row">
-            <!-- 오른쪽 경로 -->
+            <!-- 좌측 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.vm')]" />
+              <Apath v-bind:paths="[$t('label.vm')]"/>
+              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+                <template #icon>
+                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                </template>
+              </a-button>
             </a-col>
 
-            <!-- 왼쪽 액션 -->
-            <a-col id="content-action" :span="12">
-              <actions :action-from="actionFrom" />
+            <!-- 우측 액션 -->
+            <a-col id="content-action" :span="12" >
+              <actions :actionFrom="actionFrom" v-if="actionFrom === 'VirtualMachineList'"/>
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <virtual-machine-list
-            :bordered="false"
+          <VirtualMachineList
+            ref="listRefleshCall"
+            @actionFromChange="actionFromChange"
           />
         </div>
       </a-layout-content>
@@ -41,11 +47,20 @@ export default defineComponent ({
     Apath,
     Actions,
   },
-  setup() {
+  data() {
     return {
       actionFrom: ref("VirtualMachine"),
     };
   },
+  methods: {
+    reflesh(){
+      this.$refs.listRefleshCall.fetchData();
+    },
+    actionFromChange(val) {
+      //console.log(val);
+      this.actionFrom = ref(val);
+    },
+  }
 });
 </script>
 

@@ -1,49 +1,32 @@
 <template>
   <a-table
     size="middle"
+    :loading="loading"
     class="ant-table-striped"
     :columns="VMListColumns"
-    :data-source="VMListData"
-    :rowClassName="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
+    :data-source="vmDataList"
+    :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
     :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
-    :row-selection="rowSelection"
+    :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
     :pagination="pagination"
   >
+
     <template #nameRender="{ record }">
-      <!-- <router-link
-        :to="{
-          name: 'VirtualMachineDetail',
-          params: {
-            name: record.Name,
-            info: [record.IPAddress, record.Account, record.Zone],
-          },
-        }"
-        >{{ record.Name }}</router-link
-      > -->
-      <router-link :to="{ path: '/virtualMachineDetail/'+record.Uuid}">{{ record.Name }}</router-link>
+      <router-link :to="{ path: '/virtualMachineDetail/'+record.uuid}">{{ record.name }}</router-link>
     </template>
 
-    <template #actionRender="{ record }">
+    <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
-          <ASpace direction="horizontal">
-            <Actions
-              :power="record.State === 'Running'"
-              :destroy="true"
-              :reset="true"
-              :iso="true"
-            />
-          </ASpace>
+          <actions :action-from="actionFrom" />
         </template>
-        :
+        <MoreOutlined />
       </a-Popover>
     </template>
 
-    <template #tags="{ text: tags }">
+    <!-- <template #tags="{ text: tags }">
       <span>
         <a-tag
           v-for="tag in tags"
@@ -55,7 +38,7 @@
           {{ tag.toUpperCase() }}
         </a-tag>
       </span>
-    </template>
+    </template> -->
   </a-table>
 </template>
 
@@ -63,33 +46,33 @@
 import { defineComponent, ref } from "vue";
 import Actions from "@/components/Actions";
 
-const rowSelection = {
-  onChange: (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      "selectedRows: ",
-      selectedRows
-    );
-  },
-  onSelect: (record, selected, selectedRows) => {
-    console.log(record, selected, selectedRows);
-  },
-  onSelectAll: (selected, selectedRows, changeRows) => {
-    console.log(selected, selectedRows, changeRows);
-  },
-};
+
 export default defineComponent({
   props: {
-    data: Object,
-    columns: Object,
-    bordered: Boolean,
   },
   components: {
     Actions,
   },
   setup() {
+    // const rowSelection = {
+    //   onChange: (selectedRowKeys, selectedRows) => {
+    //     console.log(
+    //       `selectedRowKeys: ${selectedRowKeys}`,
+    //       "selectedRows: ",
+    //       selectedRows
+    //     );
+    //   },
+    //   onSelect: (record, selected, selectedRows) => {
+    //     $emit('actionFromChange', 'VirtualMachineDetail');
+    //     console.log(record, selected, selectedRows);
+    //   },
+    //   onSelectAll: (selected, selectedRows, changeRows) => {
+    //     console.log(selected, selectedRows, changeRows);
+    //   },
+    // };
     return {
-      rowSelection,
+      // rowSelection,
+      loading: ref(false),
       actionFrom: ref("VirtualMachineList"),
       pagination: {
         pageSize: 10,
@@ -102,57 +85,98 @@ export default defineComponent({
   },
   data() {
     return {
+      selectedRowKeys: [],
       VMListColumns : [
         {
-          dataIndex: "Name",
-          key: "Name",
-          slots: { customRender: "nameRender" },
           title: this.$t('label.name'),
-          sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
+          dataIndex: "name",
+          key: "name",
+          slots: { customRender: "nameRender" },
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: "",
           key: "action",
           dataIndex: "action",
+          align: 'right',
           slots: { customRender: "actionRender" },
         },
         {
           title: this.$t('label.state'),
-          dataIndex: "State",
-          key: "State",
-          sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
+          dataIndex: "state",
+          key: "state",
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t('label.workspace'),
-          dataIndex: "Workspace",
-          key: "Workspace",
+          dataIndex: "workspace",
+          key: "workspace",
           sorter: (a, b) =>
-            a.Workspace < b.Workspace ? -1 : a.Workspace > b.Workspace ? 1 : 0,
+            a.workspace < b.workspace ? -1 : a.workspace > b.workspace ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t('label.users'),
-          dataIndex: "User",
-          key: "User",
-          sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
+          dataIndex: "user",
+          key: "user",
+          sorter: (a, b) => (a.user < b.user ? -1 : a.user > b.user ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t('label.desktop.connect.boolean'),
-          dataIndex: "Conn",
-          key: "Conn",
-          sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
+          dataIndex: "conn",
+          key: "conn",
+          sorter: (a, b) => (a.conn < b.connoD ? -1 : a.conn > b.conn ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-      VMListData : [
-        {"Uuid":"sdfasdfasdfasdf", "Name":"VM1","State":"Running","User":"user01","Conn":"TRUE","Workspace":"test1"},
-        {"Uuid":"sdfasdfasdfasdf", "Name":"VM2","State":"Stopped","User":"user03","Conn":"FALSE","Workspace":"test1"},
-        {"Uuid":"sdfasdfasdfasdf", "Name":"VM3","State":"Running","User":"user02","Conn":"TRUE","Workspace":"test1"}
+      vmDataList : [
+        {"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1"},
+        {"uuid":"20202020202020202020202020202020", "name":"VM2","state":"Stopped","user":"user03","conn":"FALSE","workspace":"test1"},
+        {"uuid":"3030303030303030303030303030303030", "name":"VM3","state":"Running","user":"user02","conn":"TRUE","workspace":"test1"}
       ],
     }
+  },
+    created() {
+    this.fetchData();
+  },
+  methods: {
+    setSelection (selection) {
+      this.selectedRowKeys = selection;
+      if(this.selectedRowKeys.length == 0){
+        this.$emit('actionFromChange', "VirtualMachine");
+      }else{
+        this.$emit('actionFromChange', this.actionFrom);
+      }
+    },
+    resetSelection () {
+      this.setSelection([])
+    },
+    onSelectChange (selectedRowKeys, selectedRows) {
+      this.setSelection(selectedRowKeys)
+    },
+    fetchData() {
+      this.loading = true;
+      // worksApi
+      //   .get("/api/v1/virtualMachines", { withCredentials: true })
+      //   .then((response) => {
+      //     if (response.data.result.status == 200) {
+      //       this.vmDataList = response.data.result.list;
+      //     } else {
+      //       message.error(this.t('message.response.data.fail'));
+      //       //console.log(response.message);
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     message.error(error.message);
+      //     //console.log(error);
+      //   });
+      setTimeout(() => {
+        this.loading = false;  
+      }, 500);
+    },
   },
 });
 </script>

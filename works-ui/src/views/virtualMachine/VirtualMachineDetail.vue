@@ -9,7 +9,7 @@
               <Apath
                 v-bind:paths="[
                   { name: $t('label.vm'), component: 'VirtualMachines' },
-                  { name: vmDataInfo.Name, component: null },
+                  { name: vmDataInfo.name, component: null },
                 ]"
               />
             </a-col>
@@ -61,12 +61,15 @@ export default defineComponent({
   },
   methods: {
     fetchData() {
-      this.vmDataInfo= {"Uuid":"sdfasdfasdfasdf", "Name":"VM1","State":"Running","User":"user01","Conn":"TRUE","Workspace":"test1"};
+      this.vmDataInfo= {"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1", "aaaa":"aaaa", "bbbb":"bbbb", "cccc":"cccc", "dddd":"dddd", "eeee":"eeee"};
       // worksApi
       //   .get("/api/v1/vm/"+this.$route.params.uuid, { withCredentials: true })
       //   .then((response) => {
       //     if (response.data.result.status == 200) {
-      //       this.vmDataList = response.data.result.vmInfo;
+      //       this.vmDataInfo = response.data.result.vmInfo;
+      //       this.networkDataList = response.data.result.networkDataList;
+      //       this.diskDtaList = response.data.result.diskDtaList;
+      
       //     } else {
       //       message.error(this.$t('message.response.data.fail'));
       //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
