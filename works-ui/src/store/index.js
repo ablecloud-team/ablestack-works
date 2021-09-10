@@ -8,7 +8,7 @@ export default createStore({
   mutations: {
     loginSuccess(state, payload) {
       state.user.isLogin = true;
-      //state.user.isAdmin = payload.result.isAdmin;
+      state.user.isAdmin = payload.result.isAdmin;
       state.user.userID = payload.result.username;
       state.user.token = payload.result.token;
     },
@@ -25,7 +25,7 @@ export default createStore({
     },
     logoutCommit({ commit }) {
       commit("logoutSuccess");
-      localStorage.setItem("token", "");
+      localStorage.clear();
     },
   },
   modules: {},
