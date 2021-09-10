@@ -1,14 +1,9 @@
 <template>
   <div id="ContentTab">
-    <a-tabs
-      v-model:activeKey="activeKey"
-      type="card"
-      :tab-position="tabPosition"
-      @change="changeTap"
-    >
+    <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.vm.list')">
         <TableContent
-          v-model:tapName="state.callTap"
+          :tapName="'desktop'"
           :data="VMListData"
           :columns="VMListColumns"
           :actionFrom="'VirtualMachineList'"
@@ -17,21 +12,21 @@
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
-          v-model:tapName="state.callTap"
+          :tapName="'user'"
           :data="UserListData"
           :columns="UserListColumns"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.disk.list')">
         <TableContent
-          v-model:tapName="state.callTap"
+          :tapName="'disk'"
           :data="VMDiskListData"
           :columns="VMDiskListColumns"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
         <TableContent
-          v-model:tapName="state.callTap"
+          :tapName="'network'"
           :data="networkDataList"
           :columns="NWListColumns"
         />
@@ -61,37 +56,19 @@ export default defineComponent({
   setup() {
     const tabPosition = ref("top");
     const activeKey = ref("1");
-    const state = reactive({
-      callTap: ref("desktop"),
-    });
-    const changeTap = (value) => {
-      console.log(`${value}`);
-      if (`${value}` === "1") {
-        state.callTap = ref("desktop");
-      } else if (`${value}` === "2") {
-        state.callTap = ref("user");
-      } else if (`${value}` === "3") {
-        state.callTap = ref("datadisk");
-      } else if (`${value}` === "4") {
-        state.callTap = ref("network");
-      }
-      console.log(state.callTap);
-    };
     return {
-      state,
-      changeTap,
       tabPosition,
       activeKey,
     };
   },
   data() {
     return {
-      VMDiskListColumns : [
+      VMDiskListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -102,38 +79,38 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
           sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.size'),
+          title: this.$t("label.size"),
           dataIndex: "size",
           key: "size",
           sorter: (a, b) => (a.size < b.size ? -1 : a.size > b.size ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.connected.desktop'),
+          title: this.$t("label.connected.desktop"),
           dataIndex: "conn",
           key: "conn",
           sorter: (a, b) => (a.conn < b.conn ? -1 : a.conn > b.conn ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-      VMDiskListData : JSON.parse(
+      VMDiskListData: JSON.parse(
         '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
         '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
         '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
       ),
-      VMListColumns : [
+      VMListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -144,14 +121,14 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
           sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.workspace'),
+          title: this.$t("label.workspace"),
           dataIndex: "workspace",
           key: "workspace",
           sorter: (a, b) =>
@@ -159,31 +136,31 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.users'),
+          title: this.$t("label.users"),
           dataIndex: "user",
           key: "user",
           sorter: (a, b) => (a.user < b.user ? -1 : a.user > b.user ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.desktop.connect.boolean'),
+          title: this.$t("label.desktop.connect.boolean"),
           dataIndex: "conn",
           key: "conn",
           sorter: (a, b) => (a.conn < b.conn ? -1 : a.conn > b.conn ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-      VMListData : [
+      VMListData: [
         {"name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"work11"},
         {"name":"VM2","state":"Stopped","user":"user03","conn":"FALSE","workspace":"work112"},
         {"name":"VM3","state":"Running","user":"user02","conn":"TRUE","workspace":"work113"}
       ],
-      NWListColumns : [
+      NWListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -194,22 +171,22 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
           sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-      UserListData : [
+      UserListData: [
         {"name":"user01","state":"Allocated","desktop":"Desktop1"}
       ],
-      UserListColumns : [
+      UserListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -220,14 +197,14 @@ export default defineComponent({
         //     slots: {customRender: 'actionRender'}
         // },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
           sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.allocated.desktop'),
+          title: this.$t("label.allocateddesktop"),
           dataIndex: "Deskdesktoptop",
           key: "desktop",
           sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),

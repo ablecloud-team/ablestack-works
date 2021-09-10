@@ -35,7 +35,7 @@
 
   <div v-if="workspaceDataList.Type =='desktop'" id="shared" class="CardItem">
     <div class="ItemName">{{ $t("label.dedicated.shared") }}</div>
-    <div class="Item">{{  workspaceDataList.Shared == 'false' ? 'Dedicated' : 'Shared' }}</div>
+    <div class="Item">{{  workspaceDataList.Shared == false ? 'Dedicated' : 'Shared' }}</div>
   </div>
 
   <div id="" class="CardItem">

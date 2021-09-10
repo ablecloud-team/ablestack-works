@@ -7,30 +7,31 @@
             <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath v-bind:paths="[$t('label.workspace')]" />
+              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+                <template #icon>
+                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                </template>
+              </a-button>
             </a-col>
-
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <a-button type="primary" shape="round" @click="showModal(true)">{{ addModalTitle }}
+                <actions :actionFrom="actionFrom" v-if="actionFrom === 'WorkspaceList'"/>
+                <a-button type="primary" shape="round" style="margin-left: 10px;" @click="showModal(true)">{{ addModalTitle }}
                   <template #icon>
                       <PlusOutlined />
                     </template>
                 </a-button>
               </div>
-              <!-- <Actions
-                :title="$t('label.add.workspace')"
-                :add-button="true"
-                :action-from="actionFrom"
-                :show-modal="showAddModal"
-              /> -->
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceList :data="dataList" :bordered="false" />
+          <WorkSpaceList
+            ref="listRefleshCall"
+            @actionFromChange="actionFromChange"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -51,14 +52,14 @@
         layout="vertical"
       >
           <!--워크스페이스 이름 start-->
-          <a-form-item name="name" :label="$t('label.name')">
+          <a-form-item has-feedback name="name" :label="$t('label.name')">
             <a-input 
               v-model:value="formState.name" 
               :placeholder="$t('tooltip.workspace.name')"/>
           </a-form-item>
           <!--워크스페이스 이름 end-->
           <!--워크스페이스 설명 start-->
-          <a-form-item name="description" :label="$t('label.description')">
+          <a-form-item has-feedback name="description" :label="$t('label.description')">
             <a-input
               v-model:value="formState.description"
               :placeholder="$t('tooltip.workspace.description')"
@@ -67,7 +68,7 @@
           </a-form-item>
           <!--워크스페이스 설명 end-->
           <!--워크스페이스 타입 start-->
-          <a-form-item name="workspaceType" :label="$t('label.type')">
+          <a-form-item has-feedback name="workspaceType" :label="$t('label.type')">
             <a-select
               v-model:value="formState.workspaceType"
               :placeholder="$t('tooltip.workspace.type')"
@@ -89,7 +90,7 @@
           </a-form-item>
           <!--워크스페이스 전용 여부 end-->
           <!--워크스페이스 템플릿 start-->
-          <a-form-item name="selectedTemplateId" :label="$t('label.template')">
+          <a-form-item has-feedback name="selectedTemplateId" :label="$t('label.template')">
             <a-select
               v-model:value="formState.selectedTemplateId"
               :placeholder="$t('tooltip.workspace.template')"
@@ -104,7 +105,7 @@
           </a-form-item>
           <!--워크스페이스 템플릿 end-->
           <!--워크스페이스 컴퓨트 오퍼링 start-->
-          <a-form-item name="selectedOfferingId" :label="$t('label.compute.offering')">
+          <a-form-item has-feedback name="selectedOfferingId" :label="$t('label.compute.offering')">
             <a-select
               v-model:value="formState.selectedOfferingId"
               :placeholder="$t('tooltip.workspace.compute.offering')"
@@ -125,7 +126,7 @@
 </template>
 
 <script>
-//import AddWorkspaceModal from "@/components/AddWorkspaceModal";
+import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceList from "./WorkSpaceList";
 import { defineComponent, onMounted, reactive, ref, toRaw } from "vue";
@@ -137,6 +138,7 @@ export default defineComponent ({
   components: {
     WorkSpaceList,
     Apath,
+    Actions,
   },
   props: {},
   setup() {
@@ -179,30 +181,20 @@ export default defineComponent ({
   data() {
     return {
       addModalTitle: this.$t("label.workspace.add"),
-      dataList: [],
       desktopBoolean: ref(false),
+      actionFrom: ref("Workspace"),
     };
   },
   created() {
-    this.fetchData();
     this.fetchOfferingsAndTemplates();
   },
   methods: {
-    fetchData() {
-      worksApi
-        .get("/api/v1/workspace", { withCredentials: true })
-        .then((response) => {
-          if (response.data.result.status == 200) {
-            this.dataList = response.data.result.list;
-          } else {
-            message.error(this.t('message.response.data.fail'));
-            //console.log(response.message);
-          }
-        })
-        .catch(function (error) {
-          message.error(error.message);
-          //console.log(error);
-        });
+    reflesh(){
+      this.$refs.listRefleshCall.fetchData();
+    },
+    actionFromChange(val) {
+      console.log(val);
+      this.actionFrom = ref(val);
     },
     dedicatedChange(value) {
       this.dedicatedOrSharedBoolean = value
@@ -255,13 +247,14 @@ export default defineComponent ({
               .then((response) => {
                 if (response.data.result.status === 200) {
                   message.loading(this.$t("message.workspace.create.success"), 1);
-                  setTimeout(() => {
-                    location.reload();
-                  }, 1500);
+                  // setTimeout(() => {
+                  //   location.reload();
+                  // }, 1500);
                 } else {
                   message.error(response.data.result.deployvirtualmachineresponse.errortext);
                 }
                 this.showModal(false);
+                this.$refs.listRefleshCall.fetchData();
               })
               .catch(function (error) {
                 message.error(error.message);
