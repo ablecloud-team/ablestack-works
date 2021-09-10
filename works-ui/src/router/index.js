@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { axiosUserDetail } from "../api";
+import { worksApi } from "../api";
 import { message } from "ant-design-vue";
 import store from "../store/index";
 import Login from "../views/auth/Login.vue";
@@ -22,7 +22,7 @@ import AuditDetail from "../views/audit/AuditDetail.vue";
 import Community from "../views/community/Community.vue";
 import CommunityDetail from "../views/community/CommunityDetail.vue";
 
-const requireAuth = async (to, from, next) => {
+const requireAuth = (to, from, next) => {
   //console.log("-----------------------------------");
   //console.log("to.name : " + to.name + ", from.name : " + from.name);
 
@@ -39,29 +39,45 @@ const requireAuth = async (to, from, next) => {
   localStorage.setItem("menukey", menukey);
 
   const isAuth = localStorage.getItem("token");
-  //console.log(isAuth);
   if (isAuth && isAuth !== "") {
     if (to.name === "Dashboard" && from.name === "Login") {
       //console.log("login OK :: " + to.name);
       next();
-      setTimeout(() => {
-        location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
-      }, 0);
+      // setTimeout(() => {
+      //   location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
+      // }, 0);
     } else {
-      const res = await axiosUserDetail();
-      if (res.data.result.status > 200) {
-        //console.log("token 이상함 :: " + res.data.result.status);
-        // localStorage.setItem("token", "");
-        message.error(this.$t('message.incorrect.access.login.please'));
-        next({ name: "Login" });
-      } else {
-        //console.log("token OK :::" + res.data.result.status);
-        next();
-      }
+      worksApi
+        .get("/api/v1/token", { withCredentials: true })
+        .then((response) => {
+          //console.log(response);
+          if (response.status == 200) {
+            //this.userDataInfo = response.data.result.vmInfo;
+            next();
+          } else {
+            message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
+            localStorage.setItem("token", "");
+            next({ name: "Login" });
+          }
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      //const res = await axiosTokenAuth();
+      // if (res.data.result.status == 200) {
+      //   message.error(this.$t('message.incorrect.access.login.please'));
+      //   next();
+      //   message.error($t('message.incorrect.access.login.please'));
+      // } else {
+      //   //localStorage.setItem("token", "");
+      //   message.error($t('message.incorrect.access.login.please'));
+      //   next({ name: "Login" });
+      // }
     }
   } else {
-    message.error(this.$t('message.incorrect.access.login.please'));
-    //alert("정상적인 토큰값이 아닙니다. 로그인이 해주세요.");
+    message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
     localStorage.setItem("token", "");
     next({ name: "Login" });
   }
@@ -125,7 +141,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/userDetail/:uuid",
+        path: "/userDetail/:username",
         name: "UserDetail",
         component: UserDetail,
         beforeEnter: requireAuth,
