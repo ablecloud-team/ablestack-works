@@ -130,7 +130,7 @@ export default defineComponent({
   },
   setup(props) {
     const sizeValue = 8;
-    console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
+    //console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
     const state = reactive({
       callComponent: ref(props.actionFrom),
       buttonBoolean: {
