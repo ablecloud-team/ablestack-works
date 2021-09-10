@@ -7,12 +7,18 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath v-bind:paths="[$t('label.users')]" />
+              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+                <template #icon>
+                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                </template>
+              </a-button>
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <a-button type="primary" shape="round" @click="showModal(true)">{{ addModalTitle }}
+                <Actions :actionFrom="actionFrom" v-if="actionFrom === 'UserList'"/>
+                <a-button type="primary" shape="round" style="margin-left: 10px;" @click="showModal(true)">{{ addModalTitle }}
                   <template #icon>
                       <PlusOutlined />
                     </template>
@@ -25,7 +31,8 @@
       <a-layout-content>
         <div id="content-body">
           <UsersList
-            :data="userDataList" :bordered="false" />
+            ref="listRefleshCall"
+            @actionFromChange="actionFromChange"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -43,17 +50,22 @@
         :wrapper-col="wrapperCol"
         layout="vertical"
       >
-        <a-form-item name="name" :label="$t('label.name')">
+        <a-form-item has-feedback name="account" :label="$t('label.account')">
           <a-input
-            v-model:value="formState.name"
-            :placeholder="$t('tooltip.user.name')"/>
+            v-model:value="formState.account"
+            :placeholder="$t('tooltip.user.account')"/>
+        </a-form-item>
+        <a-form-item has-feedback name="firstName" :label="$t('label.firstname')">
+          <a-input
+            v-model:value="formState.firstName"
+            :placeholder="$t('tooltip.user.firstname')"/>
         </a-form-item>
         <!--워크스페이스 이름 end-->
         <!--워크스페이스 설명 start-->
-        <a-form-item name="description" :label="$t('label.description')">
+        <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
           <a-input
-            v-model:value="formState.description"
-            :placeholder="$t('tooltip.user.description')"
+            v-model:value="formState.lastName"
+            :placeholder="$t('tooltip.user.lastname')"
             class="addmodal-aform-item-div"
           />
         </a-form-item>
@@ -63,20 +75,20 @@
             v-model:value="formState.password"
             :placeholder="$t('tooltip.user.password')"/>
         </a-form-item>
-        <a-form-item has-feedback name="passwordCheck" :label="$t('label.passwordCheck')" autocomplete="off" >
+        <a-form-item has-feedback name="passwordCheck" :label="$t('label.passwordCheck')" autocomplete="off">
           <a-input
             type="password"
             v-model:value="formState.passwordCheck"
             :placeholder="$t('tooltip.user.passwordCheck')"/>
         </a-form-item>
-        <a-form-item name="email" :label="$t('label.email')">
-          <a-input
+        <a-form-item has-feedback name="email" :label="$t('label.email')">
+          <a-input 
             v-model:value="formState.email"
             :placeholder="$t('tooltip.user.email')"
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <a-form-item name="userGroup" :label="$t('label.userGroup')">
+        <!-- <a-form-item has-feedback name="userGroup" :label="$t('label.userGroup')">
           <a-input
             v-model:value="formState.userGroup"
             :placeholder="$t('tooltip.user.userGroup')"
@@ -90,13 +102,13 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <a-form-item name="phone" :label="$t('label.phone')">
+        <a-form-item name="phone" :label="$t('label.phone')" >
           <a-input
             v-model:value="formState.phone"
             :placeholder="$t('tooltip.user.phone')"
             class="addmodal-aform-item-div"
           />
-        </a-form-item>
+        </a-form-item>-->
 
 
         
@@ -108,6 +120,7 @@
 </template>
 
 <script>
+import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import UsersList from "@/views/users/UsersList";
 import { defineComponent, ref, reactive } from "vue";
@@ -119,16 +132,8 @@ export default defineComponent({
   },
   components: { 
     UsersList,
-    Apath
-  },
-  data(){
-    return {
-      addModalTitle: this.$t("label.user.add"),
-      userDataList : [
-          {"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "desktop":"Desktop1"}
-        ],
-      
-    }
+    Apath,
+    Actions,
   },
   setup() {
     const visible = ref(false);
@@ -137,8 +142,9 @@ export default defineComponent({
     };
     const formRef = ref();
     const formState = reactive({
-      name: '',
-      description: '',
+      account: '',
+      firstName: '',
+      lastName: '',
       password: '',
       passwordCheck: '',
       email: '',
@@ -147,7 +153,12 @@ export default defineComponent({
       phone: '',
     });
     let validatePass = async (rule, value) => {
-      if (value === '') {
+      let lengthCheck = value.length >= rule.min ? true : false; //길이체크
+      let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      //let containsEngUpper = /[A-Z]/.test(value); 대문자
+      let containsNumber = /[0-9]/.test(value)
+      let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value)
+      if (value === '' || !containsEng || !containsNumber || !containsSpecial || !lengthCheck) {
         return Promise.reject();
       } else {
         if (formState.passwordCheck !== '') {
@@ -163,9 +174,11 @@ export default defineComponent({
       } 
     };
     const rules = {
-      name: { required: true, },
-      description: { required: true, },
+      account: { required: true },
+      firstName: { required: true },
+      lastName: { required: true },
       password: { 
+        min: 7,
         required: true,
         validator: validatePass,
         trigger: 'change',
@@ -175,11 +188,15 @@ export default defineComponent({
         validator: validatePass2,
         trigger: 'change',
       },
-      email: { required: true, },
-      userGroup: { required: true, },
-      department: { required: true, },
-      phone: { required: true, },
-};
+      email:
+          {
+            required: true,
+            type: 'email',
+          },
+      // userGroup: { required: true, },
+      // department: { required: false, },
+      // phone: { required:  false, },
+    };
     return {
       labelCol: { span: 10 },
       wrapperCol: { span: 40 },
@@ -192,69 +209,68 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
+  },  
+  data() {
+    return {
+      addModalTitle: this.$t("label.user.add"),
+      actionFrom: ref("User"),
+    };
   },
   methods: {
+    reflesh(){
+      this.$refs.listRefleshCall.fetchData();
+    },
+    actionFromChange(val) {
+      //console.log(val);
+      this.actionFrom = ref(val);
+      
+    },
     fetchData() {
-      this.rules.name.message = this.$t('input.user.name');
-      this.rules.description.message = this.$t('input.user.description');
+      this.rules.account.message = this.$t('input.user.account');
+      this.rules.firstName.message = this.$t('input.user.firstname');
+      this.rules.lastName.message = this.$t('input.user.lastname');
       this.rules.password.message = this.$t('input.user.password');
       this.rules.passwordCheck.message = this.$t('input.user.passwordCheck');
       this.rules.email.message = this.$t('input.user.email');
-      this.rules.userGroup.message = this.$t('input.user.userGroup');
-      this.rules.department.message = this.$t('input.user.department');
-      this.rules.phone.message = this.$t('input.user.phone');
-
-      // worksApi
-      //   .get("/api/v1/users", { withCredentials: true })
-      //   .then((response) => {
-      //     if (response.data.result.status == 200) {
-      //       this.userDataList = response.data.result.list;
-      //     } else {
-      //       message.error(this.t('message.response.data.fail'));
-      //       //console.log(response.message);
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     message.error(error.message);
-      //     //console.log(error);
-      //   });
+      // this.rules.userGroup.message = this.$t('input.user.userGroup');
+      // this.rules.department.message = this.$t('input.user.department');
+      // this.rules.phone.message = this.$t('input.user.phone');
     },
-
     putUser() {
-
-
       let params = new URLSearchParams();
-      params.append("name", this.formState.name);
-      params.append("description", this.formState.description);
+      params.append("username", this.formState.account);
+      params.append("firstName", this.formState.firstName);
+      params.append("lastName", this.formState.lastName);
       params.append("password", this.formState.password);
+      params.append("email", this.formState.email);
       //console.log(params);
       this.formRef
           .validate()
           .then( () => {
-          //console.log(toRaw(formState));
-          message.loading(this.$t("message.workspace.createing"), 1);
-          // try {
-          //   worksApi
-          //     .put("/api/v1/user", params, { withCredentials: true })
-          //     .then((response) => {
-          //       if (response.data.result.status === 200) {
-          //         message.loading(this.$t("message.workspace.create.success"), 1);
-          //         setTimeout(() => {
-          //           location.reload();
-          //         }, 1500);
-          //       } else {
-          //         message.error(response.data.result.deployvirtualmachineresponse.errortext);
-          //       }
-          //       this.showModal(false);
-          //     })
-          //     .catch(function (error) {
-          //       message.error(error.message);
-          //     //console.log(error);
-          //     });
-          // }catch (error){
-          //   console.log(error)
-          //   message.error(this.$t("message.workspace.create.fail"))
-          // }
+          message.loading(this.$t("message.user.createing"), 1);
+          try {
+            worksApi
+              .put("/api/v1/user", params, { withCredentials: true })
+              .then((response) => {
+                if (response.data.result.status === 200) {
+                  message.loading(this.$t("message.user.create.success"), 1);
+                  // setTimeout(() => {
+                  //   location.reload();
+                  // }, 1500);
+                } else {
+                  message.error(response.data.result.createuserresponse.errortext);
+                }
+                this.showModal(false);
+                this.$refs.listRefleshCall.fetchData();
+              })
+              .catch(function (error) {
+                message.error(error.message);
+              //console.log(error);
+              });
+          }catch (error){
+            console.log(error)
+            message.error(this.$t("message.user.create.fail"))
+          }
         })
         .catch(error => {
           console.log('error', error);

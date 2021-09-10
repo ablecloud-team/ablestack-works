@@ -16,7 +16,7 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <Actions :actionFrom="actionFrom" />
             </a-col>
           </a-row>
         </div>
@@ -36,6 +36,8 @@ import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
 import UserBody from "./UserBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
   props: {
   },
@@ -47,7 +49,9 @@ export default defineComponent({
   },
   data() {
     return {
-      userDataInfo: [],
+      userDataInfo: []
+          //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
+      ,
     };
   },
   created() {
@@ -55,21 +59,20 @@ export default defineComponent({
   },
   methods: {
     fetchData() {
-      this.userDataInfo = {"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "desktop":"Desktop1"};
-      // worksApi
-      //   .get("/api/v1/user/"+this.$route.params.uuid, { withCredentials: true })
-      //   .then((response) => {
-      //     if (response.data.result.status == 200) {
-      //       this.userDataInfo = response.data.result.vmInfo;
-      //     } else {
-      //       message.error(this.$t('message.response.data.fail'));
-      //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-      //     }
+      worksApi
+        .get("/api/v1/user/"+this.$route.params.username, { withCredentials: true })
+        .then((response) => {
+          if (response.status == 200) {
+            this.userDataInfo = response.data.result;
+          } else {
+            message.error(this.$t('message.response.data.fail'));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
 
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error);
-      //   });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 });

@@ -7,30 +7,26 @@
         </template>
       </a-avatar>
       <h4 style="margin-left:20px;">
-        {{ userDataInfo.name }}
+        {{ userDataInfo.username }}
       </h4>
     </div>
   </div>
-  <div id="Status" class="CardItem" >
-    <div class="ItemName">{{ $t("label.state") }}</div>
-    <div class="Item">
-      <a-badge class="Status" :color="userDataInfo.state == 'Disable' ?'grey' : userDataInfo.state == 'Running' ? 'green' : 'red'" :text="userDataInfo.state" />
-    </div>
-  </div>
 
-  <div id="ID" class="CardItem">
-    <div class="ItemName">ID</div>
-    <div class="Item">
-      <a-button shape="circle" type="dashed">
-        <BarcodeOutlined />
-      </a-button>
-      {{ userDataInfo.uuid }}
-    </div>
+  <div id="firstname" class="CardItem">
+    <div class="ItemName">{{ $t('label.firstname') }}</div>
+    <div class="Item">{{ userDataInfo.sn }}</div>
   </div>
-
-  <div id="" class="CardItem">
-    <div class="ItemName">{{ $t('label.allocated.desktop') }}</div>
-    <div class="Item">{{ userDataInfo.desktop }}</div>
+  <div id="firstname" class="CardItem">
+    <div class="ItemName">{{ $t('label.lastname') }}</div>
+    <div class="Item">{{ userDataInfo.givenName }}</div>
+  </div>
+  <div id="email" class="CardItem">
+    <div class="ItemName">{{ $t('label.email') }}</div>
+    <div class="Item">{{ userDataInfo.mail }}</div>
+  </div>
+  <div id="phone" class="CardItem">
+    <div class="ItemName">{{ $t('label.phone') }}</div>
+    <div class="Item">{{ userDataInfo.telephoneNumber }}</div>
   </div>
 
 </template>
@@ -38,26 +34,6 @@
 <script>
 import { UserOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
-
-// function guid() {
-//   function _s4() {
-//     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-//   }
-//   return (
-//     _s4() +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     "-" +
-//     _s4() +
-//     _s4() +
-//     _s4()
-//   );
-// }
 export default defineComponent({
   components: {
     UserOutlined,
