@@ -8,16 +8,21 @@ const worksApi = axios.create({
   },
 });
 
-function axiosLogin(userData) {
-  return worksApi.post("/api/login", userData, { withCredentials: true });
-}
+// function axiosLogin(userData) {
+//   return worksApi.post("/api/login", userData, { withCredentials: true });
+// }
 
-function axiosTokenAuth() {
-  return worksApi.get("/api/v1/token", { withCredentials: true });
-}
+// function axiosTokenAuth() {
+//   return worksApi.get("/api/v1/token", { withCredentials: true });
+// }
 
 function axiosLogout() {
   return worksApi.get("/api/v1/logout", { withCredentials: true });
 }
 
-export { worksApi, axiosLogin, axiosLogout, axiosTokenAuth };
+export {
+  worksApi,
+  // axiosLogin,
+  axiosLogout,
+  // axiosTokenAuth
+};
