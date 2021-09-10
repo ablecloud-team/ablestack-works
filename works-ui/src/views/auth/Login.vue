@@ -74,7 +74,7 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosLogin } from "../../api/index";
+import { worksApi } from "../../api/index";
 import store from "../../store/index"
 import router from "../../router";
 
@@ -125,26 +125,41 @@ export default defineComponent({
       let res
       this.formRef
           .validate()
-          .then(async () => {
-            message.loading(this.$t("message.logging"), 0);
+          .then( () => {
+            message.loading(this.$t("message.logging"));
             params.append("id", this.formState.id);
             params.append("password", this.formState.password);
-            try {
-              res = await axiosLogin(params)
-              console.log(res);
-              if (res.data.result.status === 200) {
-                localStorage.setItem("token", res.data.result.token);
-                message.destroy();
-                message.success(this.$t("message.login.completed"), 2);
-                store.dispatch("loginCommit", res.data)
-                router.push({name: "Dashboard"})
-              }
-            }catch (error){
-              message.destroy();
-              //TODO i18n 적용
-              console.log(error)
-              message.error(this.$t("message.login.wrong"))
-            }
+            // try {
+            //  res = await axiosLogin(params)
+
+            worksApi
+              .post("/api/login", params, { withCredentials: true })
+              .then((response) => {
+                //console.log(response);
+                if (response.status == 200) {
+                  router.push({name: "Dashboard"})
+                  //console.log(response.data.result.token);
+                  localStorage.setItem("token", response.data.result.token);
+                  localStorage.setItem("username", response.data.result.username);
+                  
+                  message.destroy();
+                  message.success(this.$t("message.login.completed"));
+                  store.dispatch("loginCommit", response.data)
+                } else {
+                  message.destroy();
+                  message.error(this.$t("message.login.wrong"))
+                }
+
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+            // }catch (error){
+            //   message.destroy();
+            //   //TODO i18n 적용
+            //   console.log(error)
+            //   message.error(this.$t("message.login.wrong"))
+            // }
           })
           .catch((error) => {
             console.log("error", error);
