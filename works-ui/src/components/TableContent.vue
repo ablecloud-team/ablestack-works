@@ -10,31 +10,17 @@
     {{ state.addButtontext }}
   </a-button>
   <a-table
-    size="middle"
+    size="small"
     class="ant-table-striped"
     :columns="columns"
     :data-source="data"
-    :rowClassName="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
-    :bordered="bordered ? bordered : false"
+
     style="overflow: auto"
-    :row-selection="rowSelection"
     :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <span v-if="comp !== undefined">
-        <router-link
-          :to="{
-            name: comp,
-            params: {
-              name: record.name,
-              info: [record.IPAddress, record.Account, record.Zone],
-            },
-          }"
-        >
-          {{ record.name }}
-        </router-link>
+      <span v-if="comp !== undefined && comp ==='virtualMachineDetail'">
+        <router-link :to="{ path: '/virtualMachineDetail/'+record.uuid}">{{ record.name }}</router-link>
       </span>
       <span v-else>
         {{ record.name }}
@@ -52,7 +38,7 @@
       </a-Popover>
     </template>
 
-    <template #tags="{ text: tags }">
+    <!-- <template #tags="{ text: tags }">
       <span>
         <a-tag
           v-for="tag in tags"
@@ -64,7 +50,7 @@
           {{ tag.toUpperCase() }}
         </a-tag>
       </span>
-    </template>
+    </template> -->
   </a-table>
 
   <a-modal
