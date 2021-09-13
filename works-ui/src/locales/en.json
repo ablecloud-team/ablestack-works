@@ -53,7 +53,8 @@
     "label.workspace": "Workspaces",
     "label.vm": "Virtual Machines",
     "label.users": "Users",
-    "label.group.policy": "GroupPolicy",
+    "label.group.policy": "Group Policy",
+    "label.group.policy.add": "Add Group Policy",
     "label.audit": "Audit",
     "label.community": "Community",
     "label.desktop": "Desktop",
@@ -112,6 +113,7 @@
     "label.isAdmin": "Administrator Y/N",
     "label.telephoneNumber": "Phone Number",
     "label.userPrincipalName": "Principal Name",
+    "label.createdate": "Create Date",
 
     //input
     "input.workspace.name": "Input workspace name",

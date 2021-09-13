@@ -54,6 +54,7 @@
     "label.vm": "가상머신",
     "label.users": "사용자",
     "label.group.policy": "그룹 정책",
+    "label.group.policy.add": "그룹 정책 추가",
     "label.audit": "감사",
     "label.community": "커뮤니티",
     "label.desktop": "데스크탑",
@@ -112,6 +113,7 @@
     "label.isAdmin": "관리자 여부",
     "label.telephoneNumber": "전화번호",
     "label.userPrincipalName": "Principal Name",
+    "label.createdate": "생성일자",
 
     //input
     "input.workspace.name": "워크스페이스 이름을 입력하세요.",
