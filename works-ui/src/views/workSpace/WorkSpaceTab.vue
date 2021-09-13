@@ -7,14 +7,17 @@
           :data="VMListData"
           :columns="VMListColumns"
           :actionFrom="'VirtualMachineList'"
-          comp="VirtualMachineDetail"
+          :comp="'VirtualMachineDetail'"
+          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
           :tapName="'user'"
-          :data="UserListData"
+          :data="workspaceUserList"
           :columns="UserListColumns"
+          :actionFrom="'UserDetail'"
+          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.disk.list')">
@@ -22,6 +25,7 @@
           :tapName="'disk'"
           :data="VMDiskListData"
           :columns="VMDiskListColumns"
+          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
@@ -29,6 +33,7 @@
           :tapName="'network'"
           :data="networkDataList"
           :columns="NWListColumns"
+          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
     </a-tabs>
@@ -37,6 +42,8 @@
 
 <script>
 import { defineComponent, reactive, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 import TableContent from "@/components/TableContent";
 
 export default defineComponent({
@@ -178,9 +185,7 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
       ],
-      UserListData: [
-        {"name":"user01","state":"Allocated","desktop":"Desktop1"}
-      ],
+      workspaceUserList: [],
       UserListColumns: [
         {
           dataIndex: "name",
@@ -190,27 +195,55 @@ export default defineComponent({
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
+        {
+            title: '',
+            key: 'action',
+            dataIndex: 'action',
+            align: 'right',
+            slots: {customRender: 'actionRender'}
+        },
         // {
-        //     title: '',
-        //     key: 'action',
-        //     dataIndex: 'action',
-        //     slots: {customRender: 'actionRender'}
+        //   title: this.$t("label.state"),
+        //   dataIndex: "state",
+        //   key: "state",
+        //   sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+        //   sortDirections: ["descend", "ascend"],
         // },
         {
-          title: this.$t("label.state"),
-          dataIndex: "state",
-          key: "state",
-          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
           title: this.$t("label.allocateddesktop"),
-          dataIndex: "Deskdesktoptop",
+          dataIndex: "desktop",
           key: "desktop",
           sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
+    }
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      //해당 워크스페이스에 추가된 사용자 목록 조회
+      worksApi
+        .get("/api/v1/user", { withCredentials: true })
+        .then((response) => {
+          if (response.status == 200) {
+            this.workspaceUserList = response.data.result.result;
+          } else {
+            message.error(this.t('message.response.data.fail'));
+            //console.log(response.message);
+          }
+        })
+        .catch(function (error) {
+          message.error(error.message);
+          //console.log(error);
+        });
+
+      this.loading = ref(false);
+    },
+    tabReflesh() {
+      this.fetchData();
     }
   },
 });

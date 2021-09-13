@@ -115,29 +115,29 @@ export default defineComponent({
           sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
-        {
-          title: this.$t("label.desktop.connection.quantity"),
-          dataIndex: "NoC",
-          key: "NoC",
-          sorter: (a, b) => (a.NoC < b.NoC ? -1 : a.NoC > b.NoC ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.network.type"),
-          dataIndex: "NetType",
-          key: "NetType",
-          sorter: (a, b) =>
-            a.NetType < b.NetType ? -1 : a.NetType > b.NetType ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.restrict"),
-          dataIndex: "Restrict",
-          key: "Restrict",
-          sorter: (a, b) =>
-            a.Restrict < b.Restrict ? -1 : a.Restrict > b.Restrict ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-        },
+        // {
+        //   title: this.$t("label.desktop.connection.quantity"),
+        //   dataIndex: "NoC",
+        //   key: "NoC",
+        //   sorter: (a, b) => (a.NoC < b.NoC ? -1 : a.NoC > b.NoC ? 1 : 0),
+        //   sortDirections: ["descend", "ascend"],
+        // },
+        // {
+        //   title: this.$t("label.network.type"),
+        //   dataIndex: "NetType",
+        //   key: "NetType",
+        //   sorter: (a, b) =>
+        //     a.NetType < b.NetType ? -1 : a.NetType > b.NetType ? 1 : 0,
+        //   sortDirections: ["descend", "ascend"],
+        // },
+        // {
+        //   title: this.$t("label.restrict"),
+        //   dataIndex: "Restrict",
+        //   key: "Restrict",
+        //   sorter: (a, b) =>
+        //     a.Restrict < b.Restrict ? -1 : a.Restrict > b.Restrict ? 1 : 0,
+        //   sortDirections: ["descend", "ascend"],
+        // },
         // ,
         // {
         //     title: 'Tags',

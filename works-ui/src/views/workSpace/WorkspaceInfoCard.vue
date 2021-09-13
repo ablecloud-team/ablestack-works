@@ -11,6 +11,11 @@
       </h4>
     </div>
   </div>
+  <div id="Description" class="CardItem">
+    <div class="ItemName">{{ $t("label.description") }}</div>
+    <div class="Item">{{ workspaceDataList.Description }}</div>
+  </div>
+
   <div id="Status" class="CardItem" >
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
@@ -28,6 +33,11 @@
     </div>
   </div>
 
+  <div id="createdate" class="CardItem">
+    <div class="ItemName">{{ $t("label.createdate") }}</div>
+    <div class="Item">{{ workspaceDataList.CreateDate }}</div>
+  </div>
+
   <div id="Type" class="CardItem">
     <div class="ItemName">{{ $t("label.type") }}</div>
     <div class="Item">{{ workspaceDataList.Type }}</div>
@@ -38,15 +48,15 @@
     <div class="Item">{{  workspaceDataList.Shared == false ? 'Dedicated' : 'Shared' }}</div>
   </div>
 
-  <div id="" class="CardItem">
+  <!-- <div id="" class="CardItem">
     <div class="ItemName">{{ $t("label.desktop.quantity") }}</div>
     <div class="Item">{{ workspaceDataList.Quantity }}</div>
-  </div>
+  </div> -->
 
-  <div id="" class="CardItem">
+  <!-- <div id="" class="CardItem">
     <div class="ItemName">{{ $t("label.desktop.connection.quantity") }}</div>
-    <!-- <div class="Item">{{ workspaceDataList.Type }}</div> -->
-  </div>
+    <div class="Item">{{ workspaceDataList.Type }}</div>
+  </div> -->
 
   <div class="CardItem">
     <div class="ItemName">{{ $t("label.template") }}</div>
