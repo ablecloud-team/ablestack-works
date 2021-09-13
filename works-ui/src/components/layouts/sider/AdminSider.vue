@@ -40,13 +40,13 @@
         </template>
         <span>{{ $t("label.group.policy") }}</span>
       </a-menu-item>
-      <a-menu-item key="6" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(6)">
+      <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)">
         <template #icon>
           <BarChartOutlined />
         </template>
         <span>{{ $t("label.audit") }}</span>
       </a-menu-item>
-      <a-menu-item key="7" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(7)">
+      <a-menu-item key="7" @click="$router.push({ name: 'Community' }); selectedKeysSetting(7)">
         <template #icon>
           <CoffeeOutlined />
         </template>
