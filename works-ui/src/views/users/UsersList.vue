@@ -21,7 +21,7 @@
     <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
-          <actions :action-from="actionFrom" />
+          <Actions :action-from="actionFrom" />
         </template>
         <MoreOutlined />
       </a-Popover>

@@ -23,6 +23,9 @@
 import { defineComponent, ref } from "vue";
 import TableContent from "@/components/TableContent";
 import DetailContent from "@/components/DetailContent";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+
 export default defineComponent({
   components: {
     TableContent,

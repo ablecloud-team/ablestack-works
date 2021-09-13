@@ -252,7 +252,7 @@ export default defineComponent({
             worksApi
               .put("/api/v1/user", params, { withCredentials: true })
               .then((response) => {
-                if (response.data.result.status === 200) {
+                if (response.status === 200) {
                   message.loading(this.$t("message.user.create.success"), 1);
                   // setTimeout(() => {
                   //   location.reload();
