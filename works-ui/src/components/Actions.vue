@@ -155,7 +155,6 @@ export default defineComponent({
         state.buttonBoolean.destroy = true;
         state.buttonBoolean.pause = true;
       } else if (state.callComponent === "VirtualMachine") {
-
       } else if (state.callComponent === "VirtualMachineList" || state.callComponent === "VirtualMachineDetail") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
@@ -165,6 +164,8 @@ export default defineComponent({
       } else if (state.callComponent === "UserList" || state.callComponent === "UserDetail") {
         state.buttonBoolean.destroy = true;
         state.buttonBoolean.pause = true;
+      } else if (state.callComponent === "GroupPolicyList" || state.callComponent === "GroupPolicyDetail") {
+        state.buttonBoolean.destroy = true;
       }
     });
     return {
