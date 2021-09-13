@@ -1,0 +1,132 @@
+<template>
+  <div id="ContentTab">
+    <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
+      <a-tab-pane key="1" :tab="$t('label.detail')">
+        <DetailContent 
+        :dataInfo="userDataInfo"
+        :actionFrom="'groupPolicyDetail'"/>
+      </a-tab-pane>
+    </a-tabs>
+  </div>
+</template>
+
+<script>
+import { defineComponent, ref } from "vue";
+import TableContent from "@/components/TableContent";
+import DetailContent from "@/components/DetailContent";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+
+export default defineComponent({
+  components: {
+    TableContent,
+    DetailContent,
+  },
+  props: {
+    userDataInfo:{
+      type: Object,
+      required: true,
+      default: null,
+    },
+    // vmDiskList:{
+    //   type: Object,
+    //   required: false,
+    //   default: null,
+    // },
+    // vmNetworkList:{
+    //   type: Object,
+    //   required: false,
+    //   default: null,
+    // },
+  },
+  setup() {
+    const tabPosition = ref("top");
+    const activeKey = ref("1");
+    return {
+      tabPosition,
+      activeKey,
+    };
+  },
+  data() {
+    return {
+      vmDiskList : JSON.parse(
+        '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
+        '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
+        '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
+      ),
+      vmNetworkList : JSON.parse(
+        '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
+        '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
+        '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
+      ),
+      vmDiskListColumns : [
+        {
+          dataIndex: "name",
+          key: "name",
+          slots: { customRender: "nameRender" },
+          title: this.$t('label.name'),
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          slots: { customRender: "actionRender" },
+        },
+        {
+          title: this.$t('label.state'),
+          dataIndex: "state",
+          key: "state",
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.size'),
+          dataIndex: "size",
+          key: "size",
+          sorter: (a, b) => (a.size < b.size ? -1 : a.size > b.size ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t('label.connected.desktop'),
+          dataIndex: "conn",
+          key: "conn",
+          sorter: (a, b) => (a.conn < b.conn ? -1 : a.conn > b.conn ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+      ],
+      
+      vmNetworkListColumns : [
+        {
+          dataIndex: "name",
+          key: "name",
+          slots: { customRender: "nameRender" },
+          title: this.$t('label.name'),
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          slots: { customRender: "actionRender" },
+        },
+        {
+          title: this.$t('label.state'),
+          dataIndex: "state",
+          key: "state",
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+      ],
+    }
+  }
+});
+</script>
+
+<style>
+#ContentTab {
+  text-align: left;
+}
+</style>

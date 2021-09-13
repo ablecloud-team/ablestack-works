@@ -8,22 +8,23 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.group.policy'), component: 'GroupPolicy' },
-                  { name: name, component: null },
+                  { name: $t('label.users'), component: 'Users' },
+                  { name: userDataInfo.name, component: null },
                 ]"
               />
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :destroy="true" />
+              <Actions :actionFrom="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody :name="name" :info="info" />
+          <GroupPolicyBody 
+          :userDataInfo="userDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -31,16 +32,49 @@
 </template>
 
 <script>
-import Actions from "@/components/Actions";
-import Apath from "@/components/Apath";
-import UserBody from "@/views/users/UserBody";
-import { defineComponent } from "vue";
+import Actions from "../../components/Actions";
+import Apath from "../../components/Apath";
+import GroupPolicyBody from "./GroupPolicyBody";
+import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
   props: {
-    name: String,
-    info: Object,
   },
-  components: { UserBody, Apath, Actions },
+  components: { GroupPolicyBody, Apath, Actions },
+  setup() {
+    return {
+      actionFrom: ref("GroupPolicyDetail"),
+    };
+  },
+  data() {
+    return {
+      userDataInfo: []
+          //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
+      ,
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      worksApi
+        .get("/api/v1/user/"+this.$route.params.username, { withCredentials: true })
+        .then((response) => {
+          if (response.status == 200) {
+            this.userDataInfo = response.data.result;
+          } else {
+            message.error(this.$t('message.response.data.fail'));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+  },
 });
 </script>
 
