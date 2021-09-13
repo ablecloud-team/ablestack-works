@@ -4,7 +4,7 @@
       <a-layout-header id="content-header">
         <div>
           <a-row>
-            <!-- 오른쪽 경로 -->
+            <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
@@ -14,7 +14,7 @@
               />
             </a-col>
 
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <actions :actionFrom="actionFrom" />
             </a-col>
@@ -37,6 +37,7 @@ import Apath from "@/components/Apath";
 import VirtualMachineBody from "@/views/virtualMachine/VirtualMachineBody";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
   props: {
@@ -51,7 +52,7 @@ export default defineComponent({
   },
   data() {
     return {
-      vmDataInfo: [],
+      vmDataInfo: [{"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1", "aaaa":"aaaa", "bbbb":"bbbb", "cccc":"cccc", "dddd":"dddd", "eeee":"eeee"}],
       networkDataList: [],
       diskDtaList: [],
     };
@@ -61,7 +62,6 @@ export default defineComponent({
   },
   methods: {
     fetchData() {
-      this.vmDataInfo= {"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1", "aaaa":"aaaa", "bbbb":"bbbb", "cccc":"cccc", "dddd":"dddd", "eeee":"eeee"};
       // worksApi
       //   .get("/api/v1/vm/"+this.$route.params.uuid, { withCredentials: true })
       //   .then((response) => {
