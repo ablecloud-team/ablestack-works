@@ -10,7 +10,6 @@
     </a-col>
     <a-col :span="12" style="float:right; text-align: right; padding-right: 40px">
       <a-dropdown>
-
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <font-awesome-icon 
@@ -124,7 +123,7 @@ export default defineComponent({
   },
   data() {
     return {
-      language: 'ko',
+      language: '',
       loadedLanguage: [],
     }
   },
@@ -138,13 +137,13 @@ export default defineComponent({
       state,
     };
   },
-  mounted() {
+  created() {
     // const res = await axiosUserDetail()
     // if(res.status === 200){
     //   this.$store.dispatch("loginCommit",res.data);
     //   this.state.userID = res.data.result.name;
     // }
-    this.language = localStorage.getItem('locale') || 'ko';
+    this.language = localStorage.getItem('locale');
     this.setLocale(this.language);
   },
   methods: {
@@ -153,11 +152,11 @@ export default defineComponent({
       this.$emit("setCollapsed");
     },
     setLocaleClick (e) {
-      let localeValue = e.key
+      let localeValue = e.key;
       if (!localeValue) {
-        localeValue = 'ko'
+        localeValue = 'ko';
       }
-      this.setLocale(localeValue)
+      this.setLocale(localeValue);
     },
     setLocale (localeValue) {
       this.$locale = localeValue;

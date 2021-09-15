@@ -44,13 +44,13 @@
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <a-popover placement="bottom">
+        <!-- <a-popover placement="bottom">
           <template #content>
-            <a-button type="text" @click="$i18n.locale = 'ko'">
+            <a-button type="text" @click="setLocale('ko')">
               한국어
             </a-button>
             <br />
-            <a-button type="text" @click="$i18n.locale = 'en'">
+            <a-button type="text" @click="setLocale('en')">
               English
             </a-button>
           </template>
@@ -64,7 +64,27 @@
               />
             </template>
           </a-button>
-        </a-popover>
+        </a-popover> -->
+        <a-dropdown>
+        <a-button type="text" shape="circle" class="header-notice-button">
+          <a class="ant-dropdown-link" @click.prevent>
+            <font-awesome-icon 
+              :icon="['fas', 'language']"
+              size="2x"
+              style="color: #666;"
+              class="login-icon"/>
+            <!-- <GlobalOutlined /> -->
+          </a>
+        </a-button>
+        <template #overlay>
+          <a-menu
+            :selectedKeys="[language]"
+            @click="setLocaleClick">
+            <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+            <a-menu-item key="en" value="enUS"> English </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
         <!--   언어변환 버튼 끝     -->
       </a-form>
     </div>
@@ -85,21 +105,17 @@ export default defineComponent({
     const formState = reactive({
       id: "administrator",
       password: "Ablecloud1!",
-      // id: "",
-      // password: "",
     });
-
     const rules = {
       id: {
         required: true,
-        message: "message.login.failure",
+        trigger: "change",
       },
       password: {
         required: true,
-        message: "Please input name",
+        trigger: "change",
       },
     };
-
     return {
       formRef,
       formState,
@@ -107,63 +123,76 @@ export default defineComponent({
     };
   },
   data() {
-    let rulesIdMeassage = this.$t(`message.please.enter.your.id`);
-    let rulesPasswordMeassage = this.$t("message.please.enter.your.password");
-    return {
-      rulesIdMeassage,
-      rulesPasswordMeassage,
-    };
+    return {};
   },
-  computed: {
-
+  created() {
+    this.onClear();
   },
+  computed: {},
   methods: {
+    setLocaleClick (e) {
+      let localeValue = e.key;
+      if (!localeValue) {
+        localeValue = 'ko';
+      }
+      this.setLocale(localeValue);
+    },
+    setLocale (localeValue) {
+      this.$locale = localeValue;
+      this.$i18n.locale = localeValue;
+      this.language = localeValue;
+      localStorage.setItem('locale', localeValue);
+      //this.loadLanguageAsync(localeValue);
+    },
+    onClear() {
+      localStorage.clear();
+    },
     onSubmit() {
-      this.rules.id.message = this.rulesIdMeassage;
-      this.rules.password.message = this.rulesPasswordMeassage;
+      this.rules.id.message = this.$t("message.please.enter.your.id");;
+      this.rules.password.message = this.$t("message.please.enter.your.password")
       let params = new URLSearchParams();
       let res
       this.formRef
-          .validate()
-          .then( () => {
-            message.loading(this.$t("message.logging"));
-            params.append("id", this.formState.id);
-            params.append("password", this.formState.password);
-            // try {
-            //  res = await axiosLogin(params)
+        .validate()
+        .then( () => {
+          message.loading(this.$t("message.logging"));
+          params.append("id", this.formState.id);
+          params.append("password", this.formState.password);
+          // try {
+          //  res = await axiosLogin(params)
 
-            worksApi
-              .post("/api/login", params, { withCredentials: true })
-              .then((response) => {
-                //console.log(response);
-                if (response.status == 200) {
-                  router.push({name: "Dashboard"})
-                  //console.log(response.data.result.token);
-                  localStorage.setItem("token", response.data.result.token);
-                  localStorage.setItem("username", response.data.result.username);
-                  
-                  message.destroy();
-                  message.success(this.$t("message.login.completed"));
-                  store.dispatch("loginCommit", response.data)
-                } else {
-                  message.destroy();
-                  message.error(this.$t("message.login.wrong"))
-                }
+          worksApi
+            .post("/api/login", params, { withCredentials: true })
+            .then((response) => {
+              //console.log(response);
+              if (response.status == 200) {
+                router.push({name: "Dashboard"})
+                //console.log(response.data.result.token);
+                localStorage.setItem("token", response.data.result.token);
+                localStorage.setItem("username", response.data.result.username);
+                
+                message.destroy();
+                message.success(this.$t("message.login.completed"));
+                store.dispatch("loginCommit", response.data)
+              } else {
+                message.destroy();
+                message.error(this.$t("message.login.wrong"))
+              }
 
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
-            // }catch (error){
-            //   message.destroy();
-            //   //TODO i18n 적용
-            //   console.log(error)
-            //   message.error(this.$t("message.login.wrong"))
-            // }
-          })
-          .catch((error) => {
-            console.log("error", error);
-          });
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          // }catch (error){
+          //   message.destroy();
+          //   //TODO i18n 적용
+          //   console.log(error)
+          //   message.error(this.$t("message.login.wrong"))
+          // }
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     },
   },
 });

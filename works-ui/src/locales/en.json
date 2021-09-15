@@ -114,6 +114,16 @@
     "label.telephoneNumber": "Phone Number",
     "label.userPrincipalName": "Principal Name",
     "label.createdate": "Create Date",
+    "label.workspace.count": "Workspace Count",
+    "label.desktop.count": "Desktop Count",
+    "label.desktop.connected.count": "Desktop Connected Count",
+    "label.app.connected.count": "App Connected Count",
+    "label.allocated.cpu.count": "CPU Allocated",
+    "label.allocated.memory.count": "Memory Allocated",
+    "label.allocated.disk.count": "Disk Allocated",
+    "label.allocated.IP.count": "IP Used Count",
+    "label.search": "Search",
+    "label.reset": "Reset",
 
     //input
     "input.workspace.name": "Input workspace name",
@@ -129,5 +139,9 @@
     "input.user.email": "Input user email",
     "input.user.userGroup": "Input user userGroup",
     "input.user.department": "Input user department",
-    "input.user.phone": "Input user phone"
+    "input.user.phone": "Input user phone",
+
+    //search
+    "search.name": "Search Name.",
+    "search.type": "Search Type."
 }

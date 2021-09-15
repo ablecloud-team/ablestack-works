@@ -4,8 +4,8 @@
     "message.login.validation": "아이디 또는 계정을 입력해주세요.",
     "message.login.completed": "로그인이 완료되었습니다.",
     "message.login.failure": "로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.",
-    "message.please.enter.your.id": "아이디를 입력 하셔야 합니다.",
-    "message.please.enter.your.password": "패스워드를 입력 하셔야 합니다.",
+    "message.please.enter.your.id": "아이디를 입력하세요.",
+    "message.please.enter.your.password": "패스워드를 입력하세요.",
     "message.workspace.create.success": "워크스페이스 생성이 완료되었습니다.",
     "message.workspace.createing": "워크스페이스 생성중입니다.",
     "message.workspace.create.fail": "워크스페이스 생성에 실패하였습니다.",
@@ -114,6 +114,16 @@
     "label.telephoneNumber": "전화번호",
     "label.userPrincipalName": "Principal Name",
     "label.createdate": "생성일자",
+    "label.workspace.count": "워크스페이스 수",
+    "label.desktop.count": "데스크톱 수",
+    "label.desktop.connected.count": "데스크톱 연결 수",
+    "label.app.connected.count": "APP 연결 수",
+    "label.allocated.cpu.count": "CPU 할당량",
+    "label.allocated.memory.count": "Memory 할당량",
+    "label.allocated.disk.count": "Disk 할당량",
+    "label.allocated.IP.count": "IP 사용 수",
+    "label.search": "검색",
+    "label.reset": "초기화",
 
     //input
     "input.workspace.name": "워크스페이스 이름을 입력하세요.",
@@ -129,5 +139,9 @@
     "input.user.email": "사용자 이메일을 입력하세요.",
     "input.user.userGroup": "사용자 그룹을 선택하세요.",
     "input.user.department": "사용자 부서를 입력하세요.",
-    "input.user.phone": "사용자 전화번호를 입력하세요."
+    "input.user.phone": "사용자 전화번호를 입력하세요.",
+
+    //search
+    "search.name": "이름을 검색하세요.",
+    "search.type": "타입을 검색하세요."
 }

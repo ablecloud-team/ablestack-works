@@ -1,8 +1,6 @@
 module.exports = {
   pluginOptions: {
-    i18n: {
-      locale: "ko",
-      fallbackLocale: "ko",
+    i18n: {      
       localeDir: "locales",
       enableLegacy: true,
       runtimeOnly: false,
