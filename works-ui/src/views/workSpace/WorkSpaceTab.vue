@@ -20,14 +20,14 @@
           @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('label.disk.list')">
+      <!-- <a-tab-pane key="3" :tab="$t('label.disk.list')">
         <TableContent
           :tapName="'disk'"
           :data="VMDiskListData"
           :columns="VMDiskListColumns"
           @tabReflesh="tabReflesh"
         />
-      </a-tab-pane>
+      </a-tab-pane> -->
       <a-tab-pane key="4" :tab="$t('label.network.list')">
         <TableContent
           :tapName="'network'"
@@ -83,6 +83,8 @@ export default defineComponent({
           title: "",
           key: "action",
           dataIndex: "action",
+          align: "right",
+          width: "5px",
           slots: { customRender: "actionRender" },
         },
         {
@@ -125,6 +127,8 @@ export default defineComponent({
           title: "",
           key: "action",
           dataIndex: "action",
+          align: "right",
+          width: "5px",
           slots: { customRender: "actionRender" },
         },
         {
@@ -175,6 +179,8 @@ export default defineComponent({
           title: "",
           key: "action",
           dataIndex: "action",
+          align: "right",
+          width: "5px",
           slots: { customRender: "actionRender" },
         },
         {

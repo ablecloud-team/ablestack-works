@@ -11,9 +11,37 @@
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
-    :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
     :pagination="pagination"
   >
+    <!-- 검색 필터링 template-->
+    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
+      <div style="padding: 8px">
+        <a-input-search
+          ref="searchInput"
+          :placeholder="$t('search.'+column.dataIndex)"
+          :value="selectedKeys[0]"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <!-- <a-button
+          type="primary"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          <template #icon><SearchOutlined /></template>
+          {{ $t("label.search")}}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
+          {{ $t("label.reset")}}
+        </a-button> -->
+      </div>
+    </template>
+    <template #filterIcon="filtered">
+      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    </template>
+    <!-- 검색 필터링 template-->
+
     <template #nameRender="{ record }">
       <router-link :to="{ path: '/workspaceDetail/'+record.Uuid}">{{ record.Name }}</router-link>
     </template>
@@ -25,15 +53,18 @@
         <MoreOutlined />
       </a-Popover>
     </template>
+    <template #typeRender="{ record }">
+      {{ record.Type.toUpperCase() }}
+    </template>
   </a-table>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
+import { SearchOutlined } from "@ant-design/icons-vue";
 // const rowSelection = {
 //   onChange: (selectedRowKeys, selectedRows) => {
 //     // console.log(
@@ -49,14 +80,29 @@ import { message } from "ant-design-vue";
 //     // console.log(selected, selectedRows, changeRows);
 //   },
 // };
+
 export default defineComponent({
-  name : "WorkspaceList",
+  name: "WorkspaceList",
   components: {
     Actions,
+    SearchOutlined,
   },
-  props: {
-  },
+  props: {},
   setup() {
+    const state = reactive({
+      searchText: '',
+      searchedColumn: '',
+    });
+    const searchInput = ref();
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      state.searchText = selectedKeys[0];
+      state.searchedColumn = dataIndex;
+    };
+    const handleReset = clearFilters => {
+      clearFilters();
+      state.searchText = '';
+    };
     return {
       //rowSelection,
       loading: ref(false),
@@ -68,11 +114,11 @@ export default defineComponent({
         showTotal: (total) => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
-      
+      searchInput,
+      state,
+      handleSearch,
+      handleReset,
     };
-  },
-  created() {
-    this.fetchData();
   },
   data() {
     return {
@@ -80,38 +126,80 @@ export default defineComponent({
       dataList: [],
       listColumns: [
         {
-          dataIndex: "Name",
-          key: "Name",
-          slots: { customRender: "nameRender" },
           title: this.$t("label.name"),
+          dataIndex: "name",
+          key: "Name",
+          width: "39%",
+          slots: { 
+            customRender: "nameRender",
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+          },
           sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          onFilter: (value, record) => record.Name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: "",
           key: "action",
           dataIndex: "action",
-          align: 'right',
+          align: "right",
+          width: "1%",
           slots: { customRender: "actionRender" },
         },
         {
           title: this.$t("label.state"),
           dataIndex: "State",
           key: "State",
+          width: "20%",
           sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t("label.type"),
-          dataIndex: "Type",
+          dataIndex: "type",
           key: "Type",
+          width: "20%",
+          slots: { 
+            customRender: "typeRender",
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+          },
           sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
+          //filterMultiple: false,
+          // filters: [
+          //   {
+          //     text: 'DESKTOP',
+          //     value: 'DESKTOP',
+          //   },
+          //   {
+          //     text: 'APP',
+          //     value: 'APP',
+          //   },
+          // ]
+          onFilter: (value, record) => record.Type.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: this.$t("label.desktop.quantity"),
           dataIndex: "Quantity",
           key: "Quantity",
+          width: "20%",
           sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -146,22 +234,25 @@ export default defineComponent({
         //     slots: {customRender: 'tags'},
         // }
       ],
-    }
+    };
+  },
+  created() {
+    this.fetchData();
   },
   methods: {
-    setSelection (selection) {
+    setSelection(selection) {
       this.selectedRowKeys = selection;
-      if(this.selectedRowKeys.length == 0){
-        this.$emit('actionFromChange', "Workspace");
-      }else{
-        this.$emit('actionFromChange', this.actionFrom);
+      if (this.selectedRowKeys.length == 0) {
+        this.$emit("actionFromChange", "Workspace");
+      } else {
+        this.$emit("actionFromChange", this.actionFrom);
       }
     },
-    resetSelection () {
-      this.setSelection([])
+    resetSelection() {
+      this.setSelection([]);
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys)
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.setSelection(selectedRowKeys);
     },
     fetchData() {
       this.loading = true;
@@ -180,7 +271,7 @@ export default defineComponent({
           //console.log(error);
         });
       setTimeout(() => {
-        this.loading = false;  
+        this.loading = false;
       }, 500);
     },
   },
