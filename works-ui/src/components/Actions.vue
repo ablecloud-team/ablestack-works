@@ -151,19 +151,16 @@ export default defineComponent({
       if (state.callComponent === "WorkspaceList" || state.callComponent === "WorkspaceDetail") {
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
         state.buttonBoolean.destroy = true;
         state.buttonBoolean.pause = true;
       } else if (state.callComponent === "VirtualMachine") {
       } else if (state.callComponent === "VirtualMachineList" || state.callComponent === "VirtualMachineDetail") {
         state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
+        state.buttonBoolean.stop = true;        
         state.buttonBoolean.iso = true;
         state.buttonBoolean.destroy = true;
       } else if (state.callComponent === "UserList" || state.callComponent === "UserDetail") {
         state.buttonBoolean.destroy = true;
-        state.buttonBoolean.pause = true;
       } else if (state.callComponent === "GroupPolicyList" || state.callComponent === "GroupPolicyDetail") {
         state.buttonBoolean.destroy = true;
       }
