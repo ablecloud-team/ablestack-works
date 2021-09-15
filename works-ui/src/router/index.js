@@ -59,7 +59,6 @@ const requireAuth = (to, from, next) => {
             localStorage.setItem("token", "");
             next({ name: "Login" });
           }
-
         })
         .catch(function (error) {
           console.log(error);
@@ -78,13 +77,13 @@ const requireAuth = (to, from, next) => {
     }
   } else {
     message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-    localStorage.setItem("token", "");
+    localStorage.clear();
     next({ name: "Login" });
   }
 };
 
 const routes = [
-  { path: "/:catchAll(.*)", redirect: '/' },//없는 path 일 경우 root path로 이동함.
+  { path: "/:catchAll(.*)", redirect: "/login" },//없는 path 일 경우 root path로 이동함.
   {
     path: "/login",
     name: "Login",
@@ -154,7 +153,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/groupPolicyDetail/",
+        path: "/groupPolicyDetail/:username",
         name: "GroupPolicyDetail",
         component: GroupPolicyDetail,
         beforeEnter: requireAuth,
