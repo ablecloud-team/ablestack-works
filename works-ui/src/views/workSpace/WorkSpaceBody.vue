@@ -5,7 +5,7 @@
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <WorkspaceInfoCard
-          :workspaceDataList="workspaceDataList"
+          :workspaceInfo="workspaceInfo"
           :templateDataList="templateDataList"
           :offeringDataList="offeringDataList"/>
         </ACard>
@@ -15,8 +15,7 @@
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
           <WorkSpaceTab 
-          :workspaceDataList="workspaceDataList"
-          :networkDataList="networkDataList"/>
+          :workspaceInfo="workspaceInfo"/>
         </a-card>
       </a-col>
     </a-row>
@@ -24,24 +23,19 @@
 </template>
 
 <script>
-import WorkSpaceTab from "./WorkSpaceTab";
 import { defineComponent, ref } from "vue";
+import WorkSpaceTab from "./WorkSpaceTab";
 import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
 export default defineComponent({
   components: { WorkSpaceTab, WorkspaceInfoCard },
   props: {
-    workspaceDataList: {
+    workspaceInfo: {
       type: Object,
       required: true,
       default: null,
     },
     templateDataList: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    networkDataList: {
       type: Object,
       required: true,
       default: null,

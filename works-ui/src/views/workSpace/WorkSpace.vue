@@ -245,13 +245,13 @@ export default defineComponent ({
             worksApi
               .put("/api/v1/workspace", params, { withCredentials: true })
               .then((response) => {
-                if (response.data.result.status === 200) {
+                if (response.status === 200) {
                   message.loading(this.$t("message.workspace.create.success"), 1);
                   // setTimeout(() => {
                   //   location.reload();
                   // }, 1500);
                 } else {
-                  message.error(response.data.result.deployvirtualmachineresponse.errortext);
+                  message.error(this.$t("message.workspace.create.fail"));
                 }
                 this.showModal(false);
                 this.$refs.listRefleshCall.fetchData();

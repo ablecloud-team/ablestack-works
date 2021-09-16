@@ -8,8 +8,8 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.workspace'), component: 'Workspaces' },
-                  { name: workspaceDataList.Name, component: null }, 
+                  { name: $t('label.workspace'), component: 'Workspace' },
+                  { name: workspaceInfo.name, component: null }, 
                 ]"
               />
             </a-col>
@@ -23,9 +23,8 @@
       <a-layout-content>
         <div id="content-body">
           <WorkSpaceBody
-          :workspaceDataList="workspaceDataList"
+          :workspaceInfo="workspaceInfo"
           :templateDataList="templateDataList"
-          :networkDataList="networkDataList"
           :offeringDataList="offeringDataList"/>
         </div>
         
@@ -53,9 +52,8 @@ export default defineComponent({
   },
   data() {
     return {
-      workspaceDataList: [],
+      workspaceInfo: [],
       templateDataList: [],
-      networkDataList: [],
       offeringDataList: [],
     };
   },
@@ -68,12 +66,10 @@ export default defineComponent({
       worksApi
         .get("/api/v1/workspace/"+this.$route.params.uuid, { withCredentials: true })
         .then((response) => {
-          if (response.data.result.status == 200) {
-            this.workspaceDataList = response.data.result.workspaceInfo;
+          if (response.status == 200) {
+            this.workspaceInfo = response.data.result.workspaceInfo;
             this.templateDataList = response.data.result.templateInfo.listtemplatesresponse.template[0];
-            this.networkDataList = response.data.result.networkInfo.listnetworksresponse.network;
-            this.offeringDataList = response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];
-            //this.workspaceName = response.data.result.workspaceInfo.Name;
+            this.offeringDataList = response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];            
           } else {
             message.error(this.$t('message.response.data.fail'));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");

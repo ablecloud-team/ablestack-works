@@ -7,19 +7,19 @@
         </template>
       </a-avatar>
       <h4 style="margin-left:20px;">
-        {{ workspaceDataList.Name }}
+        {{ workspaceInfo.name }}
       </h4>
     </div>
   </div>
   <div id="Description" class="CardItem">
     <div class="ItemName">{{ $t("label.description") }}</div>
-    <div class="Item">{{ workspaceDataList.Description }}</div>
+    <div class="Item">{{ workspaceInfo.description }}</div>
   </div>
 
   <div id="Status" class="CardItem" >
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
-      <a-badge class="Status" :color="workspaceDataList.State == 'Disable' ?'grey' : workspaceDataList.State == 'Running' ? 'green' : 'red'" :text="workspaceDataList.State" />
+      <a-badge class="Status" :color="workspaceInfo.state == 'Disable' ?'grey' : workspaceInfo.state == 'Running' ? 'green' : 'red'" :text="workspaceInfo.state" />
     </div>
   </div>
 
@@ -29,33 +29,33 @@
       <a-button shape="circle" type="dashed">
         <BarcodeOutlined />
       </a-button>
-      {{ workspaceDataList.Uuid }}
+      {{ workspaceInfo.uuid }}
     </div>
   </div>
 
   <div id="createdate" class="CardItem">
     <div class="ItemName">{{ $t("label.createdate") }}</div>
-    <div class="Item">{{ workspaceDataList.CreateDate }}</div>
+    <div class="Item">{{ workspaceInfo.create_date }}</div>
   </div>
 
   <div id="Type" class="CardItem">
     <div class="ItemName">{{ $t("label.type") }}</div>
-    <div class="Item">{{ workspaceDataList.Type }}</div>
+    <div class="Item">{{ workspaceInfo.workspace_type }}</div>
   </div>
 
-  <div v-if="workspaceDataList.Type =='desktop'" id="shared" class="CardItem">
+  <div v-if="workspaceInfo.workspace_type =='desktop'" id="shared" class="CardItem">
     <div class="ItemName">{{ $t("label.dedicated.shared") }}</div>
-    <div class="Item">{{  workspaceDataList.Shared == false ? 'Dedicated' : 'Shared' }}</div>
+    <div class="Item">{{  workspaceInfo.shared == false ? 'Dedicated' : 'Shared' }}</div>
   </div>
 
-  <!-- <div id="" class="CardItem">
+  <div id="" class="CardItem">
     <div class="ItemName">{{ $t("label.desktop.quantity") }}</div>
-    <div class="Item">{{ workspaceDataList.Quantity }}</div>
-  </div> -->
+    <div class="Item">{{ workspaceInfo.quantity }}</div>
+  </div>
 
   <!-- <div id="" class="CardItem">
     <div class="ItemName">{{ $t("label.desktop.connection.quantity") }}</div>
-    <div class="Item">{{ workspaceDataList.Type }}</div>
+    <div class="Item">{{ workspaceInfo.Type }}</div>
   </div> -->
 
   <div class="CardItem">
@@ -102,7 +102,7 @@ export default defineComponent({
     ClusterOutlined,
   },
   props: {
-    workspaceDataList: {
+    workspaceInfo: {
       type: Object,
       required: false,
       default: null,
@@ -119,8 +119,7 @@ export default defineComponent({
     },
   },
   setup() {
-    //let infoID = guid();
-    return { infoID:null };
+    return {};
   },
 });
 </script>

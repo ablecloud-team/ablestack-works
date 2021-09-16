@@ -43,7 +43,7 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/workspaceDetail/'+record.Uuid}">{{ record.Name }}</router-link>
+      <router-link :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }">{{ record.name }}</router-link>
     </template>
     <template #actionRender>
       <a-Popover placement="topLeft">
@@ -54,7 +54,7 @@
       </a-Popover>
     </template>
     <template #typeRender="{ record }">
-      {{ record.Type.toUpperCase() }}
+      {{ record.workspace_type.toUpperCase() }}
     </template>
   </a-table>
 </template>
@@ -128,14 +128,14 @@ export default defineComponent({
         {
           title: this.$t("label.name"),
           dataIndex: "name",
-          key: "Name",
+          key: "name",
           width: "39%",
           slots: { 
             customRender: "nameRender",
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
           },
-          sorter: (a, b) => (a.Name < b.Name ? -1 : a.Name > b.Name ? 1 : 0),
+          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           onFilter: (value, record) => record.Name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
@@ -156,23 +156,23 @@ export default defineComponent({
         },
         {
           title: this.$t("label.state"),
-          dataIndex: "State",
-          key: "State",
+          dataIndex: "state",
+          key: "state",
           width: "20%",
-          sorter: (a, b) => (a.State < b.State ? -1 : a.State > b.State ? 1 : 0),
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t("label.type"),
-          dataIndex: "type",
-          key: "Type",
+          dataIndex: "workspace_type",
+          key: "workspace_type",
           width: "20%",
           slots: { 
             customRender: "typeRender",
             filterDropdown: 'filterDropdown',
             filterIcon: 'filterIcon',
           },
-          sorter: (a, b) => (a.Type < b.Type ? -1 : a.Type > b.Type ? 1 : 0),
+          sorter: (a, b) => (a.workspace_type < b.workspace_type ? -1 : a.workspace_type > b.workspace_type ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
           //filterMultiple: false,
@@ -186,7 +186,7 @@ export default defineComponent({
           //     value: 'APP',
           //   },
           // ]
-          onFilter: (value, record) => record.Type.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.workspace_type.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
@@ -197,10 +197,10 @@ export default defineComponent({
         },
         {
           title: this.$t("label.desktop.quantity"),
-          dataIndex: "Quantity",
-          key: "Quantity",
+          dataIndex: "quantity",
+          key: "quantity",
           width: "20%",
-          sorter: (a, b) => (a.NoD < b.NoD ? -1 : a.NoD > b.NoD ? 1 : 0),
+          sorter: (a, b) => (a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         // {
@@ -259,10 +259,10 @@ export default defineComponent({
       worksApi
         .get("/api/v1/workspace", { withCredentials: true })
         .then((response) => {
-          if (response.data.result.status == 200) {
+          if (response.status == 200) {
             this.dataList = response.data.result.list;
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
