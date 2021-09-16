@@ -6,15 +6,15 @@ import Login from "../views/auth/Login.vue";
 import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
 import Dashboard from "../views/dashboard/Dashboard.vue";
-import Workspaces from "../views/workSpace/WorkSpace.vue";
+import Workspace from "../views/workSpace/WorkSpace.vue";
 import UserBaseLayout from "../components/layouts/UserBaseLayout.vue";
 import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
 import Favorites from "../views/favorites/Favorites.vue";
 import UserDesktop from "../views/desktopApplication/DesktopApplication.vue";
-import Users from "../views/users/Users.vue";
-import UserDetail from "../views/users/UserDetail.vue";
+import Account from "../views/account/Account.vue";
+import AccountDetail from "../views/account/AccountDetail.vue";
 import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
 import Audit from "../views/audit/Audit.vue";
@@ -27,15 +27,18 @@ const requireAuth = (to, from, next) => {
   //console.log("to.name : " + to.name + ", from.name : " + from.name);
 
   let menukey = "1";
-  if(to.name.includes('Dashboard')) { menukey = "1"; }
-  else if(to.name.includes('Workspace')) { menukey = "2"; }
-  else if(to.name.includes('VirtualMachine')) { menukey = "3"; }
-  else if(to.name.includes('User')) { menukey = "4"; }
-  else if(to.name.includes('GroupPolicy')) { menukey = "5"; }
-  else if(to.name.includes('Audit')) { menukey = "6"; }
-  else if(to.name.includes('Community')) { menukey = "7"; }
-  else if(to.name.includes('Favorite')) { menukey = "8"; }
-  else if(to.name.includes('UserDesktop')) { menukey = "9"; }
+  //let menuName = to.name.toLowerCase();
+  if(to.name.includes("Dashboard")) { menukey = "1"; }
+  if(to.name.includes("Workspace")) { menukey = "2"; }
+  if(to.name.includes("VirtualMachine")) { menukey = "3"; }
+  if(to.name.includes("Account")) { menukey = "4"; }
+  if(to.name.includes("GroupPolicy")) { menukey = "5"; }
+  if(to.name.includes("Audit")) { menukey = "6"; }
+  if(to.name.includes("Community")) { menukey = "7"; }
+  if(to.name.includes("Favorite")) { menukey = "8"; }
+  if(to.name.includes("UserDesktop")) { menukey = "9"; }
+  
+  //console.log(menukey);
   localStorage.setItem("menukey", menukey);
 
   const isAuth = localStorage.getItem("token");
@@ -83,7 +86,7 @@ const requireAuth = (to, from, next) => {
 };
 
 const routes = [
-  { path: "/:catchAll(.*)", redirect: "/login" },//없는 path 일 경우 root path로 이동함.
+  //{ path: "/:catchAll(.*)", redirect: "/login" },//없는 path 일 경우 root path로 이동함.
   {
     path: "/login",
     name: "Login",
@@ -108,21 +111,21 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/workspaces",
-        name: "Workspaces",
-        component: Workspaces,
+        path: "/workspace",
+        name: "Workspace",
+        component: Workspace,
         beforeEnter: requireAuth,
       },
       {
-        path: "/workspaceDetail/:uuid/",
+        path: "/workspaceDetail/:uuid/:name",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
         beforeEnter: requireAuth,
         props: true,
       },
       {
-        path: "/virtualMachines",
-        name: "VirtualMachines",
+        path: "/virtualMachine",
+        name: "VirtualMachine",
         component: VirtualMachine,
         beforeEnter: requireAuth,
       },
@@ -134,15 +137,15 @@ const routes = [
         props: true,
       },
       {
-        path: "/users",
-        name: "Users",
-        component: Users,
+        path: "/account",
+        name: "Account",
+        component: Account,
         beforeEnter: requireAuth,
       },
       {
-        path: "/userDetail/:username",
-        name: "UserDetail",
-        component: UserDetail,
+        path: "/accountDetail/:username",
+        name: "AccountDetail",
+        component: AccountDetail,
         beforeEnter: requireAuth,
         props: true,
       },
@@ -153,38 +156,38 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/groupPolicyDetail/:username",
+        path: "/groupPolicyDetail/:groupName",
         name: "GroupPolicyDetail",
         component: GroupPolicyDetail,
         beforeEnter: requireAuth,
         props: true,
       },
-      {
-        path: "/audit",
-        name: "Audit",
-        component: Audit,
-        beforeEnter: requireAuth,
-      },
-      {
-        path: "/auditDetail",
-        name: "AuditDetail",
-        component: AuditDetail,
-        beforeEnter: requireAuth,
-        props: true,
-      },
-      {
-        path: "/community",
-        name: "/Community",
-        component: Community,
-        beforeEnter: requireAuth,
-      },
-      {
-        path: "/community",
-        name: "CommunityDetail",
-        component: CommunityDetail,
-        beforeEnter: requireAuth,
-        props: true,
-      },
+      // {
+      //   path: "/audit",
+      //   name: "Audit",
+      //   component: Audit,
+      //   beforeEnter: requireAuth,
+      // },
+      // {
+      //   path: "/auditDetail",
+      //   name: "AuditDetail",
+      //   component: AuditDetail,
+      //   beforeEnter: requireAuth,
+      //   props: true,
+      // },
+      // {
+      //   path: "/community",
+      //   name: "/Community",
+      //   component: Community,
+      //   beforeEnter: requireAuth,
+      // },
+      // {
+      //   path: "/community",
+      //   name: "CommunityDetail",
+      //   component: CommunityDetail,
+      //   beforeEnter: requireAuth,
+      //   props: true,
+      // },
     ],
   },
   {
