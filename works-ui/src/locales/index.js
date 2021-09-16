@@ -8,7 +8,6 @@ import { createI18n } from "vue-i18n/index";
  */
 function loadLocaleMessages() {
   const locales = require.context(".", true, /[A-Za-z0-9-_,\s]+\.json$/i);
-  console.log(locales);
   const messages = {};
   locales.keys().forEach((key) => {
     const matched = key.match(/([A-Za-z0-9-_]+)\./i);
