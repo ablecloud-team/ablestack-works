@@ -17,7 +17,7 @@
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <Actions :actionFrom="actionFrom" v-if="actionFrom === 'UserList'"/>
+                <Actions :actionFrom="actionFrom" v-if="actionFrom === 'AccountList'"/>
                 <a-button type="primary" shape="round" style="margin-left: 10px;" @click="showModal(true)">{{ addModalTitle }}
                   <template #icon>
                       <PlusOutlined />
@@ -30,7 +30,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UsersList
+          <AccountList
             ref="listRefleshCall"
             @actionFromChange="actionFromChange"/>
         </div>
@@ -122,7 +122,7 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import UsersList from "@/views/users/UsersList";
+import AccountList from "@/views/account/AccountList";
 import { defineComponent, ref, reactive } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
@@ -131,7 +131,7 @@ export default defineComponent({
   props: {
   },
   components: { 
-    UsersList,
+    AccountList,
     Apath,
     Actions,
   },
@@ -213,7 +213,7 @@ export default defineComponent({
   data() {
     return {
       addModalTitle: this.$t("label.user.add"),
-      actionFrom: ref("User"),
+      actionFrom: ref("Account"),
     };
   },
   methods: {

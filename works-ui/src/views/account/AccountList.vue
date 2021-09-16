@@ -5,19 +5,17 @@
     class="ant-table-striped"
     :columns="UserListColumns"
     :data-source="userDataList"
-    :rowClassName="
+    :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
-    :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
     :pagination="pagination"
   >
     <template #nameRender="{ record }">
-        <router-link :to="{ path: '/userDetail/'+record.name}">{{ record.name }}</router-link>
+        <router-link :to="{ path: '/accountDetail/'+record.name}">{{ record.name }}</router-link>
     </template>
-
     <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
@@ -26,20 +24,6 @@
         <MoreOutlined />
       </a-Popover>
     </template>
-
-    <!-- <template #tags="{ text: tags }">
-      <span>
-        <a-tag
-          v-for="tag in tags"
-          :key="tag"
-          :color="
-            tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
-          "
-        >
-          {{ tag.toUpperCase() }}
-        </a-tag>
-      </span>
-    </template> -->
   </a-table>
 </template>
 
@@ -48,7 +32,6 @@ import { defineComponent, ref } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-import { FieldTimeOutlined } from "@ant-design/icons-vue";
 
 // const rowSelection = {
 //   onChange: (selectedRowKeys, selectedRows) => {
@@ -66,13 +49,15 @@ import { FieldTimeOutlined } from "@ant-design/icons-vue";
 //   },
 // };
 export default defineComponent({
-  props: {
+  components: {
+    Actions,
   },
+  props: {},
   setup() {
     return {
       //rowSelection,
       loading: ref(false),
-      actionFrom: ref("UserList"),
+      actionFrom: ref("AccountList"),
       pagination: {
         pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
@@ -82,30 +67,27 @@ export default defineComponent({
       },
     };
   },
-  components: {
-    Actions,
-  },
   data() {
-    return{
+    return {
       selectedRowKeys: [],
-      userDataList : [
-          // {"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "desktop":"Desktop1"}
-      ],
-      UserListColumns : [
+      userDataList: [],
+      UserListColumns: [
         {
+          title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
+          width: "39%",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.account'),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-            title: '',
-            key: 'action',
-            dataIndex: 'action',
-            align: 'right',
-            slots: {customRender: 'actionRender'}
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          align: "right",
+          width: "1%",
+          slots: { customRender: "actionRender" },
         },
         // {
         //   title: this.$t('label.state'),
@@ -115,39 +97,41 @@ export default defineComponent({
         //   sortDirections: ["descend", "ascend"],
         // },
         {
-          title: this.$t('label.email'),
+          title: this.$t("label.email"),
           dataIndex: "mail",
           key: "mail",
+          width: "30%",
           sorter: (a, b) => (a.mail < b.mail ? -1 : a.mail > b.mail ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.allocateddesktop'),
+          title: this.$t("label.allocateddesktop"),
           dataIndex: "desktop",
           key: "desktop",
+          width: "30%",
           sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-    }
+    };
   },
   created() {
     this.fetchData();
   },
   methods: {
-    setSelection (selection) {
+    setSelection(selection) {
       this.selectedRowKeys = selection;
-      if(this.selectedRowKeys.length == 0){
-        this.$emit('actionFromChange', "User");
-      }else{
-        this.$emit('actionFromChange', this.actionFrom);
+      if (this.selectedRowKeys.length == 0) {
+        this.$emit("actionFromChange", "User");
+      } else {
+        this.$emit("actionFromChange", this.actionFrom);
       }
     },
-    resetSelection () {
-      this.setSelection([])
+    resetSelection() {
+      this.setSelection([]);
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys)
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.setSelection(selectedRowKeys);
     },
     fetchData() {
       this.loading = true;
@@ -157,7 +141,7 @@ export default defineComponent({
           if (response.data.result.status == 200) {
             this.userDataList = response.data.result.result;
           } else {
-            message.error(this.t('message.response.data.fail'));
+            message.error(this.t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
@@ -166,9 +150,8 @@ export default defineComponent({
           //console.log(error);
         });
       setTimeout(() => {
-        this.loading = false;  
+        this.loading = false;
       }, 500);
-        
     },
   },
 });

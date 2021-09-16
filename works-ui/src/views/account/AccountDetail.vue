@@ -8,7 +8,7 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.users'), component: 'Users' },
+                  { name: $t('label.users'), component: 'Account' },
                   { name: userDataInfo.name, component: null },
                 ]"
               />
@@ -23,7 +23,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody 
+          <AccountBody 
           :userDataInfo="userDataInfo" />
         </div>
       </a-layout-content>
@@ -34,17 +34,20 @@
 <script>
 import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
-import UserBody from "./UserBody";
+import AccountBody from "./AccountBody";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {
+  props: {},
+  components: {
+    AccountBody,
+    Apath,
+    Actions
   },
-  components: { UserBody, Apath, Actions },
   setup() {
     return {
-      actionFrom: ref("UserDetail"),
+      actionFrom: ref("AccountDetail"),
     };
   },
   data() {

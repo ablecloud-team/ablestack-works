@@ -81,6 +81,8 @@ export default defineComponent({
           title: "",
           key: "action",
           dataIndex: "action",
+          align: "right",
+          width: "5px",
           slots: { customRender: "actionRender" },
         },
         {
@@ -119,6 +121,8 @@ export default defineComponent({
           title: "",
           key: "action",
           dataIndex: "action",
+          align: "right",
+          width: "5px",
           slots: { customRender: "actionRender" },
         },
         {
