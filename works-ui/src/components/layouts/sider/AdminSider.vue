@@ -16,19 +16,19 @@
         </template>
         <span>{{ $t("label.dashboard") }}</span>
       </a-menu-item>
-      <a-menu-item key="2" @click="$router.push({ name: 'Workspaces' }); selectedKeysSetting(2)">
+      <a-menu-item key="2" @click="$router.push({ name: 'Workspace' }); selectedKeysSetting(2)">
         <template #icon>
           <CloudOutlined />
         </template>
         <span>{{ $t("label.workspace") }}</span>
       </a-menu-item>
-      <a-menu-item key="3" @click="$router.push({ name: 'VirtualMachines' }); selectedKeysSetting(3)">
+      <a-menu-item key="3" @click="$router.push({ name: 'VirtualMachine' }); selectedKeysSetting(3)">
         <template #icon>
           <DesktopOutlined />
         </template>
         <span>{{ $t("label.vm") }}</span>
       </a-menu-item>
-      <a-menu-item key="4" @click="$router.push({ name: 'Users' }); selectedKeysSetting(4)">
+      <a-menu-item key="4" @click="$router.push({ name: 'Account' }); selectedKeysSetting(4)">
         <template #icon>
           <TeamOutlined />
         </template>
@@ -85,7 +85,7 @@ export default defineComponent({
   setup(props) {
     const state = reactive({
       collapsed: ref(props.collapsed),
-      selectedKeys: [ "" ? "1" : localStorage.getItem("menukey")],
+      selectedKeys: [""],
       openKeys: ["sub1"],
       preOpenKeys: ["sub1"],
     });
@@ -102,7 +102,14 @@ export default defineComponent({
       state,
     };
   },
+  created () {
+    this.updateMenu()
+  },
   methods: {
+    updateMenu() {
+      this.selectedKeys = [ "" ? "1" : localStorage.getItem("menukey")];
+
+    },
     // toggleCollapsed: function () {
     //   this.$emit("changeToggleCollapsed");
     // },
