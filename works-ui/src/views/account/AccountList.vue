@@ -13,6 +13,35 @@
     :row-key="(record, index) => index"
     :pagination="pagination"
   >
+    <!-- 검색 필터링 template-->
+    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }">
+      <div style="padding: 8px">
+        <a-input-search
+          ref="searchInput"
+          :placeholder="$t('search.' + column.dataIndex)"
+          :value="selectedKeys[0]"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <!-- <a-button
+          type="primary"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          <template #icon><SearchOutlined /></template>
+          {{ $t("label.search")}}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
+          {{ $t("label.reset")}}
+        </a-button> -->
+      </div>
+    </template>
+    <template #filterIcon="filtered">
+      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    </template>
+    <!-- 검색 필터링 template-->
+
     <template #nameRender="{ record }">
         <router-link :to="{ path: '/accountDetail/'+record.name}">{{ record.name }}</router-link>
     </template>
@@ -28,7 +57,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
@@ -54,6 +83,21 @@ export default defineComponent({
   },
   props: {},
   setup() {
+    const state = reactive({
+      searchText: "",
+      searchedColumn: "",
+    });
+    const searchInput = ref();
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      state.searchText = selectedKeys[0];
+      state.searchedColumn = dataIndex;
+      //console.log(selectedKeys + "  ::  " + confirm + "  ::  " +dataIndex);
+    };
+    const handleReset = (clearFilters) => {
+      clearFilters();
+      state.searchText = "";
+    };
     return {
       //rowSelection,
       loading: ref(false),
@@ -65,6 +109,10 @@ export default defineComponent({
         showTotal: (total) => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
+      searchInput,
+      state,
+      handleSearch,
+      handleReset,
     };
   },
   data() {
@@ -76,17 +124,30 @@ export default defineComponent({
           title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
-          width: "39%",
-          slots: { customRender: "nameRender" },
+          width: "37%",
+          slots: {
+            customRender: "nameRender",
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          ellipsis: true,
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: "",
           key: "action",
           dataIndex: "action",
           align: "right",
-          width: "1%",
+          width: "3%",
           slots: { customRender: "actionRender" },
         },
         // {
