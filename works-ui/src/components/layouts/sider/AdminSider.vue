@@ -1,6 +1,6 @@
 <template>
   <div style="width: 100%; height: 100%">
-    <Logo 
+    <Logo
       @click="$router.push({ name: 'Dashboard' }); selectedKeysSetting(1)" 
     />
     <a-menu
@@ -40,43 +40,28 @@
         </template>
         <span>{{ $t("label.group.policy") }}</span>
       </a-menu-item>
-      <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)">
+      <a-menu-item key="6">
+        <!-- <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)"> -->
         <template #icon>
           <BarChartOutlined />
         </template>
         <span>{{ $t("label.audit") }}</span>
       </a-menu-item>
-      <a-menu-item key="7" @click="$router.push({ name: 'Community' }); selectedKeysSetting(7)">
+      <!-- <a-menu-item key="7" @click="$router.push({ name: 'Community' }); selectedKeysSetting(7)">
         <template #icon>
           <CoffeeOutlined />
         </template>
         <span>{{ $t("label.community") }}</span>
-      </a-menu-item>
+      </a-menu-item> -->
     </a-menu>
   </div>
 </template>
 <script>
 import { defineComponent, reactive, ref, watch } from "vue";
-import {
-  DashboardOutlined,
-  CloudOutlined,
-  DesktopOutlined,
-  TeamOutlined,
-  ReconciliationOutlined,
-  BarChartOutlined,
-  CoffeeOutlined,
-} from "@ant-design/icons-vue";
 import Logo from "./Logo";
 export default defineComponent({
   components: {
     Logo,
-    DashboardOutlined,
-    CloudOutlined,
-    DesktopOutlined,
-    TeamOutlined,
-    ReconciliationOutlined,
-    BarChartOutlined,
-    CoffeeOutlined,
   },
   props: {
     collapsed: Boolean,
@@ -86,15 +71,14 @@ export default defineComponent({
     const state = reactive({
       collapsed: ref(props.collapsed),
       selectedKeys: [""],
-      openKeys: ["sub1"],
-      preOpenKeys: ["sub1"],
+      openKeys: [""],
+      preOpenKeys: [""],
     });
     watch(
       () => state.openKeys,
       (val, oldVal) => {
-        console.log(val)
-        console.log(oldVal)
-
+        console.log(val);
+        console.log(oldVal);
         state.preOpenKeys = oldVal;
       }
     );
@@ -102,19 +86,18 @@ export default defineComponent({
       state,
     };
   },
-  created () {
-    this.updateMenu()
+  created() {
+    this.updateMenu();
   },
   methods: {
     updateMenu() {
-      this.selectedKeys = [ "" ? "1" : localStorage.getItem("menukey")];
-
+      this.selectedKeys = [ "" ? "1" : sessionStorage.getItem("menukey") ];
     },
     // toggleCollapsed: function () {
     //   this.$emit("changeToggleCollapsed");
     // },
     selectedKeysSetting: function (key) {
-      localStorage.setItem("menukey",key);
+      sessionStorage.setItem("menukey", key);
       //this.selectedKeys = [key];
     },
   },

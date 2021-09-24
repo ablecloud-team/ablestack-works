@@ -1,21 +1,25 @@
 <template>
-    <a-row class="user-menu">
+  <a-row class="user-menu">
     <a-col :span="12">
-        <menu-unfold-outlined
-          v-if="state.collapsed"
-          class="trigger3"
-          @click="setCollapsed()"
-        />
-        <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
+      <menu-unfold-outlined
+        v-if="state.collapsed"
+        class="trigger3"
+        @click="setCollapsed()"
+      />
+      <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
-    <a-col :span="12" style="float:right; text-align: right; padding-right: 40px">
-      <a-dropdown>
+    <a-col
+      :span="12"
+      style="float: right; text-align: right; padding-right: 40px"
+    >
+      <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
-            <font-awesome-icon 
+            <font-awesome-icon
               :icon="['fas', 'language']"
-              style="color: #666; margin-bottom: -2px;"
-              class="login-icon"/>
+              style="color: #666; margin-bottom: -2px"
+              class="login-icon"
+            />
             <!-- <GlobalOutlined /> -->
           </a>
         </a-button>
@@ -33,24 +37,27 @@
           <BellOutlined class="header-notice-icon" />
         </a>
       </a-button>
-      <a-dropdown>
+      <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
           </a>
         </a-button>
         <template #overlay>
-          <a-menu >
-            <a-menu-item key="0" >
-              <a-button type="text" class="">
-                <UserOutlined />{{ $t("label.profile") }}
-              </a-button>
+          <a-menu style="width: 100%">
+            <a-menu-item key="a">
+              <template #icon>
+                <UserOutlined />
+              </template>
+              <router-link :to="{ path: '/accountDetail/' + username }">
+                {{ $t("label.profile") }}
+              </router-link>
             </a-menu-item>
-            <a-menu-divider />
-            <a-menu-item key="1">
-              <a-button type="text" class="" @click="logoutSubmit">
-                <LogoutOutlined />{{ $t("label.logout") }}
-              </a-button>
+            <a-menu-item key="b" @click="logoutSubmit">
+              <template #icon>
+                <LogoutOutlined />
+              </template>
+              {{ $t("label.logout") }}
             </a-menu-item>
           </a-menu>
         </template>
@@ -92,45 +99,33 @@
           {{ state.userID }}
         </a-button>
       </a-popover> -->
-
-
     </a-col>
   </a-row>
 </template>
 
 <script>
-import {
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-  DownOutlined,
-  StarOutlined
-} from '@ant-design/icons-vue';
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { axiosUserDetail, axiosLogout } from "@/api/index";
 import store from "@/store/index";
 import router from "@/router";
-
 export default defineComponent({
   name: "AdminHeader",
-  components: {
-    DownOutlined,
-    MenuUnfoldOutlined,
-    MenuFoldOutlined,
-  },
+  components: {},
   props: {
     collapsed: Boolean,
   },
   data() {
     return {
-      language: '',
+      language: ref(""),
       loadedLanguage: [],
-    }
+      username: ref(""),
+    };
   },
   setup(props) {
     let res;
     const state = reactive({
-      userID: "",
+      //userID: "",
       collapsed: ref(props.collapsed),
     });
     return {
@@ -143,65 +138,50 @@ export default defineComponent({
     //   this.$store.dispatch("loginCommit",res.data);
     //   this.state.userID = res.data.result.name;
     // }
-    this.language = localStorage.getItem('locale');
+    this.language = sessionStorage.getItem("locale") === null ? "ko": sessionStorage.getItem("locale");
     this.setLocale(this.language);
+    this.username = sessionStorage.getItem("username");
   },
   methods: {
     setCollapsed() {
       this.state.collapsed = !this.state.collapsed;
       this.$emit("setCollapsed");
     },
-    setLocaleClick (e) {
+    setLocaleClick(e) {
       let localeValue = e.key;
       if (!localeValue) {
-        localeValue = 'ko';
+        localeValue = "ko";
       }
       this.setLocale(localeValue);
     },
-    setLocale (localeValue) {
+    setLocale(localeValue) {
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
       this.language = localeValue;
-      localStorage.setItem('locale', localeValue);
-      //this.loadLanguageAsync(localeValue);
+      sessionStorage.setItem("locale", localeValue);
     },
     async logoutSubmit() {
       const res = await axiosLogout();
       if (res.data.result.login === false || res.data.result.status > 200) {
-        message.success(this.$t('message.logout.success'), 2);
+        message.success(this.$t("message.logout.success"), 2);
         await store.dispatch("logoutCommit");
         await router.push({ name: "Login" });
       }
     },
-    loadLanguageAsync(lang) {
-      if (!lang) {
-        lang = Vue.ls ? Vue.ls.get('LOCALE') || 'en' : 'en';
-      }
-      if (this.loadedLanguage.includes(lang)) {
-        return Promise.resolve(this.setLanguage(lang));
-      }
-
-      return fetch(`locales/${lang}.json`)
-        .then(response => response.json())
-        .then(json => Promise.resolve(this.setLanguage(lang, json)))
-    },
     setLanguage(lang, message) {
       if (i18n) {
         i18n.locale = lang;
-
         if (message && Object.keys(message).length > 0) {
           i18n.setLocaleMessage(lang, message);
         }
       }
-
       if (!this.loadedLanguage.includes(lang)) {
         this.loadedLanguage.push(lang);
       }
-
       if (message && Object.keys(message).length > 0) {
         messages[lang] = message;
       }
-    }
+    },
   },
 });
 </script>

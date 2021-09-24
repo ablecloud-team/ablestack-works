@@ -271,13 +271,9 @@
 
 <script>
 import { defineComponent, onMounted, reactive, ref } from "vue";
-import { InfoCircleOutlined } from "@ant-design/icons-vue";
-
 export default defineComponent({
   name: "AddModal",
-  components: {
-    InfoCircleOutlined,
-  },
+  components: {},
   props: {
     actionFrom: {
       type: String,

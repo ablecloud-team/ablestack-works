@@ -31,20 +31,10 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import {
-  AppstoreAddOutlined,
-  CoffeeOutlined,
-  DesktopOutlined,
-  StarOutlined,
-} from "@ant-design/icons-vue";
 import Logo from "./Logo";
 export default defineComponent({
   components: {
     Logo,
-    DesktopOutlined,
-    CoffeeOutlined,
-    StarOutlined,
-    AppstoreAddOutlined,
   },
 });
 </script>
