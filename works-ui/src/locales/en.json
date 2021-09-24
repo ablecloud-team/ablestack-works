@@ -16,6 +16,16 @@
     "message.user.createing": "User is being created.",
     "message.user.create.success": "User creation is complete.",
     "message.user.create.fail": "User creation failed.",
+    "message.workspace.vm.add": "The desktop addition is complete.",
+    "message.workspace.vm.add.fail": "Failed to add desktop.",
+    "message.workspace.user.add": "You have added a user to the workspace.",
+    "message.workspace.user.add.fail": "Failed to add user to workspace.",
+    "message.delete.confirm": "Do you want to delete?",
+    "message.workspace.user.delete": "A user has been deleted from the workspace.",
+    "message.workspace.user.delete.fail": "Failed to delete user from workspace.",
+    "message.vm.status.update": "Changed the state of the desktop virtual machine.",
+    "message.vm.status.delete": "I deleted the desktop virtual machine.",
+    "message.vm.status.update.fail": "Failed to change state of desktop virtual machine.",
 
     //tooltip
     "tooltip.start": "Start",
@@ -91,7 +101,7 @@
     "label.dedicated.shared": "Dedicated/Shared",
     "label.network": "Network",
     "label.desktop.vm.add": "Add Desktop VM",
-    "label.desktop.user.add": "Add Desktop User",
+    "label.desktop.user.add": "Add Workspace User",
     "label.desktop.connect.boolean": "Connect State",
     "label.allocateddesktop": "Allocated Desktop",
     "label.size": "Size",
@@ -109,10 +119,10 @@
     "label.policy.list": "Policy",
     "label.country": "Country",
     "label.countryCode": "CountryCode",
-    "label.distinguishedName": "Distinguished Name",
+    "label.distinguishedName": "DN(Distinguished Name)",
     "label.isAdmin": "Administrator Y/N",
     "label.telephoneNumber": "Phone Number",
-    "label.userPrincipalName": "Principal Name",
+    "label.userPrincipalName": "UPN(User Principal Name)",
     "label.createdate": "Create Date",
     "label.workspace.count": "Workspace Count",
     "label.desktop.count": "Desktop Count",
@@ -143,5 +153,10 @@
 
     //search
     "search.name": "Search Name.",
-    "search.type": "Search Type."
+    "search.type": "Search Type.",
+
+    //modal confirm message
+    "modal.confirm.start": "Do you want to start a desktop virtual machine?",
+    "modal.confirm.stop": "Are you sure you want to stop the desktop virtual machine?",
+    "modal.confirm.destroy": "Are you sure you want to delete the desktop virtual machine?"
 }
