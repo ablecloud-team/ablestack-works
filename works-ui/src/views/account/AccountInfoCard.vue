@@ -32,12 +32,9 @@
 </template>
 
 <script>
-import { UserOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
 export default defineComponent({
-  components: {
-    UserOutlined,
-  },
+  components: {},
   props: {
     userDataInfo: {
       type: Object,
