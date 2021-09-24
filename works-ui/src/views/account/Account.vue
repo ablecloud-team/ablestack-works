@@ -55,19 +55,17 @@
             v-model:value="formState.account"
             :placeholder="$t('tooltip.user.account')"/>
         </a-form-item>
-        <a-form-item has-feedback name="firstName" :label="$t('label.firstname')">
-          <a-input
-            v-model:value="formState.firstName"
-            :placeholder="$t('tooltip.user.firstname')"/>
-        </a-form-item>
-        <!--워크스페이스 이름 end-->
-        <!--워크스페이스 설명 start-->
         <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
           <a-input
             v-model:value="formState.lastName"
             :placeholder="$t('tooltip.user.lastname')"
             class="addmodal-aform-item-div"
           />
+        </a-form-item>
+        <a-form-item has-feedback name="firstName" :label="$t('label.firstname')">
+          <a-input
+            v-model:value="formState.firstName"
+            :placeholder="$t('tooltip.user.firstname')"/>
         </a-form-item>
         <a-form-item has-feedback name="password" :label="$t('label.password')" autocomplete="off">
           <a-input
@@ -223,7 +221,6 @@ export default defineComponent({
     actionFromChange(val) {
       //console.log(val);
       this.actionFrom = ref(val);
-      
     },
     fetchData() {
       this.rules.account.message = this.$t('input.user.account');
@@ -248,33 +245,28 @@ export default defineComponent({
           .validate()
           .then( () => {
           message.loading(this.$t("message.user.createing"), 1);
-          try {
-            worksApi
-              .put("/api/v1/user", params, { withCredentials: true })
-              .then((response) => {
-                if (response.status === 200) {
-                  message.loading(this.$t("message.user.create.success"), 1);
-                  // setTimeout(() => {
-                  //   location.reload();
-                  // }, 1500);
-                } else {
-                  message.error(response.data.result.createuserresponse.errortext);
-                }
-                this.showModal(false);
+          worksApi
+            .put("/api/v1/user", params, { withCredentials: true })
+            .then((response) => {
+              console.log(response.status);
+              if (response.status === 200) {
+                message.loading(this.$t("message.user.create.success"), 1);
+              } else {
+                message.error(this.$t("message.user.create.fail"));
+              }
+              this.showModal(false);
+              setTimeout(() => {
                 this.$refs.listRefleshCall.fetchData();
-              })
-              .catch(function (error) {
-                message.error(error.message);
-              //console.log(error);
-              });
-          }catch (error){
-            console.log(error)
-            message.error(this.$t("message.user.create.fail"))
-          }
-        })
-        .catch(error => {
-          console.log('error', error);
-          //message.error(error);
+              }, 1500);
+            })
+            .catch(function (error) {
+              message.error(error);
+              console.log(error);
+            });
+          })
+          .catch(error => {
+            console.log('error', error);
+            //message.error(error);
           
         });
     },
