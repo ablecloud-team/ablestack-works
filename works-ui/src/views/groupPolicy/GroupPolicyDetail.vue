@@ -8,8 +8,8 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.users'), component: 'Users' },
-                  { name: userDataInfo.name, component: null },
+                  { name: $t('label.group.policy'), component: 'GroupPolicy' },
+                  { name: groupDataInfo.groupname, component: null },
                 ]"
               />
             </a-col>
@@ -24,7 +24,7 @@
       <a-layout-content>
         <div id="content-body">
           <GroupPolicyBody 
-          :userDataInfo="userDataInfo" />
+          :groupDataInfo="groupDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -49,9 +49,7 @@ export default defineComponent({
   },
   data() {
     return {
-      userDataInfo: []
-          //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
-      ,
+      groupDataInfo: [],
     };
   },
   created() {
@@ -60,10 +58,11 @@ export default defineComponent({
   methods: {
     fetchData() {
       worksApi
-        .get("/api/v1/user/"+this.$route.params.username, { withCredentials: true })
+        .get("/api/v1/group/"+this.$route.params.groupName, { withCredentials: true })
         .then((response) => {
           if (response.status == 200) {
-            this.userDataInfo = response.data.result;
+            this.groupDataInfo = response.data.result;
+            //console.log(response.data.result.member);
           } else {
             message.error(this.$t('message.response.data.fail'));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");

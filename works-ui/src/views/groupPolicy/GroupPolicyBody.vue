@@ -5,7 +5,7 @@
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <GroupPolicyInfoCard
-          :userDataInfo="userDataInfo" />
+          :groupDataInfo="groupDataInfo" />
         </ACard>
       </ACol>
 
@@ -13,7 +13,7 @@
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
           <GroupPolicyTab
-          :userDataInfo="userDataInfo"/>
+          :groupDataInfo="groupDataInfo"/>
         </ACard>
       </ACol>
     </ARow>
@@ -32,7 +32,7 @@ export default defineComponent({
     GroupPolicyTab,
   },
   props: {
-    userDataInfo:{
+    groupDataInfo:{
       type: Object,
       required: true,
       default: null,

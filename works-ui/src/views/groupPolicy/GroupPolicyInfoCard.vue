@@ -7,39 +7,25 @@
         </template>
       </a-avatar>
       <h4 style="margin-left:20px;">
-        {{ userDataInfo.username }}
+        {{ groupDataInfo.groupname }}
       </h4>
     </div>
   </div>
 
   <div id="firstname" class="CardItem">
-    <div class="ItemName">{{ $t('label.firstname') }}</div>
-    <div class="Item">{{ userDataInfo.sn }}</div>
+    <div class="ItemName">{{ $t('label.distinguishedName') }}</div>
+    <div class="Item">{{ groupDataInfo.distinguishedName }}</div>
   </div>
-  <div id="firstname" class="CardItem">
-    <div class="ItemName">{{ $t('label.lastname') }}</div>
-    <div class="Item">{{ userDataInfo.givenName }}</div>
-  </div>
-  <div id="email" class="CardItem">
-    <div class="ItemName">{{ $t('label.email') }}</div>
-    <div class="Item">{{ userDataInfo.mail }}</div>
-  </div>
-  <div id="phone" class="CardItem">
-    <div class="ItemName">{{ $t('label.phone') }}</div>
-    <div class="Item">{{ userDataInfo.telephoneNumber }}</div>
-  </div>
+
 
 </template>
 
 <script>
-import { UsergroupAddOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
 export default defineComponent({
-  components: {
-    UsergroupAddOutlined,
-  },
+  components: {},
   props: {
-    userDataInfo: {
+    groupDataInfo: {
       type: Object,
       required: true,
       default: null,

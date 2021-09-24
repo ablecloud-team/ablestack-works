@@ -3,15 +3,14 @@
     size="middle"
     :loading="loading"
     class="ant-table-striped"
-    :columns="UserListColumns"
-    :data-source="userDataList"
-    :rowClassName="
+    :columns="groupListColumns"
+    :data-source="groupDataList"
+    :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
-    :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
     :pagination="pagination"
   >
     <template #nameRender="{ record }">
@@ -48,7 +47,6 @@ import { defineComponent, ref } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-import { FieldTimeOutlined } from "@ant-design/icons-vue";
 
 // const rowSelection = {
 //   onChange: (selectedRowKeys, selectedRows) => {
@@ -88,76 +86,63 @@ export default defineComponent({
   data() {
     return{
       selectedRowKeys: [],
-      userDataList : [
-          // {"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "desktop":"Desktop1"}
-      ],
-      UserListColumns : [
+      groupDataList: [],
+      groupListColumns: [
         {
+          title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          slots: { customRender: "nameRender" },
-          title: this.$t('label.account'),
+          width: "39%",
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          slots: { customRender: "nameRender" },
         },
         {
-            title: '',
-            key: 'action',
-            dataIndex: 'action',
-            align: 'right',
-            slots: {customRender: 'actionRender'}
-        },
-        // {
-        //   title: this.$t('label.state'),
-        //   dataIndex: "state",
-        //   key: "state",
-        //   sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
-        //   sortDirections: ["descend", "ascend"],
-        // },
-        {
-          title: this.$t('label.email'),
-          dataIndex: "mail",
-          key: "mail",
-          sorter: (a, b) => (a.mail < b.mail ? -1 : a.mail > b.mail ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          width: "1%",
+          align: "right",
+          slots: { customRender: "actionRender"}
         },
         {
-          title: this.$t('label.allocateddesktop'),
-          dataIndex: "desktop",
-          key: "desktop",
-          sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
+          title: this.$t("label.description"),
+          dataIndex: "description",
+          key: "description",
+          width: "60%",
+          sorter: (a, b) => (a.description < b.description ? -1 : a.description > b.description ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-    }
+    };
   },
   created() {
     this.fetchData();
   },
   methods: {
-    setSelection (selection) {
+    setSelection(selection) {
       this.selectedRowKeys = selection;
-      if(this.selectedRowKeys.length == 0){
-        this.$emit('actionFromChange', "GroupPolicy");
-      }else{
-        this.$emit('actionFromChange', this.actionFrom);
+      if (this.selectedRowKeys.length == 0) {
+        this.$emit("actionFromChange", "GroupPolicy");
+      } else {
+        this.$emit("actionFromChange", this.actionFrom);
       }
     },
-    resetSelection () {
+    resetSelection() {
       this.setSelection([])
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.setSelection(selectedRowKeys)
     },
     fetchData() {
       this.loading = true;
       worksApi
-        .get("/api/v1/user", { withCredentials: true })
+        .get("/api/v1/group", { withCredentials: true })
         .then((response) => {
-          if (response.data.result.status == 200) {
-            this.userDataList = response.data.result.result;
+          if (response.status == 200) {
+            this.groupDataList = response.data.result;
           } else {
-            message.error(this.t('message.response.data.fail'));
+            message.error(this.$t('message.response.data.fail'));
             //console.log(response.message);
           }
         })
@@ -166,7 +151,7 @@ export default defineComponent({
           //console.log(error);
         });
       setTimeout(() => {
-        this.loading = false;  
+        this.loading = false;
       }, 500);
         
     },
