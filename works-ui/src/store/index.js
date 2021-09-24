@@ -2,7 +2,7 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
-    user: [{ isLogin: false, isAdmin: false, userID: null, accessToken: null }],
+    user: [{ isLogin: false, isAdmin: false, userID: null, token: null }],
   },
   getters: {},
   mutations: {
@@ -25,7 +25,7 @@ export default createStore({
     },
     logoutCommit({ commit }) {
       commit("logoutSuccess");
-      localStorage.clear();
+      sessionStorage.clear();
     },
   },
   modules: {},

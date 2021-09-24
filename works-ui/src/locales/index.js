@@ -20,7 +20,7 @@ function loadLocaleMessages() {
 }
 
 export default createI18n({
-  locale: localStorage.getItem("locale"),
-  fallbackLocale: localStorage.getItem("locale"),
+  locale: sessionStorage.getItem("locale"),
+  fallbackLocale: sessionStorage.getItem("locale"),
   messages: loadLocaleMessages(),
 });

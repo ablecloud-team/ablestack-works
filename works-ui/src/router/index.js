@@ -21,10 +21,11 @@ import Audit from "../views/audit/Audit.vue";
 import AuditDetail from "../views/audit/AuditDetail.vue";
 import Community from "../views/community/Community.vue";
 import CommunityDetail from "../views/community/CommunityDetail.vue";
+import axios from "axios";
 
 const requireAuth = (to, from, next) => {
   //console.log("-----------------------------------");
-  //console.log("to.name : " + to.name + ", from.name : " + from.name);
+  console.log("to.name : " + to.name + ", from.name : " + from.name);
 
   let menukey = "1";
   //let menuName = to.name.toLowerCase();
@@ -37,21 +38,22 @@ const requireAuth = (to, from, next) => {
   if(to.name.includes("Community")) { menukey = "7"; }
   if(to.name.includes("Favorite")) { menukey = "8"; }
   if(to.name.includes("UserDesktop")) { menukey = "9"; }
-  
-  //console.log(menukey);
-  localStorage.setItem("menukey", menukey);
 
-  const isAuth = localStorage.getItem("token");
+  //console.log(menukey);
+  sessionStorage.setItem("menukey", menukey);
+
+  const isAuth = sessionStorage.getItem("token");
   if (isAuth && isAuth !== "") {
     if (to.name === "Dashboard" && from.name === "Login") {
       //console.log("login OK :: " + to.name);
       next();
-      // setTimeout(() => {
-      //   location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
-      // }, 0);
+      setTimeout(() => {
+        location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
+      }, 0);
     } else {
+      console.log(isAuth);
       worksApi
-        .get("/api/v1/token", { withCredentials: true })
+        .get("/api/v1/token", { headers: { Authorization:sessionStorage.getItem("token") } } )
         .then((response) => {
           //console.log(response);
           if (response.status == 200) {
@@ -59,7 +61,7 @@ const requireAuth = (to, from, next) => {
             next();
           } else {
             message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-            localStorage.setItem("token", "");
+            sessionStorage.setItem("token", "");
             next({ name: "Login" });
           }
         })
@@ -73,14 +75,14 @@ const requireAuth = (to, from, next) => {
       //   next();
       //   message.error($t('message.incorrect.access.login.please'));
       // } else {
-      //   //localStorage.setItem("token", "");
+      //   //sessionStorage.setItem("token", "");
       //   message.error($t('message.incorrect.access.login.please'));
       //   next({ name: "Login" });
       // }
     }
   } else {
     message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-    localStorage.clear();
+    sessionStorage.clear();
     next({ name: "Login" });
   }
 };
