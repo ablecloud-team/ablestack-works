@@ -8,7 +8,7 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.vm'), component: 'VirtualMachines' },
+                  { name: $t('label.vm'), component: 'VirtualMachine' },
                   { name: vmDataInfo.name, component: null },
                 ]"
               />

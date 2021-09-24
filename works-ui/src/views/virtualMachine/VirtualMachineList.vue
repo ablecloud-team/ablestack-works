@@ -3,7 +3,7 @@
     size="middle"
     :loading="loading"
     class="ant-table-striped"
-    :columns="VMListColumns"
+    :columns="vmListColumns"
     :data-source="vmDataList"
     :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
     :bordered="bordered ? bordered : false"
@@ -12,42 +12,68 @@
     :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
     :pagination="pagination"
   >
+    <!-- 검색 필터링 template-->
+    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }">
+      <div style="padding: 8px">
+        <a-input-search
+          ref="searchInput"
+          :placeholder="$t('search.' + column.dataIndex)"
+          :value="selectedKeys[0]"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <!-- <a-button
+          type="primary"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          <template #icon><SearchOutlined /></template>
+          {{ $t("label.search")}}
+        </a-button>
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
+          {{ $t("label.reset")}}
+        </a-button> -->
+      </div>
+    </template>
+    <template #filterIcon="filtered">
+      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    </template>
+    <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/'+record.uuid}">{{ record.name }}</router-link>
+      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{ record.name }}</router-link>
     </template>
 
-    <template #actionRender>
+    <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
         <template #content>
-          <actions :action-from="actionFrom" />
+          <actions
+            :action-from="actionFrom"
+            :uuid="record.uuid"
+            :name="record.name"
+            :status="record.status"/>
         </template>
         <MoreOutlined />
       </a-Popover>
     </template>
-
-    <!-- <template #tags="{ text: tags }">
-      <span>
-        <a-tag
-          v-for="tag in tags"
-          :key="tag"
-          :color="
-            tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
-          "
-        >
-          {{ tag.toUpperCase() }}
-        </a-tag>
-      </span>
-    </template> -->
+    <template #stateRender="{ record }">
+      <a-badge class="head-example"  :color="record.status == 'Running' ?'green' : 'red'" :text="record.status" />
+    </template>
+    <template #userRender="{ record }">
+      {{ record.owner_account_id.String == "" ? "No" : record.owner_account_id.String }}
+    </template>
+    <template #connRender="{ record }">
+      {{ record.connected == false ? "Disconnect" : "Connected" }}
+    </template>    
   </a-table>
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
 export default defineComponent({
   props: {
   },
@@ -55,22 +81,21 @@ export default defineComponent({
     Actions,
   },
   setup() {
-    // const rowSelection = {
-    //   onChange: (selectedRowKeys, selectedRows) => {
-    //     console.log(
-    //       `selectedRowKeys: ${selectedRowKeys}`,
-    //       "selectedRows: ",
-    //       selectedRows
-    //     );
-    //   },
-    //   onSelect: (record, selected, selectedRows) => {
-    //     $emit('actionFromChange', 'VirtualMachineDetail');
-    //     console.log(record, selected, selectedRows);
-    //   },
-    //   onSelectAll: (selected, selectedRows, changeRows) => {
-    //     console.log(selected, selectedRows, changeRows);
-    //   },
-    // };
+    const state = reactive({
+      searchText: "",
+      searchedColumn: "",
+    });
+    const searchInput = ref();
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+      confirm();
+      state.searchText = selectedKeys[0];
+      state.searchedColumn = dataIndex;
+      //console.log(selectedKeys + "  ::  " + confirm + "  ::  " +dataIndex);
+    };
+    const handleReset = clearFilters => {
+      clearFilters();
+      state.searchText = "";
+    };
     return {
       // rowSelection,
       loading: ref(false),
@@ -82,98 +107,122 @@ export default defineComponent({
         showTotal: (total) => `Total ${total} items`, // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
+      searchInput,
+      state,
+      handleSearch,
+      handleReset,
     };
   },
   data() {
     return {
       selectedRowKeys: [],
-      VMListColumns : [
+      vmDataList: [],
+      vmListColumns: [
         {
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          slots: { customRender: "nameRender" },
+          width: "32%",
+          slots: { 
+            customRender: "nameRender",
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          ellipsis: true,
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: "",
           key: "action",
           dataIndex: "action",
-          align: 'right',
+          align: "right",
+          width: "3%",
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
-          dataIndex: "state",
-          key: "state",
-          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          title: this.$t("label.state"),
+          dataIndex: "status",
+          key: "status",
+          width: "15%",
+          sorter: (a, b) => (a.status < b.status ? -1 : a.status > b.status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          slots: { customRender: "stateRender" },
         },
         {
-          title: this.$t('label.workspace'),
-          dataIndex: "workspace",
-          key: "workspace",
-          sorter: (a, b) =>
-            a.workspace < b.workspace ? -1 : a.workspace > b.workspace ? 1 : 0,
+          title: this.$t("label.workspace"),
+          dataIndex: "workspace_name",
+          key: "workspace_name",
+          width: "25%",
+          sorter: (a, b) => a.workspace_name < b.workspace_name ? -1 : a.workspace_name > b.workspace_name ? 1 : 0,
           sortDirections: ["descend", "ascend"],
+          ellipsis: true,
         },
         {
-          title: this.$t('label.users'),
-          dataIndex: "user",
-          key: "user",
-          sorter: (a, b) => (a.user < b.user ? -1 : a.user > b.user ? 1 : 0),
+          title: this.$t("label.users"),
+          dataIndex: "owner_account_id",
+          key: "owner_account_id",
+          width: "10%",
+          sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          slots: { customRender: "userRender" },
         },
         {
-          title: this.$t('label.desktop.connect.boolean'),
-          dataIndex: "conn",
-          key: "conn",
-          sorter: (a, b) => (a.conn < b.connoD ? -1 : a.conn > b.conn ? 1 : 0),
+          title: this.$t("label.desktop.connect.boolean"),
+          dataIndex: "connected",
+          key: "connected",
+          width: "15%",
+          sorter: (a, b) => (a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0),
           sortDirections: ["descend", "ascend"],
+          slots: { customRender: "connRender" },
         },
       ],
-      vmDataList : [
-        {"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1"},
-        {"uuid":"20202020202020202020202020202020", "name":"VM2","state":"Stopped","user":"user03","conn":"FALSE","workspace":"test1"},
-        {"uuid":"3030303030303030303030303030303030", "name":"VM3","state":"Running","user":"user02","conn":"TRUE","workspace":"test1"}
-      ],
-    }
+    };
   },
-    created() {
+  created() {
     this.fetchData();
+    // setInterval(() => {
+    //   this.fetchData();
+    // }, 10000);
   },
   methods: {
-    setSelection (selection) {
+    setSelection(selection) {
       this.selectedRowKeys = selection;
       if(this.selectedRowKeys.length == 0){
-        this.$emit('actionFromChange', "VirtualMachine");
+        this.$emit("actionFromChange", "VirtualMachine");
       }else{
-        this.$emit('actionFromChange', this.actionFrom);
+        this.$emit("actionFromChange", this.actionFrom);
       }
     },
-    resetSelection () {
-      this.setSelection([])
+    resetSelection() {
+      this.setSelection([]);
     },
     onSelectChange (selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys)
+      this.setSelection(selectedRowKeys);
     },
     fetchData() {
       this.loading = true;
-      // worksApi
-      //   .get("/api/v1/virtualMachines", { withCredentials: true })
-      //   .then((response) => {
-      //     if (response.data.result.status == 200) {
-      //       this.vmDataList = response.data.result.list;
-      //     } else {
-      //       message.error(this.t('message.response.data.fail'));
-      //       //console.log(response.message);
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     message.error(error.message);
-      //     //console.log(error);
-      //   });
+      worksApi
+        .get("/api/v1/instance/all", { withCredentials: true })
+        .then((response) => {
+          if (response.status == 200) {
+            this.vmDataList = response.data.result.list;
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+          }
+        })
+        .catch(function (error) {
+          message.error(error);
+          //console.log(error);
+        });
       setTimeout(() => {
         this.loading = false;  
       }, 500);

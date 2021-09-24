@@ -32,13 +32,10 @@
 </template>
 
 <script>
-import { DesktopOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  components: {
-    DesktopOutlined,
-  },
+  components: {},
   props: {
     actionFrom: {
       type: String,
