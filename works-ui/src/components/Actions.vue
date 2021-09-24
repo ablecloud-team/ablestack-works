@@ -1,128 +1,130 @@
 <template class="able-action">
   <a-space :size="size">
-    <!--Start circle button start-->
+    <!--Start-->
     <a-tooltip v-if="state.buttonBoolean.start" placement="top">
       <template #title>{{ $t("tooltip.start") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.start')">
+      <a-button shape="circle" @click="setCircleButtonModal('start')">
         <CaretRightOutlined />
       </a-button>
-    </a-tooltip>
-    <!--Start circle button end-->
-    <!--Stop circle button start-->
+    </a-tooltip>    
+    <!--Stop-->
     <a-tooltip v-if="state.buttonBoolean.stop" placement="top">
       <template #title>{{ $t("tooltip.stop") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.stop')">
+      <a-button shape="circle" @click="setCircleButtonModal('stop')">
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
-    <!--Stop circle button end-->
-    <!--reset circle button start-->
+    <!--reset -->
     <a-tooltip v-if="state.buttonBoolean.reset" placement="top">
       <template #title>{{ $t("tooltip.reset") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.reset')">
+      <a-button shape="circle" @click="setCircleButtonModal('reset')">
         <ReloadOutlined />
       </a-button>
     </a-tooltip>
-    <!--reinstall circle button start-->
+    <!--reinstall-->
     <a-tooltip v-if="state.buttonBoolean.reinstall" placement="top">
       <template #title>{{ $t("tooltip.reinstall") }}</template>
       <a-button
         shape="circle"
-        @click="setCircleButtonModal('tooltip.reinstall')"
+        @click="setCircleButtonModal('reinstall')"
       >
         <SyncOutlined />
       </a-button>
     </a-tooltip>
-    <!--reinstall circle button end-->
-    <!--snapshot circle button start-->
+    <!--snapshot-->
     <a-tooltip v-if="state.buttonBoolean.snapshot" placement="top">
       <template #title>{{ $t("tooltip.snapshot") }}</template>
       <a-button
         shape="circle"
-        @click="setCircleButtonModal('tooltip.snapshot')"
+        @click="setCircleButtonModal('snapshot')"
       >
         <CameraOutlined />
       </a-button>
     </a-tooltip>
-    <!--snapshot circle button end-->
-    <!--volsnapshot circle button start-->
+    <!--volsnapshot-->
     <a-tooltip v-if="state.buttonBoolean.volsnapshot" placement="top">
       <template #title>{{ $t("tooltip.volsnapshot") }}</template>
       <a-button
         shape="circle"
-        @click="setCircleButtonModal('tooltip.volsnapshot')"
+        @click="setCircleButtonModal('volsnapshot')"
       >
         <i class="fas fa-camera-retro"></i>
         <VideoCameraAddOutlined />
       </a-button>
     </a-tooltip>
-    <!--volsnapshot circle button end-->
-    <!--isoattach circle button start-->
+    <!--isoattach-->
     <a-tooltip v-if="state.buttonBoolean.isoattach" placement="top">
       <template #title>{{ $t("tooltip.isoattach") }}</template>
       <a-button
         shape="circle"
-        @click="setCircleButtonModal('tooltip.isoattach')"
+        @click="setCircleButtonModal('isoattach')"
       >
         <PaperClipOutlined />
       </a-button>
     </a-tooltip>
-    <!--isoattach circle button end-->
-    <!--edit circle button start-->
+    <!--edit-->
     <a-tooltip v-if="state.buttonBoolean.edit" placement="top">
       <template #title>{{ $t("tooltip.edit") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.edit')">
+      <a-button shape="circle" @click="setCircleButtonModal('edit')">
         <EditOutlined />
       </a-button>
     </a-tooltip>
-    <!--edit circle button end-->
-    <!--pause circle button start-->
+    <!--pause-->
     <a-tooltip v-if="state.buttonBoolean.pause" placement="top">
       <template #title>{{ $t("tooltip.pause") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.pause')">
+      <a-button shape="circle" @click="setCircleButtonModal('pause')">
         <PauseOutlined />
       </a-button>
     </a-tooltip>
-    <!--pause circle button end-->
-    <!--destroy circle button start-->
+    <!--destroy-->
     <a-tooltip v-if="state.buttonBoolean.destroy" placement="top">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
         danger
-        @click="setCircleButtonModal('tooltip.destroy')"
+        @click="setCircleButtonModal('destroy')"
       >
         <DeleteFilled />
       </a-button>
     </a-tooltip>
+
+    <!-- Confirm Modal -->
     <a-modal
-      :title="$t(modalTitle)"
+      :title="$t('tooltip.'+modalTitle)"
       :visible="confirmModalView"
       @cancel="handleCancel"
-      @ok="handleCancel"
-    >
-      <p>{{ $t(modalTitle) }} 하시겠습니까?</p>
+      @ok="handleSubmit(actionFrom, name, uuid)">
+      <p>{{ $t(modalConfirm) }}</p>
     </a-modal>
-    <!--circle button check modal end-->
+
   </a-space>
 </template>
 
 <script>
-import { PauseOutlined } from '@ant-design/icons-vue';
 import { defineComponent, onMounted, reactive, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
-  components: {
-    PauseOutlined
-  },
+  components: {},
   props: {
     actionFrom: {
       type: String,
       requires: true,
       default: "",
     },
-    title: {
+    uuid: {
+      type: String,
+      requires: false,
+      default: "",
+    },
+    name: {
+      type: String,
+      requires: false,
+      default: "",
+    },
+    status: {
       type: String,
       requires: false,
       default: "",
@@ -133,6 +135,7 @@ export default defineComponent({
     //console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
     const state = reactive({
       callComponent: ref(props.actionFrom),
+      status: ref(props.status),
       buttonBoolean: {
         showModal: ref(false),
         start: ref(false),
@@ -152,14 +155,16 @@ export default defineComponent({
         state.buttonBoolean.start = true;
         state.buttonBoolean.stop = true;
         state.buttonBoolean.destroy = true;
-        state.buttonBoolean.pause = true;
       } else if (state.callComponent === "VirtualMachine") {
       } else if (state.callComponent === "VirtualMachineList" || state.callComponent === "VirtualMachineDetail") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;        
+        if (state.status === "Running") {
+          state.buttonBoolean.stop = true;
+        } else {
+          state.buttonBoolean.start = true;
+        }
         state.buttonBoolean.iso = true;
         state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "UserList" || state.callComponent === "UserDetail") {
+      } else if (state.callComponent === "AccountList" || state.callComponent === "AccountDetail") {
         state.buttonBoolean.destroy = true;
       } else if (state.callComponent === "GroupPolicyList" || state.callComponent === "GroupPolicyDetail") {
         state.buttonBoolean.destroy = true;
@@ -168,9 +173,9 @@ export default defineComponent({
     return {
       size: ref(sizeValue),
       confirmModalView: ref(false),
-      //TODO:2021.07.30 mobalTitle i18n 적용필요
-      //fixm
-      modalTitle: "",
+      modalTitle: ref(""),
+      modalConfirm: ref(""),
+      popView: ref(true),
       state,
     };
   },
@@ -180,11 +185,58 @@ export default defineComponent({
   methods: {
     setCircleButtonModal: function (value) {
       this.confirmModalView = true;
+      this.popView = false;
       this.modalTitle = value;
+      if(value == "start") this.modalConfirm = "modal.confirm.start";
+      if(value == "stop") this.modalConfirm = "modal.confirm.stop";
+      if(value == "destroy") this.modalConfirm = "modal.confirm.destroy";
+
     },
     handleCancel: function () {
       this.confirmModalView = false;
     },
+    handleSubmit: function (actionFrom, name, uuid) { //actionFrom, name, uuid
+      console.log(this.modalTitle + "  ::  " +actionFrom + " ::  " + name + " :: "+ uuid);
+      if(actionFrom == "VirtualMachineList"){
+        let worksUrl, resMessage = "";
+        if(this.modalTitle.includes("start")){
+          worksUrl = "/api/v1/instance/VMStart/" + uuid;
+          resMessage = this.$t("message.vm.status.update");
+        }
+        if(this.modalTitle.includes("stop")){
+          worksUrl = "/api/v1/instance/VMStop/" + uuid;
+          resMessage = this.$t("message.vm.status.update");
+        }
+        if(this.modalTitle.includes("destroy")){
+          worksUrl = "/api/v1/instance/VMDestroy/"+ uuid;
+          resMessage = this.$t("message.vm.status.delete");
+        }
+        worksApi
+          .patch( worksUrl, { withCredentials: true })
+          .then((response) => {
+            if (response.status == 200) {
+              this.vmDataList = response.data.result.list;
+              message.loading(resMessage);
+            } else {
+              message.error("message.vm.status.update.fail");
+            }
+            setTimeout(() => {
+              this.$emit("fetchData");
+              this.handleCancel();
+            }, 1000);
+
+          })
+          .catch(function (error) {
+            message.error(error);
+          });
+
+      }
+      setTimeout(() => {
+        this.$emit("fetchData");
+        this.handleCancel();
+      }, 1000);
+ 
+    } 
   },
 });
 </script>
