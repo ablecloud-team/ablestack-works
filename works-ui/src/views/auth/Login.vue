@@ -3,23 +3,23 @@
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-            src="../../assets/ablestack-logo.png"
-            alt="logo"
-            class="user-layout-logo"
+          src="../../assets/ablestack-logo.png"
+          alt="logo"
+          class="user-layout-logo"
         />
       </div>
       <a-form
-          ref="formRef"
-          layout="horizontal"
-          :model="formState"
-          :rules="rules"
-          class="user-layout-login"
+        ref="formRef"
+        layout="horizontal"
+        :model="formState"
+        :rules="rules"
+        class="user-layout-login"
       >
         <a-form-item name="id">
           <a-input
-              v-model:value="formState.id"
-              :placeholder="$t('label.user.id')"
-              size="large"
+            v-model:value="formState.id"
+            :placeholder="$t('label.user.id')"
+            size="large"
           >
             <template #prefix>
               <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -28,10 +28,10 @@
         </a-form-item>
         <a-form-item name="password">
           <a-input-password
-              v-model:value="formState.password"
-              type="password"
-              :placeholder="$t('label.password')"
-              size="large"
+            v-model:value="formState.password"
+            type="password"
+            :placeholder="$t('label.password')"
+            size="large"
           >
             <template #prefix>
               <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -39,7 +39,7 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" @click="onSubmit" block class="login-button">
+          <a-button type="primary" block class="login-button" @click="onSubmit">
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
@@ -66,25 +66,26 @@
           </a-button>
         </a-popover> -->
         <a-dropdown>
-        <a-button type="text" shape="circle" class="header-notice-button">
-          <a class="ant-dropdown-link" @click.prevent>
-            <font-awesome-icon 
-              :icon="['fas', 'language']"
-              size="2x"
-              style="color: #666;"
-              class="login-icon"/>
-            <!-- <GlobalOutlined /> -->
-          </a>
-        </a-button>
-        <template #overlay>
-          <a-menu
-            :selectedKeys="[language]"
-            @click="setLocaleClick">
-            <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
-            <a-menu-item key="en" value="enUS"> English </a-menu-item>
-          </a-menu>
-        </template>
-      </a-dropdown>
+          <a-button type="text" shape="circle" class="header-notice-button">
+            <a class="ant-dropdown-link" @click.prevent>
+              <font-awesome-icon
+                :icon="['fas', 'language']"
+                size="2x"
+                style="color: #666"
+                class="login-icon"
+              />
+              <!-- <GlobalOutlined /> -->
+            </a>
+          </a-button>
+          <template #overlay>
+            <a-menu
+              :selectedKeys="[language]"
+              @click="setLocaleClick">
+              <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+              <a-menu-item key="en" value="enUS"> English </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
         <!--   언어변환 버튼 끝     -->
       </a-form>
     </div>
@@ -94,9 +95,9 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { worksApi } from "../../api/index";
-import store from "../../store/index"
-import router from "../../router";
+import { worksApi } from "@/api/index";
+import store from "@/store/index";
+import router from "@/router";
 
 export default defineComponent({
   name: "Login",
@@ -119,66 +120,62 @@ export default defineComponent({
     return {
       formRef,
       formState,
-      rules
+      rules,
     };
   },
   data() {
     return {};
   },
+  computed: {},
   created() {
     this.onClear();
   },
-  computed: {},
   methods: {
-    setLocaleClick (e) {
+    setLocaleClick(e) {
       let localeValue = e.key;
       if (!localeValue) {
-        localeValue = 'ko';
+        localeValue = "ko";
       }
       this.setLocale(localeValue);
     },
-    setLocale (localeValue) {
+    setLocale(localeValue) {
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
       this.language = localeValue;
-      localStorage.setItem('locale', localeValue);
+      sessionStorage.setItem("locale", localeValue);
       //this.loadLanguageAsync(localeValue);
     },
     onClear() {
-      localStorage.clear();
+      sessionStorage.clear();
     },
     onSubmit() {
-      this.rules.id.message = this.$t("message.please.enter.your.id");;
-      this.rules.password.message = this.$t("message.please.enter.your.password")
+      this.rules.id.message = this.$t("message.please.enter.your.id");
+      this.rules.password.message = this.$t("message.please.enter.your.password");
       let params = new URLSearchParams();
-      let res
       this.formRef
         .validate()
-        .then( () => {
+        .then(() => {
           message.loading(this.$t("message.logging"));
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
           // try {
           //  res = await axiosLogin(params)
-
           worksApi
             .post("/api/login", params, { withCredentials: true })
             .then((response) => {
               //console.log(response);
               if (response.status == 200) {
-                router.push({name: "Dashboard"})
+                router.push({ name: "Dashboard" });
                 //console.log(response.data.result.token);
-                localStorage.setItem("token", response.data.result.token);
-                localStorage.setItem("username", response.data.result.username);
-                
+                sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem("username", response.data.result.username);
                 message.destroy();
                 message.success(this.$t("message.login.completed"));
-                store.dispatch("loginCommit", response.data)
+                store.dispatch("loginCommit", response.data);
               } else {
                 message.destroy();
-                message.error(this.$t("message.login.wrong"))
+                message.error(this.$t("message.login.wrong"));
               }
-
             })
             .catch(function (error) {
               console.log(error);
