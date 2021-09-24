@@ -241,29 +241,23 @@ export default defineComponent ({
           .then( () => {
           //console.log(toRaw(formState));
           message.loading(this.$t("message.workspace.createing"), 1);
-          try {
-            worksApi
-              .put("/api/v1/workspace", params, { withCredentials: true })
-              .then((response) => {
-                if (response.status === 200) {
-                  message.loading(this.$t("message.workspace.create.success"), 1);
-                  // setTimeout(() => {
-                  //   location.reload();
-                  // }, 1500);
-                } else {
-                  message.error(this.$t("message.workspace.create.fail"));
-                }
-                this.showModal(false);
+          worksApi
+            .put("/api/v1/workspace", params, { withCredentials: true })
+            .then((response) => {
+              if (response.status === 200) {
+                message.loading(this.$t("message.workspace.create.success"), 1);
+              } else {
+                message.error(this.$t("message.workspace.create.fail"));
+              }
+              this.showModal(false);
+              setTimeout(() => {
                 this.$refs.listRefleshCall.fetchData();
-              })
-              .catch(function (error) {
-                message.error(error.message);
-              //console.log(error);
-              });
-          }catch (error){
-            console.log(error)
-            message.error(this.$t("message.workspace.create.fail"))
-          }
+              }, 1500);
+            })
+            .catch(function (error) {
+              message.error(error);
+            //console.log(error);
+            });
         })
         .catch(error => {
           console.log('error', error);

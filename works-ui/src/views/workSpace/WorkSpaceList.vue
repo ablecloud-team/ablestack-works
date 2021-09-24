@@ -21,7 +21,7 @@
           :placeholder="$t('search.'+column.dataIndex)"
           :value="selectedKeys[0]"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
-          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
+          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
         <!-- <a-button
           type="primary"
@@ -64,28 +64,10 @@ import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-import { SearchOutlined } from "@ant-design/icons-vue";
-// const rowSelection = {
-//   onChange: (selectedRowKeys, selectedRows) => {
-//     // console.log(
-//     //   `selectedRowKeys: ${selectedRowKeys}`,
-//     //   "selectedRows: ",
-//     //   selectedRows
-//     // );
-//   },
-//   onSelect: (record, selected, selectedRows) => {
-//     // console.log(record, selected, selectedRows);
-//   },
-//   onSelectAll: (selected, selectedRows, changeRows) => {
-//     // console.log(selected, selectedRows, changeRows);
-//   },
-// };
-
 export default defineComponent({
   name: "WorkspaceList",
   components: {
     Actions,
-    SearchOutlined,
   },
   props: {},
   setup() {
@@ -129,7 +111,7 @@ export default defineComponent({
           title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "39%",
+          width: "37%",
           slots: { 
             customRender: "nameRender",
             filterDropdown: 'filterDropdown',
@@ -137,7 +119,8 @@ export default defineComponent({
           },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          onFilter: (value, record) => record.Name.toString().toLowerCase().includes(value.toLowerCase()),
+          ellipsis: true,
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: visible => {
             if (visible) {
               setTimeout(() => {
@@ -151,7 +134,7 @@ export default defineComponent({
           key: "action",
           dataIndex: "action",
           align: "right",
-          width: "1%",
+          width: "3%",
           slots: { customRender: "actionRender" },
         },
         {
@@ -255,6 +238,7 @@ export default defineComponent({
       this.setSelection(selectedRowKeys);
     },
     fetchData() {
+      this.state.searchText ="";
       this.loading = true;
       worksApi
         .get("/api/v1/workspace", { withCredentials: true })

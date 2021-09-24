@@ -70,12 +70,9 @@
 </template>
 
 <script>
-import { ClusterOutlined } from '@ant-design/icons-vue';
 import { defineComponent } from "vue";
 export default defineComponent({
-  components: {
-    ClusterOutlined,
-  },
+  components: {},
   props: {
     workspaceInfo: {
       type: Object,

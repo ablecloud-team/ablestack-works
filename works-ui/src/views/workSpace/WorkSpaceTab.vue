@@ -11,7 +11,7 @@
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
-          :tapName="'user'"  
+          :tapName="'user'"
           :actionFrom="'UserDetail'"
           @tabReflesh="tabReflesh"
         />
@@ -58,7 +58,7 @@ export default defineComponent({
     };
   },
   data() {
-    return {}
+    return {};
   },
   created() {
     this.fetchData();
@@ -69,8 +69,6 @@ export default defineComponent({
     },
     fetchData() {
       //alert(this.$route.params.uuid);
-      
-
     },
   },
 });
