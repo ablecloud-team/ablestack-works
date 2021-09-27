@@ -7,20 +7,32 @@
             <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath v-bind:paths="[$t('label.workspace')]" />
-              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
                 <template #icon>
-                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
                 </template>
               </a-button>
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <actions :actionFrom="actionFrom" v-if="actionFrom === 'WorkspaceList'"/>
-                <a-button type="primary" shape="round" style="margin-left: 10px;" @click="showModal(true)">{{ addModalTitle }}
+                <actions
+                  :actionFrom="actionFrom"
+                  v-if="actionFrom === 'WorkspaceList'"
+                />
+                <a-button
+                  type="primary"
+                  shape="round"
+                  style="margin-left: 10px"
+                  @click="showModal(true)"
+                  >{{ addModalTitle }}
                   <template #icon>
-                      <PlusOutlined />
-                    </template>
+                    <PlusOutlined />
+                  </template>
                 </a-button>
               </div>
             </a-col>
@@ -31,17 +43,25 @@
         <div id="content-body">
           <WorkSpaceList
             ref="listRefleshCall"
-            @actionFromChange="actionFromChange"/>
+            @actionFromChange="actionFromChange"
+          />
         </div>
       </a-layout-content>
     </a-layout>
     <!-- ADD WORKSPACE MODAL START  -->
-    <a-modal v-model:visible="visible" :title="addModalTitle" >
-      <template #title>
-      </template>
+    <a-modal v-model:visible="visible" :title="addModalTitle">
+      <template #title> </template>
       <template #footer>
-        <a-button key="close" @click="showModal(false)">{{$t("label.cancel")}}</a-button>
-        <a-button key="submit" type="primary" :loading="loading" @click="putWorkspace">{{$t("label.ok")}}</a-button>
+        <a-button key="close" @click="showModal(false)">{{
+          $t("label.cancel")
+        }}</a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          :loading="loading"
+          @click="putWorkspace"
+          >{{ $t("label.ok") }}</a-button
+        >
       </template>
       <a-form
         ref="formRef"
@@ -51,74 +71,114 @@
         :wrapper-col="wrapperCol"
         layout="vertical"
       >
-          <!--워크스페이스 이름 start-->
-          <a-form-item has-feedback name="name" :label="$t('label.name')">
-            <a-input 
-              v-model:value="formState.name" 
-              :placeholder="$t('tooltip.workspace.name')"/>
-          </a-form-item>
-          <!--워크스페이스 이름 end-->
-          <!--워크스페이스 설명 start-->
-          <a-form-item has-feedback name="description" :label="$t('label.description')">
-            <a-input
-              v-model:value="formState.description"
-              :placeholder="$t('tooltip.workspace.description')"
-              class="addmodal-aform-item-div"
-            />
-          </a-form-item>
-          <!--워크스페이스 설명 end-->
-          <!--워크스페이스 타입 start-->
-          <a-form-item has-feedback name="workspaceType" :label="$t('label.type')">
-            <a-select
-              v-model:value="formState.workspaceType"
-              :placeholder="$t('tooltip.workspace.type')"
-              class="addmodal-aform-item-div"
-              @change="workspaceTypeChange"
-            >
-              <a-select-option value="desktop">Desktop</a-select-option>
-              <a-select-option value="application">Application</a-select-option>
-            </a-select>
-          </a-form-item>
-          <!--워크스페이스 타입 end-->
-          <!--워크스페이스 전용 여부 start-->
-          <a-form-item v-show="desktopBoolean">
-              {{ $t(switchLabel) }}
+        <!--워크스페이스 이름 start-->
+        <a-form-item has-feedback name="name" :label="$t('label.name')">
+          <a-input
+            v-model:value="formState.name"
+            :placeholder="$t('tooltip.workspace.name')"
+          />
+        </a-form-item>
+        <!--워크스페이스 이름 end-->
+        <!--워크스페이스 설명 start-->
+        <a-form-item
+          has-feedback
+          name="description"
+          :label="$t('label.description')"
+        >
+          <a-input
+            v-model:value="formState.description"
+            :placeholder="$t('tooltip.workspace.description')"
+            class="addmodal-aform-item-div"
+          />
+        </a-form-item>
+        <!--워크스페이스 설명 end-->
+        <!--워크스페이스 타입 start-->
+        <a-form-item
+          has-feedback
+          name="workspaceType"
+          :label="$t('label.type')"
+        >
+          <a-select
+            v-model:value="formState.workspaceType"
+            :placeholder="$t('tooltip.workspace.type')"
+            @change="workspaceTypeChange"
+          >
+            <a-select-option value="desktop">Desktop</a-select-option>
+            <a-select-option value="application">Application</a-select-option>
+          </a-select>
+        </a-form-item>
+        <!--워크스페이스 타입 end-->
+        <!--워크스페이스 전용 여부 start-->
+        <a-form-item v-show="desktopBoolean">
+          <!-- {{ $t(switchLabel) }}
             <a-switch
               v-model:checked="formState.dedicatedOrSharedBoolean"
               @change="dedicatedChange"
-            />
-          </a-form-item>
-          <!--워크스페이스 전용 여부 end-->
-          <!--워크스페이스 템플릿 start-->
-          <a-form-item has-feedback name="selectedTemplateId" :label="$t('label.template')">
-            <a-select
-              v-model:value="formState.selectedTemplateId"
-              :placeholder="$t('tooltip.workspace.template')"
-              show-search
-              option-filter-prop="label"
-              class="addmodal-aform-item-div"
+            /> -->
+
+          <a-radio-group
+            v-model:value="formState.dedicatedOrSharedBoolean"
+            button-style="solid"
+          >
+            <!-- <a-radio :value="false">{{ $t("label.dedicated") }}</a-radio>
+              <a-radio :value="true">{{ $t("label.shared") }}</a-radio> -->
+            <a-radio-button :value="false">{{
+              $t("label.dedicated")
+            }}</a-radio-button>
+            <a-radio-button :value="true">{{
+              $t("label.shared")
+            }}</a-radio-button>
+          </a-radio-group>
+        </a-form-item>
+        <!--워크스페이스 전용 여부 end-->
+        <!--워크스페이스 템플릿 start-->
+        <a-form-item
+          has-feedback
+          name="selectedTemplateId"
+          :label="$t('label.template')"
+        >
+          <a-select
+            v-model:value="formState.selectedTemplateId"
+            :placeholder="$t('tooltip.workspace.template')"
+            show-search
+            option-filter-prop="label"
+            class="addmodal-aform-item-div"
+          >
+            <a-select-option
+              v-for="option in templates"
+              :key="option.name"
+              :value="option.id"
+              :label="option.name"
             >
-              <a-select-option v-for="option in templates" :key="option.name" :value="option.id" :label="option.name">
-                {{ option.name }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
-          <!--워크스페이스 템플릿 end-->
-          <!--워크스페이스 컴퓨트 오퍼링 start-->
-          <a-form-item has-feedback name="selectedOfferingId" :label="$t('label.compute.offering')">
-            <a-select
-              v-model:value="formState.selectedOfferingId"
-              :placeholder="$t('tooltip.workspace.compute.offering')"
-              show-search
-              option-filter-prop="label"
-              class="addmodal-aform-item-div"
+              {{ option.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <!--워크스페이스 템플릿 end-->
+        <!--워크스페이스 컴퓨트 오퍼링 start-->
+        <a-form-item
+          has-feedback
+          name="selectedOfferingId"
+          :label="$t('label.compute.offering')"
+        >
+          <a-select
+            v-model:value="formState.selectedOfferingId"
+            :placeholder="$t('tooltip.workspace.compute.offering')"
+            show-search
+            option-filter-prop="label"
+            class="addmodal-aform-item-div"
+          >
+            <a-select-option
+              v-for="option in offerings"
+              :key="option.name"
+              :value="option.id"
+              :label="option.name"
             >
-              <a-select-option v-for="option in offerings" :key="option.name" :value="option.id" :label="option.name">
-                {{ option.name }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
-          <!--워크스페이스 컴퓨트 오퍼링 end-->
+              {{ option.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <!--워크스페이스 컴퓨트 오퍼링 end-->
       </a-form>
     </a-modal>
     <!-- ADD WORKSPACE MODAL END  -->
@@ -133,7 +193,7 @@ import { defineComponent, onMounted, reactive, ref, toRaw } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
-export default defineComponent ({
+export default defineComponent({
   name: "WorkSpace",
   components: {
     WorkSpaceList,
@@ -148,20 +208,37 @@ export default defineComponent ({
     };
     const formRef = ref();
     const formState = reactive({
-      name: ref(undefined),
-      description: ref(undefined),
-      selectedTemplateId: ref(undefined),
-      selectedOfferingId: ref(undefined),
-      workspaceType: ref(undefined),
+      name: ref(""),
+      description: ref(""),
+      selectedTemplateId: ref(""),
+      selectedOfferingId: ref(""),
+      workspaceType: ref(""),
       dedicatedOrSharedBoolean: ref(false),
     });
+    let validateName = async (rule, value) => {
+      //let lengthCheck = value.length >= rule.min ? true : false; //길이체크
+      //let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      //let containsEngUpper = /[A-Z]/.test(value); 대문자
+      //let containsNumber = /[0-9]/.test(value);
+      //let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value);
+      let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
+      if (value === "" || containsHangle) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    };
     const rules = {
-      name: { required: true, },
-      description: { required: true, },
-      workspaceType: { required: true, },
-      dedicatedOrSharedBoolean: { required: false, },
-      selectedTemplateId: { required: true, },
-      selectedOfferingId: { required: true, },
+      name: {
+        required: true,
+        validator: validateName,
+        trigger: "change",
+      },
+      description: { required: true },
+      workspaceType: { required: true },
+      dedicatedOrSharedBoolean: { required: false },
+      selectedTemplateId: { required: true },
+      selectedOfferingId: { required: true },
     };
     const templates = [];
     const offerings = [];
@@ -189,7 +266,7 @@ export default defineComponent ({
     this.fetchOfferingsAndTemplates();
   },
   methods: {
-    reflesh(){
+    reflesh() {
       this.$refs.listRefleshCall.fetchData();
     },
     actionFromChange(val) {
@@ -197,13 +274,13 @@ export default defineComponent ({
       this.actionFrom = ref(val);
     },
     dedicatedChange(value) {
-      this.dedicatedOrSharedBoolean = value
+      this.dedicatedOrSharedBoolean = value;
       if (this.dedicatedOrSharedBoolean) {
         this.switchLabel = ref("label.shared");
-        console.log("true");
+        //console.log("true");
       } else {
         this.switchLabel = ref("label.dedicated");
-        console.log("false");
+        //console.log("false");
       }
     },
     workspaceTypeChange(value) {
@@ -222,11 +299,17 @@ export default defineComponent ({
       //console.log(value);
     },
     putWorkspace() {
-      this.rules.name.message = this.$t('input.workspace.name');
-      this.rules.description.message = this.$t('input.workspace.description');
-      this.rules.workspaceType.message = this.$t('input.workspace.workspaceType');
-      this.rules.selectedTemplateId.message = this.$t('input.workspace.selectedTemplateId'); 
-      this.rules.selectedOfferingId.message = this.$t('input.workspace.selectedOfferingId');
+      this.rules.name.message = this.$t("input.workspace.name");
+      this.rules.description.message = this.$t("input.workspace.description");
+      this.rules.workspaceType.message = this.$t(
+        "input.workspace.workspaceType"
+      );
+      this.rules.selectedTemplateId.message = this.$t(
+        "input.workspace.selectedTemplateId"
+      );
+      this.rules.selectedOfferingId.message = this.$t(
+        "input.workspace.selectedOfferingId"
+      );
 
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
@@ -237,12 +320,12 @@ export default defineComponent ({
       params.append("computeOfferingUuid", this.formState.selectedOfferingId);
       //console.log(params);
       this.formRef
-          .validate()
-          .then( () => {
+        .validate()
+        .then(() => {
           //console.log(toRaw(formState));
           message.loading(this.$t("message.workspace.createing"), 1);
           worksApi
-            .put("/api/v1/workspace", params, { withCredentials: true })
+            .put("/api/v1/workspace", params)
             .then((response) => {
               if (response.status === 200) {
                 message.loading(this.$t("message.workspace.create.success"), 1);
@@ -256,23 +339,24 @@ export default defineComponent ({
             })
             .catch(function (error) {
               message.error(error);
-            //console.log(error);
+              //console.log(error);
             });
         })
-        .catch(error => {
-          console.log('error', error);
+        .catch((error) => {
+          console.log("error", error);
           //message.error(error);
-          
         });
     },
     fetchOfferingsAndTemplates() {
       worksApi
-        .get("/api/v1/offering", { withCredentials: true })
+        .get("/api/v1/offering")
         .then((response) => {
           if (response.status == 200) {
             //console.log(response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering);
-            this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
-            this.templates = response.data.templateList.listtemplatesresponse.template;
+            this.offerings =
+              response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
+            this.templates =
+              response.data.templateList.listtemplatesresponse.template;
           } else {
             console.log(response.message);
           }

@@ -6,7 +6,7 @@
           <ClusterOutlined />
         </template>
       </a-avatar>
-      <h4 style="margin-left:20px;">
+      <h4 style="margin-left: 20px">
         {{ workspaceInfo.name }}
       </h4>
     </div>
@@ -16,10 +16,20 @@
     <div class="Item">{{ workspaceInfo.description }}</div>
   </div>
 
-  <div id="Status" class="CardItem" >
+  <div id="Status" class="CardItem">
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
-      <a-badge class="Status" :color="workspaceInfo.state == 'Disable' ?'grey' : workspaceInfo.state == 'Running' ? 'green' : 'red'" :text="workspaceInfo.state" />
+      <a-badge
+        class="Status"
+        :color="
+          workspaceInfo.state === 'Disable'
+            ? 'red'
+            : workspaceInfo.state === 'Enable'
+            ? 'green'
+            : 'grey'
+        "
+        :text="workspaceInfo.state"
+      />
     </div>
   </div>
 
@@ -40,12 +50,30 @@
 
   <div id="Type" class="CardItem">
     <div class="ItemName">{{ $t("label.type") }}</div>
-    <div class="Item">{{ workspaceInfo.workspace_type }}</div>
+    <div class="Item">
+      {{
+        workspaceInfo.workspace_type === "desktop"
+          ? $t("label.desktop")
+          : workspaceInfo.workspace_type === "application"
+          ? $t("label.application")
+          : ""
+      }}
+    </div>
   </div>
 
-  <div v-if="workspaceInfo.workspace_type =='desktop'" id="shared" class="CardItem">
+  <div
+    v-if="workspaceInfo.workspace_type === 'desktop'"
+    id="shared"
+    class="CardItem"
+  >
     <div class="ItemName">{{ $t("label.dedicated.shared") }}</div>
-    <div class="Item">{{  workspaceInfo.shared == false ? 'Dedicated' : 'Shared' }}</div>
+    <div class="Item">
+      {{
+        workspaceInfo.shared === false
+          ? $t("label.dedicated")
+          : $t("label.shared")
+      }}
+    </div>
   </div>
 
   <div id="" class="CardItem">
@@ -76,7 +104,7 @@ export default defineComponent({
   props: {
     workspaceInfo: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
     },
     templateDataList: {
@@ -86,7 +114,7 @@ export default defineComponent({
     },
     offeringDataList: {
       type: Object,
-      required: true,
+      required: false,
       default: null,
     },
   },
