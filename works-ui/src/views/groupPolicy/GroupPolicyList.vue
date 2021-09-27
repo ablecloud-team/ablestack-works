@@ -14,7 +14,9 @@
     :pagination="pagination"
   >
     <template #nameRender="{ record }">
-        <router-link :to="{ path: '/groupPolicyDetail/'+record.name}">{{ record.name }}</router-link>
+      <router-link :to="{ path: '/groupPolicyDetail/' + record.name }">{{
+        record.name
+      }}</router-link>
     </template>
 
     <template #actionRender>
@@ -64,8 +66,7 @@ import { message } from "ant-design-vue";
 //   },
 // };
 export default defineComponent({
-  props: {
-  },
+  props: {},
   setup() {
     return {
       //rowSelection,
@@ -84,7 +85,7 @@ export default defineComponent({
     Actions,
   },
   data() {
-    return{
+    return {
       selectedRowKeys: [],
       groupDataList: [],
       groupListColumns: [
@@ -103,14 +104,19 @@ export default defineComponent({
           dataIndex: "action",
           width: "1%",
           align: "right",
-          slots: { customRender: "actionRender"}
+          slots: { customRender: "actionRender" },
         },
         {
           title: this.$t("label.description"),
           dataIndex: "description",
           key: "description",
           width: "60%",
-          sorter: (a, b) => (a.description < b.description ? -1 : a.description > b.description ? 1 : 0),
+          sorter: (a, b) =>
+            a.description < b.description
+              ? -1
+              : a.description > b.description
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
         },
       ],
@@ -129,20 +135,20 @@ export default defineComponent({
       }
     },
     resetSelection() {
-      this.setSelection([])
+      this.setSelection([]);
     },
     onSelectChange(selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys)
+      this.setSelection(selectedRowKeys);
     },
     fetchData() {
       this.loading = true;
       worksApi
-        .get("/api/v1/group", { withCredentials: true })
+        .get("/api/v1/group")
         .then((response) => {
           if (response.status == 200) {
             this.groupDataList = response.data.result;
           } else {
-            message.error(this.$t('message.response.data.fail'));
+            message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
@@ -153,7 +159,6 @@ export default defineComponent({
       setTimeout(() => {
         this.loading = false;
       }, 500);
-        
     },
   },
 });

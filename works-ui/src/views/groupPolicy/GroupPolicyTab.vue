@@ -7,7 +7,8 @@
           block
           style="margin-bottom: 14px"
           @click="changeModal(state.callTapName, true)"
-          v-if="state.addButtonBoolean">
+          v-if="state.addButtonBoolean"
+        >
           <PlusOutlined />
           {{ state.addButtontext }}
         </a-button>
@@ -16,13 +17,17 @@
           :loading="loading"
           size="small"
           class="ant-table-striped"
-          style="overflow: auto; margin-left:5px;"
+          style="overflow: auto; margin-left: 5px"
           :columns="columns"
           :data-source="userDataList"
-          :pagination="pagination">
+          :pagination="pagination"
+        >
           <template #nameRender="{ record }">
-            <span v-if="comp !== undefined && comp ==='VirtualMachineDetail'">
-              <router-link :to="{ path: '/virtualMachineDetail/'+record.uuid}">{{ record.name }}</router-link>
+            <span v-if="comp !== undefined && comp === 'VirtualMachineDetail'">
+              <router-link
+                :to="{ path: '/virtualMachineDetail/' + record.uuid }"
+                >{{ record.name }}</router-link
+              >
             </span>
             <span v-else>
               {{ record.name }}
@@ -40,26 +45,32 @@
             </a-Popover>
           </template>
           <template #userRender="{ record }">
-            {{ record.owner_account_id.String == "" ? "No" : record.owner_account_id.String }}
+            {{
+              record.owner_account_id.String == ""
+                ? "No"
+                : record.owner_account_id.String
+            }}
           </template>
           <template #connRender="{ record }">
-            {{ record.connected == "true" ? "Connected" : "Disconnect"}}
+            {{ record.connected == "true" ? "Connected" : "Disconnect" }}
           </template>
         </a-table>
 
-      <a-modal
-        v-model:title="state.addButtontext"
-        v-model:visible="state.addVmModalBoolean"
-        @ok="putVmToWorksapce"
-        width="400px">
-        <a-input-number
-          v-model:value="addDesktopQuantity"
-          id="inputNumber"
-          style="width: 100%; margin-top: 7px"
-          :title="'Desktop Quantity'"
-          :min="1"
-          :max="10"/>
-      </a-modal>
+        <a-modal
+          v-model:title="state.addButtontext"
+          v-model:visible="state.addVmModalBoolean"
+          @ok="putVmToWorksapce"
+          width="400px"
+        >
+          <a-input-number
+            v-model:value="addDesktopQuantity"
+            id="inputNumber"
+            style="width: 100%; margin-top: 7px"
+            :title="'Desktop Quantity'"
+            :min="1"
+            :max="10"
+          />
+        </a-modal>
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -105,7 +116,7 @@ export default defineComponent({
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
       callModal: ref("desktop"),
-    });  
+    });
     const addDesktopQuantity = ref(1);
     return {
       rowSelection,
@@ -142,11 +153,11 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
-            title: '',
-            key: 'action',
-            dataIndex: 'action',
-            align: 'right',
-            slots: {customRender: 'actionRender'}
+          title: "",
+          key: "action",
+          dataIndex: "action",
+          align: "right",
+          slots: { customRender: "actionRender" },
         },
         // {
         //   title: this.$t("label.state"),
@@ -159,7 +170,8 @@ export default defineComponent({
           title: this.$t("label.allocateddesktop"),
           dataIndex: "desktop",
           key: "desktop",
-          sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
+          sorter: (a, b) =>
+            a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
       ],
@@ -170,66 +182,69 @@ export default defineComponent({
   },
   methods: {
     changeModal(target, value) {
-      if(target == 'desktop'){
+      if (target == "desktop") {
         this.state.addVmModalBoolean = ref(value);
-      }else if(target == 'user'){
+      } else if (target == "user") {
         this.state.addUserModalBoolean = ref(value);
       }
-      
     },
     fetchData() {
       this.loading = ref(true);
+
+      //해당 워크스페이스에 추가 된 사용자 목록 조회
       worksApi
-        .get("/api/v1/group/"+this.$route.params.groupName, { withCredentials: true })
+        .get("/api/v1/group/" + this.$route.params.groupName)
         .then((response) => {
           if (response.status == 200) {
-            this.userDataList = response.data.result.member;
             //console.log(response.data.result.member);
+            const temp =
+              response.data.result.member == undefined
+                ? ""
+                : response.data.result.member;
+            for (let str of temp) {
+              this.userDataList.push({
+                name: str.split(",")[0].split("CN=")[1],
+              });
+            }
           } else {
-            message.error(this.$t('message.response.data.fail'));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            message.error(this.t("message.response.data.fail"));
+            //console.log(response.message);
           }
-
         })
         .catch(function (error) {
-          console.log(error);
+          message.error(error);
+          //console.log(error);
         });
+
+      // worksApi
+      //   .get("/api/v1/group/"+this.$route.params.groupName)
+      //   .then((response) => {
+      //     if (response.status == 200) {
+      //       this.userDataList = response.data.result.member;
+      //       //console.log(response.data.result.member);
+      //     } else {
+      //       message.error(this.$t('message.response.data.fail'));
+      //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
       setTimeout(() => {
         this.loading = ref(false);
       }, 1000);
 
-
       if (this.state.callTapName === "user") {
         this.state.addButtonBoolean = ref(true);
         this.state.addButtontext = this.$t("label.desktop.user.add");
-        
-        
-      // //해당 워크스페이스에 추가 된 사용자 목록 조회
-      // worksApi
-      //   .get("/api/v1/user", { withCredentials: true })
-      //   .then((response) => {
-      //     if (response.status == 200) {
-      //       this.userDataList = response.data.result.result;
-      //     } else {
-      //       message.error(this.t('message.response.data.fail'));
-      //       //console.log(response.message);
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     message.error(error.message);
-      //     //console.log(error);
-      //   });
-
-
       }
     },
 
     putUserToWorksapce() {
-      //alert(this.selectedUser);
       let params = new URLSearchParams();
       params.append("username", this.selectedUser);
       //  worksApi
-      //   .put("/api/v1/workspace/user", params, { withCredentials: true })
+      //   .put("/api/v1/workspace/user", params)
       //   .then((response) => {
       //     if (response.status === 200) {
       //       message.loading(this.$t("message.workspace.user.add"), 1);
@@ -244,10 +259,9 @@ export default defineComponent({
       //     message.error(error.message);
       //   //console.log(error);
       //   });
-      this.changeModal('user', false)
-      this.$emit('tabReflesh');
-
-    }
+      this.changeModal("user", false);
+      this.$emit("tabReflesh");
+    },
   },
 });
 </script>

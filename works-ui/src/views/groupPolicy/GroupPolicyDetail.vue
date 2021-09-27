@@ -23,8 +23,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <GroupPolicyBody 
-          :groupDataInfo="groupDataInfo" />
+          <GroupPolicyBody :groupDataInfo="groupDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -39,8 +38,7 @@ import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {
-  },
+  props: {},
   components: { GroupPolicyBody, Apath, Actions },
   setup() {
     return {
@@ -58,16 +56,15 @@ export default defineComponent({
   methods: {
     fetchData() {
       worksApi
-        .get("/api/v1/group/"+this.$route.params.groupName, { withCredentials: true })
+        .get("/api/v1/group/" + this.$route.params.groupName)
         .then((response) => {
           if (response.status == 200) {
             this.groupDataInfo = response.data.result;
             //console.log(response.data.result.member);
           } else {
-            message.error(this.$t('message.response.data.fail'));
+            message.error(this.$t("message.response.data.fail"));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
-
         })
         .catch(function (error) {
           console.log(error);

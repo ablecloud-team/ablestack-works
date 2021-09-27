@@ -161,7 +161,7 @@ export default defineComponent({
           // try {
           //  res = await axiosLogin(params)
           worksApi
-            .post("/api/login", params, { withCredentials: true })
+            .put("/api/login", params)
             .then((response) => {
               //console.log(response);
               if (response.status == 200) {

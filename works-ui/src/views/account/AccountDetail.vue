@@ -23,8 +23,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody 
-          :userDataInfo="userDataInfo" />
+          <AccountBody :userDataInfo="userDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -43,7 +42,7 @@ export default defineComponent({
   components: {
     AccountBody,
     Apath,
-    Actions
+    Actions,
   },
   setup() {
     return {
@@ -52,9 +51,8 @@ export default defineComponent({
   },
   data() {
     return {
-      userDataInfo: []
-          //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
-      ,
+      userDataInfo: [],
+      //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
     };
   },
   created() {
@@ -63,15 +61,14 @@ export default defineComponent({
   methods: {
     fetchData() {
       worksApi
-        .get("/api/v1/user/"+this.$route.params.username, { withCredentials: true })
+        .get("/api/v1/user/" + this.$route.params.username)
         .then((response) => {
           if (response.status == 200) {
             this.userDataInfo = response.data.result;
           } else {
-            message.error(this.$t('message.response.data.fail'));
+            message.error(this.$t("message.response.data.fail"));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
-
         })
         .catch(function (error) {
           console.log(error);

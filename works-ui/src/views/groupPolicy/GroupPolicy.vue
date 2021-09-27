@@ -7,9 +7,13 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath v-bind:paths="[$t('label.group.policy')]" />
-              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
                 <template #icon>
-                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
                 </template>
               </a-button>
             </a-col>
@@ -32,7 +36,8 @@
         <div id="content-body">
           <GroupPolicyList
             ref="listRefleshCall"
-            @actionFromChange="actionFromChange"/>
+            @actionFromChange="actionFromChange"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -86,7 +91,7 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item> -->
-        <!-- <a-form-item has-feedback name="userGroup" :label="$t('label.userGroup')">
+    <!-- <a-form-item has-feedback name="userGroup" :label="$t('label.userGroup')">
           <a-input
             v-model:value="formState.userGroup"
             :placeholder="$t('tooltip.user.userGroup')"
@@ -108,10 +113,8 @@
           />
         </a-form-item>-->
 
-
-        
-        <!--워크스페이스 비밀번호 확인 end-->
-      <!-- </a-form>
+    <!--워크스페이스 비밀번호 확인 end-->
+    <!-- </a-form>
     </a-modal> -->
     <!-- ADD WORKSPACE MODAL END  -->
   </div>
@@ -126,9 +129,8 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
-  props: {
-  },
-  components: { 
+  props: {},
+  components: {
     GroupPolicyList,
     Apath,
     Actions,
@@ -140,27 +142,33 @@ export default defineComponent({
     };
     const formRef = ref();
     const formState = reactive({
-      account: '',
-      firstName: '',
-      lastName: '',
-      password: '',
-      passwordCheck: '',
-      email: '',
-      userGroup: '',
-      department: '',
-      phone: '',
+      account: "",
+      firstName: "",
+      lastName: "",
+      password: "",
+      passwordCheck: "",
+      email: "",
+      userGroup: "",
+      department: "",
+      phone: "",
     });
     let validatePass = async (rule, value) => {
       let lengthCheck = value.length >= rule.min ? true : false; //길이체크
       let containsEng = /[a-zA-Z]/.test(value); // 대소문자
       //let containsEngUpper = /[A-Z]/.test(value); 대문자
-      let containsNumber = /[0-9]/.test(value)
-      let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value)
-      if (value === '' || !containsEng || !containsNumber || !containsSpecial || !lengthCheck) {
+      let containsNumber = /[0-9]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value);
+      if (
+        value === "" ||
+        !containsEng ||
+        !containsNumber ||
+        !containsSpecial ||
+        !lengthCheck
+      ) {
         return Promise.reject();
       } else {
-        if (formState.passwordCheck !== '') {
-          formRef.value.validateFields('passwordCheck');
+        if (formState.passwordCheck !== "") {
+          formRef.value.validateFields("passwordCheck");
         }
         return Promise.resolve();
       }
@@ -169,28 +177,27 @@ export default defineComponent({
     let validatePass2 = async (rule, value) => {
       if (value !== formState.password) {
         return Promise.reject("Two inputs don't match!");
-      } 
+      }
     };
     const rules = {
       account: { required: true },
       firstName: { required: true },
       lastName: { required: true },
-      password: { 
+      password: {
         min: 7,
         required: true,
         validator: validatePass,
-        trigger: 'change',
+        trigger: "change",
       },
       passwordCheck: {
         required: true,
         validator: validatePass2,
-        trigger: 'change',
+        trigger: "change",
       },
-      email:
-          {
-            required: true,
-            type: 'email',
-          },
+      email: {
+        required: true,
+        type: "email",
+      },
       // userGroup: { required: true, },
       // department: { required: false, },
       // phone: { required:  false, },
@@ -207,7 +214,7 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
-  },  
+  },
   data() {
     return {
       addModalTitle: this.$t("label.user.add"),
@@ -215,21 +222,20 @@ export default defineComponent({
     };
   },
   methods: {
-    reflesh(){
+    reflesh() {
       this.$refs.listRefleshCall.fetchData();
     },
     actionFromChange(val) {
       //console.log(val);
       this.actionFrom = ref(val);
-      
     },
     fetchData() {
-      this.rules.account.message = this.$t('input.user.account');
-      this.rules.firstName.message = this.$t('input.user.firstname');
-      this.rules.lastName.message = this.$t('input.user.lastname');
-      this.rules.password.message = this.$t('input.user.password');
-      this.rules.passwordCheck.message = this.$t('input.user.passwordCheck');
-      this.rules.email.message = this.$t('input.user.email');
+      this.rules.account.message = this.$t("input.user.account");
+      this.rules.firstName.message = this.$t("input.user.firstname");
+      this.rules.lastName.message = this.$t("input.user.lastname");
+      this.rules.password.message = this.$t("input.user.password");
+      this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
+      this.rules.email.message = this.$t("input.user.email");
       // this.rules.userGroup.message = this.$t('input.user.userGroup');
       // this.rules.department.message = this.$t('input.user.department');
       // this.rules.phone.message = this.$t('input.user.phone');
@@ -243,12 +249,12 @@ export default defineComponent({
       params.append("email", this.formState.email);
       //console.log(params);
       this.formRef
-          .validate()
-          .then( () => {
+        .validate()
+        .then(() => {
           message.loading(this.$t("message.user.createing"), 1);
           try {
             worksApi
-              .put("/api/v1/user", params, { withCredentials: true })
+              .put("/api/v1/user", params)
               .then((response) => {
                 if (response.status === 200) {
                   message.loading(this.$t("message.user.create.success"), 1);
@@ -256,24 +262,25 @@ export default defineComponent({
                   //   location.reload();
                   // }, 1500);
                 } else {
-                  message.error(response.data.result.createuserresponse.errortext);
+                  message.error(
+                    response.data.result.createuserresponse.errortext
+                  );
                 }
                 this.showModal(false);
                 this.$refs.listRefleshCall.fetchData();
               })
               .catch(function (error) {
                 message.error(error.message);
-              //console.log(error);
+                //console.log(error);
               });
-          }catch (error){
-            console.log(error)
-            message.error(this.$t("message.user.create.fail"))
+          } catch (error) {
+            console.log(error);
+            message.error(this.$t("message.user.create.fail"));
           }
         })
-        .catch(error => {
-          console.log('error', error);
+        .catch((error) => {
+          console.log("error", error);
           //message.error(error);
-          
         });
     },
   },

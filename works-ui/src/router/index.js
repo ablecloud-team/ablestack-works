@@ -47,13 +47,13 @@ const requireAuth = (to, from, next) => {
     if (to.name === "Dashboard" && from.name === "Login") {
       //console.log("login OK :: " + to.name);
       next();
-      setTimeout(() => {
-        location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
-      }, 0);
+      // setTimeout(() => {
+      //   location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
+      // }, 0);
     } else {
       console.log(isAuth);
       worksApi
-        .get("/api/v1/token", { headers: { Authorization:sessionStorage.getItem("token") } } )
+        .get("/api/v1/token")
         .then((response) => {
           //console.log(response);
           if (response.status == 200) {

@@ -124,7 +124,7 @@ export default defineComponent({
           title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
-          width: "37%",
+          width: "47%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -161,16 +161,8 @@ export default defineComponent({
           title: this.$t("label.email"),
           dataIndex: "mail",
           key: "mail",
-          width: "30%",
+          width: "50%",
           sorter: (a, b) => (a.mail < b.mail ? -1 : a.mail > b.mail ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.allocateddesktop"),
-          dataIndex: "desktop",
-          key: "desktop",
-          width: "30%",
-          sorter: (a, b) => (a.desktop < b.desktop ? -1 : a.desktop > b.desktop ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
@@ -197,7 +189,7 @@ export default defineComponent({
     fetchData() {
       this.loading = true;
       worksApi
-        .get("/api/v1/user", { withCredentials: true })
+        .get("/api/v1/user")
         .then((response) => {
           if (response.data.result.status == 200) {
             this.userDataList = response.data.result.result;

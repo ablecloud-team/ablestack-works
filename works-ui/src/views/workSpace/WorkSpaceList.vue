@@ -14,13 +14,22 @@
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
-    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
+    <template
+      #filterDropdown="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        column,
+      }"
+    >
       <div style="padding: 8px">
         <a-input-search
           ref="searchInput"
-          :placeholder="$t('search.'+column.dataIndex)"
+          :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
-          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @change="
+            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
+          "
           @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
         <!-- <a-button
@@ -41,9 +50,11 @@
       <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
     </template>
     <!-- 검색 필터링 template-->
-
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }">{{ record.name }}</router-link>
+      <router-link
+        :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }"
+        >{{ record.name }}
+      </router-link>
     </template>
     <template #actionRender>
       <a-Popover placement="topLeft">
@@ -52,6 +63,13 @@
         </template>
         <MoreOutlined />
       </a-Popover>
+    </template>
+    <template #stateRender="{ record }">
+      <a-badge
+        class="head-example"
+        :color="record.state == 'Enable' ? 'green' : 'red'"
+        :text="record.state"
+      />
     </template>
     <template #typeRender="{ record }">
       {{ record.workspace_type.toUpperCase() }}
@@ -72,8 +90,8 @@ export default defineComponent({
   props: {},
   setup() {
     const state = reactive({
-      searchText: '',
-      searchedColumn: '',
+      searchText: "",
+      searchedColumn: "",
     });
     const searchInput = ref();
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -81,9 +99,9 @@ export default defineComponent({
       state.searchText = selectedKeys[0];
       state.searchedColumn = dataIndex;
     };
-    const handleReset = clearFilters => {
+    const handleReset = (clearFilters) => {
       clearFilters();
-      state.searchText = '';
+      state.searchText = "";
     };
     return {
       //rowSelection,
@@ -112,16 +130,17 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           width: "37%",
-          slots: { 
+          slots: {
             customRender: "nameRender",
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'filterIcon',
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
           },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
-          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: visible => {
+          onFilter: (value, record) =>
+            record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
                 this.$refs.searchInput.focus();
@@ -142,20 +161,27 @@ export default defineComponent({
           dataIndex: "state",
           key: "state",
           width: "20%",
-          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sorter: (a, b) =>
+            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
           sortDirections: ["descend", "ascend"],
+          slots: { customRender: "stateRender" },
         },
         {
           title: this.$t("label.type"),
           dataIndex: "workspace_type",
           key: "workspace_type",
           width: "20%",
-          slots: { 
+          slots: {
             customRender: "typeRender",
-            filterDropdown: 'filterDropdown',
-            filterIcon: 'filterIcon',
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
           },
-          sorter: (a, b) => (a.workspace_type < b.workspace_type ? -1 : a.workspace_type > b.workspace_type ? 1 : 0),
+          sorter: (a, b) =>
+            a.workspace_type < b.workspace_type
+              ? -1
+              : a.workspace_type > b.workspace_type
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
           //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
           //filterMultiple: false,
@@ -169,8 +195,12 @@ export default defineComponent({
           //     value: 'APP',
           //   },
           // ]
-          onFilter: (value, record) => record.workspace_type.toString().toLowerCase().includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: visible => {
+          onFilter: (value, record) =>
+            record.workspace_type
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
                 this.$refs.searchInput.focus();
@@ -183,7 +213,8 @@ export default defineComponent({
           dataIndex: "quantity",
           key: "quantity",
           width: "20%",
-          sorter: (a, b) => (a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0),
+          sorter: (a, b) =>
+            a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
         // {
@@ -238,10 +269,10 @@ export default defineComponent({
       this.setSelection(selectedRowKeys);
     },
     fetchData() {
-      this.state.searchText ="";
+      this.state.searchText = "";
       this.loading = true;
       worksApi
-        .get("/api/v1/workspace", { withCredentials: true })
+        .get("/api/v1/workspace")
         .then((response) => {
           if (response.status == 200) {
             this.dataList = response.data.result.list;
@@ -263,6 +294,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+::v-deep(.ant-badge-status-dot) {
+  width: 12px;
+  height: 12px;
+}
+
 ::v-deep(.ant-table-thead) {
   background-color: #f9f9f9;
 }

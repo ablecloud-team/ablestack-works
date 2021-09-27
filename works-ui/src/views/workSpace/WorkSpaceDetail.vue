@@ -64,7 +64,7 @@ export default defineComponent({
     fetchData() {
       //alert(this.$route.params.uuid);
       worksApi
-        .get("/api/v1/workspace/"+this.$route.params.uuid, { withCredentials: true })
+        .get("/api/v1/workspace/"+this.$route.params.uuid)
         .then((response) => {
           if (response.status == 200) {
             this.workspaceInfo = response.data.result.workspaceInfo;
