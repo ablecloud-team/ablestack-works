@@ -134,9 +134,12 @@
     "label.allocated.IP.count": "IP 사용 수",
     "label.search": "검색",
     "label.reset": "초기화",
+    "label.connect.true": "사용 중",
+    "label.connect.false": "미 사용",
+    "label.owner.account.false": "미 할당",
 
     //input
-    "input.workspace.name": "워크스페이스 이름을 입력하세요.",
+    "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.",
     "input.workspace.workspaceType": "워크스페이스 타입을 선택하세요.",
     "input.workspace.selectedTemplateId": "워크스페이스 템플릿을 선택하세요.",
@@ -144,7 +147,7 @@
     "input.user.account": "사용자 계정 입력하세요.",
     "input.user.firstname": "사용자 이름(명)을 입력하세요.",
     "input.user.lastname": "사용자 이름(성)을 입력하세요.",
-    "input.user.password": "사용자 비밀번호(7자 이상 영문, 숫자, 특수문자 포함)를 입력하세요.",
+    "input.user.password": "사용자 비밀번호(영문, 숫자, 특수문자 포함 7자 이상)를 입력하세요.",
     "input.user.passwordCheck": "사용자 비밀번호가 일치하지 않습니다.",
     "input.user.email": "사용자 이메일을 입력하세요.",
     "input.user.userGroup": "사용자 그룹을 선택하세요.",
