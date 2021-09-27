@@ -212,7 +212,7 @@ export default defineComponent({
           resMessage = this.$t("message.vm.status.delete");
         }
         worksApi
-          .patch( worksUrl, { withCredentials: true })
+          .patch(worksUrl)
           .then((response) => {
             if (response.status == 200) {
               this.vmDataList = response.data.result.list;
