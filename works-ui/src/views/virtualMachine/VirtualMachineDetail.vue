@@ -23,8 +23,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody 
-          :vmDataInfo="vmDataInfo" />
+          <VirtualMachineBody :vmDataInfo="vmDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -52,7 +51,21 @@ export default defineComponent({
   },
   data() {
     return {
-      vmDataInfo: [{"uuid":"0101010101010101010101010101001", "name":"VM1","state":"Running","user":"user01","conn":"TRUE","workspace":"test1", "aaaa":"aaaa", "bbbb":"bbbb", "cccc":"cccc", "dddd":"dddd", "eeee":"eeee"}],
+      vmDataInfo: [
+        {
+          uuid: "0101010101010101010101010101001",
+          name: "VM1",
+          state: "Running",
+          user: "user01",
+          conn: "TRUE",
+          workspace: "test1",
+          aaaa: "aaaa",
+          bbbb: "bbbb",
+          cccc: "cccc",
+          dddd: "dddd",
+          eeee: "eeee",
+        },
+      ],
       networkDataList: [],
       diskDtaList: [],
     };
@@ -63,18 +76,16 @@ export default defineComponent({
   methods: {
     fetchData() {
       // worksApi
-      //   .get("/api/v1/vm/"+this.$route.params.uuid, { withCredentials: true })
+      //   .get("/api/v1/vm/"+this.$route.params.uuid)
       //   .then((response) => {
       //     if (response.data.result.status == 200) {
       //       this.vmDataInfo = response.data.result.vmInfo;
       //       this.networkDataList = response.data.result.networkDataList;
       //       this.diskDtaList = response.data.result.diskDtaList;
-      
       //     } else {
       //       message.error(this.$t('message.response.data.fail'));
       //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
       //     }
-
       //   })
       //   .catch(function (error) {
       //     console.log(error);

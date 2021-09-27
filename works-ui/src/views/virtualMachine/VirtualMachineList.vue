@@ -5,21 +5,30 @@
     class="ant-table-striped"
     :columns="vmListColumns"
     :data-source="vmDataList"
-    :rowClassName="(record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')"
+    :rowClassName="
+      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
+    "
     :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
     :row-key="(record, index) => index"
-    :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
+    :row-selection="{
+      selectedRowKeys: selectedRowKeys,
+      onChange: onSelectChange,
+    }"
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
-    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }">
+    <template
+      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
+    >
       <div style="padding: 8px">
         <a-input-search
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
-          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @change="
+            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
+          "
           @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
         <!-- <a-button
@@ -42,7 +51,9 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{ record.name }}</router-link>
+      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
+        record.name
+      }}</router-link>
     </template>
 
     <template #actionRender="{ record }">
@@ -52,20 +63,29 @@
             :action-from="actionFrom"
             :uuid="record.uuid"
             :name="record.name"
-            :status="record.status"/>
+            :status="record.status"
+          />
         </template>
         <MoreOutlined />
       </a-Popover>
     </template>
     <template #stateRender="{ record }">
-      <a-badge class="head-example"  :color="record.status == 'Running' ?'green' : 'red'" :text="record.status" />
+      <a-badge
+        class="head-example"
+        :color="record.status == 'Running' ? 'green' : 'red'"
+        :text="record.status"
+      />
     </template>
     <template #userRender="{ record }">
-      {{ record.owner_account_id.String == "" ? "No" : record.owner_account_id.String }}
+      {{
+        record.owner_account_id.String == ""
+          ? $t("label.owner.account.false")
+          : record.owner_account_id.String
+      }}
     </template>
     <template #connRender="{ record }">
-      {{ record.connected == false ? "Disconnect" : "Connected" }}
-    </template>    
+      {{ record.connected == false ? $t("label.connect.false") : $t("label.connect.true") }}
+    </template>
   </a-table>
 </template>
 
@@ -75,8 +95,7 @@ import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {
-  },
+  props: {},
   components: {
     Actions,
   },
@@ -92,7 +111,7 @@ export default defineComponent({
       state.searchedColumn = dataIndex;
       //console.log(selectedKeys + "  ::  " + confirm + "  ::  " +dataIndex);
     };
-    const handleReset = clearFilters => {
+    const handleReset = (clearFilters) => {
       clearFilters();
       state.searchText = "";
     };
@@ -123,7 +142,7 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           width: "32%",
-          slots: { 
+          slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
             filterIcon: "filterIcon",
@@ -131,8 +150,9 @@ export default defineComponent({
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
-          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
-          onFilterDropdownVisibleChange: visible => {
+          onFilter: (value, record) =>
+            record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
                 this.$refs.searchInput.focus();
@@ -153,7 +173,8 @@ export default defineComponent({
           dataIndex: "status",
           key: "status",
           width: "15%",
-          sorter: (a, b) => (a.status < b.status ? -1 : a.status > b.status ? 1 : 0),
+          sorter: (a, b) =>
+            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "stateRender" },
         },
@@ -162,7 +183,12 @@ export default defineComponent({
           dataIndex: "workspace_name",
           key: "workspace_name",
           width: "25%",
-          sorter: (a, b) => a.workspace_name < b.workspace_name ? -1 : a.workspace_name > b.workspace_name ? 1 : 0,
+          sorter: (a, b) =>
+            a.workspace_name < b.workspace_name
+              ? -1
+              : a.workspace_name > b.workspace_name
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
         },
@@ -171,7 +197,12 @@ export default defineComponent({
           dataIndex: "owner_account_id",
           key: "owner_account_id",
           width: "10%",
-          sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
+          sorter: (a, b) =>
+            a.owner_account_id < b.owner_account_id
+              ? -1
+              : a.owner_account_id > b.owner_account_id
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "userRender" },
         },
@@ -180,7 +211,8 @@ export default defineComponent({
           dataIndex: "connected",
           key: "connected",
           width: "15%",
-          sorter: (a, b) => (a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0),
+          sorter: (a, b) =>
+            a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "connRender" },
         },
@@ -196,22 +228,22 @@ export default defineComponent({
   methods: {
     setSelection(selection) {
       this.selectedRowKeys = selection;
-      if(this.selectedRowKeys.length == 0){
+      if (this.selectedRowKeys.length == 0) {
         this.$emit("actionFromChange", "VirtualMachine");
-      }else{
+      } else {
         this.$emit("actionFromChange", this.actionFrom);
       }
     },
     resetSelection() {
       this.setSelection([]);
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys, selectedRows) {
       this.setSelection(selectedRowKeys);
     },
     fetchData() {
       this.loading = true;
       worksApi
-        .get("/api/v1/instance/all", { withCredentials: true })
+        .get("/api/v1/instance/all")
         .then((response) => {
           if (response.status == 200) {
             this.vmDataList = response.data.result.list;
@@ -224,14 +256,17 @@ export default defineComponent({
           //console.log(error);
         });
       setTimeout(() => {
-        this.loading = false;  
+        this.loading = false;
       }, 500);
     },
   },
 });
 </script>
-
-<style scoped>
+<style scoped lang="scss">
+::v-deep(.ant-badge-status-dot) {
+  width: 12px;
+  height: 12px;
+}
 ::v-deep(.ant-table-thead) {
   background-color: #f9f9f9;
 }
@@ -247,9 +282,7 @@ export default defineComponent({
 ::v-deep(.dark-row) {
   background-color: #f9f9f9;
 }
-</style>
 
-<style scoped lang="scss">
 .shift-btns {
   display: flex;
 }
