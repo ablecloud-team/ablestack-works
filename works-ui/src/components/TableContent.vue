@@ -4,7 +4,8 @@
     block
     style="margin-bottom: 14px"
     @click="changeModal(state.callTapName, true)"
-    v-if="state.addButtonBoolean">
+    v-if="state.addButtonBoolean"
+  >
     <PlusOutlined />
     {{ state.addButtontext }}
   </a-button>
@@ -13,13 +14,16 @@
     :loading="loading"
     size="small"
     class="ant-table-striped"
-    style="overflow: auto; margin-left:5px;"
+    style="overflow: auto; margin-left: 5px"
     :columns="columns"
     :data-source="dataList"
-    :pagination="pagination">
+    :pagination="pagination"
+  >
     <template #nameRender="{ record }">
-      <span v-if="comp !== undefined && comp ==='VirtualMachineDetail'">
-        <router-link :to="{ path: '/virtualMachineDetail/'+record.uuid}">{{ record.name }}</router-link>
+      <span v-if="comp !== undefined && comp === 'VirtualMachineDetail'">
+        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
+          record.name
+        }}</router-link>
       </span>
       <span v-else>
         {{ record.name }}
@@ -37,10 +41,14 @@
       </a-Popover>
     </template>
     <template #userRender="{ record }">
-      {{ record.owner_account_id.String == "" ? "No" : record.owner_account_id.String }}
+      {{
+        record.owner_account_id.String == ""
+          ? $t("label.owner.account.false")
+          : record.owner_account_id.String
+      }}
     </template>
     <template #connRender="{ record }">
-      {{ record.connected == "true" ? "Connected" : "Disconnect"}}
+      {{ record.connected == false ? $t("label.connect.false") : $t("label.connect.true") }}
     </template>
     <template #stateRender="{ record }">
       {{ record.state }}
@@ -54,10 +62,7 @@
       >
         <a-tooltip placement="top">
           <template #title>{{ $t("tooltip.destroy") }}</template>
-          <a-button
-            type="primary"
-            shape="circle"
-            danger>
+          <a-button type="primary" shape="circle" danger>
             <DeleteFilled />
           </a-button>
         </a-tooltip>
@@ -69,29 +74,38 @@
     v-model:title="state.addButtontext"
     v-model:visible="state.addVmModalBoolean"
     @ok="putVmToWorksapce"
-    width="400px">
+    width="400px"
+  >
     <a-input-number
       v-model:value="addDesktopQuantity"
       id="inputNumber"
       style="width: 100%; margin-top: 7px"
       :title="'Desktop Quantity'"
       :min="1"
-      :max="10"/>
+      :max="10"
+    />
   </a-modal>
 
   <a-modal
     v-model:title="state.addButtontext"
     v-model:visible="state.addUserModalBoolean"
     @ok="putUserToWorksapce"
-    width="400px">
+    width="400px"
+  >
     <a-select
       v-model:value="selectedUser"
       :placeholder="$t('tooltip.user')"
       show-search
       style="width: 100%; margin-top: 7px"
       option-filter-prop="label"
-      class="addmodal-aform-item-div">
-      <a-select-option v-for="option in userDataList" :key="option.name" :value="option.name" :label="option.name">
+      class="addmodal-aform-item-div"
+    >
+      <a-select-option
+        v-for="option in userDataList"
+        :key="option.name"
+        :value="option.name"
+        :label="option.name"
+      >
         {{ option.name }}
       </a-select-option>
     </a-select>
@@ -138,7 +152,7 @@ export default defineComponent({
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
       callModal: ref("desktop"),
-    });  
+    });
     const addDesktopQuantity = ref(1);
     return {
       rowSelection,
@@ -177,14 +191,12 @@ export default defineComponent({
     Actions,
   },
   methods: {
-
     changeModal(target, value) {
-      if(target == 'desktop'){
+      if (target == "desktop") {
         this.state.addVmModalBoolean = ref(value);
-      }else if(target == 'user'){
+      } else if (target == "user") {
         this.state.addUserModalBoolean = ref(value);
       }
-      
     },
     fetchData() {
       this.dataList = []; //초기화
@@ -207,7 +219,7 @@ export default defineComponent({
             key: "action",
             dataIndex: "action",
             align: "right",
-            width: "5px",
+            width: "5%",
             slots: { customRender: "actionRender" },
           },
           // {
@@ -221,7 +233,12 @@ export default defineComponent({
             title: this.$t("label.users"),
             dataIndex: "owner_account_id",
             key: "owner_account_id",
-            sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
+            sorter: (a, b) =>
+              a.owner_account_id < b.owner_account_id
+                ? -1
+                : a.owner_account_id > b.owner_account_id
+                ? 1
+                : 0,
             sortDirections: ["descend", "ascend"],
             slots: { customRender: "userRender" },
           },
@@ -229,30 +246,34 @@ export default defineComponent({
             title: this.$t("label.desktop.connect.boolean"),
             dataIndex: "connected",
             key: "connected",
-            sorter: (a, b) => (a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0),
+            sorter: (a, b) =>
+              a.connected < b.connected
+                ? -1
+                : a.connected > b.connected
+                ? 1
+                : 0,
             sortDirections: ["descend", "ascend"],
             slots: { customRender: "connRender" },
           },
         ];
 
         worksApi
-          .get("/api/v1/instance/"+this.$route.params.uuid, { withCredentials: true })
+          .get("/api/v1/instance/" + this.$route.params.uuid)
           .then((response) => {
             if (response.status == 200) {
               this.dataList = response.data.result.list;
             } else {
-              message.error(this.$t('message.response.data.fail'));
+              //message.error(this.$t("message.response.data.fail"));
               //console.log("데이터를 정상적으로 가져오지 못했습니다.");
             }
           })
           .catch(function (error) {
             console.log(error);
           });
-
       } else if (this.state.callTapName === "user") {
         this.state.addButtonBoolean = ref(true);
         this.state.addButtontext = this.$t("label.desktop.user.add");
-        
+
         this.columns = [
           {
             dataIndex: "name",
@@ -263,11 +284,12 @@ export default defineComponent({
             sortDirections: ["descend", "ascend"],
           },
           {
-              title: '',
-              key: 'action',
-              dataIndex: 'action',
-              align: 'right',
-              slots: {customRender: 'deleteRender'}
+            title: "",
+            key: "action",
+            dataIndex: "action",
+            align: "right",
+            width: "5%",
+            slots: { customRender: "deleteRender" },
           },
           // {
           //   title: this.$t("label.state"),
@@ -287,16 +309,19 @@ export default defineComponent({
 
         //해당 워크스페이스에 추가 된 사용자 목록 조회
         worksApi
-          .get("/api/v1/group/" + this.$route.params.name, { withCredentials: true })
+          .get("/api/v1/group/" + this.$route.params.name)
           .then((response) => {
             if (response.status == 200) {
               //console.log(response.data.result.member);
-              const temp = response.data.result.member == undefined ? "" : response.data.result.member;
-              for(let str of temp){
-                this.dataList.push({ "name" : str.split(",")[0].split("CN=")[1] });
+              const temp =
+                response.data.result.member == undefined
+                  ? ""
+                  : response.data.result.member;
+              for (let str of temp) {
+                this.dataList.push({ name: str.split(",")[0].split("CN=")[1] });
               }
             } else {
-              message.error(this.t('message.response.data.fail'));
+              //message.error(this.t("message.response.data.fail"));
               //console.log(response.message);
             }
           })
@@ -307,12 +332,12 @@ export default defineComponent({
 
         // 워크스페이스에 추가 할 사용자 목록 조회
         worksApi
-          .get("/api/v1/user", { withCredentials: true })
+          .get("/api/v1/user")
           .then((response) => {
             if (response.data.result.status == 200) {
               this.userDataList = response.data.result.result;
             } else {
-              message.error(this.t('message.response.data.fail'));
+              //message.error(this.t("message.response.data.fail"));
               //console.log(response.message);
             }
           })
@@ -320,7 +345,52 @@ export default defineComponent({
             message.error(error);
             //console.log(error);
           });
+      } else if (this.state.callTapName === "policy") {
+        this.state.addButtonBoolean = ref(false);
 
+        this.columns = [
+          {
+            dataIndex: "name",
+            key: "name",
+            slots: { customRender: "nameRender" },
+            title: this.$t("label.name"),
+            sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+            sortDirections: ["descend", "ascend"],
+          },
+          // {
+          //   title: "",
+          //   key: "action",
+          //   dataIndex: "action",
+          //   align: "right",
+          //   width: "5px",
+          //   slots: { customRender: "actionRender" },
+          // },
+          {
+            title: this.$t("label.state"),
+            dataIndex: "state",
+            key: "state",
+            sorter: (a, b) =>
+              a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
+            sortDirections: ["descend", "ascend"],
+            slots: { customRender: "stateRender" },
+          },
+        ];
+        // 워크스페이스 정책 리스트 조회
+        worksApi
+          .get("/api/v1/workspace1/" + this.$route.params.uuid)
+          .then((response) => {
+            if (response.status == 200) {
+              //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
+              this.dataList =
+                response.data.result.networkInfo.listnetworksresponse.network;
+            } else {
+              //message.error(this.$t("message.response.data.fail"));
+              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       } else if (this.state.callTapName === "network") {
         this.state.addButtonBoolean = ref(false);
 
@@ -345,20 +415,22 @@ export default defineComponent({
             title: this.$t("label.state"),
             dataIndex: "state",
             key: "state",
-            sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+            sorter: (a, b) =>
+              a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
             sortDirections: ["descend", "ascend"],
             slots: { customRender: "stateRender" },
           },
         ];
-
+        // 워크스페이스 네트워크 조회
         worksApi
-          .get("/api/v1/workspace/"+this.$route.params.uuid, { withCredentials: true })
+          .get("/api/v1/workspace/" + this.$route.params.uuid)
           .then((response) => {
             if (response.status == 200) {
               //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
-              this.dataList = response.data.result.networkInfo.listnetworksresponse.network;
+              this.dataList =
+                response.data.result.networkInfo.listnetworksresponse.network;
             } else {
-              message.error(this.$t('message.response.data.fail'));
+              //message.error(this.$t("message.response.data.fail"));
               //console.log("데이터를 정상적으로 가져오지 못했습니다.");
             }
           })
@@ -369,25 +441,24 @@ export default defineComponent({
       setTimeout(() => {
         this.loading = ref(false);
       }, 500);
-
     },
     putVmToWorksapce() {
       let params = new URLSearchParams();
       params.append("uuid", this.$route.params.uuid);
       params.append("quantity", this.selectedVmQuantity);
       worksApi
-        .put("/api/v1/instance", params, { withCredentials: true })
+        .put("/api/v1/instance", params)
         .then((response) => {
           if (response.status === 200) {
             message.loading(this.$t("message.workspace.vm.add"), 1);
           } else {
             message.error(this.$t("message.workspace.vm.add.fail"));
           }
-          this.changeModal('desktop', false);
+          this.changeModal("desktop", false);
         })
         .catch(function (error) {
           message.error(error);
-        //console.log(error);
+          //console.log(error);
         });
       setTimeout(() => {
         this.fetchData();
@@ -395,28 +466,29 @@ export default defineComponent({
     },
     putUserToWorksapce() {
       worksApi
-        .put("/api/v1/group/" + this.$route.params.name + "/" + this.selectedUser, { withCredentials: true })
+        .put(
+          "/api/v1/group/" + this.$route.params.name + "/" + this.selectedUser
+        )
         .then((response) => {
           if (response.status === 200) {
             message.loading(this.$t("message.workspace.user.add"), 1);
           } else {
             message.error(this.$t("message.workspace.user.add.fail"));
           }
-          this.changeModal('user', false)
+          this.changeModal("user", false);
           //this.$refs.listRefleshCall.fetchData();
         })
         .catch(function (error) {
           message.error(error);
-        //console.log(error);
+          //console.log(error);
         });
       setTimeout(() => {
         this.fetchData();
       }, 1000);
     },
     onUserDelete(val) {
-      alert(val);
       worksApi
-        .delete("/api/v1/group/" + this.$route.params.name + "/" + val, { withCredentials: true })
+        .delete("/api/v1/group/" + this.$route.params.name + "/" + val)
         .then((response) => {
           if (response.status === 200) {
             message.loading(this.$t("message.workspace.user.delete"), 1);

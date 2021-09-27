@@ -16,19 +16,15 @@
           @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
-      <!-- <a-tab-pane key="3" :tab="$t('label.disk.list')">
+      <a-tab-pane key="3" :tab="$t('label.policy.list')">
         <TableContent
-          :tapName="'disk'"
-          :data="VMDiskListData"
-          :columns="VMDiskListColumns"
+          :tapName="'policy'"
+          :actionFrom="'policyDetail'"
           @tabReflesh="tabReflesh"
         />
-      </a-tab-pane> -->
+      </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent
-          :tapName="'network'"
-          @tabReflesh="tabReflesh"
-        />
+        <TableContent :tapName="'network'" @tabReflesh="tabReflesh" />
       </a-tab-pane>
     </a-tabs>
   </div>
