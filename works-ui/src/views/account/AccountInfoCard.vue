@@ -6,29 +6,28 @@
           <UserOutlined />
         </template>
       </a-avatar>
-      <h4 style="margin-left:20px;">
+      <h4 style="margin-left: 20px">
         {{ userDataInfo.username }}
       </h4>
     </div>
   </div>
 
   <div id="firstname" class="CardItem">
-    <div class="ItemName">{{ $t('label.firstname') }}</div>
+    <div class="ItemName">{{ $t("label.firstname") }}</div>
     <div class="Item">{{ userDataInfo.sn }}</div>
   </div>
   <div id="firstname" class="CardItem">
-    <div class="ItemName">{{ $t('label.lastname') }}</div>
+    <div class="ItemName">{{ $t("label.lastname") }}</div>
     <div class="Item">{{ userDataInfo.givenName }}</div>
   </div>
   <div id="email" class="CardItem">
-    <div class="ItemName">{{ $t('label.email') }}</div>
+    <div class="ItemName">{{ $t("label.email") }}</div>
     <div class="Item">{{ userDataInfo.mail }}</div>
   </div>
   <div id="phone" class="CardItem">
-    <div class="ItemName">{{ $t('label.phone') }}</div>
+    <div class="ItemName">{{ $t("label.phone") }}</div>
     <div class="Item">{{ userDataInfo.telephoneNumber }}</div>
   </div>
-
 </template>
 
 <script>

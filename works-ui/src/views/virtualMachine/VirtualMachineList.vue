@@ -5,7 +5,7 @@
     class="ant-table-striped"
     :columns="vmListColumns"
     :data-source="vmDataList"
-    :rowClassName="
+    :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="bordered ? bordered : false"
@@ -84,7 +84,11 @@
       }}
     </template>
     <template #connRender="{ record }">
-      {{ record.connected == false ? $t("label.connect.false") : $t("label.connect.true") }}
+      {{
+        record.connected == false
+          ? $t("label.connect.false")
+          : $t("label.connect.true")
+      }}
     </template>
   </a-table>
 </template>
@@ -95,10 +99,11 @@ import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {},
   components: {
     Actions,
   },
+  props: {},
+  emits: ["actionFromChange"],
   setup() {
     const state = reactive({
       searchText: "",

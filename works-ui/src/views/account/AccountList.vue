@@ -14,13 +14,17 @@
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
-    <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }">
+    <template
+      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
+    >
       <div style="padding: 8px">
         <a-input-search
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
-          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @change="
+            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
+          "
           @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
         <!-- <a-button
@@ -43,7 +47,9 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-        <router-link :to="{ path: '/accountDetail/'+record.name}">{{ record.name }}</router-link>
+      <router-link :to="{ path: '/accountDetail/' + record.name }">{{
+        record.name
+      }}</router-link>
     </template>
     <template #actionRender>
       <a-Popover placement="topLeft">
@@ -82,6 +88,7 @@ export default defineComponent({
     Actions,
   },
   props: {},
+  emits: ["actionFromChange"],
   setup() {
     const state = reactive({
       searchText: "",
@@ -133,7 +140,8 @@ export default defineComponent({
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
-          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) =>
+            record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {

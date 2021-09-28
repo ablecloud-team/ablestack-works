@@ -1,20 +1,33 @@
 <template>
   <div class="resource-details">
-    <div class="resource-details__name" v-if="actionFrom==='VirtualMachineDetail'">
+    <div
+      v-if="actionFrom === 'VirtualMachineDetail'"
+      class="resource-details__name"
+    >
       <a-avatar shape="square" :size="60">
         <template #icon>
           <DesktopOutlined />
         </template>
       </a-avatar>
-      <h4 style="margin-left:20px;">
+      <h4 style="margin-left: 20px">
         {{ vmDataInfo.name }}
       </h4>
     </div>
   </div>
-  <div id="Status" class="CardItem" >
+  <div id="Status" class="CardItem">
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
-      <a-badge class="Status" :color="vmDataInfo.state == 'Disable' ?'grey' : vmDataInfo.state == 'Running' ? 'green' : 'red'" :text="vmDataInfo.state" />
+      <a-badge
+        class="Status"
+        :color="
+          vmDataInfo.state == 'Disable'
+            ? 'grey'
+            : vmDataInfo.state == 'Running'
+            ? 'green'
+            : 'red'
+        "
+        :text="vmDataInfo.state"
+      />
     </div>
   </div>
 
@@ -27,8 +40,6 @@
       {{ vmDataInfo.uuid }}
     </div>
   </div>
-
- 
 </template>
 
 <script>
@@ -40,7 +51,7 @@ export default defineComponent({
     actionFrom: {
       type: String,
       required: true,
-      default: '',
+      default: "",
     },
     vmDataInfo: {
       type: Object,

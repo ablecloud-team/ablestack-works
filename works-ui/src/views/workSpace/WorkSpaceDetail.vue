@@ -7,15 +7,15 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
+                :paths="[
                   { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceInfo.name, component: null }, 
+                  { name: workspaceInfo.name, component: null },
                 ]"
               />
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
@@ -23,11 +23,11 @@
       <a-layout-content>
         <div id="content-body">
           <WorkSpaceBody
-          :workspaceInfo="workspaceInfo"
-          :templateDataList="templateDataList"
-          :offeringDataList="offeringDataList"/>
+            :workspace-info="workspaceInfo"
+            :template-data-list="templateDataList"
+            :offering-data-list="offeringDataList"
+          />
         </div>
-        
       </a-layout-content>
     </a-layout>
   </div>
@@ -42,9 +42,8 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
-  props: {
-  },
   components: { Apath, Actions, WorkSpaceBody },
+  props: {},
   setup(props) {
     return {
       actionFrom: ref("WorkspaceDetail"),
@@ -64,17 +63,18 @@ export default defineComponent({
     fetchData() {
       //alert(this.$route.params.uuid);
       worksApi
-        .get("/api/v1/workspace/"+this.$route.params.uuid)
+        .get("/api/v1/workspace/" + this.$route.params.uuid)
         .then((response) => {
           if (response.status == 200) {
             this.workspaceInfo = response.data.result.workspaceInfo;
-            this.templateDataList = response.data.result.templateInfo.listtemplatesresponse.template[0];
-            this.offeringDataList = response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];            
+            this.templateDataList =
+              response.data.result.templateInfo.listtemplatesresponse.template[0];
+            this.offeringDataList =
+              response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];
           } else {
-            message.error(this.$t('message.response.data.fail'));
+            message.error(this.$t("message.response.data.fail"));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
-
         })
         .catch(function (error) {
           console.log(error);
@@ -82,8 +82,6 @@ export default defineComponent({
     },
   },
 });
-
-
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

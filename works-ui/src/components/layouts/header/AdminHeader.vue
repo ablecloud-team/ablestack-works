@@ -24,9 +24,7 @@
           </a>
         </a-button>
         <template #overlay>
-          <a-menu
-            :selectedKeys="[language]"
-            @click="setLocaleClick">
+          <a-menu :selected-keys="[language]" @click="setLocaleClick">
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
@@ -115,13 +113,7 @@ export default defineComponent({
   props: {
     collapsed: Boolean,
   },
-  data() {
-    return {
-      language: ref(""),
-      loadedLanguage: [],
-      username: ref(""),
-    };
-  },
+  emits: ["setCollapsed"],
   setup(props) {
     let res;
     const state = reactive({
@@ -132,15 +124,25 @@ export default defineComponent({
       state,
     };
   },
+  data() {
+    return {
+      language: ref(""),
+      loadedLanguage: [],
+      username: ref(""),
+    };
+  },
   created() {
     // const res = await axiosUserDetail()
     // if(res.status === 200){
     //   this.$store.dispatch("loginCommit",res.data);
     //   this.state.userID = res.data.result.name;
     // }
-    this.language = sessionStorage.getItem("locale") === null ? "ko": sessionStorage.getItem("locale");
-    this.setLocale(this.language);
+    this.language =
+      sessionStorage.getItem("locale") === null
+        ? "ko"
+        : sessionStorage.getItem("locale");
     this.username = sessionStorage.getItem("username");
+    this.setLocale(this.language);
   },
   methods: {
     setCollapsed() {
@@ -153,6 +155,9 @@ export default defineComponent({
         localeValue = "ko";
       }
       this.setLocale(localeValue);
+      setTimeout(() => {
+        location.reload();
+      }, 1000);
     },
     setLocale(localeValue) {
       this.$locale = localeValue;

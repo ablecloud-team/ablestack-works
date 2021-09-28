@@ -6,17 +6,24 @@
           <a-row id="content-header-row">
             <!-- 좌측 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.vm')]"/>
-              <a-button shape="round" style="margin-left: 20px; height:30px;" @click="reflesh()">
+              <Apath :paths="[$t('label.vm')]" />
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
                 <template #icon>
-                  <ReloadOutlined /> {{$t('label.reflesh')}}
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
                 </template>
               </a-button>
             </a-col>
 
             <!-- 우측 액션 -->
-            <a-col id="content-action" :span="12" >
-              <actions :actionFrom="actionFrom" v-if="actionFrom === 'VirtualMachineList'"/>
+            <a-col id="content-action" :span="12">
+              <actions
+                v-if="actionFrom === 'VirtualMachineList'"
+                :action-from="actionFrom"
+              />
             </a-col>
           </a-row>
         </div>
@@ -37,30 +44,30 @@
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import { defineComponent, ref } from "vue";
-import VirtualMachineList from "./VirtualMachineList.vue";
+import VirtualMachineList from "./VirtualMachineList";
 
-export default defineComponent ({
+export default defineComponent({
   name: "VirtualMachine",
-  props: {},
   components: {
     VirtualMachineList,
     Apath,
     Actions,
   },
+  props: {},
   data() {
     return {
       actionFrom: ref("VirtualMachine"),
     };
   },
   methods: {
-    reflesh(){
+    reflesh() {
       this.$refs.listRefleshCall.fetchData();
     },
     actionFromChange(val) {
       //console.log(val);
       this.actionFrom = ref(val);
     },
-  }
+  },
 });
 </script>
 

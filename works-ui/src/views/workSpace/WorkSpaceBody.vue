@@ -1,21 +1,21 @@
 <template>
-  <a-space direction="horizontal" id="content-space">
-    <a-row style="min-height: 400px" id="content-row">
+  <a-space id="content-space" direction="horizontal">
+    <a-row id="content-row" style="min-height: 400px">
       <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <WorkspaceInfoCard
-          :workspaceInfo="workspaceInfo"
-          :templateDataList="templateDataList"
-          :offeringDataList="offeringDataList"/>
+            :workspace-info="workspaceInfo"
+            :template-data-list="templateDataList"
+            :offering-data-list="offeringDataList"
+          />
         </ACard>
       </a-col>
 
       <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
-          <WorkSpaceTab 
-          :workspaceInfo="workspaceInfo"/>
+          <WorkSpaceTab :workspace-info="workspaceInfo" />
         </a-card>
       </a-col>
     </a-row>
@@ -47,8 +47,7 @@ export default defineComponent({
     },
   },
   setup() {
-    return {
-    };
+    return {};
   },
 });
 </script>

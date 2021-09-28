@@ -6,7 +6,7 @@
           <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.users')]" />
+              <Apath :paths="[$t('label.users')]" />
               <a-button
                 shape="round"
                 style="margin-left: 20px; height: 30px"
@@ -22,8 +22,8 @@
             <a-col id="content-action" :span="12">
               <div>
                 <Actions
-                  :actionFrom="actionFrom"
                   v-if="actionFrom === 'AccountList'"
+                  :action-from="actionFrom"
                 />
                 <a-button
                   type="primary"
@@ -101,8 +101,8 @@
           autocomplete="off"
         >
           <a-input
-            type="password"
             v-model:value="formState.password"
+            type="password"
             :placeholder="$t('tooltip.user.password')"
           />
         </a-form-item>
@@ -113,8 +113,8 @@
           autocomplete="off"
         >
           <a-input
-            type="password"
             v-model:value="formState.passwordCheck"
+            type="password"
             :placeholder="$t('tooltip.user.passwordCheck')"
           />
         </a-form-item>
@@ -163,12 +163,12 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
-  props: {},
   components: {
     AccountList,
     Apath,
     Actions,
   },
+  props: {},
   setup() {
     const visible = ref(false);
     const checkDupl = ref(false);
@@ -248,14 +248,14 @@ export default defineComponent({
       checkDupl,
     };
   },
-  created() {
-    this.fetchData();
-  },
   data() {
     return {
       addModalTitle: this.$t("label.user.add"),
       actionFrom: ref("Account"),
     };
+  },
+  created() {
+    this.fetchData();
   },
   methods: {
     reflesh() {

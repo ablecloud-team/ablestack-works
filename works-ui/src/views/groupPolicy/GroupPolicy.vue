@@ -6,7 +6,7 @@
           <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.group.policy')]" />
+              <Apath :paths="[$t('label.group.policy')]" />
               <a-button
                 shape="round"
                 style="margin-left: 20px; height: 30px"
@@ -121,7 +121,7 @@
 </template>
 
 <script>
-import Actions from "@/components/Actions";
+//import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import GroupPolicyList from "./GroupPolicyList";
 import { defineComponent, ref, reactive } from "vue";
@@ -129,12 +129,12 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
-  props: {},
   components: {
     GroupPolicyList,
     Apath,
-    Actions,
+    //Actions,
   },
+  props: {},
   setup() {
     const visible = ref(false);
     const showModal = (state) => {
@@ -212,14 +212,14 @@ export default defineComponent({
       showModal,
     };
   },
-  created() {
-    this.fetchData();
-  },
   data() {
     return {
       addModalTitle: this.$t("label.user.add"),
       actionFrom: ref("GroupPolicy"),
     };
+  },
+  created() {
+    this.fetchData();
   },
   methods: {
     reflesh() {

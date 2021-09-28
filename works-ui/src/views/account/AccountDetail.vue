@@ -7,7 +7,7 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
+                :paths="[
                   { name: $t('label.users'), component: 'Account' },
                   { name: userDataInfo.name, component: null },
                 ]"
@@ -16,14 +16,14 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions :actionFrom="actionFrom" />
+              <Actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody :userDataInfo="userDataInfo" />
+          <AccountBody :user-data-info="userDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -38,12 +38,12 @@ import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {},
   components: {
     AccountBody,
     Apath,
     Actions,
   },
+  props: {},
   setup() {
     return {
       actionFrom: ref("AccountDetail"),
@@ -52,7 +52,6 @@ export default defineComponent({
   data() {
     return {
       userDataInfo: [],
-      //{"name":"user01", "uuid":"123123123123123123123123", "state":"Allocated", "email":"jschoi@ablecloud.io", "allocateddesktop":"Desktop1"}
     };
   },
   created() {

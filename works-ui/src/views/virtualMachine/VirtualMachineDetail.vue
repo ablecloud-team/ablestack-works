@@ -7,7 +7,7 @@
             <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
+                :paths="[
                   { name: $t('label.vm'), component: 'VirtualMachine' },
                   { name: vmDataInfo.name, component: null },
                 ]"
@@ -16,14 +16,14 @@
 
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody :vmDataInfo="vmDataInfo" />
+          <VirtualMachineBody :vm-data-info="vmDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -39,11 +39,8 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
-  },
   components: { VirtualMachineBody, Apath, Actions },
+  props: {},
   setup() {
     return {
       actionFrom: ref("VirtualMachineDetail"),

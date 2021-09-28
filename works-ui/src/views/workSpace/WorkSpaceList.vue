@@ -15,12 +15,7 @@
   >
     <!-- 검색 필터링 template-->
     <template
-      #filterDropdown="{
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        column,
-      }"
+      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
     >
       <div style="padding: 8px">
         <a-input-search
@@ -59,7 +54,7 @@
     <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
-          <actions :actionFrom="actionFrom" />
+          <actions :action-from="actionFrom" />
         </template>
         <MoreOutlined />
       </a-Popover>
@@ -88,6 +83,7 @@ export default defineComponent({
     Actions,
   },
   props: {},
+  emits: ["actionFromChange"],
   setup() {
     const state = reactive({
       searchText: "",

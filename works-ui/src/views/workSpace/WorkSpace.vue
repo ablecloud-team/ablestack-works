@@ -6,7 +6,7 @@
           <a-row id="content-header-row">
             <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.workspace')]" />
+              <Apath :paths="[$t('label.workspace')]" />
               <a-button
                 shape="round"
                 style="margin-left: 20px; height: 30px"
@@ -21,8 +21,8 @@
             <a-col id="content-action" :span="12">
               <div>
                 <actions
-                  :actionFrom="actionFrom"
                   v-if="actionFrom === 'WorkspaceList'"
+                  :action-from="actionFrom"
                 />
                 <a-button
                   type="primary"

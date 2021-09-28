@@ -2,9 +2,7 @@
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent 
-        :dataInfo="vmDataInfo"
-        :actionFrom="'vmDetail'"/>
+        <DetailContent :data-info="vmDataInfo" :action-from="'vmDetail'" />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.disk.list')">
         <TableContent :data="vmDiskList" :columns="vmDiskListColumns" />
@@ -26,7 +24,7 @@ export default defineComponent({
     DetailContent,
   },
   props: {
-    vmDataInfo:{
+    vmDataInfo: {
       type: Object,
       required: true,
       default: null,
@@ -52,22 +50,22 @@ export default defineComponent({
   },
   data() {
     return {
-      vmDiskList : JSON.parse(
+      vmDiskList: JSON.parse(
         '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
-        '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
-        '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
+          '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
+          '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
       ),
-      vmNetworkList : JSON.parse(
+      vmNetworkList: JSON.parse(
         '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
-        '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
-        '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
+          '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
+          '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
       ),
-      vmDiskListColumns : [
+      vmDiskListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -80,34 +78,35 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
-          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sorter: (a, b) =>
+            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.size'),
+          title: this.$t("label.size"),
           dataIndex: "size",
           key: "size",
           sorter: (a, b) => (a.size < b.size ? -1 : a.size > b.size ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.connected.desktop'),
+          title: this.$t("label.connected.desktop"),
           dataIndex: "conn",
           key: "conn",
           sorter: (a, b) => (a.conn < b.conn ? -1 : a.conn > b.conn ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
-      
-      vmNetworkListColumns : [
+
+      vmNetworkListColumns: [
         {
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t('label.name'),
+          title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
@@ -120,15 +119,16 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.state'),
+          title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
-          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
+          sorter: (a, b) =>
+            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
       ],
-    }
-  }
+    };
+  },
 });
 </script>
 
