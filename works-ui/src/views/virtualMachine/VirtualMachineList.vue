@@ -59,11 +59,13 @@
     <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
         <template #content>
-          <actions
+          <Actions
             :action-from="actionFrom"
             :uuid="record.uuid"
-            :name="record.name"
+            :workspace="record.workspace_name"
+            :allocate-status="record.owner_account_id"
             :status="record.status"
+            @fetchData="fetchData"
           />
         </template>
         <MoreOutlined />
@@ -78,9 +80,9 @@
     </template>
     <template #userRender="{ record }">
       {{
-        record.owner_account_id.String == ""
+        record.owner_account_id === ""
           ? $t("label.owner.account.false")
-          : record.owner_account_id.String
+          : record.owner_account_id
       }}
     </template>
     <template #connRender="{ record }">
@@ -139,6 +141,7 @@ export default defineComponent({
   },
   data() {
     return {
+      timer: ref(null),
       selectedRowKeys: [],
       vmDataList: [],
       vmListColumns: [
@@ -226,9 +229,12 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
-    // setInterval(() => {
-    //   this.fetchData();
-    // }, 10000);
+    this.timer = setInterval(() => { //10초 자동 갱신
+      this.fetchData();
+    }, 15000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
     setSelection(selection) {
@@ -245,7 +251,7 @@ export default defineComponent({
     onSelectChange(selectedRowKeys, selectedRows) {
       this.setSelection(selectedRowKeys);
     },
-    fetchData() {
+    fetchData(val) {
       this.loading = true;
       worksApi
         .get("/api/v1/instance/all")
