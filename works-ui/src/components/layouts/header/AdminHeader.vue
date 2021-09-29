@@ -47,7 +47,7 @@
               <template #icon>
                 <UserOutlined />
               </template>
-              <router-link :to="{ path: '/accountDetail/' + username }">
+              <router-link :to="{ path: '/accountDetail/' + username }" style="margin-left: 4px;">
                 {{ $t("label.profile") }}
               </router-link>
             </a-menu-item>
@@ -155,9 +155,9 @@ export default defineComponent({
         localeValue = "ko";
       }
       this.setLocale(localeValue);
-      setTimeout(() => {
-        location.reload();
-      }, 1000);
+      // setTimeout(() => {
+      //   location.reload();
+      // }, 0);
     },
     setLocale(localeValue) {
       this.$locale = localeValue;
