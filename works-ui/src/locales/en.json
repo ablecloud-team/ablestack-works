@@ -16,7 +16,7 @@
     "message.user.createing": "User is being created.",
     "message.user.create.success": "User creation is complete.",
     "message.user.create.fail": "User creation failed.",
-    "message.workspace.vm.add": "The desktop addition is complete.",
+    "message.workspace.vm.add": "It will take some time until the desktop creation is complete.",
     "message.workspace.vm.add.fail": "Failed to add desktop.",
     "message.workspace.user.add": "You have added a user to the workspace.",
     "message.workspace.user.add.fail": "Failed to add user to workspace.",
@@ -26,7 +26,14 @@
     "message.vm.status.update": "Changed the state of the desktop virtual machine.",
     "message.vm.status.delete": "I deleted the desktop virtual machine.",
     "message.vm.status.update.fail": "Failed to change state of desktop virtual machine.",
-
+    "message.user.vm.allocated.completed": "User assignment to desktop is complete.",
+    "message.user.vm.allocated.fail": "Failed to assign user to desktop.",
+    "message.vm.status.starting": "Starting the desktop virtual machine.",
+    "message.vm.status.stopping": "The desktop virtual machine is being stopped.",
+    "message.vm.status.destroying": "Deleting the desktop virtual machine.",
+    "message.workspace.vm.adding": "A desktop virtual machine is being added.",
+    "message.name.dupl": "Duplicates of previously generated names. Please enter a different name.",
+    "message.workspace.user.add.dupl": "This is an existing user. Please choose a different name.",
     //tooltip
     "tooltip.start": "Start",
     "tooltip.stop": "Stop",
@@ -56,6 +63,12 @@
     "tooltip.user.userGroup": "User Group",
     "tooltip.user.department": "User Department",
     "tooltip.user.phone": "User Phone Number",
+    "tooltip.userAllocate": "User assignment",
+    "tooltip.userUnlock": "User off",
+    "tooltip.desktop.allocate.user": "Desktop user assignment",
+    "tooltip.accountDestroy":"Destroy user account",
+    "tooltip.vmDestroy":"Destroy the desktop virtual machine",
+    "tooltip.workspaceDestroy":"Destroy the workspace",
 
     //label
     "label.reflesh": "Reflesh",
@@ -161,5 +174,9 @@
     //modal confirm message
     "modal.confirm.start": "Do you want to start a desktop virtual machine?",
     "modal.confirm.stop": "Are you sure you want to stop the desktop virtual machine?",
-    "modal.confirm.destroy": "Are you sure you want to delete the desktop virtual machine?"
+    "modal.confirm.workspaceDestroy": "Are you sure you want to delete the workspace?",
+    "modal.confirm.vmDestroy": "Are you sure you want to delete the desktop virtual machine?",
+    "modal.confirm.accountDestroy": "Are you sure you want to delete your user account?",
+    "modal.confirm.userAllocate": "Do you want to assign users to desktop virtual machines?",
+    "modal.confirm.userUnlock": "Do you want to assign users to desktop virtual machines?"
 }
