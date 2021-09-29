@@ -5,7 +5,7 @@
         <TableContent
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
-          :comp="'VirtualMachineDetail'"
+          :comp="'VirtualMachineList'"
           @tabReflesh="tabReflesh"
         />
       </a-tab-pane>

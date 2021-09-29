@@ -290,26 +290,12 @@ export default defineComponent({
         this.desktopBoolean = ref(false);
       }
     },
-    templateChange(value) {
-      this.formState.selectedTemplateId = value;
-      //console.log(value);
-    },
-    offeringChange(value) {
-      this.formState.selectedOfferingId = value;
-      //console.log(value);
-    },
     putWorkspace() {
       this.rules.name.message = this.$t("input.workspace.name");
       this.rules.description.message = this.$t("input.workspace.description");
-      this.rules.workspaceType.message = this.$t(
-        "input.workspace.workspaceType"
-      );
-      this.rules.selectedTemplateId.message = this.$t(
-        "input.workspace.selectedTemplateId"
-      );
-      this.rules.selectedOfferingId.message = this.$t(
-        "input.workspace.selectedOfferingId"
-      );
+      this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
+      this.rules.selectedTemplateId.message = this.$t("input.workspace.selectedTemplateId");
+      this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
 
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
@@ -322,24 +308,33 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          //console.log(toRaw(formState));
-          message.loading(this.$t("message.workspace.createing"), 1);
           worksApi
-            .put("/api/v1/workspace", params)
+            .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
             .then((response) => {
-              if (response.status === 200) {
-                message.loading(this.$t("message.workspace.create.success"), 1);
-              } else {
-                message.error(this.$t("message.workspace.create.fail"));
+              if (response.status === 200) { //이름 중복일때 메시지 확인
+                message.error(this.$t("message.workspace.name.dupl"));
               }
-              this.showModal(false);
-              setTimeout(() => {
-                this.$refs.listRefleshCall.fetchData();
-              }, 1500);
             })
-            .catch(function (error) {
-              message.error(error);
-              //console.log(error);
+            .catch((error) => {
+              //이름 중복이 아닐때(status code = 401)
+              message.loading(this.$t("message.workspace.createing"), 1);
+                worksApi
+                  .put("/api/v1/workspace", params)
+                  .then((response) => {
+                    if (response.status === 200) {
+                      message.loading(this.$t("message.workspace.create.success"), 1);
+                    } else {
+                      message.error(this.$t("message.workspace.create.fail"));
+                    }
+                    this.showModal(false);
+                    setTimeout(() => {
+                      this.$refs.listRefleshCall.fetchData();
+                    }, 1500);
+                  })
+                  .catch(function (error) {
+                    message.error(error);
+                    //console.log(error);
+                  });
             });
         })
         .catch((error) => {
@@ -352,7 +347,6 @@ export default defineComponent({
         .get("/api/v1/offering")
         .then((response) => {
           if (response.status == 200) {
-            //console.log(response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering);
             this.offerings =
               response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
             this.templates =
