@@ -78,9 +78,7 @@
             </a>
           </a-button>
           <template #overlay>
-            <a-menu
-              :selectedKeys="[language]"
-              @click="setLocaleClick">
+            <a-menu :selected-keys="[language]" @click="setLocaleClick">
               <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
               <a-menu-item key="en" value="enUS"> English </a-menu-item>
             </a-menu>
@@ -150,28 +148,32 @@ export default defineComponent({
     },
     onSubmit() {
       this.rules.id.message = this.$t("message.please.enter.your.id");
-      this.rules.password.message = this.$t("message.please.enter.your.password");
+      this.rules.password.message = this.$t(
+        "message.please.enter.your.password"
+      );
       let params = new URLSearchParams();
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.logging"));
+          message.loading(this.$t("message.logging"), 0);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
           // try {
           //  res = await axiosLogin(params)
           worksApi
-            .put("/api/login", params)
+            .post("/api/login", params)
             .then((response) => {
               //console.log(response);
-              if (response.status == 200) {
-                router.push({ name: "Dashboard" });
-                //console.log(response.data.result.token);
+              if (response.status === 200) {
+                store.dispatch("loginCommit", response.data);
                 sessionStorage.setItem("token", response.data.result.token);
-                sessionStorage.setItem("username", response.data.result.username);
+                sessionStorage.setItem(
+                  "username",
+                  response.data.result.username
+                );
+                router.push({ name: "Dashboard" });
                 message.destroy();
                 message.success(this.$t("message.login.completed"));
-                store.dispatch("loginCommit", response.data);
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));
