@@ -190,7 +190,10 @@ export default defineComponent({
       callTapName: ref(props.tapName),
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
-      callModal: ref("desktop"),
+      modalConfirm: ref(""),
+      modalTitle: ref(""),
+      confirmModalView: ref(false),
+      userAllocateVmModalBoolean: ref(false),
     });
     return {
       rowSelection,
@@ -221,9 +224,9 @@ export default defineComponent({
   },
   created() {
     this.fetchData(this.state.callTapName);
-    this.timer = setInterval(() => { //10초 자동 갱신
+    this.timer = setInterval(() => { //30초 자동 갱신
       this.fetchData('desktop');
-    }, 15000);
+    }, 30000);
   },
   unmounted() {
     clearInterval(this.timer);
@@ -302,7 +305,7 @@ export default defineComponent({
           .get("/api/v1/instance/" + this.$route.params.uuid)
           .then((response) => {
             if (response.status == 200) {
-              this.dataList = response.data.result.list;
+              this.dataList = response.data.result.instanceInfo;
             } else {
               //message.error(this.$t("message.response.data.fail"));
               //console.log("데이터를 정상적으로 가져오지 못했습니다.");
@@ -478,6 +481,56 @@ export default defineComponent({
           .catch(function (error) {
             console.log(error);
           });
+      } else if (this.state.callTapName === "datadisk") {
+        this.state.addButtonBoolean = ref(false);
+
+        this.columns = [
+          {
+            dataIndex: "name",
+            key: "name",
+            slots: { customRender: "nameRender" },
+            title: this.$t("label.name"),
+            sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+            sortDirections: ["descend", "ascend"],
+          },
+          // {
+          //   title: "",
+          //   key: "action",
+          //   dataIndex: "action",
+          //   align: "right",
+          //   width: "5px",
+          //   slots: { customRender: "actionRender" },
+          // },
+          {
+            title: this.$t("label.type"),
+            dataIndex: "type",
+            key: "type",
+            sorter: (a, b) =>
+              a.type < b.type ? -1 : a.type > b.type ? 1 : 0,
+            sortDirections: ["descend", "ascend"],
+          },
+          {
+            title: this.$t("label.size"),
+            dataIndex: "sizegb",
+            key: "sizegb",
+            sorter: (a, b) =>
+              a.sizegb < b.sizegb ? -1 : a.sizegb > b.sizegb ? 1 : 0,
+            sortDirections: ["descend", "ascend"],
+          },
+        ];
+        // 가상머신 데이터디스크 조회
+        worksApi
+        .get("/api/v1/instance/detail/"+this.$route.params.uuid)
+        .then((response) => {
+          if (response.status === 200) {
+            this.dataList = response.data.result.instanceInstanceVolumeInfo.listvolumesmetricsresponse.volume;
+          } else {
+            //message.error(this.$t('message.response.data.fail'));
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       }
       setTimeout(() => {
         this.loading = ref(false);
@@ -508,12 +561,13 @@ export default defineComponent({
         });
     },
     putUserToWorksapce() { //워크스페이스에 사용자 추가
+      console.log(this.selectedUser);
       if (!this.selectedUser) return false;
       worksApi
         .put("/api/v1/group/" + this.$route.params.name + "/" + this.selectedUser)
         .then((response) => {
           if (response.status === 200) {
-            message.success(this.$t("message.workspace.user.add"), 1);
+            message.success(this.$t("message.workspace.user.add"), 5);
             setTimeout(() => {
               this.fetchData('desktop');
             }, 1000);
@@ -522,8 +576,8 @@ export default defineComponent({
           }
           this.changeModal("user", false);
         })
-        .catch(function (error) {
-          message.error(error);
+        .catch((error) => {
+          message.error(this.$t("message.workspace.user.add.dupl"));
           //console.log(error);
         });
     },
