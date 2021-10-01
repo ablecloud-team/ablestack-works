@@ -125,6 +125,13 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
+        <a-form-item name="phone" :label="$t('label.phone')" >
+          <a-input
+            v-model:value="formState.phone"
+            :placeholder="$t('tooltip.user.phone')"
+            class="addmodal-aform-item-div"
+          />
+        </a-form-item>
         <!-- <a-form-item has-feedback name="userGroup" :label="$t('label.userGroup')">
           <a-input
             v-model:value="formState.userGroup"
@@ -139,13 +146,7 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <a-form-item name="phone" :label="$t('label.phone')" >
-          <a-input
-            v-model:value="formState.phone"
-            :placeholder="$t('tooltip.user.phone')"
-            class="addmodal-aform-item-div"
-          />
-        </a-form-item>-->
+        -->
 
         <!--워크스페이스 비밀번호 확인 end-->
       </a-form>
@@ -211,7 +212,7 @@ export default defineComponent({
 
     let validatePass2 = async (rule, value) => {
       if (value !== formState.password) {
-        return Promise.reject("Two inputs don't match!");
+        return Promise.reject();
       }
     };
     const rules = {
@@ -233,9 +234,11 @@ export default defineComponent({
         required: true,
         type: "email",
       },
-      // userGroup: { required: true, },
-      // department: { required: false, },
-      // phone: { required:  false, },
+      phone: {
+        required: false,
+        pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
+      },
+      // title: { required: false, },
     };
     return {
       labelCol: { span: 10 },
@@ -272,9 +275,7 @@ export default defineComponent({
       this.rules.password.message = this.$t("input.user.password");
       this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
       this.rules.email.message = this.$t("input.user.email");
-      // this.rules.userGroup.message = this.$t('input.user.userGroup');
-      // this.rules.department.message = this.$t('input.user.department');
-      // this.rules.phone.message = this.$t('input.user.phone');
+      this.rules.phone.message = this.$t("input.user.phone");
     },
     putUser() {
       let params = new URLSearchParams();
@@ -283,28 +284,38 @@ export default defineComponent({
       params.append("lastName", this.formState.lastName);
       params.append("password", this.formState.password);
       params.append("email", this.formState.email);
+      params.append("phone", this.formState.phone);
+
       //console.log(params);
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.user.createing"), 1);
-          worksApi
-            .put("/api/v1/user", params)
+          worksApi //이름 중복 확인 체크
+            .get("/api/v1/user/" + this.formState.account)
             .then((response) => {
-              console.log(response.status);
-              if (response.status === 200) {
-                message.loading(this.$t("message.user.create.success"), 1);
-              } else {
-                message.error(this.$t("message.user.create.fail"));
+              if (response.status === 200) { //중복일 때 
+                message.error(this.$t("message.name.dupl"));
               }
-              this.showModal(false);
-              setTimeout(() => {
-                this.$refs.listRefleshCall.fetchData();
-              }, 1500);
             })
-            .catch(function (error) {
-              message.error(error);
-              console.log(error);
+            .catch((error) => { //중복 이름 없을 때
+              message.loading(this.$t("message.user.createing"), 1);
+              worksApi
+                .put("/api/v1/user", params)
+                .then((response) => {
+                  console.log(response.status);
+                  if (response.status === 200) {
+                    message.loading(this.$t("message.user.create.success"), 1);
+                  } else {
+                    message.error(this.$t("message.user.create.fail"));
+                  }
+                  this.showModal(false);
+                  setTimeout(() => {
+                    this.$refs.listRefleshCall.fetchData();
+                  }, 1500);
+                })
+                .catch((error) => {
+                  message.error(error);
+                });
             });
         })
         .catch((error) => {
