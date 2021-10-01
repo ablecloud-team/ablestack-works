@@ -6,14 +6,51 @@
       {{value}}
     </a-list-item> 
   </a-list>-->
-  <a-list item-layout="horizontal" v-if="actionFrom === 'vmDetail'"> 
+  <a-list item-layout="horizontal" v-if="actionFrom === 'VirtualMachineDetail'"> 
     <a-list-item >
       <strong>{{ $t('label.name') }}</strong>
       <br>
-      {{dataInfo.name}}
+      {{dataInfo.displayname}}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.workspace') }}</strong>
+      <br>
+      {{vmDbDataInfo.workspace_name}}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.state') }}</strong>
+      <br>
+      {{vmDbDataInfo.status}}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.users') }}</strong>
+      <br>
+      {{vmDbDataInfo.owner_account_id == ""
+          ? $t("label.owner.account.false")
+          : vmDbDataInfo.owner_account_id }}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t("label.desktop.connect.boolean") }}</strong>
+      <br>
+      {{ vmDbDataInfo.connected === true ? $t("label.desktop.connect.true") : $t("label.desktop.connect.false") }}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.domain') }}</strong>
+      <br>
+      {{dataInfo.domain}}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.hypervisor') }}</strong>
+      <br>
+      {{dataInfo.hypervisor}}
+    </a-list-item>
+    <a-list-item >
+      <strong>{{ $t('label.pooltype') }}</strong>
+      <br>
+      {{dataInfo.pooltype}}
     </a-list-item>
   </a-list>
-  <a-list item-layout="horizontal" v-if="actionFrom === 'userDetail'">
+  <a-list item-layout="horizontal" v-if="actionFrom === 'UserDetail'">
     <a-list-item >
       <strong>{{ $t('label.account') }}</strong><br>
       {{dataInfo.username}}
@@ -23,7 +60,7 @@
       {{dataInfo.co}}
     </a-list-item>
     <a-list-item >
-      <strong>{{ $t('label.countrycode') }}</strong><br>
+      <strong>{{ $t('label.countryCode') }}</strong><br>
       {{dataInfo.countryCode}}
     </a-list-item>
     <a-list-item >
@@ -47,6 +84,12 @@
       {{dataInfo.userPrincipalName}}
     </a-list-item>
   </a-list>
+  <a-list item-layout="horizontal" v-if="actionFrom === 'GroupPolicyDetail'">
+    <a-list-item >
+      <strong>{{ $t('label.account') }}</strong><br>
+      {{dataInfo.username}}
+    </a-list-item>
+  </a-list>
 </template>
 
 <script>
@@ -54,6 +97,11 @@ export default {
   name: "DetailContent",
   props: {
     dataInfo: {
+      type: Object,
+      required: true,
+      default: null,
+    },
+    vmDbDataInfo: {
       type: Object,
       required: true,
       default: null,
