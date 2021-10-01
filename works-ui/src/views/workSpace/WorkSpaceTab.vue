@@ -6,25 +6,22 @@
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
           :comp="'VirtualMachineList'"
-          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
           :tap-name="'user'"
           :action-from="'UserDetail'"
-          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.policy.list')">
         <TableContent
           :tap-name="'policy'"
           :action-from="'policyDetail'"
-          @tabReflesh="tabReflesh"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent :tap-name="'network'" @tabReflesh="tabReflesh" />
+        <TableContent :tap-name="'network'"/>
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -56,17 +53,8 @@ export default defineComponent({
   data() {
     return {};
   },
-  created() {
-    this.fetchData();
-  },
-  methods: {
-    tabReflesh() {
-      this.fetchData();
-    },
-    fetchData() {
-      //alert(this.$route.params.uuid);
-    },
-  },
+  created() {},
+  methods: {},
 });
 </script>
 

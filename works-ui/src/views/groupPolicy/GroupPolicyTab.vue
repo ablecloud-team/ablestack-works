@@ -260,7 +260,6 @@ export default defineComponent({
       //   //console.log(error);
       //   });
       this.changeModal("user", false);
-      this.$emit("tabReflesh");
     },
   },
 });

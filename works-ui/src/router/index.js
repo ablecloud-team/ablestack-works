@@ -25,19 +25,19 @@ import axios from "axios";
 
 const requireAuth = (to, from, next) => {
   //console.log("-----------------------------------");
-  console.log("to.name : " + to.name + ", from.name : " + from.name);
+  //console.log("to.name : " + to.name + ", from.name : " + from.name);
 
   let menukey = "1";
   //let menuName = to.name.toLowerCase();
-  if(to.name.includes("Dashboard")) { menukey = "1"; }
-  if(to.name.includes("Workspace")) { menukey = "2"; }
-  if(to.name.includes("VirtualMachine")) { menukey = "3"; }
-  if(to.name.includes("Account")) { menukey = "4"; }
-  if(to.name.includes("GroupPolicy")) { menukey = "5"; }
-  if(to.name.includes("Audit")) { menukey = "6"; }
-  if(to.name.includes("Community")) { menukey = "7"; }
-  if(to.name.includes("Favorite")) { menukey = "8"; }
-  if(to.name.includes("UserDesktop")) { menukey = "9"; }
+  if (to.name.includes("Dashboard")) { menukey = "1"; }
+  if (to.name.includes("Workspace")) { menukey = "2"; }
+  if (to.name.includes("VirtualMachine")) { menukey = "3"; }
+  if (to.name.includes("Account")) { menukey = "4"; }
+  if (to.name.includes("GroupPolicy")) { menukey = "5"; }
+  if (to.name.includes("Audit")) { menukey = "6"; }
+  if (to.name.includes("Community")) { menukey = "7"; }
+  if (to.name.includes("Favorite")) { menukey = "8"; }
+  if (to.name.includes("UserDesktop")) { menukey = "9"; }
 
   //console.log(menukey);
   sessionStorage.setItem("menukey", menukey);
@@ -45,18 +45,16 @@ const requireAuth = (to, from, next) => {
   const isAuth = sessionStorage.getItem("token");
   if (isAuth && isAuth !== "") {
     if (to.name === "Dashboard" && from.name === "Login") {
-      //console.log("login OK :: " + to.name);
       next();
       // setTimeout(() => {
       //   location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
       // }, 0);
     } else {
-      console.log(isAuth);
       worksApi
         .get("/api/v1/token")
         .then((response) => {
           //console.log(response);
-          if (response.status == 200) {
+          if (response.status === 200) {
             //this.userDataInfo = response.data.result.vmInfo;
             next();
           } else {
@@ -65,20 +63,11 @@ const requireAuth = (to, from, next) => {
             next({ name: "Login" });
           }
         })
-        .catch(function (error) {
-          console.log(error);
+        .catch(function (error) {          
+          message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
+          sessionStorage.setItem("token", "");
+          next({ name: "Login" });
         });
-
-      //const res = await axiosTokenAuth();
-      // if (res.data.result.status == 200) {
-      //   message.error(this.$t('message.incorrect.access.login.please'));
-      //   next();
-      //   message.error($t('message.incorrect.access.login.please'));
-      // } else {
-      //   //sessionStorage.setItem("token", "");
-      //   message.error($t('message.incorrect.access.login.please'));
-      //   next({ name: "Login" });
-      // }
     }
   } else {
     message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
@@ -88,7 +77,7 @@ const requireAuth = (to, from, next) => {
 };
 
 const routes = [
-  //{ path: "/:catchAll(.*)", redirect: "/login" },//없는 path 일 경우 root path로 이동함.
+  { path: "/:catchAll(.*)", redirect: "/login" },// 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
     path: "/login",
     name: "Login",

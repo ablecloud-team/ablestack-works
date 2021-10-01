@@ -148,9 +148,7 @@ export default defineComponent({
     },
     onSubmit() {
       this.rules.id.message = this.$t("message.please.enter.your.id");
-      this.rules.password.message = this.$t(
-        "message.please.enter.your.password"
-      );
+this.rules.password.message = this.$t("message.please.enter.your.password");
       let params = new URLSearchParams();
       this.formRef
         .validate()

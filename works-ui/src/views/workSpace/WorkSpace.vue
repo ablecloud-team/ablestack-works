@@ -312,7 +312,7 @@ export default defineComponent({
             .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
             .then((response) => {
               if (response.status === 200) { //이름 중복일때 메시지 확인
-                message.error(this.$t("message.workspace.name.dupl"));
+                message.error(this.$t("message.name.dupl"));
               }
             })
             .catch((error) => {

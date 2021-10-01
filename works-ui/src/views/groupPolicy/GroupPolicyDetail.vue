@@ -33,7 +33,7 @@
 <script>
 import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
-import GroupPolicyBody from "./GroupPolicyBody";
+import GroupPolicyBody from "./GroupPolicyBody.vue";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";

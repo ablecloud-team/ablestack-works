@@ -23,7 +23,7 @@
 <script>
 // import TabbedContent from "@/components/TabbedContent";
 import GroupPolicyInfoCard from "./GroupPolicyInfoCard";
-import GroupPolicyTab from "./GroupPolicyTab";
+import GroupPolicyTab from "./GroupPolicyTab.vue";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
