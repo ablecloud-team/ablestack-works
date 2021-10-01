@@ -1,16 +1,13 @@
 <template>
   <div class="resource-details">
-    <div
-      v-if="actionFrom === 'VirtualMachineDetail'"
-      class="resource-details__name"
-    >
+    <div class="resource-details__name">
       <a-avatar shape="square" :size="60">
         <template #icon>
           <DesktopOutlined />
         </template>
       </a-avatar>
       <h4 style="margin-left: 20px">
-        {{ vmDataInfo.name }}
+        {{ vmDbDataInfo.name }}
       </h4>
     </div>
   </div>
@@ -18,49 +15,123 @@
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
       <a-badge
-        class="Status"
-        :color="
-          vmDataInfo.state == 'Disable'
-            ? 'grey'
-            : vmDataInfo.state == 'Running'
-            ? 'green'
-            : 'red'
-        "
-        :text="vmDataInfo.state"
+        class="head-example"
+        :color="vmDbDataInfo.status == 'Running' ? 'green' : 'red'"
+        :text="vmDbDataInfo.status"
       />
     </div>
   </div>
-
   <div id="ID" class="CardItem">
     <div class="ItemName">{{ $t("label.uuid") }}</div>
     <div class="Item">
       <a-button shape="circle" type="dashed">
         <BarcodeOutlined />
       </a-button>
-      {{ vmDataInfo.uuid }}
+      {{ vmDbDataInfo.uuid }}
     </div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.createdate") }}</div>
+    <div class="Item">{{ vmDbDataInfo.create_date }}</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.ostype") }}</div>
+    <div class="Item">{{ vmMoldDataInfo.osdisplayname }}</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
+    <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
+    <a-progress :percent="cpuused" size="small" status="active" />
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
+    <div class="Item">{{ vmMoldDataInfo.memory }} MB</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.disk.size") }}</div>
+    <div class="Item">{{ vmDiskInfo.sizegb }}<br>
+      <a-tag> {{$t("label.read") + " " + (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2) }} GB</a-tag>
+      <a-tag> {{$t("label.write") + " " + (vmMoldDataInfo.diskkbswrite/ 1048576).toFixed(2) }} GB</a-tag><br>
+      <a-tag> {{$t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag>
+      <a-tag> {{$t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag>
+    </div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.network") }}</div>
+    <div class="Item">
+      <a-tag> <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag>
+      <a-tag> <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag><br>
+      {{ vmNetworkInfo.networkname }}</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.network.ip") }}</div>
+    <div class="Item">{{ vmNetworkInfo.ipaddress }}</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.template") }}</div>
+    <div class="Item">{{ vmMoldDataInfo.templatename }}</div>
+  </div>
+  <div class="CardItem">
+    <div class="ItemName">{{ $t("label.vm.serviceOffering") }}</div>
+    <div class="Item">{{ vmMoldDataInfo.serviceofferingname }}</div>
   </div>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, reactive, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
-export default defineComponent({
+export default defineComponent ({
   components: {},
   props: {
-    actionFrom: {
-      type: String,
-      required: true,
-      default: "",
-    },
-    vmDataInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+    // vmDbDataInfo: {
+    //   type: Object,
+    //   required: true,
+    //   default: null,
+    // },
+    // vmMoldDataInfo: {
+    //   type: Object,
+    //   required: true,
+    //   default: null,
+    // },
   },
   setup() {
     return {};
+  },
+  data() {
+    return {
+      vmDbDataInfo: ref([]),
+      vmMoldDataInfo: ref([]),
+      vmNetworkInfo : ref([]),
+      vmDiskInfo : ref([]),
+      cpuused: ref(0),
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      worksApi
+        .get("/api/v1/instance/detail/"+this.$route.params.uuid)
+        .then((response) => {
+          if (response.status === 200) {
+            console.log(response.data.result.instanceDBInfo);
+            this.vmDbDataInfo = response.data.result.instanceDBInfo;
+            this.vmMoldDataInfo = response.data.result.instanceMoldInfo.listvirtualmachinesmetricsresponse.virtualmachine[0];
+            this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
+            this.vmDiskInfo = response.data.result.instanceInstanceVolumeInfo.listvolumesmetricsresponse.volume[0];
+            this.cpuused = this.vmMoldDataInfo.cpuused.split("%")[0];
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
   },
 });
 </script>

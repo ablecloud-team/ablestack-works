@@ -10,11 +10,6 @@
     "
     :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
-    :row-key="(record, index) => index"
-    :row-selection="{
-      selectedRowKeys: selectedRowKeys,
-      onChange: onSelectChange,
-    }"
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
@@ -257,7 +252,7 @@ export default defineComponent({
         .get("/api/v1/instance/all")
         .then((response) => {
           if (response.status == 200) {
-            this.vmDataList = response.data.result.list;
+            this.vmDataList = response.data.result.instanceInfo;
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
