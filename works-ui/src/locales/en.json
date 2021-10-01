@@ -34,6 +34,7 @@
     "message.workspace.vm.adding": "A desktop virtual machine is being added.",
     "message.name.dupl": "Duplicates of previously generated names. Please enter a different name.",
     "message.workspace.user.add.dupl": "This is an existing user. Please choose a different name.",
+
     //tooltip
     "tooltip.start": "Start",
     "tooltip.stop": "Stop",
@@ -91,6 +92,8 @@
     "label.state": "State",
     "label.description": "Description",
     "label.type": "Type",
+    "label.vm.ostype": "OS Type",
+    "label.size": "Size",
     "label.desktop.quantity": "Number of Desktop",
     "label.desktop.connection.quantity": "Number of Connection",
     "label.network.type": "Network Type",
@@ -150,6 +153,20 @@
     "label.connect.true": "In Use",
     "label.connect.false": "Unused",
     "label.owner.account.false": "Unassigned",
+    "label.vm.cpu.size": "CPU Size",
+    "label.vm.memory.size": "Memory Size",
+    "label.vm.disk.size": "Disk Size",
+    "label.vm.network.ip": "Network IP",
+    "label.vm.serviceOffering": "Service Offering",
+    "label.domain": "Domain",
+    "label.hypervisor": "Hypervisor",
+    "label.pooltype": "Pool Type",
+    "label.read": "Read",
+    "label.write": "Write",
+    "label.read.io": "Read(IO)",
+    "label.write.io": "Write(IO)",
+    "label.desktop.connect.true": "Connecting",
+    "label.desktop.connect.false": "Unconnected",
 
     //input
     "input.workspace.name": "Input workspace name(except Korean).",
@@ -165,7 +182,7 @@
     "input.user.email": "Input user email.",
     "input.user.userGroup": "Input user user group.",
     "input.user.department": "Input user department.",
-    "input.user.phone": "Input user phone.",
+    "input.user.phone": "Please format your phone number(including numbers and '-').",
 
     //search
     "search.name": "Search Name.",
