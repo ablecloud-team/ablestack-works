@@ -60,6 +60,157 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/group": {
+            "get": {
+                "description": "그룹 리스트를 조회를 위한 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "그룹 리스트를 조회 하는 API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "그룹을 삭제하기 위한 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "그룹을 삭제하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 계정",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/group/:groupName": {
+            "get": {
+                "description": "그룹 리스트를 조회를 위한 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "그룹 리스트를 조회 하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 계정",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/group/:groupName/:userName": {
+            "put": {
+                "description": "그룹을 삭제하기 위한 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "그룹을 삭제하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자를 추가할 그룹 이름",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "그룹에 추가할 사용자 계정",
+                        "name": "userName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "그룹에서 유저를 삭제하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "그룹에서 유저를 삭제하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자를 삭제할 그룹 이름",
+                        "name": "groupName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "그룹에 삭제할 사용자 계정",
+                        "name": "userName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/instance": {
             "put": {
                 "description": "워크스페이스의 instance 를 추가하는 API 입니다.",
@@ -82,6 +233,108 @@ var doc = `{
                         "type": "string",
                         "description": "워크스페이스에 추가할 Instance 수량",
                         "name": "quantity",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "instance 에 사용자를 할당하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 에 사용자를 할당하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Instance 에 할당할 userName",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/instance/:action/:instanceUuid": {
+            "patch": {
+                "description": "instance 의 상태를 변경하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 의 상태 변경하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다.",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/instance/detail/:instanceUuid": {
+            "get": {
+                "description": "워크스페이스의 instance 를 추가하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "워크스페이스의 instance 를 추가하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "instance UUID",
+                        "name": "instanceUuid",
                         "in": "path",
                         "required": true
                     }
@@ -208,8 +461,7 @@ var doc = `{
                         "type": "string",
                         "description": "사용자 전화번호",
                         "name": "phone",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
                     },
                     {
                         "type": "string",
@@ -236,8 +488,7 @@ var doc = `{
                         "type": "string",
                         "description": "사용자 직급",
                         "name": "title",
-                        "in": "path",
-                        "required": true
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -261,6 +512,15 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "사용자 상세조회 하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 계정",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

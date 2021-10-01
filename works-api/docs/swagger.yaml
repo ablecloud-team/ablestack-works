@@ -26,7 +26,133 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 로그인 하는 API
+  /api/v1/group:
+    delete:
+      consumes:
+      - application/json
+      description: 그룹을 삭제하기 위한 API 입니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: groupName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 그룹을 삭제하는 API
+    get:
+      consumes:
+      - application/json
+      description: 그룹 리스트를 조회를 위한 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 그룹 리스트를 조회 하는 API
+  /api/v1/group/:groupName:
+    get:
+      consumes:
+      - application/json
+      description: 그룹 리스트를 조회를 위한 API 입니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: groupName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 그룹 리스트를 조회 하는 API
+  /api/v1/group/:groupName/:userName:
+    delete:
+      consumes:
+      - application/json
+      description: 그룹에서 유저를 삭제하는 API 입니다.
+      parameters:
+      - description: 사용자를 삭제할 그룹 이름
+        in: path
+        name: groupName
+        required: true
+        type: string
+      - description: 그룹에 삭제할 사용자 계정
+        in: path
+        name: userName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 그룹에서 유저를 삭제하는 API
+    put:
+      consumes:
+      - application/json
+      description: 그룹을 삭제하기 위한 API 입니다.
+      parameters:
+      - description: 사용자를 추가할 그룹 이름
+        in: path
+        name: groupName
+        required: true
+        type: string
+      - description: 그룹에 추가할 사용자 계정
+        in: path
+        name: userName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 그룹을 삭제하는 API
   /api/v1/instance:
+    post:
+      consumes:
+      - application/json
+      description: instance 에 사용자를 할당하는 API 입니다.
+      parameters:
+      - description: Instance UUID
+        in: path
+        name: instanceUuid
+        required: true
+        type: string
+      - description: Instance 에 할당할 userName
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: instance 에 사용자를 할당하는 API
     put:
       consumes:
       - application/json
@@ -40,6 +166,51 @@ paths:
       - description: 워크스페이스에 추가할 Instance 수량
         in: path
         name: quantity
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스의 instance 를 추가하는 API
+  /api/v1/instance/:action/:instanceUuid:
+    patch:
+      consumes:
+      - application/json
+      description: instance 의 상태를 변경하는 API 입니다.
+      parameters:
+      - description: action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다.
+        in: path
+        name: action
+        required: true
+        type: string
+      - description: Instance UUID
+        in: path
+        name: instanceUuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: instance 의 상태 변경하는 API
+  /api/v1/instance/detail/:instanceUuid:
+    get:
+      consumes:
+      - application/json
+      description: 워크스페이스의 instance 를 추가하는 API 입니다.
+      parameters:
+      - description: instance UUID
+        in: path
+        name: instanceUuid
         required: true
         type: string
       produces:
@@ -127,7 +298,6 @@ paths:
       - description: 사용자 전화번호
         in: path
         name: phone
-        required: true
         type: string
       - description: 사용자 이메일
         in: path
@@ -147,7 +317,6 @@ paths:
       - description: 사용자 직급
         in: path
         name: title
-        required: true
         type: string
       produces:
       - application/json
@@ -165,6 +334,12 @@ paths:
       description: |-
         사용자 상세 조회를 위한 API 입니다.
         해더에 로그인시 생성된 토큰값을 "Authorization" 키값에 넣어주시면 됩니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: username
+        required: true
+        type: string
       produces:
       - application/json
       responses:

@@ -2,36 +2,50 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Workspace struct {
-	Id                                             int
-	Quantity, Postfix                              int
-	Name, Description, Uuid, State, Type           string
-	TemplateOkCheck                                string
-	Shared                                         bool
-	NetworkUuid, ComputeOfferingUuid, TemplateUuid string
-	CreateDate, Removed                            []uint8
+	Id                  int    `json:"id"`
+	Name                string `json:"name"`
+	Description         string `json:"description"`
+	Uuid                string `json:"uuid"`
+	State               string `json:"state"`
+	WorkspaceType       string `json:"workspace_type"`
+	TemplateOkCheck     string `json:"template_ok_check"`
+	Quantity            int    `json:"quantity"`
+	NetworkUuid         string `json:"network_uuid"`
+	ComputeOfferingUuid string `json:"compute_offering_uuid"`
+	TemplateUuid        string `json:"template_uuid"`
+	Postfix             int    `json:"postfix"`
+	Shared              bool   `json:"shared"`
+	CreateDate          string `json:"create_date"`
+	Removed             string `json:"removed"`
 }
 
 type Instance struct {
-	Id                                                     int
-	Name, Uuid, WorkspaceUuid, WindowsUuid, ownerAccountId string
-	Checked, Connected                                     bool
-	CreateDate, Removed                                    []uint8
+	Id             int     `json:"id"`
+	Name           string  `json:"name"`
+	Uuid           string  `json:"uuid"`
+	WorkspaceUuid  string  `json:"workspace_uuid"`
+	WorkspaceName  string  `json:"workspace_name"`
+	MoldUuid       string  `json:"mold_uuid"`
+	Status         string  `json:"status"`
+	OwnerAccountId *string `json:"owner_account_id,omitempty"`
+	Checked        bool    `json:"checked"`
+	Connected      bool    `json:"connected"`
+	CreateDate     string  `json:"create_date"`
+	CheckedDate    *string `json:"checked_date"`
+	Removed        string  `json:"removed"`
 }
 
 func selectWorkspaceList() string {
-	////pageInt, _ := strconv.Atoi(payload["page"].(string))
-	////pageSizeInt, _ := strconv.Atoi(payload["pagesize"].(string))
-	//pageInt = (pageInt - 1) * pageSizeInt
-
-	//log.Info("page=["+strconv.Itoa(pageInt)+"]pageSize=["+strconv.Itoa(pageSizeInt)+"]")
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
 		log.Error("DB connect error")
@@ -40,7 +54,7 @@ func selectWorkspaceList() string {
 	defer db.Close()
 	log.Info("DB connect success")
 
-	rows, err := db.Query("SELECT * FROM workspaces ORDER BY id")
+	rows, err := db.Query("SELECT * FROM workspaces WHERE removed IS NULL ORDER BY id DESC ")
 	if err != nil {
 		log.Error("workspace select query FAILED")
 		log.Error(err.Error())
@@ -83,9 +97,9 @@ func selectWorkspaceDetail(workspaceUuid string) Workspace {
 	log.Info("DB connect success")
 	log.Info(workspaceUuid)
 	workspace := Workspace{}
-	err = db.QueryRow("SELECT id, name, description, uuid, state, type, template_ok_check, quantity, shared, postfix, network_uuid, compute_offering_uuid, template_uuid, create_date FROM workspaces where uuid = ?", workspaceUuid).Scan(
+	err = db.QueryRow("SELECT id, name, description, uuid, state, workspace_type, template_ok_check, quantity, shared, postfix, network_uuid, compute_offering_uuid, template_uuid, create_date FROM workspaces where removed IS NULL AND uuid = ?", workspaceUuid).Scan(
 		&workspace.Id, &workspace.Name, &workspace.Description,
-		&workspace.Uuid, &workspace.State, &workspace.Type,
+		&workspace.Uuid, &workspace.State, &workspace.WorkspaceType,
 		&workspace.TemplateOkCheck, &workspace.Quantity, &workspace.Shared, &workspace.Postfix,
 		&workspace.NetworkUuid, &workspace.ComputeOfferingUuid, &workspace.TemplateUuid,
 		&workspace.CreateDate)
@@ -98,7 +112,7 @@ func selectWorkspaceDetail(workspaceUuid string) Workspace {
 	return workspace
 }
 
-func selectInstanceDetail(instanceUuid string) Instance {
+func selectInstanceDetail(instanceUuid string) (Instance, error) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
 		log.Error("DB connect error")
@@ -108,17 +122,72 @@ func selectInstanceDetail(instanceUuid string) Instance {
 	log.Info(MsgDBConnectOK)
 	log.Info(instanceUuid)
 	instance := Instance{}
-	err = db.QueryRow("SELECT id, name, uuid, workspace_uuid, windows_uuid, owner_account_id, checked, connected, create_date FROM vm_instances where removed IS NULL AND uuid = ?", instanceUuid).Scan(
-		&instance.Id, &instance.Name, &instance.WorkspaceUuid, &instance.WindowsUuid,
-		&instance.ownerAccountId, &instance.Checked, &instance.Connected, &instance.CreateDate)
+	err = db.QueryRow("SELECT vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid, vi.owner_account_id, vi.checked, vi.connected, vi.create_date, w.name AS workspace_name FROM vm_instances as vi LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid WHERE vi.removed IS NULL AND vi.uuid = ?", instanceUuid).Scan(
+		&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
+		&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.CreateDate, &instance.WorkspaceName)
 	if err != nil {
-		log.Error("instance select query FAILED")
+		log.Errorf("instance select query FAILED [%v]", err)
 		log.Error(err.Error())
 	}
 	log.Debugln(instance)
+	return instance, err
+}
+
+func selectInstanceForWorkspace(workspaceUuid string) string {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+	}
+	defer db.Close()
+	log.Info("DB connect success")
+	log.Info(workspaceUuid)
+	queryString := "SELECT vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid, vi.workspace_name, IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date, vi.checked_date, w.name as workspace_name" +
+		" FROM vm_instances AS vi" +
+		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
+		" WHERE vi.removed IS NULL"
+	if workspaceUuid != ALL {
+		queryString = queryString + " AND vi.workspace_uuid = '" + workspaceUuid + "'"
+	}
+	log.Info(queryString)
+	rows, err := db.Query(queryString + " ORDER BY vi.id DESC ")
+	if err != nil {
+		log.Error("vm_instance select query FAILED")
+		log.Error(err.Error())
+	}
+	defer rows.Close()
+
+	result, err := rowsToString(rows)
+	log.Error(result)
 	if err != nil {
 		fmt.Println("err")
 		fmt.Println(err)
+	}
+	return result
+}
+
+func selectInstance(instanceUuid string) Instance {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+	}
+	defer db.Close()
+	log.Info("DB connect success")
+	log.Info(instanceUuid)
+	queryString := "SELECT vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid, IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date, vi.checked_date, w.name as workspace_name, vi.status, vi.create_date" +
+		" FROM vm_instances AS vi" +
+		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
+		" WHERE vi.removed IS NULL"
+	queryString = queryString + " AND vi.uuid = '" + instanceUuid + "'"
+	log.Info(queryString)
+	instance := Instance{}
+	//err1 = db.QueryRow(queryString+" ORDER BY vi.id DESC ").Scan(
+	err1 := db.QueryRow(queryString).Scan(
+		&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid, &instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate, &instance.CheckedDate, &instance.WorkspaceName, &instance.Status, &instance.CreateDate)
+	if err1 != nil {
+		log.Error("vm_instance select query FAILED")
+		log.Error(err1.Error())
 	}
 	return instance
 }
@@ -134,8 +203,8 @@ func insertWorkspace(workspace Workspace) map[string]interface{} {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO workspaces(name, description, uuid, type, network_uuid, compute_offering_uuid, template_uuid, create_date) VALUES (?, ?, ?, ?, ?, ?, ?,  now())",
-		workspace.Name, workspace.Description, workspace.Uuid, workspace.Type, workspace.NetworkUuid, workspace.ComputeOfferingUuid, workspace.TemplateUuid)
+	result, err := db.Exec("INSERT INTO workspaces(name, description, uuid, workspace_type, network_uuid, compute_offering_uuid, template_uuid, create_date) VALUES (?, ?, ?, ?, ?, ?, ?,  NOW())",
+		workspace.Name, workspace.Description, workspace.Uuid, workspace.WorkspaceType, workspace.NetworkUuid, workspace.ComputeOfferingUuid, workspace.TemplateUuid)
 	if err != nil {
 		log.Error("UUID 생성 후 DB Insert 중 오류가 발생하였습니다.")
 		log.Error(err)
@@ -163,8 +232,8 @@ func insertInstance(instance Instance) map[string]interface{} {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO vm_instances(name, uuid, workspace_uuid, create_date) VALUES (?, ?, ?, now())",
-		instance.Name, instance.Uuid, instance.WorkspaceUuid)
+	result, err := db.Exec("INSERT INTO vm_instances(name, uuid, mold_uuid, workspace_uuid, create_date) VALUES (?, ?, ?, ?, NOW())",
+		instance.Name, instance.Uuid, instance.MoldUuid, instance.WorkspaceUuid)
 	if err != nil {
 		log.Error("가상머신 DB Insert 중 오류가 발생하였습니다.")
 		log.Error(err)
@@ -208,6 +277,30 @@ func updateWorkspacePostfix(workspaceUuid string, postfixInt int) map[string]int
 	return resultReturn
 }
 
+func updateWorkspaceQuantity(workspaceUuid string) map[string]interface{} {
+	returnValue := map[string]interface{}{}
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		fmt.Println("DB connect error")
+		fmt.Println(err)
+	}
+	defer db.Close()
+	result1, err := db.Exec("UPDATE workspaces set quantity=(select count(*) from vm_instances where removed is null and workspace_uuid = ?) where uuid=?", workspaceUuid, workspaceUuid)
+	if err != nil {
+		log.Error("워크스페이스 수량 업데이트 쿼리중 에러가 발생했습니다.")
+		log.Error(err)
+		returnValue["message"] = "An error occurred while querying the workspace Quantity update."
+		returnValue["status"] = SQLQueryError
+	}
+	n, err := result1.RowsAffected()
+	if n == 1 {
+		log.Info("워크스페이스 수량이 업데이트 완료가 되었습니다.")
+		returnValue["message"] = "Workspace Quantity update is complete."
+		returnValue["status"] = http.StatusOK
+	}
+	return returnValue
+}
+
 func selectNetworkDetail() string {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
@@ -242,7 +335,88 @@ func selectZoneId() string {
 	return zoneId
 }
 
-func updateWorkspaceAgent(uuid string, asyncJobUuid string, typeString string) map[string]interface{} {
+func updateWorkspaceTemplateCheck(uuid string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "updateWorkspaceTemplateCheck",
+		}).Errorf("DB Connect Error [%v]", err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLConnectError
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updateWorkspaceTemplateCheck",
+	}).Infof("uuid [%v]", uuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", AgentOK, Enable, uuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	log.Debugf("123123123 [%v]", n1)
+	if n1 == 1 {
+		resultReturn["message"] = "workspace template check OK"
+		resultReturn["status"] = http.StatusOK
+	}
+	return resultReturn
+}
+
+func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	resultReturn["status"] = http.StatusUnauthorized
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updateInstanceCheck",
+	}).Infof("uuid [%v]", uuid)
+	defer db.Close()
+
+	loginInfoMap := map[string]interface{}{}
+	logoutInfoMap := map[string]interface{}{}
+	//loc, e := time.LoadLocation("Asia/Seoul")
+	//if e != nil {
+	//	log.Error(e)
+	//}
+	layout := "2006/01/02 15:04:05"
+	connected := 0
+	json.Unmarshal([]byte(loginInfo), &loginInfoMap)
+	json.Unmarshal([]byte(logoutInfo), &logoutInfoMap)
+	loginTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
+	logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
+	log.Infof("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
+	//loginKst := loginTime.In(loc)
+	//logOutKst := logOutTime.In(loc)
+	//log.Infof("Login Time [%v], LogOut Time [%v]", loginKst, logOutKst)
+	if logOutTime.Before(loginTime) {
+		connected = 1
+		log.Infof("connected [%v]", logOutTime.Before(loginTime))
+	}
+	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Running' where uuid=?", connected, uuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+	return resultReturn
+}
+
+func updateInstanceMoldUuid(uuid string, moldUuid string) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -252,33 +426,78 @@ func updateWorkspaceAgent(uuid string, asyncJobUuid string, typeString string) m
 		resultReturn["status"] = BaseErrorCode
 	}
 	log.WithFields(logrus.Fields{
-		"workspaceImpl": "updateWorkspaceAgent",
-	}).Infof("uuid=[%v], asyncJobUuid=[%v], sypeString=[%v]", uuid, asyncJobUuid, typeString)
+		"workspaceImpl": "updateInstanceCheck",
+	}).Infof("uuid [%v]", uuid)
 	defer db.Close()
-	if typeString == WorkspaceString {
-		result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", AgentOK, Enable, uuid)
-		if err != nil {
-			log.Error(MsgDBConnectError)
-			log.Error(err)
-			resultReturn["message"] = MsgDBConnectError
-			resultReturn["status"] = SQLQueryError
-		}
-		n1, _ := result.RowsAffected()
-		if n1 == 1 {
-			updateAsyncJobRead(asyncJobUuid, 1)
-		}
-	} else if typeString == InstanceString {
-		result, err := db.Exec("UPDATE vm_instances set checked=? where uuid=?", 1, uuid)
-		if err != nil {
-			log.Error(MsgDBConnectError)
-			log.Error(err)
-			resultReturn["message"] = MsgDBConnectError
-			resultReturn["status"] = SQLQueryError
-		}
-		n1, _ := result.RowsAffected()
-		if n1 == 1 {
-			updateAsyncJobRead(asyncJobUuid, 1)
-		}
+
+	result, err := db.Exec("UPDATE vm_instances set mold_uuid=? where uuid=?", moldUuid, uuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+	return resultReturn
+}
+
+func deleteInstance(moldUuid string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "deleteInstance",
+	}).Infof("uuid [%v]", moldUuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE vm_instances set removed=NOW() where mold_uuid=?", moldUuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+	return resultReturn
+}
+
+func UpdateInstanceUser(instanceUuid string, userName string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "deleteInstance",
+	}).Infof("instanceUuid [%v], userName[%v]", instanceUuid, userName)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE vm_instances SET owner_account_id=? WHERE uuid=?", userName, instanceUuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
 	}
 
 	return resultReturn

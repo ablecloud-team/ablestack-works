@@ -50,9 +50,12 @@ func main() {
 		err error
 	)
 	setup()
-	DBSetting()   //DB 접속정보 셋팅
-	MoldSetting() //Mold 정보 셋팅
-	DCSetting()   //DC 정보 셋팅
+	DBSetting()        //DB 접속정보 셋팅
+	MoldSetting()      //Mold 정보 셋팅
+	DCSetting()        //DC 정보 셋팅
+	WorksSetting()     //Works-API 정보 셋팅
+	SambaSetting()     //SAMBA 정보 셋팅
+	GuacamoleSetting() //guacamole 정보 셋팅
 
 	router := gin.Default()
 	router.Use(SetHeader)
@@ -74,7 +77,11 @@ func main() {
 
 			v1.GET("/offering", getOffering)
 
+			v1.GET("/instance/:instanceUuid", getInstances)
+			v1.GET("/instance/detail/:instanceUuid", getInstancesDetail)
 			v1.PUT("/instance", putInstances)
+			v1.POST("/instance", postInstances)
+			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
 
 			v1.GET("/version", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
@@ -82,13 +89,19 @@ func main() {
 
 			v1.GET("/logout", getLogout)
 
-			v1.GET("/user:username", getUserDetail)
+			v1.GET("/user/:username", getUserDetail)
 			v1.GET("/user", getUser)
 			v1.PUT("/user", putUser)
+
+			v1.GET("/group", getGroup)
+			v1.GET("/group/:groupName", getGroupDetail)
+			v1.DELETE("/group/:groupName", delGroupDetail)
+			v1.DELETE("/group/:groupName/:userName", delDeleteUserToGroup)
+			v1.PUT("/group/:groupName/:userName", putAddUserToGroup)
 		}
 		test := api.Group("/test")
 		{
-			test.GET("/test", testFunc)
+			test.POST("/test", testFunc)
 		}
 	}
 

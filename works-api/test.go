@@ -6,13 +6,29 @@ import (
 )
 
 func testFunc(c *gin.Context) {
-	params := []MoldParams{
-		{"resourceids": "4a54e716-ebd3-4ee6-99ad-9e7fa90a3131"},
-		{"tags[0].key": "321"},
-		{"tags[0].value": "123"},
-	}
-	result := getCreateTags(params)
+	userName := c.PostForm("userName")
+	uuid := c.PostForm("uuid")
+	log.Infof("username [%v], uuid [%v]", userName, uuid)
+	log.Info(userName)
+	result := insertUserAllocatedInstance(userName, uuid, "")
+	log.Error(result)
+	//log.Error(result.Status)
+	//log.Error(result.Body)
+	//res := map[string]interface{}{}
+	//res1 := map[string]interface{}{}
+	//body, err := ioutil.ReadAll(result.Body)
+	//log.Errorf("error [%v]",err)
+	//json.Unmarshal(body, &res)
+	//log.Error(string(body))
+	//res1["instanceDBInfo"] = result
+	//log.Error(res)
+	//params := []MoldParams{
+	//	{"id": result.MoldUuid},
+	//}
+	//moldInstanceInfo := getListVirtualMachinesMetrics(params)
+	//res1["instanceMoldInfo"] = moldInstanceInfo
 	c.JSON(http.StatusOK, gin.H{
-		"testResult": result,
+
+		"result": result,
 	})
 }
