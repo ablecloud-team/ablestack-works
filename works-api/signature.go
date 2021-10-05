@@ -66,7 +66,8 @@ func makeSignature(payload string) string {
 	hash.Write(message)
 	strHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 	log.Infof("makeSignature payload [%v]\n", payload)
-	return strHash
+	returnString := strings.Replace(strHash, "+", "%2B", -1)
+	return returnString
 }
 
 func getUuid() string {

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -22,11 +23,10 @@ func getWorkspaces(c *gin.Context) {
 	var resultData []Workspace
 	err := json.Unmarshal([]byte(result), &resultData)
 	if err != nil {
-
+		log.Error(err)
 	}
 	returnData["list"] = resultData
 	returnData["listTotalCount"] = selectCountWorkspace()
-	returnData["status"] = http.StatusOK
 
 	c.JSON(http.StatusOK, gin.H{
 		"result": returnData,
@@ -64,11 +64,23 @@ func getWorkspacesDetail(c *gin.Context) {
 	}
 	networkResult := getNetwork(paramsNetwork)
 
+	VMList := selectInstanceForWorkspace(workspaceUuid)
+	var VMListData []Instance
+	err := json.Unmarshal([]byte(VMList), &VMListData)
+	if err != nil {
+	}
+
+	groupDetail, _ := selectGroupDetail(result.Name)
+	var groupData map[string]interface{}
+	json.NewDecoder(groupDetail.Body).Decode(&groupData)
+	if err != nil {
+	}
 	resultReturn["workspaceInfo"] = result
 	resultReturn["templateInfo"] = templateResult
 	resultReturn["serviceOfferingInfo"] = serviceOfferingResult
 	resultReturn["networkInfo"] = networkResult
-	resultReturn["status"] = http.StatusOK
+	resultReturn["vmList"] = VMListData
+	resultReturn["groupDetail"] = groupData
 
 	c.JSON(http.StatusOK, gin.H{
 		"result": resultReturn,
@@ -118,44 +130,55 @@ func getOffering(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 func putWorkspaces(c *gin.Context) {
 	workspace := Workspace{}
-
+	result := map[string]interface{}{}
+	resultCode := http.StatusNotFound
 	workspace.Uuid = getUuid()
 	workspace.Name = c.PostForm("name")
 	workspace.Description = c.PostForm("description")
-	workspace.Type = c.PostForm("type")
+	workspace.WorkspaceType = c.PostForm("type")
 	workspace.TemplateUuid = c.PostForm("templateUuid")
 	workspace.ComputeOfferingUuid = c.PostForm("computeOfferingUuid")
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
-
-	result := insertWorkspace(workspace)
-	//params := []MoldParams{
-	//	{"serviceofferingid": workspace.ComputeOfferingUuid},
-	//	{"templateid": workspace.TemplateUuid},
-	//	{"zoneid": selectZoneId()},
-	//}
-
-	resultDeploy := getDeployVirtualMachine(workspace.Uuid)
-	log.Infof("Mold 통신 결과값 [%v]\n", resultDeploy)
-	if resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["errorcode"] != nil {
-		resultDeploy["status"] = SignatureErrorCode
-		c.JSON(http.StatusOK, gin.H{
-			"result": resultDeploy,
-		})
-	} else {
-		asyncJob := AsyncJob{}
-		asyncJob.Name = VMDestroy
-		asyncJob.ExecUuid = resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
-		asyncJob.Ready = 0
-		asyncJob.Parameter = ""
-		resultAsyncJob := insertAsyncJob(asyncJob)
-
-		c.JSON(http.StatusOK, gin.H{
-			"result":         result,
-			"resultDeploy":   resultDeploy,
-			"resultAsyncJob": resultAsyncJob,
-		})
+	resultInsertGroup, err := insertGroup(workspace.Name)
+	if err != nil {
+		log.Errorf("워크스페이스 그룹 생성 DC API 통신중 에러가 발생했습니다.[%v]", err)
 	}
+	res := map[string]interface{}{}
+	json.NewDecoder(resultInsertGroup.Body).Decode(&res)
+	result["resultInsertGroup"] = res
+	if resultInsertGroup.Status == Created201 {
+		resultInsertWorkspace := insertWorkspace(workspace)
+		log.Info(resultInsertWorkspace)
+		result["insertWorkspace"] = resultInsertWorkspace
+		if resultInsertWorkspace["status"] == http.StatusOK {
+			instanceUuid := getUuid()
+			resultDeploy := getDeployVirtualMachine(workspace.Uuid, instanceUuid, WorkspaceString)
+			log.Infof("Mold 통신 결과값 [%v]\n", resultDeploy)
+			if resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["errorcode"] != nil {
+				result["resultDeploy"] = resultDeploy
+				result["resultDeploy"].(map[string]interface{})["message"] = MessageSignatureError
+			} else {
+				resultSelectWorkspaceDetail := selectWorkspaceDetail(workspace.Uuid)
+				resultPostfixFill := postfixFill(resultSelectWorkspaceDetail.Postfix)
+				instance := Instance{}
+				instance.Uuid = instanceUuid
+				instance.MoldUuid = resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
+				instance.Name = resultSelectWorkspaceDetail.Name + "-" + resultPostfixFill
+				instance.WorkspaceUuid = resultSelectWorkspaceDetail.Uuid
+				instance.WorkspaceName = resultSelectWorkspaceDetail.Name
+				resultInsertInstance := insertInstance(instance)
+				if resultInsertInstance["status"] == http.StatusOK {
+					resultCode = http.StatusOK
+					result["resultInsertDeploy"] = resultInsertInstance
+				}
+			}
+		}
+	}
+
+	c.JSON(resultCode, gin.H{
+		"result": result,
+	})
 }
 
 // putWorkspacesAgent godoc
@@ -170,34 +193,93 @@ func putWorkspaces(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 func putWorkspacesAgent(c *gin.Context) {
 	paramsUuid := c.PostForm("uuid")
-	paramsJobId := c.PostForm("asyncJobId")
 	paramsType := c.PostForm("type")
+	paramsLogin := c.PostForm("login")
+	paramsLogout := c.PostForm("logout")
+	//TODO LOG 테이블 생성및 insert 개발 필요
+	log.Debugf("paramsUuid [%v], paramsType [%v], paramsLogin [%v], paramsLogout [%v]", paramsUuid, paramsType, paramsLogin, paramsLogout)
 	resultReturn := map[string]interface{}{}
+	returnCode := http.StatusUnauthorized
+	if paramsType == WorkspaceString {
+		instanceDetail, _ := selectInstanceDetail(paramsUuid)
+		workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceDetail.WorkspaceUuid)
 
-	resultUpdateWorkspaceAgent := updateWorkspaceAgent(paramsUuid, paramsJobId, paramsType)
-	if resultUpdateWorkspaceAgent["status"] == http.StatusOK {
-		resultDeleteAsyncJob := deleteAsyncJob(paramsJobId)
-		if resultDeleteAsyncJob["status"] == http.StatusOK {
-			resultReturn["asyncDeleteResult"] = resultDeleteAsyncJob
-			if paramsType == InstanceString {
-				resultInstance := selectInstanceDetail(paramsUuid)
-				resultWorkspace := selectWorkspaceDetail(resultInstance.WorkspaceUuid)
-				params := []MoldParams{
-					{"resourceids": paramsUuid},
-					{"tags[0].key": ServiceDaaS},
-					{"tags[0].value": ServiceWorks},
-					{"tags[1].key": WorkspaceName},
-					{"tags[1].value": resultWorkspace.Name},
-				}
-				resultGetCreateTags := getCreateTags(params)
-				resultReturn["resultGetCreateTags"] = resultGetCreateTags
-			}
+		if workspaceTemplateCheck["status"] == http.StatusOK {
+			asyncJob := AsyncJob{}
+			asyncJob.Id = getUuid()
+			asyncJob.Name = VMDestroy
+			asyncJob.ExecUuid = instanceDetail.MoldUuid
+			asyncJob.Ready = 1
+			resultInsertAsyncJob := insertAsyncJob(asyncJob)
+			log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
+			returnCode = http.StatusOK
 		}
-		resultReturn["asyncUpdateResult"] = resultUpdateWorkspaceAgent
+	} else if paramsType == InstanceString {
+		instanceCheck := updateInstanceCheck(paramsUuid, paramsLogin, paramsLogout)
+		if instanceCheck["status"] == http.StatusOK {
+			returnCode = http.StatusOK
+			resultReturn["message"] = MessageAgentUpdateOK
+		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(returnCode, gin.H{
 		"result": resultReturn,
+	})
+}
+
+// getInstances godoc
+// @Summary 워크스페이스의 instance 를 조회하는 API
+// @Description 워크스페이스의 instance 를 조회하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param workspaceUuid path string true "Instance UUID"
+// @Router /api/v1/instance/detail/:instanceUuid [GET]
+// @Success 200 {object} map[string]interface{}
+func getInstances(c *gin.Context) {
+	returnCode := http.StatusOK
+	instanceUuid := c.Param("instanceUuid")
+	result := selectInstanceForWorkspace(instanceUuid)
+	returnData := map[string]interface{}{}
+
+	resultData := []Instance{}
+	err := json.Unmarshal([]byte(result), &resultData)
+	log.Debugf("resultData = [%v], error = [%v]", resultData, err)
+	if err != nil {
+	}
+	returnData["instanceInfo"] = resultData
+	c.JSON(returnCode, gin.H{
+		"result": returnData,
+	})
+}
+
+// getInstancesDetail godoc
+// @Summary 워크스페이스의 instance 를 추가하는 API
+// @Description 워크스페이스의 instance 를 추가하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param instanceUuid path string true "instance UUID"
+// @Router /api/v1/instance/detail/:instanceUuid [GET]
+// @Success 200 {object} map[string]interface{}
+func getInstancesDetail(c *gin.Context) {
+	returnCode := http.StatusOK
+	instanceUuid := c.Param("instanceUuid")
+	resultDBInfo := selectInstance(instanceUuid)
+	log.Info(resultDBInfo)
+	returnData := map[string]interface{}{}
+
+	paramsInstance := []MoldParams{
+		{"id": resultDBInfo.MoldUuid},
+	}
+	paramsVolume := []MoldParams{
+		{"virtualmachineid": resultDBInfo.MoldUuid},
+	}
+	resultMoldInfo := getListVirtualMachinesMetrics(paramsInstance)
+	resultInstanceVolumeInfo := getlistVolumesMetrics(paramsVolume)
+	returnData["instanceDBInfo"] = resultDBInfo
+	returnData["instanceMoldInfo"] = resultMoldInfo
+	returnData["instanceInstanceVolumeInfo"] = resultInstanceVolumeInfo
+	c.JSON(returnCode, gin.H{
+		"result": returnData,
 	})
 }
 
@@ -211,6 +293,7 @@ func putWorkspacesAgent(c *gin.Context) {
 // @Router /api/v1/instance [PUT]
 // @Success 200 {object} map[string]interface{}
 func putInstances(c *gin.Context) {
+	returnCode := http.StatusNotFound
 	uuid := c.PostForm("uuid")
 	quantity, _ := strconv.Atoi(c.PostForm("quantity"))
 	resultReturn := map[string]interface{}{}
@@ -226,15 +309,93 @@ func putInstances(c *gin.Context) {
 	asyncJob.Ready = 1
 	asyncJob.Parameter = strconv.Itoa(quantity)
 	resultInsertAsyncJob := insertAsyncJob(asyncJob)
-	log.Info("qweqweqweqweqweqweqweqweqweqwewqeqweqweqweqwe")
-	log.Info(resultInsertAsyncJob)
-	log.Info("qweqweqweqweqweqweqweqweqweqwewqeqweqweqweqwe")
 	if resultInsertAsyncJob["status"] == http.StatusOK {
 		insertQuantity = insertQuantity + 1
-		resultReturn["status"] = http.StatusOK
+		returnCode = http.StatusOK
 	}
 	resultReturn["message"] = strconv.Itoa(quantity) + " virtual machines have been created and registered in async job."
+	c.JSON(returnCode, gin.H{
+		"result": resultReturn,
+	})
+}
+
+// postInstances godoc
+// @Summary instance 에 사용자를 할당하는 API
+// @Description instance 에 사용자를 할당하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param instanceUuid path string true "Instance UUID"
+// @Param username path string true "Instance 에 할당할 userName"
+// @Router /api/v1/instance [POST]
+// @Success 200 {object} map[string]interface{}
+func postInstances(c *gin.Context) {
+	//returnCode := http.StatusNotFound
+	instanceUuid := c.PostForm("instanceUuid")
+	username := c.PostForm("username")
+	resultReturn := map[string]interface{}{}
+	log.WithFields(logrus.Fields{
+		"workspaceController": "postInstances",
+	}).Infof("uuid=[%v], username=[%v]", instanceUuid, username)
+	resultInstanceInfo := selectInstance(instanceUuid)
+	paramsMold := []MoldParams{
+		{"id": resultInstanceInfo.MoldUuid},
+	}
+	resultMoldInstanceInfo := getListVirtualMachinesMetrics(paramsMold)
+	resultUserInfo := selectUserDBDetail(username)
+	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+	virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
+	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=3389,ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain")
+	resultUserAllocatedInstance := insertUserAllocatedInstance(username, resultInstanceInfo.Name, parameter)
+	log.Debugf("%v", resultUserAllocatedInstance)
+	log.Debugf("[%v]", resultUserAllocatedInstance.Status)
+	UpdateInstanceUser(resultInstanceInfo.Uuid, resultUserInfo.UserName)
+	//if strings.TrimSpace(resultGuacamole.Status) == "200"{
+	//log.Debugf("[%v]","참참참참")
+	//	resultDB := UpdateInstanceUser(uuid, username)
+	//	if resultDB["status"] == http.StatusOK {
+	//		returnCode = http.StatusOK
+	//	}
+	//}
+
 	c.JSON(http.StatusOK, gin.H{
 		"result": resultReturn,
+	})
+}
+
+// patchInstances godoc
+// @Summary instance 의 상태 변경하는 API
+// @Description instance 의 상태를 변경하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다."
+// @Param instanceUuid path string true "Instance UUID"
+// @Router /api/v1/instance/:action/:instanceUuid [PATCH]
+// @Success 200 {object} map[string]interface{}
+func patchInstances(c *gin.Context) {
+	returnCode := http.StatusUnauthorized
+	result := map[string]interface{}{}
+	action := c.Param("action")
+	instanceUuid := c.Param("instanceUuid")
+	log.Debugf("action [%v], instanceUuid [%v]", action, instanceUuid)
+	instance, err := selectInstanceDetail(instanceUuid)
+	if err != nil {
+		c.Abort()
+		return
+	}
+	asyncJob := AsyncJob{}
+	asyncJob.Id = getUuid()
+	asyncJob.Name = action
+	asyncJob.ExecUuid = instance.MoldUuid
+	asyncJob.Ready = 1
+	resultInsertAsyncJob := insertAsyncJob(asyncJob)
+	if resultInsertAsyncJob["status"] == http.StatusOK {
+		returnCode = http.StatusOK
+		result["asyncJobId"] = resultInsertAsyncJob["jobid"]
+		result["message"] = resultInsertAsyncJob["message"]
+	}
+
+	c.JSON(returnCode, gin.H{
+		"result": result,
 	})
 }

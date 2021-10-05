@@ -100,18 +100,31 @@ func getDiskOffering(params []MoldParams) map[string]interface{} {
 	return res
 }
 
-func getDeployVirtualMachine(workspaceUuid string) map[string]interface{} {
+func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instanceType string) map[string]interface{} {
 	var baseurl string = os.Getenv("MoldUrl")
 	workspaceInfo := selectWorkspaceDetail(workspaceUuid)
 	displayName := workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
+	SambaIP := os.Getenv("SambaUrl")
+	SambaDomain := os.Getenv("SambaDomain") + ".local"
+	MyDomain := os.Getenv("SambaDomain")
+	WorksIP := os.Getenv("WorksIp")
+	WorksPort := os.Getenv("WorksPort")
+	VmName := displayName
+	InstanceUuid := instanceUuid
+	Type := instanceType
+	payload := "<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \"" + SambaIP + "\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \"" + SambaDomain + "\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$" + MyDomain + "\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName " + VmName + "\necho '{  \"WorksServer\": \"" + WorksIP + "\",  \"WorksPort\": " + WorksPort + ",  \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'| Out-File -Encoding ascii \"c:\\agent\\conf.json\" \n</powershell>"
+	log.Info(payload)
+	log.Error(workspaceInfo.ComputeOfferingUuid)
 	params := []MoldParams{
 		{"command": "deployVirtualMachine"},
 		{"templateid": workspaceInfo.TemplateUuid},
 		{"displayname": displayName},
-		{"networkids": workspaceInfo.NetworkUuid},
 		{"serviceofferingid": workspaceInfo.ComputeOfferingUuid},
 		{"zoneid": selectZoneId()},
+		{"userdata": baseEncoding(payload)},
 	}
+	//{"userdata": baseEncoding("<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \""+ SambaIP +"\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \""+DCDomanin+"\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$"+MyDomain+"\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName "+displayName+"\necho '{  \"WorksServer\": \""+WorksIP+"\",  \"WorksPort\": "+WorksPort+",  \"Type\": \""+Type+"\", \"UUID\": \""+InstanceUuid+"\"}' > c:\\agent\\conf.json\n\n</powershell>")},
+	//{"networkids": workspaceInfo.NetworkUuid},
 	log.Info("09909090909090909090909090")
 	log.Info(workspaceInfo)
 	log.Info(params)
@@ -164,7 +177,6 @@ func getCreateTags(params []MoldParams) map[string]interface{} {
 	var baseurl string = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "createTags"},
-		{"resourcetype": "UserVm"},
 	}
 	params = append(params, params1...)
 
@@ -199,6 +211,100 @@ func getQueryAsyncJobResult(params []MoldParams) map[string]interface{} {
 	resp, err := http.Get(endUrl)
 	if err != nil {
 		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
+		log.Error(err.Error())
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
+func getStartVirtualMachine(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "startVirtualMachine"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	log.Infof("stringParams = [%v]", stringParams)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.Info("Mold 통신 URL [" + endUrl + "]")
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
+		log.Error(err.Error())
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
+func getStopVirtualMachine(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "stopVirtualMachine"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	log.Infof("stringParams = [%v]", stringParams)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.Info("Mold 통신 URL [" + endUrl + "]")
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
+		log.Error(err.Error())
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
+func getListVirtualMachinesMetrics(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "listVirtualMachinesMetrics"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	log.Infof("stringParams = [%v]", stringParams)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.Info("Mold 통신 URL [" + endUrl + "]")
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.Error("Mold 와 통신에 실패했습니다.(listVirtualMachinesMetrics)")
+		log.Error(err.Error())
+	}
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	log.Infof("%v", res)
+
+	return res
+}
+
+func getlistVolumesMetrics(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "listVolumesMetrics"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	log.Infof("stringParams = [%v]", stringParams)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.Info("Mold 통신 URL [" + endUrl + "]")
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.Error("Mold 와 통신에 실패했습니다.(listVirtualMachinesMetrics)")
 		log.Error(err.Error())
 	}
 	var res map[string]interface{}

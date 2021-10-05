@@ -10,21 +10,13 @@ import (
 	"time"
 )
 
-const (
-	VMStart  = "VMStart"
-	VMsStart = "VMsStart"
-	VMStop   = "VMStop"
-	VMsStop  = "VMsStop"
-	//VMDeploy = "VMDeploy"
-	VMsDeploy  = "VMsDeploy"
-	VMDestroy  = "VMDestroy"
-	VMsDestroy = "VMsDestroy"
-)
-
 type AsyncJob struct {
-	Id, Name, ExecUuid, Parameter string
-	CreateDate                    time.Time
-	Ready                         int
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	ExecUuid   string `json:"exec_uuid"`
+	Parameter  string `json:"parameter"`
+	CreateDate string `json:"create_date"`
+	Ready      int    `json:"ready"`
 }
 
 func asyncJobMonitoring() {
@@ -66,9 +58,13 @@ func asyncJobExec() {
 			{"id": asyncJob.ExecUuid},
 		}
 		result := getDestroyVirtualMachine(params)
-		log.Info(result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"].(string))
-		if result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
+		log.Info(result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"])
+		if result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"] != nil {
 			deleteAsyncJob(asyncJob.Id)
+			deleteInstance(asyncJob.ExecUuid)
+		} else {
+			deleteAsyncJob(asyncJob.Id)
+
 		}
 	} else if asyncJob.Name == VMsDeploy {
 		log.Info("Async Job VMs Deploy Execution.")
@@ -78,8 +74,9 @@ func asyncJobExec() {
 		for i := 1; i <= deployQuantity; i++ {
 			resultSelectWorkspaceDetail := selectWorkspaceDetail(asyncJob.ExecUuid)
 			log.WithFields(logrus.Fields{"asyncJob.go": "resultSelectWorkspaceDetail"}).Infof("%v", resultSelectWorkspaceDetail)
+			instanceUuid := getUuid()
 			for y := 1; y <= 3; y++ {
-				resultGetDeployVirtualMachine := getDeployVirtualMachine(resultSelectWorkspaceDetail.Uuid)
+				resultGetDeployVirtualMachine := getDeployVirtualMachine(resultSelectWorkspaceDetail.Uuid, instanceUuid, InstanceString)
 				log.WithFields(logrus.Fields{"asyncJob.go": "resultGetDeployVirtualMachine"}).Infof("%v", resultGetDeployVirtualMachine)
 				time.Sleep(time.Second * 10)
 				if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"] == nil {
@@ -88,21 +85,22 @@ func asyncJobExec() {
 				} else if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
 					resultPostfixFill := postfixFill(resultSelectWorkspaceDetail.Postfix)
 					instance := Instance{}
-					instance.Uuid = resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
+					instance.Uuid = instanceUuid
+					instance.MoldUuid = resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
 					instance.Name = resultSelectWorkspaceDetail.Name + "-" + resultPostfixFill
 					instance.WorkspaceUuid = resultSelectWorkspaceDetail.Uuid
+					instance.WorkspaceName = resultSelectWorkspaceDetail.Name
 					resultInsertInstance := insertInstance(instance)
 					params := []MoldParams{
 						{"resourceids": instance.Uuid},
+						{"resourcetype": UserVm},
 						{"tags[0].key": ServiceDaaS},
 						{"tags[0].value": AblecloudWorks},
 						{"tags[1].key": WorkspaceName},
 						{"tags[1].value": resultSelectWorkspaceDetail.Name},
 					}
 					aaa := getCreateTags(params)
-					log.Info("00000000000000000000000000000000000")
 					log.Info(aaa)
-					log.Info("00000000000000000000000000000000000")
 
 					updateWorkspacePostfix(resultSelectWorkspaceDetail.Uuid, resultSelectWorkspaceDetail.Postfix)
 
@@ -115,14 +113,34 @@ func asyncJobExec() {
 			if resultFailQuantity == 3 {
 				updateWorkspacePostfix(resultSelectWorkspaceDetail.Uuid, resultSelectWorkspaceDetail.Postfix)
 			}
+			updateWorkspaceQuantity(resultSelectWorkspaceDetail.Uuid)
 		}
 		log.Infof("%v개의 가상머신 async_job 등록이 완료 되었습니다..\n", resultQuantity)
 		deleteAsyncJob(asyncJob.Id)
+	} else if asyncJob.Name == VMStop {
+		params := []MoldParams{
+			{"id": asyncJob.ExecUuid},
+		}
+		resultdata := getStopVirtualMachine(params)
+		log.Info(resultdata)
+		//stopvirtualmachineresponse:map[jobid:ff6e9d7a-63ea-4165-b843-5514b3327fdb]] (/Users/smlee/github/ablestack-desktop/works-api/asyncJ
+		if resultdata["stopvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
+			deleteAsyncJob(asyncJob.Id)
+		}
+	} else if asyncJob.Name == VMStart {
+		params := []MoldParams{
+			{"id": asyncJob.ExecUuid},
+		}
+		resultdata := getStartVirtualMachine(params)
+		log.Info(resultdata)
+		if resultdata["startvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
+			deleteAsyncJob(asyncJob.Id)
+		}
 	}
 	log.Info("Async Job Execution end")
 }
 
-func selectAsyncJob(asyncJobUuid string) (AsyncJob, error) {
+func selectAsyncJob(execUuid string) (AsyncJob, error) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
 		fmt.Println("DB connect error")
@@ -130,7 +148,7 @@ func selectAsyncJob(asyncJobUuid string) (AsyncJob, error) {
 	}
 	defer db.Close()
 	asyncJob := AsyncJob{}
-	err = db.QueryRow("SELECT id, name, exec_uuid, ready, parameter, create_date FROM async_job where id = ?", asyncJobUuid).Scan(&asyncJob.Id, &asyncJob.Name, &asyncJob.ExecUuid, &asyncJob.Ready, &asyncJob.Parameter, &asyncJob.CreateDate)
+	err = db.QueryRow("SELECT id, name, exec_uuid, ready, parameter, create_date FROM async_job where exec_uuid = ?", execUuid).Scan(&asyncJob.Id, &asyncJob.Name, &asyncJob.ExecUuid, &asyncJob.Ready, &asyncJob.Parameter, &asyncJob.CreateDate)
 	log.Info("asyncJob")
 	log.Info(asyncJob)
 
@@ -138,7 +156,6 @@ func selectAsyncJob(asyncJobUuid string) (AsyncJob, error) {
 }
 
 func insertAsyncJob(asyncJob AsyncJob) map[string]interface{} {
-	asyncJob.Id = getUuid()
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -181,7 +198,7 @@ func updateAsyncJobRead(asyncJobUuid string, readyValue int) map[string]interfac
 	defer db.Close()
 	result, err := db.Exec("UPDATE async_job set ready=? where id=?", readyValue, asyncJobUuid)
 	if err != nil {
-		log.Errorf("Async Job 등록중 에러가 발생했습니다.\n")
+		log.Errorf("Async Job 업데이트중 에러가 발생했습니다.\n")
 		log.Errorf("%v\n", err)
 		returnValue["status"] = BaseErrorCode
 		returnValue["message"] = "An error occurred while registering Async Job."
@@ -203,13 +220,13 @@ func deleteAsyncJob(asyncJobUuid string) map[string]interface{} {
 	if err != nil {
 		log.Errorf("%v\n", "DB connect error")
 		log.Errorf("%v\n", err)
-		returnValue["message"] = "DB connect error"
-		returnValue["status"] = BaseErrorCode
+		returnValue["message"] = MsgDBConnectError
+		returnValue["status"] = SQLConnectError
 	}
 	defer db.Close()
 	result, err := db.Exec("DELETE FROM async_job where id =?", asyncJobUuid)
 	if err != nil {
-		log.Error("Async 데이터 삭제에 실패했습니다.")
+		log.Error("Async data deletion failed.")
 		returnValue["message"] = "Async data deletion failed."
 		returnValue["status"] = BaseErrorCode
 	}
