@@ -56,7 +56,7 @@ func setLog(msg ...string) {
 	if !ADconfig.Silent {
 		writers = append(writers, os.Stdout)
 	}
-	file, err := os.OpenFile("logrus.log", os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
+	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
 	if err == nil {
 		writers = append(writers, file)
 	} else {

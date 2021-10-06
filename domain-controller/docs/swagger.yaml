@@ -1,5 +1,20 @@
 basePath: /api/v1
 definitions:
+  main.ADUser:
+    properties:
+      i:
+        description: 구/군/시
+        type: string
+    type: object
+  main.APPVAL:
+    properties:
+      desc:
+        type: string
+      name:
+        type: string
+      path:
+        type: string
+    type: object
   main.errorModel:
     properties:
       msg:
@@ -48,6 +63,27 @@ info:
   title: Ablecloud Works Domain-Controller API
   version: "1.0"
 paths:
+  /app:
+    get:
+      description: 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 목록 표시
+          schema:
+            items:
+              $ref: '#/definitions/main.APPVAL'
+            type: array
+        "401":
+          description: 명령 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: 윈도우 앱 목록
   /cmd/:
     get:
       consumes:
@@ -71,11 +107,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: 로그인 성공
+          description: 명령 성공
           schema:
             $ref: '#/definitions/main.shellReturnModel'
         "401":
-          description: 로그인 실패
+          description: 명령 실패
           schema:
             $ref: '#/definitions/main.errorModel'
         default:
@@ -116,6 +152,28 @@ paths:
             type: objects
       summary: List accounts
   /user:
+    get:
+      consumes:
+      - multipart/form-data
+      description: 사용자 목록 조회
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 생성 성공
+          schema:
+            items:
+              $ref: '#/definitions/main.ADUser'
+            type: array
+        "401":
+          description: 사용자 생성 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: 사용자 목록 조회
     post:
       consumes:
       - multipart/form-data
@@ -160,11 +218,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: 로그인 성공
+          description: 사용자 생성 성공
           schema:
             $ref: '#/definitions/main.userModel'
         "401":
-          description: 로그인 실패
+          description: 사용자 생성 실패
           schema:
             $ref: '#/definitions/main.userModel'
         default:
@@ -172,6 +230,33 @@ paths:
           schema:
             type: objects
       summary: add New User account
+  /user/{username}:
+    get:
+      consumes:
+      - multipart/form-data
+      description: 사용자 목록 조회
+      parameters:
+      - description: 사용자 이름
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 생성 성공
+          schema:
+            $ref: '#/definitions/main.ADUser'
+        "401":
+          description: 사용자 생성 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: objects
+      summary: 사용자 목록 조회
 swagger: "2.0"
 x-extension-openapi:
   example: value on a json format

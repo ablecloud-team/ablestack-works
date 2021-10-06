@@ -72,11 +72,13 @@ var UserAttributes = []string{
 	"c",
 	"co",
 	"memberOf",
+	"member",
 }
 var GroupAttributes = []string{
 	"dn",
 	"cn",
 	"distinguishedName",
+	"member",
 }
 
 //
@@ -112,8 +114,10 @@ func ADsave() (err error) {
 }
 
 func ADinit() (err error) {
-	data, err := os.Open("authconfig.json")
+	conffile:="authconfig.json"
+	data, err := os.Open(conffile)
 	if err != nil {
+		log.Fatalf("Can not find %v file", conffile)
 		return err
 	}
 
@@ -137,9 +141,10 @@ func ADinit() (err error) {
 
 	err2 := ""
 	currentWorkingDirectory, err := os.Getwd()
-
-	data, err = os.Open(fmt.Sprintf("%v/%v/%v",currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST))
+	policyfile := fmt.Sprintf("%v/%v/%v",currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
+	data, err = os.Open(policyfile)
 	if err != nil {
+		log.Fatalf("Can not find %v file, %v", policyfile, err)
 		return err
 	}
 
@@ -402,6 +407,55 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 	}
 }
 
+
+//add Connection
+func addConnection(l *ldap.Conn, user ADUser, connection string, guacparameter []string) (err_ret error) {
+
+	var (
+		err  error
+	)
+	//guacparameter = []string{"hostname=10.1.1.18", "port=3389", "ignore-cert=true", "enable-drive=true ", "create-drive-path=true ", "username=Administrator", "password=Ablecloud1!", "domain=TEST", "drive-name=G", "drive-path=/share"}
+	retuser, err := getUser(l, &USER{Username: user.username})
+	//ou add
+	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=Users,%v", connection, ADconfig.ADbasedn), []ldap.Control{})
+	addReq.Attribute("objectClass", []string{"top", "guacConfigGroup", "groupOfNames"})
+	addReq.Attribute("name", []string{connection})
+	addReq.Attribute("guacConfigProtocol", []string{"rdp"})
+	addReq.Attribute("guacConfigParameter", guacparameter)
+	addReq.Attribute("member", []string{retuser["distinguishedName"].(string)})
+
+	if err = l.Add(addReq); err != nil {
+		log.Errorf("error adding connection:%v [%v]", addReq, err)
+
+		if strings.Contains(err.Error(), "Already Exists") {
+			log.Errorf("[%v]", "Already Exists")
+		}
+	}
+
+	return err
+}
+
+//add Connection
+func delConnection(l *ldap.Conn, connection string) (err_ret error) {
+
+	var (
+		err  error
+	)
+	//guacparameter = []string{"hostname=10.1.1.18", "port=3389", "ignore-cert=true", "enable-drive=true ", "create-drive-path=true ", "username=Administrator", "password=Ablecloud1!", "domain=TEST", "drive-name=G", "drive-path=/share"}
+	delReq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=Users,%v", connection, ADconfig.ADbasedn), []ldap.Control{})
+
+
+	if err = l.Del(delReq); err != nil {
+		log.Errorf("error Deleting connection:%v [%v]", delReq, err)
+
+		if strings.Contains(err.Error(), "Already Exists") {
+			log.Errorf("[%v]", "Already Exists")
+		}
+	}
+
+	return err
+}
+
 //get group info
 func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 	setLog()
@@ -413,7 +467,7 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
 		fmt.Sprintf("(&(cn=%v)(objectclass=group))", group.Groupname),
-		UserAttributes,
+		GroupAttributes,
 		nil)
 
 	sr, err := l.Search(searchRequest)
@@ -430,10 +484,14 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 			log.Infoln(i)
 			log.Infoln(groupEntry.Attributes[i].Name)
 			log.Infoln(groupEntry.Attributes[i].Values)
-			if len(groupEntry.Attributes[i].Values) >= 2 {
+			if groupEntry.Attributes[i].Name == "member"{
 				adgroup[groupEntry.Attributes[i].Name] = groupEntry.Attributes[i].Values
 			} else {
-				adgroup[groupEntry.Attributes[i].Name] = groupEntry.Attributes[i].Values[0]
+				if len(groupEntry.Attributes[i].Values) >= 2 {
+					adgroup[groupEntry.Attributes[i].Name] = groupEntry.Attributes[i].Values
+				} else {
+					adgroup[groupEntry.Attributes[i].Name] = groupEntry.Attributes[i].Values[0]
+				}
 			}
 		}
 		ret, err := json.Marshal(adgroup)
@@ -609,7 +667,8 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP) (group_ ADGROUP, e
 	if err != nil {
 		log.Errorf("error moding group: %v, %v", modReq, err)
 	}
-	return group_, err
+	retgroup,_ := getGroup(l, &GROUP{Groupname: group["groupname"].(string)})
+	return retgroup, err
 }
 
 //delete user from group
@@ -673,9 +732,21 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 			log.Errorf("%v:%T, %v", key, val, val)
 		}
 	}
+
+	log.Infof("Add user Sucess")
 	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
 	if err := l.Add(addReq); err != nil {
-		log.Error("error adding user:", addReq, err)
+		log.Errorf("[error adding user: %v] %v", err,addReq)
+		return err
+	}
+	log.Infof("Add user Sucess")
+
+	log.Infof("[adding user to group:%v, %v]", fmt.Sprintf("cn=%v,cn=Users,%v", user["username"], ADconfig.ADbasedn), "Domain Admins")
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("CN=Domain Admins,CN=Users,%v",  ADconfig.ADbasedn), []ldap.Control{})
+	modReq.Add("member", []string{fmt.Sprintf("cn=%v,cn=Users,%v", user["username"], ADconfig.ADbasedn)})
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
 	}
 	//ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=%v,%v", user["username"], "Users", ADconfig.ADbasedn), []ldap.Control{})
 	return err
@@ -809,7 +880,7 @@ func modUser(l *ldap.Conn, user ADUSER) (user_ ADUSER, err error) {
 }
 
 //user password change
-func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
+func setPassword(l *ldap.Conn, user ADUSER, password string) error {
 	setLog()
 	client := &http.Client{}
 	l = l
@@ -826,7 +897,7 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Errorln(err)
-		return
+		return err
 	}
 	defer func() {
 		if err = resp.Body.Close(); err != nil {
@@ -839,16 +910,21 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) (err error) {
 	if err != nil {
 		log.Errorln(err)
 		log.Errorln(respBody)
-		return
+		return err
 	}
 	var responseData = make(map[string]interface{})
 	err = json.Unmarshal(respBody, &responseData)
 	log.Println("response Status : ", resp.Status)
-	log.Println("response Headers : ", resp.Header)
-	log.Println("response Body : ", string(respBody))
-	log.Println("response Body_parsed : ", responseData)
+	//log.Println("response Headers : ", resp.Header)
+	//log.Println("response Body : ", string(respBody))
+	log.Infof("response Body_parsed : %v", responseData)
+	log.Infof("response stderr %v: %v",  responseData["stderr"] != "", responseData["stderr"])
 	if responseData["stderr"] != "" {
-		return errors.New(fmt.Sprint(responseData["stderr"]))
+
+		errstr:=fmt.Sprint(responseData["stderr"])
+		err = errors.New(errstr)
+		log.Infof("stderr %v",  err)
+		return err
 	}
 	//cmd=string(respBody)
 	return nil

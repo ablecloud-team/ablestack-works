@@ -10,6 +10,9 @@ type USER struct {
 type GROUP struct {
 	Groupname string `uri:"groupname" binding:"required"`
 }
+type CONNECTION struct {
+	Connectionname string `uri:"conname" binding:"required"`
+}
 func login(conn *auth.Conn, id string, pw string) (logged bool, groups []string, isAdmin bool, err error) {
 	setLog()
 	//_, status, err := ConnectAD()

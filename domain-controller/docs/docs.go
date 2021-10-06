@@ -32,6 +32,38 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/app": {
+            "get": {
+                "description": "윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "윈도우 앱 목록",
+                "responses": {
+                    "200": {
+                        "description": "목록 표시",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.APPVAL"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "명령 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "objects"
+                        }
+                    }
+                }
+            }
+        },
         "/cmd/": {
             "get": {
                 "description": "powershell 명령 처리기",
@@ -65,13 +97,13 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "로그인 성공",
+                        "description": "명령 성공",
                         "schema": {
                             "$ref": "#/definitions/main.shellReturnModel"
                         }
                     },
                     "401": {
-                        "description": "로그인 실패",
+                        "description": "명령 실패",
                         "schema": {
                             "$ref": "#/definitions/main.errorModel"
                         }
@@ -134,6 +166,39 @@ var doc = `{
             }
         },
         "/user": {
+            "get": {
+                "description": "사용자 목록 조회",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 목록 조회",
+                "responses": {
+                    "200": {
+                        "description": "사용자 생성 성공",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.ADUser"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 생성 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "objects"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "사용자 생성",
                 "consumes": [
@@ -196,15 +261,56 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "로그인 성공",
+                        "description": "사용자 생성 성공",
                         "schema": {
                             "$ref": "#/definitions/main.userModel"
                         }
                     },
                     "401": {
-                        "description": "로그인 실패",
+                        "description": "사용자 생성 실패",
                         "schema": {
                             "$ref": "#/definitions/main.userModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "objects"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{username}": {
+            "get": {
+                "description": "사용자 목록 조회",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 목록 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "사용자 생성 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.ADUser"
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 생성 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
                         }
                     },
                     "default": {
@@ -218,6 +324,29 @@ var doc = `{
         }
     },
     "definitions": {
+        "main.ADUser": {
+            "type": "object",
+            "properties": {
+                "i": {
+                    "description": "구/군/시",
+                    "type": "string"
+                }
+            }
+        },
+        "main.APPVAL": {
+            "type": "object",
+            "properties": {
+                "desc": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
         "main.errorModel": {
             "type": "object",
             "properties": {

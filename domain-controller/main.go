@@ -59,7 +59,7 @@ func setup() {
 	if !ADconfig.Silent {
 		writers = append(writers, os.Stdout)
 	}
-	file, err := os.OpenFile("logrus.log", os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
+	file, err := os.OpenFile("logrus.log", os.O_CREATE|os.O_APPEND|os.O_RDWR|os.O_SYNC, 0666)
 	if err == nil {
 		writers = append(writers, file)
 	} else {
@@ -153,6 +153,11 @@ func main() {
 			v1.PATCH("/user/:username", setUserPasswordHandler)
 			v1.DELETE("/user/:username", deleteUserHandler)
 
+			//사용자에게 vm 할당
+			//v1.POST("/user/:username", addConnectionHandler)
+			v1.POST("/connection/:conname", addConnectionHandler)
+			v1.DELETE("/connection/:conname", deleteConnectionHandler)
+
 			v1.POST("/group", addGroupHandler)
 			v1.GET("/group", listGroupHandler)
 			v1.GET("/group/:groupname", getGroupHandler)
@@ -214,7 +219,7 @@ func main() {
 	}).Infof("Starting application")
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-	err = router.Run("0.0.0.0:8084")
+	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
 }
 

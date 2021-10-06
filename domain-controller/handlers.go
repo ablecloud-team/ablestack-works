@@ -21,8 +21,8 @@ type shellReturnModel struct{
 // @Param cmd query string true "명령어"
 // @Param arg query string false "인자"
 // @Param timeout query int false "시간제한, 기본값"
-// @Success 200 {object} shellReturnModel "로그인 성공"
-// @Failure 401 {object} errorModel "로그인 실패"
+// @Success 200 {object} shellReturnModel "명령 성공"
+// @Failure 401 {object} errorModel "명령 실패"
 // @Failure default {objects} string
 // @Router /cmd/ [get]
 func exeShellHandler(c *gin.Context) {
@@ -30,14 +30,14 @@ func exeShellHandler(c *gin.Context) {
 	var (
 		pscmd PSCMD
 		stdout string
-	stderr string
+		stderr string
 	)
 	if err := c.Bind(&pscmd); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"msg": err})
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "입력 오류", Target: err.Error()})
 		return
 	}
 	if pscmd.CMD == "" {
-		c.JSON(http.StatusNotFound, gin.H{"msg": "Command not found"})
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Command not found", Target: "powershell"})
 		return
 	}
 	if pscmd.TIMEOUT == 0 {
@@ -71,6 +71,16 @@ func exeShellHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, shellReturnModel{Stdout: stdout, Stderr: stderr})
 	return
 }
+
+
+// appListHandler godoc
+// @Summary 윈도우 앱 목록
+// @Description 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
+// @Produce  json
+// @Success 200 {object} []APPVAL "목록 표시"
+// @Failure 401 {object} errorModel "명령 실패"
+// @Failure default {objects} string
+// @Router /app [get]
 func appListHandler(c *gin.Context) {
 	setLog()
 	shell, _ := setupShell()
@@ -101,6 +111,7 @@ type errorModel struct{
 	Msg string `json:"msg"`
 	Target string `json:"target"`
 }
+
 // loginHandler godoc
 // @Summary List accounts
 // @Description 사용자 로그인 체크
@@ -156,8 +167,8 @@ func loginHandler(c *gin.Context) {
 // @Param givenName formData string true "이름"
 // @Param sn formData string true "성"
 // @Param title formData string true "직급"
-// @Success 200 {object} userModel "로그인 성공"
-// @Failure 401 {object} userModel "로그인 실패"
+// @Success 200 {object} userModel "사용자 생성 성공"
+// @Failure 401 {object} userModel "사용자 생성 실패"
 // @Failure default {objects} string
 // @Router /user [post]
 func addUserHandler(c *gin.Context) {
@@ -204,6 +215,13 @@ func addUserHandler(c *gin.Context) {
 	err = addUser(l, user)
 	if err != nil {
 		log.Errorln(err)
+		if strings.Contains(err.Error(), "Exists"){
+			c.JSON(http.StatusConflict, errorModel{
+				Msg: err.Error(),
+				Target: userID,
+			})
+			return
+		}
 		err2 := delUser(l, user)
 		if err2 != nil {
 			return
@@ -232,6 +250,17 @@ func addUserHandler(c *gin.Context) {
 		Msg:	"OK",
 	})
 }
+
+
+// listUserHandler godoc
+// @Summary 사용자 목록 조회
+// @Description 사용자 목록 조회
+// @Accept  multipart/form-data
+// @Produce  json
+// @Success 200 {object} []ADUser "사용자 생성 성공"
+// @Failure 401 {object} errorModel "사용자 생성 실패"
+// @Failure default {objects} string
+// @Router /user [get]
 func listUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -245,19 +274,28 @@ func listUserHandler(c *gin.Context) {
 	l := conn.Conn
 	//l, err := setupLdap()
 	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"err": err.Error(),
-		})
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "listuser"})
 		return
 
 	}
 	u := listUser(l)
-	c.JSON(http.StatusGone, u)
+	c.JSON(http.StatusOK, u)
 	return /*gin.H{
 		"userID": 1,
 		"username": user.Username,
 	})*/
 }
+
+// getUserHandler godoc
+// @Summary 사용자 목록 조회
+// @Description 사용자 목록 조회
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param username path string true "사용자 이름"
+// @Success 200 {object} ADUser "사용자 생성 성공"
+// @Failure 401 {object} errorModel "사용자 생성 실패"
+// @Failure default {objects} string
+// @Router /user/{username} [get]
 func getUserHandler(c *gin.Context) {
 
 	setLog()
@@ -275,10 +313,7 @@ func getUserHandler(c *gin.Context) {
 	err = c.ShouldBindUri(&user)
 	u, err := getUser(l, &user)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"username": user.Username,
-			"err":      err.Error(),
-		})
+		c.JSON(http.StatusNotFound, errorModel{Msg: err.Error(), Target: user.Username})
 		return
 	} else {
 		isAdmin, _ := inGroup(conn, user.Username, "Administrators")
@@ -289,6 +324,8 @@ func getUserHandler(c *gin.Context) {
 	}
 
 }
+
+
 func setUserHandler(c *gin.Context) {
 
 	setLog()
@@ -339,13 +376,13 @@ func setUserPasswordHandler(c *gin.Context) {
 	err = c.ShouldBindUri(&user_)
 	user["username"] = user_.Username
 
-	err = setPassword(l, user, c.PostForm("password"))
-	if err != nil {
-		log.Errorln(err)
+	err2 := setPassword(l, user, c.PostForm("password"))
+	log.Errorf("passworderr: %v",err2)
+	if err2 != nil {
 		c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
 			"userID":   1,
 			"username": user["username"],
-			"msg":      err.Error(),
+			"msg":      err2.Error(),
 		})
 		return
 	}
@@ -391,12 +428,14 @@ func deleteUserHandler(c *gin.Context) {
 func addGroupHandler(c *gin.Context) {
 	setLog()
 
-	tmpval, err := c.MultipartForm()
+	tmpval := c.PostForm("groupname")
+	log.Infof("%v, %v", tmpval)
 	addgroup := make(map[string][]string)
-	for key, val := range tmpval.Value {
-		addgroup[key] = val
-	}
-
+	//for key, val := range tmpval.Value {
+	//	addgroup[key] = val
+	//}
+	addgroup["groupname"] = []string{tmpval}
+	//log.Infof("%v, %v", tmpval, addgroup)
 	conn, status, err := ConnectAD()
 	defer conn.Conn.Close()
 	if err != nil {
@@ -436,9 +475,192 @@ func addGroupHandler(c *gin.Context) {
 	//u := listUser(l)
 	addstr, _ = json.Marshal(addgroup)
 	log.Infof(string(addstr))
-	c.JSON(http.StatusGone, addgroup)
+	c.JSON(http.StatusCreated, addgroup)
 	return
 }
+
+
+
+//func addConnectionHandler(c *gin.Context) {
+//	setLog()
+//
+//	var user2 USER
+//	err := c.ShouldBindUri(&user2)
+//
+//	connection := c.PostForm("connection")
+//	guacparameterval := c.PostForm("parameter")
+//	log.Infof("%v, %v", user2, guacparameterval)
+//	guacparameter := strings.Split(guacparameterval, ",")
+//	user := ADUser{username: user2.Username}
+//
+//	conn, status, err := ConnectAD()
+//	defer conn.Conn.Close()
+//	if err != nil {
+//		log.Errorf("connection failed:[%v]", err)
+//	}
+//	if !status {
+//		log.Errorf("connection failed:[%v]", status)
+//	}
+//	l := conn.Conn
+//
+//
+//	if user.username != "" && connection != "" && guacparameterval != ""{
+//		err = addConnection(l, user, connection, guacparameter)
+//		if err != nil {
+//			log.Infof("%v", err.Error())
+//
+//			c.JSON(http.StatusServiceUnavailable, gin.H{
+//				"err": err.Error(),
+//			})
+//			return
+//		}
+//	} else if user.username == "" {
+//		c.JSON(http.StatusServiceUnavailable, gin.H{
+//			"err": "username is not provided",
+//		})
+//		return
+//	} else if connection == "" {
+//		c.JSON(http.StatusServiceUnavailable, gin.H{
+//			"err": "connection is not provided",
+//		})
+//		return
+//	} else if guacparameterval == "" {
+//		c.JSON(http.StatusServiceUnavailable, gin.H{
+//			"err": "parameter is not provided",
+//		})
+//		return
+//	} else {
+//		c.JSON(http.StatusServiceUnavailable, gin.H{
+//			"err": "Unknown Error",
+//		})
+//		return
+//
+//	}
+//	//u := listUser(l)
+//	//addstr, _ = json.Marshal(addgroup)
+//	//log.Infof(string(addstr))
+//	c.JSON(http.StatusCreated, "Connection Created")
+//	return
+//}
+
+
+func addConnectionHandler(c *gin.Context) {
+	setLog()
+
+	var Connection CONNECTION
+	err := c.ShouldBindUri(&Connection)
+
+	username := c.PostForm("username")
+	guacparameterval := c.PostForm("parameter")
+	log.Infof("%v, %v", username, guacparameterval)
+	guacparameter := strings.Split(guacparameterval, ",")
+	user := ADUser{username: username}
+	connection := Connection.Connectionname
+
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorf("connection failed:[%v]", err)
+	}
+	if !status {
+		log.Errorf("connection failed:[%v]", status)
+	}
+	l := conn.Conn
+
+
+	if user.username != "" && connection != "" && guacparameterval != ""{
+		err = addConnection(l, user, connection, guacparameter)
+		if err != nil {
+			log.Infof("%v", err.Error())
+
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"err": err.Error(),
+			})
+			return
+		}
+	} else if user.username == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "username is not provided",
+		})
+		return
+	} else if connection == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "connection is not provided",
+		})
+		return
+	} else if guacparameterval == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "parameter is not provided",
+		})
+		return
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "Unknown Error",
+		})
+		return
+
+	}
+	//u := listUser(l)
+	//addstr, _ = json.Marshal(addgroup)
+	//log.Infof(string(addstr))
+	c.JSON(http.StatusCreated, "Connection Created")
+	return
+}
+
+
+func deleteConnectionHandler(c *gin.Context) {
+	setLog()
+
+	var Connection CONNECTION
+	err := c.ShouldBindUri(&Connection)
+
+	connection := Connection.Connectionname
+
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorf("connection failed:[%v]", err)
+	}
+	if !status {
+		log.Errorf("connection failed:[%v]", status)
+	}
+	l := conn.Conn
+
+
+	if connection != "" {
+		err = delConnection(l,  connection)
+		if err != nil {
+			log.Infof("%v", err.Error())
+
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"err": err.Error(),
+			})
+			return
+		}
+	} else if connection == "" {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "connection is not provided",
+		})
+		return
+	} else {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"err": "Unknown Error",
+		})
+		return
+
+	}
+	//u := listUser(l)
+	//addstr, _ = json.Marshal(addgroup)
+	//log.Infof(string(addstr))
+	c.JSON(http.StatusCreated, "Connection Created")
+	return
+}
+
+
+
+
+
+
 func listGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -459,7 +681,7 @@ func listGroupHandler(c *gin.Context) {
 
 	}
 	u := searchGroup(l)
-	c.JSON(http.StatusGone, u)
+	c.JSON(http.StatusOK, u)
 	return
 }
 func getGroupHandler(c *gin.Context) {
@@ -555,9 +777,29 @@ func addUserToGroupHandler(c *gin.Context){
 
 
 	group_, err := addUserToGroup(l, aduser, adgroup)
-
-	c.JSON(http.StatusAccepted, group_)
-	return
+	log.Infof("add user group: %v", group_)
+	log.Infof("add user group: %v", err)
+	if err == nil{
+		log.Infof("add user group: %v", group_)
+		c.JSON(http.StatusAccepted, group_)
+		return
+	} else if err.Error() == "Not Found"{
+		log.Errorf("add user error: %v", err)
+		c.JSON(http.StatusBadRequest,errorModel{Msg: "User Not found", Target: user.Username})
+		return
+	} else if strings.Contains(err.Error(), "No Such Object") {
+		log.Errorf("add user error: %v", err)
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Group Not found", Target: group.Groupname})
+		return
+	} else if strings.Contains(err.Error(), "Entry Already Exists"){
+		log.Errorf("add user error: %v", err)
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Already Exists", Target: fmt.Sprintf("%v@%v", user.Username,group.Groupname)})
+		return
+	} else if err != nil{
+		log.Errorf("add user error: %v", err)
+		c.JSON(http.StatusBadRequest,errorModel{Msg: "Unknown error", Target: "addUserToGroup"})
+		return
+	}
 }
 
 func deleteUserFromGroupHandler(c *gin.Context){

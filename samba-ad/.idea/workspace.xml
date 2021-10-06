@@ -5,31 +5,49 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Abledc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/authconfig.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../LdapAdmin.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build.ps1" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/container/entrypoint.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/container/samba-ad" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/container/samba-ad.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/container/samba_run.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/agent.exe" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/conf.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/go.mod" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/go.sum" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/logrus.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/main.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/psutil.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../windows-agent/utils.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/Abledc" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/Abledc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/Abledc.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/Abledc.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/go_build_domain_controller.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/go_build_domain_controller.exe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/handlers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/logrus.log" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/logrus.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/container/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.sh" beforeDir="false" afterPath="$PROJECT_DIR$/container/samba_config.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.17" />
+  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.6" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/main.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/users.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/utils.go" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/main.go" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectId" id="1wCn0CkRCZ9t3lShKP3cscmH5yo" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -48,23 +66,18 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/container" />
     <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\Documents\GitHub\ablestack-desktop\samba-ad" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\user\Documents\GitHub\ablestack-desktop\samba-ad\container" />
+    </key>
   </component>
   <component name="RunManager" selected="Go Build.go build samba-ad linux">
-    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="samba-ad" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="FILE" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
     <configuration name="go build samba-ad linux" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
@@ -77,7 +90,7 @@
       <package value="samba-ad" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <output_directory value="$PROJECT_DIR$" />
+      <output_directory value="$PROJECT_DIR$/container" />
       <option name="run" value="false" />
       <method v="2" />
     </configuration>
@@ -89,15 +102,6 @@
       <package value="samba-ad" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
-      <method v="2" />
-    </configuration>
-    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
-      <module name="samba-ad" />
-      <working_directory value="$PROJECT_DIR$" />
-      <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <list>
