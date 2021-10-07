@@ -19,6 +19,7 @@ const (
 	WorkspaceName   = "WorkspaceName"
 	AblecloudWorks  = "Ablecloud.Works"
 	AgentOK         = "AgentOK"
+	AgentCheck      = "AgentCheck"
 	Enable          = "Enable"
 	Disable         = "Disable"
 	UserVm          = "UserVm"

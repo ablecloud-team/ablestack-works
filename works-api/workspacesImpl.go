@@ -330,7 +330,7 @@ func selectZoneId() string {
 	return zoneId
 }
 
-func updateWorkspaceTemplateCheck(uuid string) map[string]interface{} {
+func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -345,7 +345,7 @@ func updateWorkspaceTemplateCheck(uuid string) map[string]interface{} {
 	}).Infof("uuid [%v]", uuid)
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", AgentOK, Enable, uuid)
+	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", typeString, Enable, uuid)
 	if err != nil {
 		log.Error(MsgDBConnectError)
 		log.Error(err)
@@ -373,7 +373,7 @@ func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[s
 	}
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "updateInstanceCheck",
-	}).Infof("uuid [%v]", uuid)
+	}).Debugf("uuid [%v]", uuid)
 	defer db.Close()
 
 	loginInfoMap := map[string]interface{}{}
@@ -390,10 +390,10 @@ func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[s
 	}
 	loginTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
 	logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
-	log.Infof("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
+	log.Debugf("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
 	if logOutTime.Before(loginTime) {
 		connected = 1
-		log.Infof("connected [%v]", logOutTime.Before(loginTime))
+		log.Debugf("connected [%v]", logOutTime.Before(loginTime))
 	}
 	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Ready' where uuid=?", connected, uuid)
 	if err != nil {

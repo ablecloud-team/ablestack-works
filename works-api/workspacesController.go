@@ -227,20 +227,27 @@ func putWorkspacesAgent(c *gin.Context) {
 	returnCode := http.StatusUnauthorized
 	if paramsType == WorkspaceString {
 		instanceList, _ := selectInstanceList(paramsUuid, InstanceString)
-		instanceInfo := instanceList[0]
-		workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid)
+		if instanceList == nil {
+			log.Errorf("Instance 조회결과가 없습니다.")
+			returnCode = http.StatusNotFound
+			resultReturn["message"] = "There are no instance search results."
+		} else {
+			instanceInfo := instanceList[0]
+			workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, AgentOK)
 
-		if workspaceTemplateCheck["status"] == http.StatusOK {
-			asyncJob := AsyncJob{}
-			asyncJob.Id = getUuid()
-			asyncJob.Name = VMDestroy
-			asyncJob.ExecUuid = instanceInfo.Uuid
-			asyncJob.Ready = 1
-			resultInsertAsyncJob := insertAsyncJob(asyncJob)
-			log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
-			updateWorkspacePostfix(instanceInfo.WorkspaceUuid, 0)
-			returnCode = http.StatusOK
+			if workspaceTemplateCheck["status"] == http.StatusOK {
+				asyncJob := AsyncJob{}
+				asyncJob.Id = getUuid()
+				asyncJob.Name = VMDestroy
+				asyncJob.ExecUuid = instanceInfo.Uuid
+				asyncJob.Ready = 1
+				resultInsertAsyncJob := insertAsyncJob(asyncJob)
+				log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
+				updateWorkspacePostfix(instanceInfo.WorkspaceUuid, 0)
+				returnCode = http.StatusOK
+			}
 		}
+
 	} else if paramsType == InstanceString {
 		instanceCheck := updateInstanceCheck(paramsUuid, paramsLogin, paramsLogout)
 		if instanceCheck["status"] == http.StatusOK {
@@ -346,16 +353,18 @@ func putInstances(c *gin.Context) {
 	log.WithFields(logrus.Fields{
 		"workspaceController": "putInstances",
 	}).Infof("uuid [%v], quantity [%v]", workspaceUuid, quantity)
-	asyncJob := AsyncJob{}
-	asyncJob.Id = getUuid()
-	asyncJob.Name = VMsDeploy
-	asyncJob.ExecUuid = workspaceUuid
-	asyncJob.Ready = 1
-	asyncJob.Parameter = strconv.Itoa(quantity)
-	resultInsertAsyncJob := insertAsyncJob(asyncJob)
-	if resultInsertAsyncJob["status"] == http.StatusOK {
-		insertQuantity = insertQuantity + 1
-		returnCode = http.StatusOK
+	for i := 0; i < quantity; i++ {
+		asyncJob := AsyncJob{}
+		asyncJob.Id = getUuid()
+		asyncJob.Name = VMsDeploy
+		asyncJob.ExecUuid = workspaceUuid
+		asyncJob.Ready = 1
+		asyncJob.Parameter = "1"
+		resultInsertAsyncJob := insertAsyncJob(asyncJob)
+		if resultInsertAsyncJob["status"] == http.StatusOK {
+			insertQuantity = insertQuantity + 1
+			returnCode = http.StatusOK
+		}
 	}
 	resultReturn["message"] = strconv.Itoa(quantity) + " virtual machines have been created and registered in async job."
 	c.JSON(returnCode, gin.H{

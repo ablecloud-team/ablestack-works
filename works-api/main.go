@@ -43,7 +43,7 @@ func setup() {
 		CallerFirst: false,
 	})
 	log.SetReportCaller(true)
-	log.SetLevel(logrus.DebugLevel)
+	log.SetLevel(logrus.InfoLevel)
 }
 func main() {
 	var (
