@@ -25,6 +25,8 @@ import {
   DeleteFilled,
   UserOutlined,
   PoweroffOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
   ReloadOutlined,
   SyncOutlined,
   CameraOutlined,
@@ -59,6 +61,8 @@ import {
   DownloadOutlined,
   Html5Outlined,
   UsergroupAddOutlined,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -68,6 +72,8 @@ app.component("HomeFilled", HomeFilled);
 app.component("DeleteFilled", DeleteFilled);
 app.component("UserOutlined", UserOutlined);
 app.component("PoweroffOutlined", PoweroffOutlined);
+app.component("UserAddOutlined", UserAddOutlined);
+app.component("UserDeleteOutlined", UserDeleteOutlined);
 app.component("ReloadOutlined", ReloadOutlined);
 app.component("SyncOutlined", SyncOutlined);
 app.component("CameraOutlined", CameraOutlined);
@@ -101,7 +107,8 @@ app.component("StarOutlined", StarOutlined);
 app.component("AppstoreAddOutlined", AppstoreAddOutlined);
 app.component("DownloadOutlined", DownloadOutlined);
 app.component("Html5Outlined", Html5Outlined);
-app.component("Html5Outlined", UsergroupAddOutlined);
-
+app.component("UsergroupAddOutlined", UsergroupAddOutlined);
+app.component("ArrowUpOutlined", ArrowUpOutlined);
+app.component("ArrowDownOutlined", ArrowDownOutlined);
 
 app.use(i18n).use(store).use(router).use(Antd).mount("#app");

@@ -19,7 +19,7 @@
                 <!--Start-->
                 <a-tooltip
                   v-if="vmDbDataInfo.status === 'Stopped'"
-                  placement="top"
+                  placement="bottom"
                 >
                   <template #title>{{ $t("tooltip.start") }}</template>
                   <a-button
@@ -31,8 +31,8 @@
                 </a-tooltip>
                 <!--Stop-->
                 <a-tooltip
-                  v-if="vmDbDataInfo.status === 'Running'"
-                  placement="top"
+                  v-if="vmMoldDataInfo.state === 'Running'"
+                  placement="bottom"
                 >
                   <template #title>{{ $t("tooltip.stop") }}</template>
                   <a-button
@@ -44,7 +44,7 @@
                 </a-tooltip>
                 <a-tooltip
                   v-if="vmDbDataInfo.owner_account_id === ''"
-                  placement="top"
+                  placement="bottom"
                 >
                   <template #title>{{ $t("tooltip.userAllocate") }}</template>
                   <a-button
@@ -56,7 +56,7 @@
                 </a-tooltip>
                 <a-tooltip
                   v-if="vmDbDataInfo.owner_account_id !== ''"
-                  placement="top"
+                  placement="bottom"
                 >
                   <template #title>{{ $t("tooltip.userUnlock") }}</template>
                   <a-button
@@ -67,7 +67,7 @@
                   </a-button>
                 </a-tooltip>
                 <!--Destroy-->
-                <a-tooltip placement="top">
+                <a-tooltip placement="bottom">
                   <template #title>{{ $t("tooltip.destroy") }}</template>
                   <a-button
                     type="primary"
@@ -265,7 +265,7 @@ export default defineComponent({
       //console.log(this.selectedUser + "  ::  " + uuid + "  :: " + workspace);
       let params = new URLSearchParams();
       params.append("instanceUuid", this.$route.params.uuid);
-      params.append("userName", this.selectedUser);
+      params.append("username", this.selectedUser);
       worksApi
         .post("/api/v1/instance", params)
         .then((response) => {

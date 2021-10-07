@@ -66,26 +66,30 @@
         <MoreOutlined />
       </a-Popover>
     </template>
-    <template #stateRender="{ record }">
+    <template #vmStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.status == 'Running' ? 'green' : 'red'"
+        :color="record.mold_status == 'Running' ? 'green' : 'red'"
+        :text="record.mold_status"
+      />
+    </template>
+    <template #vmReadyStateRender="{ record }">
+      <a-badge
+        class="head-example"
+        :color="record.checked === true ? 'green' : 'red'"
         :text="record.status"
       />
     </template>
     <template #userRender="{ record }">
-      {{
+      <!-- {{
         record.owner_account_id === ""
           ? $t("label.owner.account.false")
           : record.owner_account_id
-      }}
+      }} -->
+      {{ record.owner_account_id }}
     </template>
-    <template #connRender="{ record }">
-      {{
-        record.connected == false
-          ? $t("label.connect.false")
-          : $t("label.connect.true")
-      }}
+    <template #sessionRender="{ record }">
+      {{ record.connected }}
     </template>
   </a-table>
 </template>
@@ -144,7 +148,7 @@ export default defineComponent({
           title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "32%",
+          width: "20%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -172,20 +176,10 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t("label.state"),
-          dataIndex: "status",
-          key: "status",
-          width: "15%",
-          sorter: (a, b) =>
-            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-          slots: { customRender: "stateRender" },
-        },
-        {
           title: this.$t("label.workspace"),
           dataIndex: "workspace_name",
           key: "workspace_name",
-          width: "25%",
+          width: "20%",
           sorter: (a, b) =>
             a.workspace_name < b.workspace_name
               ? -1
@@ -210,21 +204,42 @@ export default defineComponent({
           slots: { customRender: "userRender" },
         },
         {
-          title: this.$t("label.desktop.connect.boolean"),
+          title: this.$t("label.vm.state"),
+          dataIndex: "status",
+          key: "status",
+          width: "10%",
+          sorter: (a, b) =>
+            a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+          slots: { customRender: "vmStateRender" },
+        },
+        {
+          title: this.$t("label.vm.ready.state"),
+          dataIndex: "status",
+          key: "status",
+          width: "10%",
+          sorter: (a, b) =>
+            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+          slots: { customRender: "vmReadyStateRender" },
+        },
+        {
+          title: this.$t("label.vm.session.count"),
           dataIndex: "connected",
           key: "connected",
-          width: "15%",
+          width: "10%",
           sorter: (a, b) =>
             a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "connRender" },
+          slots: { customRender: "sessionRender" },
         },
       ],
     };
   },
   created() {
     this.fetchData();
-    this.timer = setInterval(() => { //10초 자동 갱신
+    this.timer = setInterval(() => {
+      //10초 자동 갱신
       this.fetchData();
     }, 15000);
   },

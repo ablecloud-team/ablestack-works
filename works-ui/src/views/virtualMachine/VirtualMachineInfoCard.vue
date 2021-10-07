@@ -12,11 +12,11 @@
     </div>
   </div>
   <div id="Status" class="CardItem">
-    <div class="ItemName">{{ $t("label.state") }}</div>
+    <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
     <div class="Item">
       <a-badge
         class="head-example"
-        :color="vmDbDataInfo.status == 'Running' ? 'green' : 'red'"
+        :color="vmDbDataInfo.status == 'Ready' ? 'green' : 'red'"
         :text="vmDbDataInfo.status"
       />
     </div>
