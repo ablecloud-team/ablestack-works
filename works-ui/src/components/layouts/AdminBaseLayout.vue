@@ -3,6 +3,8 @@
     <a-layout-sider
       class="admin-sider-layout"
       width="280"
+      breakpoint="lg"
+      collapsed-width="80"
       v-model:collapsed="state.collapsed" :trigger="null" collapsible
     >
       <AdminSider :collapsed="state.collapsed"/>
