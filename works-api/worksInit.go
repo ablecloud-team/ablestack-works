@@ -75,12 +75,14 @@ func MoldSetting() {
 	postfix := moldValue["mold.default.url.postfix"].(string)
 	apiKey := moldValue["mold.default.api.key"].(string)
 	secretKey := moldValue["mold.default.secret.key"].(string)
+	domainId := moldValue["mold.default.domain.id"].(string)
 	log.WithFields(logrus.Fields{
 		"worksInit": "MoldSetting",
 	}).Infof("Set Mold URL [%v%v%v%v]", protocol, url, port, postfix)
 	os.Setenv("MoldUrl", protocol+url+port+postfix)
 	os.Setenv("MoldApiKey", apiKey)
 	os.Setenv("MoldSecretKey", secretKey)
+	os.Setenv("MoldDomainId", domainId)
 }
 
 func DCSetting() {

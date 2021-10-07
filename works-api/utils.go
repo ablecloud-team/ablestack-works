@@ -117,7 +117,7 @@ func RegexpPassword(payload string) bool {
 }
 
 func postfixFill(value int) string {
-	return fmt.Sprintf("%06d", value)
+	return fmt.Sprintf("%03d", value)
 }
 
 func baseEncoding(payload string) string {

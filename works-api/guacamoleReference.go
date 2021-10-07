@@ -220,7 +220,8 @@ func insertGuacamoleVMAllocateUser(username string, instanceUuid string) *http.R
 	var guacamoleUsername = os.Getenv("GuacamoleUsername")
 	resource := "/guacamole/api/session/data/mysql/connections"
 	token := "?token=" + getGuacamoleToken()
-	instanceInfo, _ := selectInstanceDetail(instanceUuid)
+	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
+	instanceInfo := instanceList[0]
 	guacamoleConnections := GuacamoleConnections{}
 	//guacamoleConnections.Parameters.ReadOnly = ""
 	//guacamoleConnections.Parameters.SwapRedBlue = ""

@@ -101,9 +101,16 @@ func getDiskOffering(params []MoldParams) map[string]interface{} {
 }
 
 func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instanceType string) map[string]interface{} {
+	log.Infof("getDeployVirtualMachine payload workspaceUuid [%v], instanceUuid [%v], instanceType [%v]", workspaceUuid, instanceUuid, instanceType)
 	var baseurl string = os.Getenv("MoldUrl")
-	workspaceInfo := selectWorkspaceDetail(workspaceUuid)
-	displayName := workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
+	workspaceList, _ := selectWorkspaceList(workspaceUuid)
+	workspaceInfo := workspaceList[0]
+	var displayName string
+	if workspaceInfo.Postfix == 0 {
+		displayName = workspaceInfo.Name + "-deploy-testVM"
+	} else {
+		displayName = workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
+	}
 	SambaIP := os.Getenv("SambaUrl")
 	SambaDomain := os.Getenv("SambaDomain") + ".local"
 	MyDomain := os.Getenv("SambaDomain")
@@ -112,9 +119,22 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 	VmName := displayName
 	InstanceUuid := instanceUuid
 	Type := instanceType
-	payload := "<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \"" + SambaIP + "\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \"" + SambaDomain + "\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$" + MyDomain + "\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName " + VmName + "\necho '{  \"WorksServer\": \"" + WorksIP + "\",  \"WorksPort\": " + WorksPort + ",  \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'| Out-File -Encoding ascii \"c:\\agent\\conf.json\" \n</powershell>"
-	log.Info(payload)
-	log.Error(workspaceInfo.ComputeOfferingUuid)
+	payload := "<powershell>\n" +
+		"date > \"c:\\agent\\installed.txt\"" +
+		"$dnsip = \"" + SambaIP + "\"\n" + "" +
+		"set-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses " + WorksIP + "\n" +
+		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n" +
+		"$username = \"$" + MyDomain + "\\administrator\" \n" +
+		"$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n" +
+		"Rename-Computer -NewName " + VmName + "\n" +
+		"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
+		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'\n" +
+		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
+		"echo $conf\n" +
+		"C:\\agent\\nssm.exe set \"Ablecloud Works Agent\" start SERVICE_DELAYED_AUTO_START\n" +
+		"C:\\agent\\nssm.exe restart \"Ablecloud Works Agent\"\n" +
+		"date >> \"c:\\agent\\installed.txt\"" +
+		"</powershell>"
 	params := []MoldParams{
 		{"command": "deployVirtualMachine"},
 		{"templateid": workspaceInfo.TemplateUuid},
@@ -123,13 +143,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		{"zoneid": selectZoneId()},
 		{"userdata": baseEncoding(payload)},
 	}
-	//{"userdata": baseEncoding("<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \""+ SambaIP +"\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \""+DCDomanin+"\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$"+MyDomain+"\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName "+displayName+"\necho '{  \"WorksServer\": \""+WorksIP+"\",  \"WorksPort\": "+WorksPort+",  \"Type\": \""+Type+"\", \"UUID\": \""+InstanceUuid+"\"}' > c:\\agent\\conf.json\n\n</powershell>")},
-	//{"networkids": workspaceInfo.NetworkUuid},
-	log.Info("09909090909090909090909090")
-	log.Info(workspaceInfo)
-	log.Info(params)
-	log.Info("09909090909090909090909090")
-	//params = append(params, params1...)
+	log.Infof("deployVirtualMachine params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
@@ -138,7 +152,6 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 	log.Info("Mold sig [" + sig + "]")
 	log.Info("Mold 통신 URL [" + endUrl + "]")
 	log.Info("endUrl1 [" + baseurl + "?" + stringParams + "&signature=" + sig + "]")
-	log.Info("endUrl2 [" + endUrl + "]")
 	res := map[string]interface{}{}
 	resp, err := http.Get(baseurl + "?" + stringParams + "&signature=" + sig)
 	if err != nil {

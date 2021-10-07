@@ -211,10 +211,11 @@ func insertUserAllocatedInstance1(username string, instanceUuid string) *http.Re
 		Timeout: 5 * time.Second,
 	}
 
-	resultInstance := selectInstance(instanceUuid)
+	resultInstance, _ := selectInstanceList(instanceUuid, InstanceString)
+	instanceInfo := resultInstance[0]
 	resultUser := selectUserDBDetail(username)
 	paramsMold := []MoldParams{
-		{"id": resultInstance.MoldUuid},
+		{"id": instanceInfo.MoldUuid},
 	}
 	resultMoldInstance := getListVirtualMachinesMetrics(paramsMold)
 	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
@@ -222,7 +223,7 @@ func insertUserAllocatedInstance1(username string, instanceUuid string) *http.Re
 	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
 	log.Infof("%v", listVirtualMachinesMetrics)
 	params := url.Values{
-		"connection": {resultInstance.Name},
+		"connection": {instanceInfo.Name},
 		"parameter":  {"hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=3389,ignore-cert=true,username=" + username + ",password=" + resultUser.Password + ",domain=testdomain"},
 	}
 	resp, err := client.PostForm(DCInfo+"/v1/user/"+username, params)
@@ -242,10 +243,10 @@ func insertUserAllocatedInstance(username string, connectName string, parameter 
 	}
 
 	params := url.Values{
-		"connection": {connectName},
-		"parameter":  {parameter},
+		"username":  {username},
+		"parameter": {parameter},
 	}
-	resp, err := client.PostForm(DCInfo+"/v1/user/"+username, params)
+	resp, err := client.PostForm(DCInfo+"/v1/connection/"+connectName, params)
 	//req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/user/%v", DCInfo, username), params)
 	if err != nil {
 		log.Errorf("유저 삭제중 에러가 발생했습니다. [%v]", err)

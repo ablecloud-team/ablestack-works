@@ -74,6 +74,7 @@ func main() {
 			v1.GET("/workspace", getWorkspaces)
 			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
 			v1.PUT("/workspace", putWorkspaces)
+			v1.DELETE("/workspace/:workspaceUuid", deleteWorkspaces)
 
 			v1.GET("/offering", getOffering)
 
@@ -109,6 +110,7 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	go asyncJobMonitoring()
+	go updateInstanceChecked0()
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8083")
