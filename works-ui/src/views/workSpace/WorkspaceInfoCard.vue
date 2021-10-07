@@ -19,17 +19,14 @@
   <div id="Status" class="CardItem">
     <div class="ItemName">{{ $t("label.state") }}</div>
     <div class="Item">
-      <a-badge
-        class="Status"
-        :color="
-          workspaceInfo.state === 'Disable'
-            ? 'red'
-            : workspaceInfo.state === 'Enable'
-            ? 'green'
-            : 'grey'
-        "
-        :text="workspaceInfo.state"
-      />
+      <a-tooltip placement="bottom">
+        <template #title>{{ workspaceInfo.template_ok_check }}</template>
+          <a-badge
+            class="head-example"
+            :color="workspaceInfo.template_ok_check == 'AgentOK' ? 'green' : 'red'"
+            :text="workspaceInfo.template_ok_check == 'AgentOK' ? 'Enable' : 'Disable'"
+          />
+      </a-tooltip>
     </div>
   </div>
 

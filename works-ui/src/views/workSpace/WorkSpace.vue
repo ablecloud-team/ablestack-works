@@ -216,13 +216,13 @@ export default defineComponent({
       dedicatedOrSharedBoolean: ref(false),
     });
     let validateName = async (rule, value) => {
-      //let lengthCheck = value.length >= rule.min ? true : false; //길이체크
+      let lengthCheck = value.length > rule.max ? true : false; //길이체크
       //let containsEng = /[a-zA-Z]/.test(value); // 대소문자
       //let containsEngUpper = /[A-Z]/.test(value); 대문자
       //let containsNumber = /[0-9]/.test(value);
       //let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value);
       let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
-      if (value === "" || containsHangle) {
+      if (value === "" || containsHangle || lengthCheck) {
         return Promise.reject();
       } else {
         return Promise.resolve();
@@ -231,10 +231,14 @@ export default defineComponent({
     const rules = {
       name: {
         required: true,
+        max: 7,
         validator: validateName,
         trigger: "change",
       },
-      description: { required: true },
+      description: { 
+        required: true, 
+        max: 32,
+      },
       workspaceType: { required: true },
       dedicatedOrSharedBoolean: { required: false },
       selectedTemplateId: { required: true },
@@ -264,6 +268,11 @@ export default defineComponent({
   },
   created() {
     this.fetchOfferingsAndTemplates();
+    this.rules.name.message = this.$t("input.workspace.name");
+    this.rules.description.message = this.$t("input.workspace.description");
+    this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
+    this.rules.selectedTemplateId.message = this.$t("input.workspace.selectedTemplateId");
+    this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
   },
   methods: {
     reflesh() {

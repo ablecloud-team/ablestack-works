@@ -68,9 +68,9 @@ export default defineComponent({
           if (response.status == 200) {
             this.workspaceInfo = response.data.result.workspaceInfo;
             this.templateDataList =
-              response.data.result.templateInfo.listtemplatesresponse.template[0];
+              response.data.result.templateInfo.template[0];
             this.offeringDataList =
-              response.data.result.serviceOfferingInfo.listserviceofferingsresponse.serviceoffering[0];
+              response.data.result.serviceOfferingInfo.serviceoffering[0];
           } else {
             message.error(this.$t("message.response.data.fail"));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");

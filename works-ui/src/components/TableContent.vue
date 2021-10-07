@@ -5,6 +5,7 @@
     block
     style="margin-bottom: 14px"
     @click="changeModal(state.callTapName, true)"
+    :disabled="buttonDisable"
   >
     <PlusOutlined />
     {{ state.addButtontext }}
@@ -20,7 +21,7 @@
     :pagination="pagination"
   >
     <template #nameRender="{ record }">
-      <span v-if="comp !== undefined && comp === 'VirtualMachineList'">
+      <span v-if="actionFrom !== undefined && actionFrom === 'VirtualMachineList'">
         <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
           record.name
         }}</router-link>
@@ -31,11 +32,11 @@
     </template>
 
     <template #actionRender="{ record }">
-      <a-Popover placement="top">
+      <a-Popover placement="bottom">
         <template #content>
           <ASpace direction="horizontal">
             <Actions
-              v-if="comp !== undefined && comp === 'VirtualMachineList'"
+              v-if="actionFrom !== undefined && actionFrom === 'VirtualMachineList'"
               :action-from="actionFrom"
               :uuid="record.uuid"
               :workspace="record.workspace_name"
@@ -50,11 +51,12 @@
       </a-Popover>
     </template>
     <template #userRender="{ record }">
-      {{
+      <!-- {{
         record.owner_account_id == ""
           ? $t("label.owner.account.false")
           : record.owner_account_id
-      }}
+      }} -->
+      {{record.owner_account_id}}
     </template>
     <template #connRender="{ record }">
       {{
@@ -66,7 +68,14 @@
     <template #vmStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.status == 'Running' ? 'green' : 'red'"
+        :color="record.mold_status == 'Running' ? 'green' : 'red'"
+        :text="record.mold_status"
+      />
+    </template>
+    <template #vmReadyStateRender="{ record }">
+      <a-badge
+        class="head-example"
+        :color="record.status == 'Ready' ? 'green' : 'red'"
         :text="record.status"
       />
     </template>
@@ -80,7 +89,7 @@
         :cancel-text="$t('label.cancel')"
         @confirm="onUserDelete(record.name)"
       >
-        <a-tooltip placement="top">
+        <a-tooltip placement="bottom">
           <template #title>{{ $t("tooltip.destroy") }}</template>
           <a-button type="primary" shape="circle" danger>
             <DeleteFilled />
@@ -167,15 +176,20 @@ export default defineComponent({
       required: true,
       default: "",
     },
+    workspaceName: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    workspaceState: {
+      type: String,
+      required: false,
+      default: "",
+    },
     bordered: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    comp: {
-      type: String,
-      required: false,
-      default: "",
     },
     actionFrom: {
       type: String,
@@ -188,6 +202,8 @@ export default defineComponent({
       addVmModalBoolean: ref(false),
       addUserModalBoolean: ref(false),
       callTapName: ref(props.tapName),
+      workspaceName: ref(props.workspaceName),
+      workspaceState: ref(props.workspaceState),
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
       modalConfirm: ref(""),
@@ -220,6 +236,7 @@ export default defineComponent({
       confirmModalView: ref(false),
       deleteUser: ref(""),
       timer: ref(null),
+      buttonDisable: ref(false),
     };
   },
   created() {
@@ -240,13 +257,14 @@ export default defineComponent({
       }
     },
     fetchData(tapName) {
-      console.log(tapName);
+      //console.log(tapName);
       this.dataList = []; //초기화
       this.loading = ref(true);
       if (this.state.callTapName === "desktop") {
         this.state.addButtonBoolean = ref(true);
         this.state.addButtontext = this.$t("label.desktop.vm.add");
-
+        console.log(this.state.callTapName + "  ::  " + this.state.workspaceState + " ::  "+ this.state.workspaceName);
+        if(this.state.workspaceState !== "AgentOK") this.buttonDisable = true;
         this.columns = [
           {
             dataIndex: "name",
@@ -265,15 +283,6 @@ export default defineComponent({
             slots: { customRender: "actionRender" },
           },
           {
-            title: this.$t("label.state"),
-            dataIndex: "status",
-            key: "status",
-            sorter: (a, b) =>
-              a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
-            sortDirections: ["descend", "ascend"],
-            slots: { customRender: "vmStateRender" },
-          },
-          {
             title: this.$t("label.users"),
             dataIndex: "owner_account_id",
             key: "owner_account_id",
@@ -286,6 +295,25 @@ export default defineComponent({
             sortDirections: ["descend", "ascend"],
             slots: { customRender: "userRender" },
           },
+          {
+            title: this.$t("label.vm.state"),
+            dataIndex: "mold_status",
+            key: "mold_status",
+            sorter: (a, b) =>
+              a.mold_status < b.mold_status ? -1 : a.mold_status > b.mold_status ? 1 : 0,
+            sortDirections: ["descend", "ascend"],
+            slots: { customRender: "vmStateRender" },
+          },
+          {
+            title: this.$t("label.vm.ready.state"),
+            dataIndex: "status",
+            key: "status",
+            sorter: (a, b) =>
+              a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
+            sortDirections: ["descend", "ascend"],
+            slots: { customRender: "vmReadyStateRender" },
+          },
+
           // {
           //   title: this.$t("label.desktop.connect.boolean"),
           //   dataIndex: "connected",
@@ -315,6 +343,7 @@ export default defineComponent({
             console.log(error);
           });
       } else if (this.state.callTapName === "user") {
+        console.log(this.state.callTapName + "  ::  " + this.state.workspaceState + " ::  "+ this.state.workspaceName);
         this.state.addButtonBoolean = ref(true);
         this.state.addButtontext = this.$t("label.desktop.user.add");
 
@@ -353,7 +382,7 @@ export default defineComponent({
 
         //해당 워크스페이스에 추가 된 사용자 목록 조회
         worksApi
-          .get("/api/v1/group/" + this.$route.params.name)
+          .get("/api/v1/group/" + this.state.workspaceName)
           .then((response) => {
             if (response.status == 200) {
               //console.log(response.data.result.member);
@@ -425,8 +454,7 @@ export default defineComponent({
           .then((response) => {
             if (response.status == 200) {
               //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
-              this.dataList =
-                response.data.result.networkInfo.listnetworksresponse.network;
+              this.dataList = null;
             } else {
               //message.error(this.$t("message.response.data.fail"));
               //console.log("데이터를 정상적으로 가져오지 못했습니다.");
@@ -561,10 +589,10 @@ export default defineComponent({
         });
     },
     putUserToWorksapce() { //워크스페이스에 사용자 추가
-      console.log(this.selectedUser);
+      //console.log(this.selectedUser);
       if (!this.selectedUser) return false;
       worksApi
-        .put("/api/v1/group/" + this.$route.params.name + "/" + this.selectedUser)
+        .put("/api/v1/group/" + this.state.workspaceName + "/" + this.selectedUser)
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.add"), 5);
@@ -583,7 +611,7 @@ export default defineComponent({
     },
     onUserDelete(val) {
       worksApi
-        .delete("/api/v1/group/" + this.$route.params.name + "/" + val)
+        .delete("/api/v1/group/" + this.state.workspaceName + "/" + val)
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.delete"), 1);

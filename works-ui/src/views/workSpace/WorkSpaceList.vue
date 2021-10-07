@@ -46,8 +46,7 @@
     </template>
     <!-- 검색 필터링 template-->
     <template #nameRender="{ record }">
-      <router-link
-        :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }"
+      <router-link :to="{ path: '/workspaceDetail/' + record.uuid }"
         >{{ record.name }}
       </router-link>
     </template>
@@ -60,11 +59,14 @@
       </a-Popover>
     </template>
     <template #stateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="record.state == 'Enable' ? 'green' : 'red'"
-        :text="record.state"
-      />
+      <a-tooltip placement="bottom">
+        <template #title>{{ record.template_ok_check }}</template>
+        <a-badge
+          class="head-example"
+          :color="record.template_ok_check == 'AgentOK' ? 'green' : 'red'"
+          :text="record.template_ok_check == 'AgentOK' ? 'Enable' : 'Disable'"
+        />
+      </a-tooltip>
     </template>
     <template #typeRender="{ record }">
       {{ record.workspace_type.toUpperCase() }}

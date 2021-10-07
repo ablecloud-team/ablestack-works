@@ -5,23 +5,21 @@
         <TableContent
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
-          :comp="'VirtualMachineList'"
+          :workspace-state="workspaceInfo.name"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
           :tap-name="'user'"
           :action-from="'UserDetail'"
+          :workspace-name="workspaceInfo.name"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.policy.list')">
-        <TableContent
-          :tap-name="'policy'"
-          :action-from="'policyDetail'"
-        />
+        <TableContent :tap-name="'policy'" :action-from="'policyDetail'" />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent :tap-name="'network'"/>
+        <TableContent :tap-name="'network'" />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -36,7 +34,7 @@ import TableContent from "@/components/TableContent";
 export default defineComponent({
   components: { TableContent },
   props: {
-    networkDataList: {
+    workspaceInfo: {
       type: Object,
       required: true,
       default: null,
