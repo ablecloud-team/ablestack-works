@@ -1,29 +1,19 @@
 <template>
   <div style="width:100%; padding: 10px;">
     <a-row>
-      <a-col flex="70%">
-        <a-row :gutter="6" type="flex">
-          <a-col flex="25%" class="dashboard-a-col">
+      <a-col flex="100%">
+        <a-row :gutter="12" type="flex">
+          <a-col flex="50%" class="dashboard-a-col">
             <a-card :title="$t('label.workspace.count')" class="dashboard-a-card-cl" hoverable>
               <span style="font-size: 80px;">33</span>
             </a-card>
           </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
+          <a-col flex="50%" class="dashboard-a-col">
             <a-card :title="$t('label.desktop.count')" class="dashboard-a-card-cl" hoverable>
               <span style="font-size: 80px;">33</span>
             </a-card>
           </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.desktop.connected.count')" class="dashboard-a-card-cl" hoverable>
-              <span style="font-size: 80px;">33</span>
-            </a-card>
-          </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.app.connected.count')" class="dashboard-a-card-cl" hoverable>
-              <span style="font-size: 80px;">33</span>
-            </a-card>
-          </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
+          <!-- <a-col flex="25%" class="dashboard-a-col">
             <a-card :title="$t('label.allocated.cpu.count')" class="dashboard-a-card-cl" hoverable>
               <a-progress type="dashboard" :percent="33"/>
             </a-card>
@@ -42,10 +32,22 @@
             <a-card :title="$t('label.allocated.IP.count')" class="dashboard-a-card-cl" hoverable>
               <a-progress type="dashboard" :percent="70" />
             </a-card>
+          </a-col> -->
+        </a-row>
+        <a-row :gutter="12" type="flex">
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card :title="$t('label.desktop.connected.count')" class="dashboard-a-card-cl" hoverable>
+              <span style="font-size: 80px;">33</span>
+            </a-card>
+          </a-col>
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card :title="$t('label.app.connected.count')" class="dashboard-a-card-cl" hoverable>
+              <span style="font-size: 80px;">33</span>
+            </a-card>
           </a-col>
         </a-row>
       </a-col>
-      <a-col flex="30%" class="dashboard-a-col">
+      <!-- <a-col flex="30%" class="dashboard-a-col">
         <a-card :bordered="true" class="dashboard-right-card">
           <a-timeline style="text-align: left">
             <a-timeline-item color="green"
@@ -76,7 +78,7 @@
             </a-timeline-item>
           </a-timeline>
         </a-card>
-      </a-col>
+      </a-col> -->
     </a-row>
   </div>
 </template>
@@ -89,8 +91,8 @@ export default {
 
 <style scoped>
 .dashboard-a-card-cl {
-  width: 170px; 
-  height: 230px;
+  width: 100%;
+  height: 100%;
   text-align: center;
 }
 .dashboard-a-col {

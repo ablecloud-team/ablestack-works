@@ -63,7 +63,7 @@ const requireAuth = (to, from, next) => {
             next({ name: "Login" });
           }
         })
-        .catch(function (error) {          
+        .catch(function (error) {
           message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
           sessionStorage.setItem("token", "");
           next({ name: "Login" });
@@ -108,7 +108,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/workspaceDetail/:uuid/:name",
+        path: "/workspaceDetail/:uuid",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
         beforeEnter: requireAuth,

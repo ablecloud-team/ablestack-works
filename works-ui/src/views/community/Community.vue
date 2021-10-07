@@ -7,7 +7,7 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
+                :paths="[
                   { name: $t('label.community'), component: 'Community' },
                   { name: name, component: null },
                 ]"
@@ -16,7 +16,7 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :addButton="true" :add="$t('label.audit')" />
+              <actions :add-button="true" :add="$t('label.audit')" />
             </a-col>
           </a-row>
         </div>
@@ -38,18 +38,14 @@
 import { defineComponent } from "vue";
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import { CommunityColumns, CommunityData } from "@/data";
 import CommunityList from "./CommunityList";
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
-  },
   components: { CommunityList, Apath, Actions },
+  props: {},
   setup() {
     return {
-      CommunityColumns,
-      CommunityData,
+      CommunityColumns: [],
+      CommunityData: [],
     };
   },
 });

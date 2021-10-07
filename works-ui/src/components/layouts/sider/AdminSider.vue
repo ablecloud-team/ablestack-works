@@ -34,12 +34,12 @@
         </template>
         <span>{{ $t("label.users") }}</span>
       </a-menu-item>
-      <a-menu-item key="5" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(5)">
+      <!-- <a-menu-item key="5" @click="$router.push({ name: 'GroupPolicy' }); selectedKeysSetting(5)">
         <template #icon>
           <ReconciliationOutlined />
         </template>
         <span>{{ $t("label.group.policy") }}</span>
-      </a-menu-item>
+      </a-menu-item> -->
       <a-menu-item key="6">
         <!-- <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)"> -->
         <template #icon>

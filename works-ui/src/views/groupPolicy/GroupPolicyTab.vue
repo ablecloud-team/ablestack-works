@@ -35,7 +35,7 @@
           </template>
 
           <template #actionRender>
-            <a-Popover placement="top">
+            <a-Popover placement="bottom">
               <template #content>
                 <ASpace direction="horizontal">
                   <Actions :actionFrom="actionFrom" />

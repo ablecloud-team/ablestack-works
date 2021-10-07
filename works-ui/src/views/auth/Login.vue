@@ -15,7 +15,7 @@
         :rules="rules"
         class="user-layout-login"
       >
-        <a-form-item name="id">
+        <a-form-item has-feedback name="id">
           <a-input
             v-model:value="formState.id"
             :placeholder="$t('label.user.id')"
@@ -26,7 +26,7 @@
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item name="password">
+        <a-form-item has-feedback name="password">
           <a-input-password
             v-model:value="formState.password"
             type="password"
@@ -126,6 +126,8 @@ export default defineComponent({
   },
   computed: {},
   created() {
+    this.rules.id.message = this.$t("message.please.enter.your.id");
+    this.rules.password.message = this.$t("message.please.enter.your.password");
     this.onClear();
   },
   methods: {
@@ -147,8 +149,6 @@ export default defineComponent({
       sessionStorage.clear();
     },
     onSubmit() {
-      this.rules.id.message = this.$t("message.please.enter.your.id");
-this.rules.password.message = this.$t("message.please.enter.your.password");
       let params = new URLSearchParams();
       this.formRef
         .validate()
@@ -163,15 +163,18 @@ this.rules.password.message = this.$t("message.please.enter.your.password");
             .then((response) => {
               //console.log(response);
               if (response.status === 200) {
-                store.dispatch("loginCommit", response.data);
-                sessionStorage.setItem("token", response.data.result.token);
-                sessionStorage.setItem(
-                  "username",
-                  response.data.result.username
-                );
-                router.push({ name: "Dashboard" });
-                message.destroy();
-                message.success(this.$t("message.login.completed"));
+
+                if(response.data.result.isAdmin == "false"){
+                  message.error(this.$t("message.login.wrong"));
+                  router.push({ name: "Login" });
+                }else{
+                  store.dispatch("loginCommit", response.data);
+                  sessionStorage.setItem("token", response.data.result.token);
+                  sessionStorage.setItem("username", response.data.result.username);
+                  router.push({ name: "Dashboard" });
+                  message.destroy();
+                  message.success(this.$t("message.login.completed"));
+                }
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));

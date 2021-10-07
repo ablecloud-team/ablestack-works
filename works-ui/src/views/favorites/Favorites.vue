@@ -273,24 +273,11 @@
 </template>
 
 <script>
-import {
-  AppstoreAddOutlined,
-  DesktopOutlined,
-  DownloadOutlined,
-  Html5Outlined,
-  MoreOutlined,
-} from "@ant-design/icons-vue";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "UserDashboard",
-  components: {
-    DesktopOutlined,
-    DownloadOutlined,
-    Html5Outlined,
-    MoreOutlined,
-    AppstoreAddOutlined,
-  },
+  components: {},
   setup() {
     const value = ref(3);
     return {

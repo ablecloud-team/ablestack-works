@@ -18,9 +18,9 @@
       {{vmDbDataInfo.workspace_name}}
     </a-list-item>
     <a-list-item >
-      <strong>{{ $t('label.state') }}</strong>
+      <strong>{{ $t('label.vm.state') }}</strong>
       <br>
-      {{vmDbDataInfo.status}}
+      {{dataInfo.state}}
     </a-list-item>
     <a-list-item >
       <strong>{{ $t('label.users') }}</strong>
