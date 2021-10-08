@@ -389,7 +389,7 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 
 
 	log.Infof("data: %v", data.Encode())
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent", Agentconfig.WorksServer, Agentconfig.WorksPort), strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
