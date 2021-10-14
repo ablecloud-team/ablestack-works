@@ -11,14 +11,13 @@
       </h4>
     </div>
   </div>
-
-  <div id="firstname" class="CardItem">
-    <div class="ItemName">{{ $t("label.firstname") }}</div>
-    <div class="Item">{{ userDataInfo.sn }}</div>
-  </div>
   <div id="firstname" class="CardItem">
     <div class="ItemName">{{ $t("label.lastname") }}</div>
     <div class="Item">{{ userDataInfo.givenName }}</div>
+  </div>
+  <div id="firstname" class="CardItem">
+    <div class="ItemName">{{ $t("label.firstname") }}</div>
+    <div class="Item">{{ userDataInfo.sn }}</div>
   </div>
   <div id="email" class="CardItem">
     <div class="ItemName">{{ $t("label.email") }}</div>

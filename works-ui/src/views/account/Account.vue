@@ -77,48 +77,62 @@
             :placeholder="$t('tooltip.user.account')"
           />
         </a-form-item>
-        <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
-          <a-input
-            v-model:value="formState.lastName"
-            :placeholder="$t('tooltip.user.lastname')"
-            class="addmodal-aform-item-div"
-          />
-        </a-form-item>
-        <a-form-item
-          has-feedback
-          name="firstName"
-          :label="$t('label.firstname')"
-        >
-          <a-input
-            v-model:value="formState.firstName"
-            :placeholder="$t('tooltip.user.firstname')"
-          />
-        </a-form-item>
-        <a-form-item
-          has-feedback
-          name="password"
-          :label="$t('label.password')"
-          autocomplete="off"
-        >
-          <a-input
-            v-model:value="formState.password"
-            type="password"
-            :placeholder="$t('tooltip.user.password')"
-          />
-        </a-form-item>
-        <a-form-item
-          has-feedback
-          name="passwordCheck"
-          :label="$t('label.passwordCheck')"
-          autocomplete="off"
-        >
-          <a-input
-            v-model:value="formState.passwordCheck"
-            type="password"
-            :placeholder="$t('tooltip.user.passwordCheck')"
-          />
-        </a-form-item>
-        <a-form-item has-feedback name="email" :label="$t('label.email')">
+        <a-row :gutter="12">
+          <a-col :md="24" :lg="12">
+            <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
+              <a-input
+                v-model:value="formState.lastName"
+                :placeholder="$t('tooltip.user.lastname')"
+                class="addmodal-aform-item-div"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :md="24" :lg="12">
+            <a-form-item
+              has-feedback
+              name="firstName"
+              :label="$t('label.firstname')"
+            >
+              <a-input
+                v-model:value="formState.firstName"
+                :placeholder="$t('tooltip.user.firstname')"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="12">
+          <a-col :md="24" :lg="12">
+             <a-form-item
+                has-feedback
+                name="password"
+                :label="$t('label.password')"
+                :labelCol="12"
+                autocomplete="off"
+              >
+                <a-input
+                  v-model:value="formState.password"
+                  type="password"
+                  :placeholder="$t('tooltip.user.password')"
+                />
+              </a-form-item>
+          </a-col>
+          <a-col :md="24" :lg="12">
+            <a-form-item
+                has-feedback
+                name="passwordCheck"
+                :label="$t('label.passwordCheck')"
+                :labelCol="12"
+                autocomplete="off"
+              >
+                <a-input
+                  v-model:value="formState.passwordCheck"
+                  type="password"
+                  :placeholder="$t('tooltip.user.passwordCheck')"
+                />
+              </a-form-item>
+          </a-col>
+        </a-row>
+        <a-form-item name="email" :label="$t('label.email')">
           <a-input
             v-model:value="formState.email"
             :placeholder="$t('tooltip.user.email')"
@@ -132,23 +146,20 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <!-- <a-form-item has-feedback name="userGroup" :label="$t('label.userGroup')">
+        <a-form-item name="title" :label="$t('label.title')">
           <a-input
-            v-model:value="formState.userGroup"
-            :placeholder="$t('tooltip.user.userGroup')"
+            v-model:value="formState.title"
+            :placeholder="$t('tooltip.user.title')"
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <a-form-item name="department" :label="$t('label.department')">
+        <!-- <a-form-item name="department" :label="$t('label.department')">
           <a-input
             v-model:value="formState.department"
             :placeholder="$t('tooltip.user.department')"
             class="addmodal-aform-item-div"
           />
-        </a-form-item>
-        -->
-
-        <!--워크스페이스 비밀번호 확인 end-->
+        </a-form-item> -->
       </a-form>
     </a-modal>
     <!-- ADD WORKSPACE MODAL END  -->
@@ -230,15 +241,15 @@ export default defineComponent({
         validator: validatePass2,
         trigger: "change",
       },
-      email: {
-        required: true,
-        type: "email",
+      email: { 
+        required: false,
+        type: "email", 
       },
       phone: {
         required: false,
         pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
       },
-      // title: { required: false, },
+      title: { required: false, },
     };
     return {
       labelCol: { span: 10 },
@@ -258,7 +269,14 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.rules.account.message = this.$t("input.user.account");
+    this.rules.firstName.message = this.$t("input.user.firstname");
+    this.rules.lastName.message = this.$t("input.user.lastname");
+    this.rules.password.message = this.$t("input.user.password");
+    this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
+    this.rules.email.message = this.$t("input.user.email");
+    this.rules.phone.message = this.$t("input.user.phone");
+    this.rules.title.message = this.$t("input.user.title");
   },
   methods: {
     reflesh() {
@@ -268,15 +286,6 @@ export default defineComponent({
       //console.log(val);
       this.actionFrom = ref(val);
     },
-    fetchData() {
-      this.rules.account.message = this.$t("input.user.account");
-      this.rules.firstName.message = this.$t("input.user.firstname");
-      this.rules.lastName.message = this.$t("input.user.lastname");
-      this.rules.password.message = this.$t("input.user.password");
-      this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
-      this.rules.email.message = this.$t("input.user.email");
-      this.rules.phone.message = this.$t("input.user.phone");
-    },
     putUser() {
       let params = new URLSearchParams();
       params.append("username", this.formState.account);
@@ -285,6 +294,7 @@ export default defineComponent({
       params.append("password", this.formState.password);
       params.append("email", this.formState.email);
       params.append("phone", this.formState.phone);
+      params.append("title", this.formState.title);
 
       //console.log(params);
       this.formRef

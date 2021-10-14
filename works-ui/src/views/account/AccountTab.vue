@@ -2,7 +2,7 @@
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent :data-info="userDataInfo" :action-from="'userDetail'" />
+        <DetailContent :data-info="userDataInfo" :action-from="'UserDetail'" />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.vm.list')">
         <TableContent :data="vmDiskList" :columns="vmDiskListColumns" />
