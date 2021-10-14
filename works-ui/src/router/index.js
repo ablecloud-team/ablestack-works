@@ -108,7 +108,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/workspaceDetail/:uuid",
+        path: "/workspaceDetail/:workspaceUuid",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
         beforeEnter: requireAuth,
@@ -121,7 +121,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/virtualMachineDetail/:uuid",
+        path: "/virtualMachineDetail/:vmUuid",
         name: "VirtualMachineDetail",
         component: VirtualMachineDetail,
         beforeEnter: requireAuth,

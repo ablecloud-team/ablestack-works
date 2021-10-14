@@ -1,5 +1,4 @@
 {
-    //message
     "message.logging": "Logging in.",
     "message.login.validation": "Please enter your ID or account.",
     "message.login.completed": "Login is complete.",
@@ -34,10 +33,13 @@
     "message.workspace.vm.adding": "A desktop virtual machine is being added.",
     "message.name.dupl": "Duplicates of previously generated names. Please enter a different name.",
     "message.workspace.user.add.dupl": "This is an existing user. Please choose a different name.",
+    "message.workspace.status.destroying": "The workspace is being deleted.",
+    "message.workspace.status.delete": "The workspace has been deleted.",
+    "message.workspace.delete.fail": "Failed to delete workspace.",
+    "message.workspace.delete.existvm": "A virtual machine exists in that workspace. Please delete the virtual machine and try again.",
 
-    //tooltip
-    "tooltip.start": "Start",
-    "tooltip.stop": "Stop",
+    "tooltip.vmStart": "Start",
+    "tooltip.vmStop": "Stop",
     "tooltip.reset": "Restart",
     "tooltip.edit": "Edit",
     "tooltip.reinstall": "Reinstall",
@@ -61,7 +63,7 @@
     "tooltip.user.password": "User Password",
     "tooltip.user.passwordCheck": "User Password Check",
     "tooltip.user.email": "User Email",
-    "tooltip.user.userGroup": "User Group",
+    "tooltip.user.title": "User Title",
     "tooltip.user.department": "User Department",
     "tooltip.user.phone": "User Phone Number",
     "tooltip.userAllocate": "User assignment",
@@ -71,7 +73,6 @@
     "tooltip.vmDestroy":"Destroy the desktop virtual machine",
     "tooltip.workspaceDestroy":"Destroy the workspace",
 
-    //label
     "label.reflesh": "Reflesh",
     "label.dashboard": "Dashboard",
     "label.workspace": "Workspaces",
@@ -93,7 +94,6 @@
     "label.description": "Description",
     "label.type": "Type",
     "label.vm.ostype": "OS Type",
-    "label.size": "Size",
     "label.desktop.quantity": "Number of VM",
     "label.desktop.connection.quantity": "Number of Connection",
     "label.network.type": "Network Type",
@@ -127,7 +127,7 @@
     "label.firstname": "First Name",
     "label.lastname": "Last Name",
     "label.email": "Email",
-    "label.userGroup": "User Group",
+    "label.title": "User Title",
     "label.department": "Department",
     "label.phone": "Phone Number",
     "label.uuid": "UUID",
@@ -141,7 +141,7 @@
     "label.userPrincipalName": "UPN(User Principal Name)",
     "label.createdate": "Create Date",
     "label.workspace.count": "Workspace Count",
-    "label.desktop.count": "Desktop Count",
+    "label.desktop.count": "Virtual Machine Count",
     "label.desktop.connected.count": "Desktop Connected Count",
     "label.app.connected.count": "App Connected Count",
     "label.allocated.cpu.count": "CPU Allocated",
@@ -169,9 +169,14 @@
     "label.desktop.connect.false": "Unconnected",
     "label.vm.ready.state": "Ready to Connect",
     "label.vm.state": "Desktop Virtual Machine State",
-    "label.vm.session.count": "Session Count",
+    "label.vm.session.count": "Connection Session Count",
+    "label.vm.status.running": "Running",
+    "label.vm.status.stopped": "Stopped",
+    "label.vm.status.ready": "Accessible",
+    "label.vm.status.notready": "Unable to Connect",
+    "label.enable": "Enable",
+    "label.disable": "Disable",
 
-    //input
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",
     "input.workspace.workspaceType": "Select workspace type.",
@@ -183,20 +188,17 @@
     "input.user.password": "Input the user password(7 or more letters, numbers, and special characters).",
     "input.user.passwordCheck": "Input user password check.",
     "input.user.email": "Input user email.",
-    "input.user.userGroup": "Input user user group.",
+    "input.user.title": "Input user user title.",
     "input.user.department": "Input user department.",
     "input.user.phone": "Please format your phone number(including numbers and '-').",
 
-    //search
     "search.name": "Search Name.",
     "search.type": "Search Type.",
 
-    //modal confirm message
-    "modal.confirm.start": "Do you want to start a desktop virtual machine?",
-    "modal.confirm.stop": "Are you sure you want to stop the desktop virtual machine?",
+    "modal.confirm.vmStart": "Do you want to start a desktop virtual machine?",
+    "modal.confirm.vmStop": "Are you sure you want to stop the desktop virtual machine?",
     "modal.confirm.workspaceDestroy": "Are you sure you want to delete the workspace?",
     "modal.confirm.vmDestroy": "Are you sure you want to delete the desktop virtual machine?",
     "modal.confirm.accountDestroy": "Are you sure you want to delete your user account?",
-    "modal.confirm.userAllocate": "Do you want to assign users to desktop virtual machines?",
-    "modal.confirm.userUnlock": "Do you want to assign users to desktop virtual machines?"
+    "modal.confirm.userUnlock": "Are you sure you want to release the user to the desktop virtual machine?"
 }

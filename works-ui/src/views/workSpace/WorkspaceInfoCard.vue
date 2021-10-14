@@ -24,8 +24,8 @@
           <a-badge
             class="head-example"
             :color="workspaceInfo.template_ok_check == 'AgentOK' ? 'green' : 'red'"
-            :text="workspaceInfo.template_ok_check == 'AgentOK' ? 'Enable' : 'Disable'"
-          />
+            :text="workspaceInfo.template_ok_check == 'AgentOK' ? $t('label.enable') : $t('label.disable')"
+          /> : [{{workspaceInfo.template_ok_check}}]
       </a-tooltip>
     </div>
   </div>

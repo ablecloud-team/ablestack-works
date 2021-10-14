@@ -5,14 +5,12 @@
         <TableContent
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
-          :workspace-state="workspaceInfo.name"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
           :tap-name="'user'"
           :action-from="'UserDetail'"
-          :workspace-name="workspaceInfo.name"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.policy.list')">
@@ -26,9 +24,7 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { defineComponent, ref } from "vue";
 import TableContent from "@/components/TableContent";
 
 export default defineComponent({

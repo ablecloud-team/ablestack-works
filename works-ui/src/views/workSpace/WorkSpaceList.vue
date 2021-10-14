@@ -50,10 +50,14 @@
         >{{ record.name }}
       </router-link>
     </template>
-    <template #actionRender>
+    <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
         <template #content>
-          <actions :action-from="actionFrom" />
+          <Actions
+            :action-from="actionFrom"
+            :workspace-uuid="record.uuid"
+            @fetchData="fetchData"
+          />
         </template>
         <MoreOutlined />
       </a-Popover>
@@ -64,7 +68,7 @@
         <a-badge
           class="head-example"
           :color="record.template_ok_check == 'AgentOK' ? 'green' : 'red'"
-          :text="record.template_ok_check == 'AgentOK' ? 'Enable' : 'Disable'"
+          :text="record.template_ok_check == 'AgentOK' ? $t('label.enable') : $t('label.disable')"
         />
       </a-tooltip>
     </template>

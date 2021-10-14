@@ -20,7 +20,7 @@
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <div>
-                <actions
+                <Actions
                   v-if="actionFrom === 'WorkspaceList'"
                   :action-from="actionFrom"
                 />

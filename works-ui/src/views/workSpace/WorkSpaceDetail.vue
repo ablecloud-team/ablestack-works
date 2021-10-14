@@ -15,7 +15,7 @@
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :action-from="actionFrom" />
+              <Actions :action-from="actionFrom" :workspace-uuid="workspaceUuid"/>
             </a-col>
           </a-row>
         </div>
@@ -51,9 +51,10 @@ export default defineComponent({
   },
   data() {
     return {
-      workspaceInfo: [],
-      templateDataList: [],
-      offeringDataList: [],
+      workspaceInfo: ref([]),
+      templateDataList: ref([]),
+      offeringDataList: ref([]),
+      workspaceUuid: ref(this.$route.params.workspaceUuid),
     };
   },
   created() {
@@ -61,9 +62,8 @@ export default defineComponent({
   },
   methods: {
     fetchData() {
-      //alert(this.$route.params.uuid);
       worksApi
-        .get("/api/v1/workspace/" + this.$route.params.uuid)
+        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
         .then((response) => {
           if (response.status == 200) {
             this.workspaceInfo = response.data.result.workspaceInfo;

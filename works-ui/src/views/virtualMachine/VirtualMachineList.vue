@@ -56,10 +56,7 @@
         <template #content>
           <Actions
             :action-from="actionFrom"
-            :uuid="record.uuid"
-            :workspace="record.workspace_name"
-            :allocate-status="record.owner_account_id"
-            :status="record.status"
+            :vm-uuid="record.uuid"
             @fetchData="fetchData"
           />
         </template>
@@ -69,15 +66,15 @@
     <template #vmStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.mold_status == 'Running' ? 'green' : 'red'"
-        :text="record.mold_status"
+        :color="record.mold_status === 'Running' ? 'green' : 'red'"
+        :text="record.mold_status === 'Running' ? $t('label.vm.status.running') : $t('label.vm.status.stopped')" 
       />
     </template>
     <template #vmReadyStateRender="{ record }">
       <a-badge
         class="head-example"
         :color="record.checked === true ? 'green' : 'red'"
-        :text="record.status"
+        :text="record.checked ===true ? $t('label.vm.status.ready') : $t('label.vm.status.notready')"
       />
     </template>
     <template #userRender="{ record }">

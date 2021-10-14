@@ -1,5 +1,4 @@
 {
-    //message
     "message.logging": "로그인중 입니다.",
     "message.login.validation": "아이디 또는 계정을 입력해주세요.",
     "message.login.completed": "로그인이 완료되었습니다.",
@@ -34,10 +33,13 @@
     "message.workspace.vm.adding": "데스크톱 가상머신을 추가중입니다.",
     "message.name.dupl": "기존에 생성된 이름과 중복됩니다. 다른 이름을 입력하세요.",
     "message.workspace.user.add.dupl": "기존에 추가된 사용자입니다. 다른 이름을 선택하세요.",
+    "message.workspace.status.destroying": "워크스페이스를 삭제하는중입니다.",
+    "message.workspace.status.delete": "워크스페이스가 삭제되었습니다.",
+    "message.workspace.delete.fail": "워크스페이스 삭제에 실패하였습니다.",
+    "message.workspace.delete.existvm": "해당 워크스페이스에 가상머신이 존재합니다. 가상머신을 삭제 후 다시 시도해주세요.",
 
-    //tooltip
-    "tooltip.start": "시작",
-    "tooltip.stop": "정지",
+    "tooltip.vmStart": "시작",
+    "tooltip.vmStop": "정지",
     "tooltip.reset": "재기동",
     "tooltip.edit": "편집",
     "tooltip.reinstall": "재설치",
@@ -61,7 +63,7 @@
     "tooltip.user.password": "사용자 비밃번호",
     "tooltip.user.passwordCheck": "사용자 비밀번호 확인",
     "tooltip.user.email": "사용자 이메일",
-    "tooltip.user.userGroup": "사용자 그룹",
+    "tooltip.user.title": "사용자 직급",
     "tooltip.user.department": "사용자 부서",
     "tooltip.user.phone": "사용자 전화번호",
     "tooltip.userAllocate": "사용자 할당",
@@ -71,7 +73,6 @@
     "tooltip.vmDestroy":"데스크톱 가상머신 파기",
     "tooltip.workspaceDestroy":"워크스페이스 파기",
 
-    //label
     "label.reflesh": "새로 고침",
     "label.dashboard": "대시보드",
     "label.workspace": "워크스페이스",
@@ -93,7 +94,6 @@
     "label.description": "설명",
     "label.type": "유형",
     "label.vm.ostype": "OS 유형",
-    "label.size": "사이즈",
     "label.desktop.quantity": "가상머신 개수",
     "label.desktop.connection.quantity": "데스크톱 연결 개수",
     "label.network.type": "네트워크 타입",
@@ -127,7 +127,7 @@
     "label.firstname": "이름(명)",
     "label.lastname": "이름(성)",
     "label.email": "이메일",
-    "label.userGroup": "사용자 그룹",
+    "label.title": "직급",
     "label.department": "부서",
     "label.phone": "전화번호",
     "label.uuid": "UUID",
@@ -141,7 +141,7 @@
     "label.userPrincipalName": "UPN(User Principal Name)",
     "label.createdate": "생성일자",
     "label.workspace.count": "워크스페이스 수",
-    "label.desktop.count": "데스크톱 수",
+    "label.desktop.count": "가상머신 수",
     "label.desktop.connected.count": "데스크톱 연결 수",
     "label.app.connected.count": "APP 연결 수",
     "label.allocated.cpu.count": "CPU 할당량",
@@ -169,9 +169,14 @@
     "label.desktop.connect.false": "미 연결",
     "label.vm.ready.state": "접속준비 상태",
     "label.vm.state": "가상머신 상태",
-    "label.vm.session.count": "세션 수",
+    "label.vm.session.count": "접속세션 수",
+    "label.vm.status.running": "실행중",
+    "label.vm.status.stopped": "정지",
+    "label.vm.status.ready": "접속 가능",
+    "label.vm.status.notready": "접속 불가",
+    "label.enable": "사용가능",
+    "label.disable": "사용불가",
 
-    //input
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
     "input.workspace.workspaceType": "워크스페이스 타입을 선택하세요.",
@@ -183,20 +188,17 @@
     "input.user.password": "사용자 비밀번호(영문, 숫자, 특수문자 포함 7자 이상)를 입력하세요.",
     "input.user.passwordCheck": "사용자 비밀번호가 일치하지 않습니다.",
     "input.user.email": "사용자 이메일을 입력하세요.",
-    "input.user.userGroup": "사용자 그룹을 선택하세요.",
+    "input.user.title": "사용자 직급을 입력하세요.",
     "input.user.department": "사용자 부서를 입력하세요.",
     "input.user.phone": "사용자 전화번호(숫자와 '-' 포함) 형식을 맞추세요.",
 
-    //search
     "search.name": "이름을 검색하세요.",
     "search.workspace_type": "타입을 검색하세요.",
 
-    //modal confirm message
-    "modal.confirm.start": "데스크톱 가상머신을 시작하시겠습니까?",
-    "modal.confirm.stop": "데스크톱 가상머신을 정지하시겠습니까?",
+    "modal.confirm.vmStart": "데스크톱 가상머신을 시작하시겠습니까?",
+    "modal.confirm.vmStop": "데스크톱 가상머신을 정지하시겠습니까?",
     "modal.confirm.workspaceDestroy": "워크스페이스를 삭제하시겠습니까?",
     "modal.confirm.vmDestroy": "데스크톱 가상머신을 삭제하시겠습니까?",
     "modal.confirm.accountDestroy": "사용자 계정을 삭제하시겠습니까?",
-    "modal.confirm.userAllocate": "데스크톱 가상머신에 사용자를 할당하시겠습니까?",
-    "modal.confirm.userUnlock": "데스크톱 가상머신에 사용자를 할당하시겠습니까?"
+    "modal.confirm.userUnlock": "데스크톱 가상머신에 사용자를 해제하시겠습니까?"
 }

@@ -15,70 +15,11 @@
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <a-space :size="size">
-                <!--Start-->
-                <a-tooltip
-                  v-if="vmDbDataInfo.status === 'Stopped'"
-                  placement="bottom"
-                >
-                  <template #title>{{ $t("tooltip.start") }}</template>
-                  <a-button
-                    shape="circle"
-                    @click="setCircleButtonModal('vmStart')"
-                  >
-                    <CaretRightOutlined />
-                  </a-button>
-                </a-tooltip>
-                <!--Stop-->
-                <a-tooltip
-                  v-if="vmMoldDataInfo.state === 'Running'"
-                  placement="bottom"
-                >
-                  <template #title>{{ $t("tooltip.stop") }}</template>
-                  <a-button
-                    shape="circle"
-                    @click="setCircleButtonModal('vmStop')"
-                  >
-                    <PoweroffOutlined />
-                  </a-button>
-                </a-tooltip>
-                <a-tooltip
-                  v-if="vmDbDataInfo.owner_account_id === ''"
-                  placement="bottom"
-                >
-                  <template #title>{{ $t("tooltip.userAllocate") }}</template>
-                  <a-button
-                    shape="circle"
-                    @click="setCircleButtonModal('userAllocate')"
-                  >
-                    <UserAddOutlined />
-                  </a-button>
-                </a-tooltip>
-                <a-tooltip
-                  v-if="vmDbDataInfo.owner_account_id !== ''"
-                  placement="bottom"
-                >
-                  <template #title>{{ $t("tooltip.userUnlock") }}</template>
-                  <a-button
-                    shape="circle"
-                    @click="setCircleButtonModal('userUnlock')"
-                  >
-                    <UserDeleteOutlined />
-                  </a-button>
-                </a-tooltip>
-                <!--Destroy-->
-                <a-tooltip placement="bottom">
-                  <template #title>{{ $t("tooltip.destroy") }}</template>
-                  <a-button
-                    type="primary"
-                    shape="circle"
-                    danger
-                    @click="setCircleButtonModal('vmDestroy')"
-                  >
-                    <DeleteFilled />
-                  </a-button>
-                </a-tooltip>
-              </a-space>
+              <Actions
+                :action-from="actionFrom"
+                :vm-uuid="uuid"
+                @fetchData="fetchData"
+              />
             </a-col>
           </a-row>
         </div>
@@ -92,44 +33,6 @@
         </div>
       </a-layout-content>
     </a-layout>
-
-    <!-- Confirm Modal -->
-    <a-modal
-      :title="$t('tooltip.' + modalTitle)"
-      :visible="confirmModalView"
-      :ok-text="$t('label.ok')"
-      :cancel-text="$t('label.cancel')"
-      @cancel="handleCancel"
-      @ok="handleSubmit()"
-    >
-      <p>{{ $t(modalConfirm) }}</p>
-    </a-modal>
-
-    <a-modal
-      :title="$t('tooltip.desktop.allocate.user')"
-      v-model:visible="userAllocateVmModalBoolean"
-      width="400px"
-      :ok-text="$t('label.ok')"
-      :cancel-text="$t('label.cancel')"
-      @ok="putUserAllocateVm()"
-    >
-      <a-select
-        v-model:value="selectedUser"
-        show-search
-        style="width: 100%; margin-top: 7px"
-        option-filter-prop="label"
-        class="addmodal-aform-item-div"
-      >
-        <a-select-option
-          v-for="option in workspaceUserDataList"
-          :key="option.name"
-          :value="option.name"
-          :label="option.name"
-        >
-          {{ option.name }}
-        </a-select-option>
-      </a-select>
-    </a-modal>
   </div>
 </template>
 
@@ -167,12 +70,12 @@ export default defineComponent({
     fetchData() {
       // 가상머신 상세조회
       worksApi
-        .get("/api/v1/instance/detail/" + this.$route.params.uuid)
+        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
         .then((response) => {
           if (response.status === 200) {
             this.vmDbDataInfo = response.data.result.instanceDBInfo;
             this.vmMoldDataInfo =
-              response.data.result.instanceMoldInfo.listvirtualmachinesmetricsresponse.virtualmachine[0];
+              response.data.result.instanceMoldInfo.virtualmachine[0];
 
             //해당 워크스페이스에 추가 된 사용자 목록 조회
             worksApi
@@ -221,21 +124,21 @@ export default defineComponent({
       this.userAllocateVmModalBoolean = false;
     },
     handleSubmit: function () {
-      console.log(this.modalTitle + "  ::  " + this.$route.params.uuid);
+      console.log(this.modalTitle + "  ::  " + this.$route.params.vmUuid);
       let worksUrl, resMessage = "";
       if (this.modalTitle.includes("vmStart")) {
         message.loading(this.$t("message.vm.status.starting"), 6);
-        worksUrl = "/api/v1/instance/VMStart/" + this.$route.params.uuid;
+        worksUrl = "/api/v1/instance/VMStart/" + this.$route.params.vmUuid;
         resMessage = this.$t("message.vm.status.update");
       }
       if (this.modalTitle.includes("vmStop")) {
         message.loading(this.$t("message.vm.status.stopping"), 6);
-        worksUrl = "/api/v1/instance/VMStop/" + this.$route.params.uuid;
+        worksUrl = "/api/v1/instance/VMStop/" + this.$route.params.vmUuid;
         resMessage = this.$t("message.vm.status.update");
       }
       if (this.modalTitle.includes("vmDestroy")) {
         message.loading(this.$t("message.vm.status.destroying"), 6);
-        worksUrl = "/api/v1/instance/VMDestroy/" + this.$route.params.uuid;
+        worksUrl = "/api/v1/instance/VMDestroy/" + this.$route.params.vmUuid;
         resMessage = this.$t("message.vm.status.delete");
       }
       worksApi
@@ -264,7 +167,7 @@ export default defineComponent({
     putUserAllocateVm: function () {
       //console.log(this.selectedUser + "  ::  " + uuid + "  :: " + workspace);
       let params = new URLSearchParams();
-      params.append("instanceUuid", this.$route.params.uuid);
+      params.append("instanceUuid", this.$route.params.vmUuid);
       params.append("username", this.selectedUser);
       worksApi
         .post("/api/v1/instance", params)

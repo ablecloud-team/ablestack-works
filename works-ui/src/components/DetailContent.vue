@@ -7,86 +7,90 @@
     </a-list-item> 
   </a-list>-->
   <a-list item-layout="horizontal" v-if="actionFrom === 'VirtualMachineDetail'"> 
-    <a-list-item >
-      <strong>{{ $t('label.name') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.name") }}</strong>
       <br>
       {{dataInfo.displayname}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.workspace') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.workspace") }}</strong>
       <br>
       {{vmDbDataInfo.workspace_name}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.vm.state') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.vm.state") }}</strong>
       <br>
-      {{dataInfo.state}}
+      {{dataInfo.state == "Running" ? $t("label.vm.status.running") : $t("label.vm.status.stopped")}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.users') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.users") }}</strong>
       <br>
       {{vmDbDataInfo.owner_account_id == ""
           ? $t("label.owner.account.false")
           : vmDbDataInfo.owner_account_id }}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t("label.desktop.connect.boolean") }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.vm.session.count") }}</strong>
       <br>
-      {{ vmDbDataInfo.connected === true ? $t("label.desktop.connect.true") : $t("label.desktop.connect.false") }}
+      {{ vmDbDataInfo.connected }}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.domain') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.domain") }}</strong>
       <br>
       {{dataInfo.domain}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.hypervisor') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.hypervisor") }}</strong>
       <br>
       {{dataInfo.hypervisor}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.pooltype') }}</strong>
+    <a-list-item>
+      <strong>{{ $t("label.pooltype") }}</strong>
       <br>
       {{dataInfo.pooltype}}
     </a-list-item>
   </a-list>
   <a-list item-layout="horizontal" v-if="actionFrom === 'UserDetail'">
-    <a-list-item >
-      <strong>{{ $t('label.account') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.account") }}</strong><br>
       {{dataInfo.username}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.country') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.country") }}</strong><br>
       {{dataInfo.co}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.countryCode') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.countryCode") }}</strong><br>
       {{dataInfo.countryCode}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.distinguishedName') }}</strong><br>
-      {{dataInfo.distinguishedName}}
+    <a-list-item>
+      <strong>{{ $t("label.title") }}</strong><br>
+      {{dataInfo.title}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.email') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.email") }}</strong><br>
       {{dataInfo.mail}}
     </a-list-item>
-        <a-list-item >
-      <strong>{{ $t('label.isAdmin') }}</strong><br>
+        <a-list-item>
+      <strong>{{ $t("label.isAdmin") }}</strong><br>
       {{dataInfo.isAdmin}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.telephoneNumber') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.telephoneNumber") }}</strong><br>
       {{dataInfo.telephoneNumber}}
     </a-list-item>
-    <a-list-item >
-      <strong>{{ $t('label.userPrincipalName') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.userPrincipalName") }}</strong><br>
       {{dataInfo.userPrincipalName}}
+    </a-list-item>
+    <a-list-item>
+      <strong>{{ $t("label.distinguishedName") }}</strong><br>
+      {{dataInfo.distinguishedName}}
     </a-list-item>
   </a-list>
   <a-list item-layout="horizontal" v-if="actionFrom === 'GroupPolicyDetail'">
-    <a-list-item >
-      <strong>{{ $t('label.account') }}</strong><br>
+    <a-list-item>
+      <strong>{{ $t("label.account") }}</strong><br>
       {{dataInfo.username}}
     </a-list-item>
   </a-list>
@@ -118,10 +122,8 @@ export default {
 <style scoped>
 .detail-content-card {
   margin-bottom: 10px;
-  minHeight: '0px';
-  padding: '7px 24px 0px 24px';
-  fontWeight: '700';
-  border: '0px';
+  padding: "7px 24px 0px 24px";
+  border: "0px";
 }
 ::v-deep(.ant-card-head-title) {
   padding: 0px;

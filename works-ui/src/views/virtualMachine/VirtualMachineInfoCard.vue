@@ -16,8 +16,8 @@
     <div class="Item">
       <a-badge
         class="head-example"
-        :color="vmDbDataInfo.status == 'Ready' ? 'green' : 'red'"
-        :text="vmDbDataInfo.status"
+        :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
+        :text="vmDbDataInfo.checked === true ? $t('label.vm.status.ready') : $t('label.vm.status.notready')"
       />
     </div>
   </div>
@@ -114,14 +114,14 @@ export default defineComponent ({
   methods: {
     fetchData() {
       worksApi
-        .get("/api/v1/instance/detail/"+this.$route.params.uuid)
+        .get("/api/v1/instance/detail/"+this.$route.params.vmUuid)
         .then((response) => {
           if (response.status === 200) {
             console.log(response.data.result.instanceDBInfo);
             this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo = response.data.result.instanceMoldInfo.listvirtualmachinesmetricsresponse.virtualmachine[0];
+            this.vmMoldDataInfo = response.data.result.instanceMoldInfo.virtualmachine[0];
             this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
-            this.vmDiskInfo = response.data.result.instanceInstanceVolumeInfo.listvolumesmetricsresponse.volume[0];
+            this.vmDiskInfo = response.data.result.instanceInstanceVolumeInfo.volume[0];
             this.cpuused = this.vmMoldDataInfo.cpuused.split("%")[0];
           } else {
             message.error(this.$t("message.response.data.fail"));
