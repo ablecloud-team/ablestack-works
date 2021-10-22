@@ -22,17 +22,22 @@ type AsyncJob struct {
 
 func asyncJobMonitoring() {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	log.WithFields(logrus.Fields{
+		"asyncJob.go": "asyncJobMonitoring",
+	}).Infof("Exec")
 	if err != nil {
-		fmt.Println("DB connect error")
-		fmt.Println(err)
+		log.WithFields(logrus.Fields{
+			"asyncJob.go": "asyncJobMonitoring",
+		}).Errorf("DB connect error")
 	}
 	defer db.Close()
 	for {
 		var count int
 		err = db.QueryRow("SELECT count(*) FROM async_job where ready = 1").Scan(&count)
 		if err != nil {
-			log.Error("async_job 테이블 조회중 에러가 발생했습니다.")
-			log.Error(err)
+			log.WithFields(logrus.Fields{
+				"asyncJob.go": "asyncJobMonitoring",
+			}).Errorf("async_job 테이블 조회중 에러가 발생했습니다. [%v]", err)
 		}
 		if count > 0 {
 			log.Info("Async Job Execution")
@@ -118,16 +123,15 @@ func asyncJobExec() {
 					{"tags[0].value": AblecloudWorks},
 					{"tags[1].key": WorkspaceName},
 					{"tags[1].value": workspaceInfo.Name},
+					{"tags[2].key": ClusterName},
+					{"tags[2].value": "WorkspaceIP"},
 				}
 				aaa := getCreateTags(params)
 				log.Info(aaa)
 
 				log.Info("The virtual machine has been successfully created.")
 				log.Info(resultInsertInstance)
-
-				break
 			}
-
 			updateWorkspaceQuantity(workspaceInfo.Uuid)
 		}
 		log.Infof("%v개의 가상머신 async_job 등록이 완료 되었습니다..\n", resultQuantity)
