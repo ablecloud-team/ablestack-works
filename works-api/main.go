@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -12,7 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	_ "works-api/docs"
+	//_ "works-api/docs"
 )
 
 var log = logrus.New() //.WithField("who", "Main")
@@ -37,39 +36,38 @@ func StartClientApp() (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-func setup() {
-	log.SetFormatter(&nested.Formatter{
-		HideKeys:    false,
-		CallerFirst: false,
-	})
-	log.SetReportCaller(true)
-	log.SetLevel(logrus.InfoLevel)
-}
+
 func main() {
 	var (
 		err error
 	)
-	setup()
 	DBSetting()        //DB 접속정보 셋팅
 	MoldSetting()      //Mold 정보 셋팅
 	DCSetting()        //DC 정보 셋팅
 	WorksSetting()     //Works-API 정보 셋팅
 	SambaSetting()     //SAMBA 정보 셋팅
 	GuacamoleSetting() //guacamole 정보 셋팅
+	logSetting()
 
 	router := gin.Default()
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
 	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
-	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
+	//router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
 	api := router.Group("/api")
 	{
 		api.POST("/login", getLogin)
+		api.POST("/workspaceAgent/:instanceUuid", putWorkspacesAgent)
 		api.POST("/workspaceAgent", putWorkspacesAgent)
+		api.GET("/version", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"version": Version})
+		})
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		{
 			v1.GET("/token", getUserToken)
+
+			v1.GET("/dashboard", getDashboard)
 
 			v1.GET("/workspace", getWorkspaces)
 			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
@@ -84,9 +82,7 @@ func main() {
 			v1.POST("/instance", postInstances)
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
 
-			v1.GET("/version", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version})
-			})
+
 
 			v1.GET("/logout", getLogout)
 
@@ -113,6 +109,6 @@ func main() {
 	go updateInstanceChecked0()
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-	err = router.Run("0.0.0.0:8083")
+	err = router.Run("0.0.0.0:8080")
 	fmt.Println(err)
 }

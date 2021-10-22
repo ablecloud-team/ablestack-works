@@ -76,3 +76,42 @@ type ListVirtualMachinesMetrics struct {
 		Zonename            string        `json:"zonename"`
 	} `json:"virtualmachine"`
 }
+
+type InstanceInstanceVolumeInfo struct {
+	Count  int `json:"count"`
+	Volume []struct {
+		Account                    string        `json:"account"`
+		Created                    string        `json:"created"`
+		Deviceid                   int           `json:"deviceid"`
+		Diskiopstotal              int           `json:"diskiopstotal"`
+		Diskioread                 int           `json:"diskioread"`
+		Diskiowrite                int           `json:"diskiowrite"`
+		Diskkbsread                int           `json:"diskkbsread"`
+		Diskkbswrite               int           `json:"diskkbswrite"`
+		Domain                     string        `json:"domain"`
+		Domainid                   string        `json:"domainid"`
+		Id                         string        `json:"id"`
+		Isextractable              bool          `json:"isextractable"`
+		Name                       string        `json:"name"`
+		Provisioningtype           string        `json:"provisioningtype"`
+		Quiescevm                  bool          `json:"quiescevm"`
+		Serviceofferingdisplaytext string        `json:"serviceofferingdisplaytext"`
+		Serviceofferingid          string        `json:"serviceofferingid"`
+		Serviceofferingname        string        `json:"serviceofferingname"`
+		Size                       int64         `json:"size"`
+		Sizegb                     string        `json:"sizegb"`
+		State                      string        `json:"state"`
+		Supportsstoragesnapshot    bool          `json:"supportsstoragesnapshot"`
+		Tags                       []interface{} `json:"tags"`
+		Templatedisplaytext        string        `json:"templatedisplaytext"`
+		Templateid                 string        `json:"templateid"`
+		Templatename               string        `json:"templatename"`
+		Type                       string        `json:"type"`
+		Virtualmachineid           string        `json:"virtualmachineid"`
+		Vmdisplayname              string        `json:"vmdisplayname"`
+		Vmname                     string        `json:"vmname"`
+		Vmstate                    string        `json:"vmstate"`
+		Zoneid                     string        `json:"zoneid"`
+		Zonename                   string        `json:"zonename"`
+	} `json:"volume"`
+}

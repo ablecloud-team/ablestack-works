@@ -60,6 +60,27 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/dashboard": {
+            "get": {
+                "description": "워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "dashboard 조회하는 API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/group": {
             "get": {
                 "description": "그룹 리스트를 조회를 위한 API 입니다.",
@@ -601,6 +622,34 @@ var doc = `{
                         "type": "boolean",
                         "description": "워크스페이스에서 Shard 여부 전용이면 'false', 공용이면 'true'",
                         "name": "shared",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "워크스페이를 추가하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "워크스페이스를 추가하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "워크스페이스 UUID",
+                        "name": "workspaceUuid",
                         "in": "path",
                         "required": true
                     }

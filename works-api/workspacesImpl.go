@@ -123,6 +123,81 @@ func selectCountWorkspace() (int, error) {
 	return workspaceCount, err
 }
 
+func selectCountInstance() (int, error) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("selectCountInstance DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectCountInstance",
+	}).Info("selectCountInstance DB connect success")
+	var instanceCount int
+	err = db.QueryRow("SELECT count(*) FROM vm_instances where removed IS NULL").Scan(&instanceCount)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("Instance Count Select Query FAILED [%v]", err)
+	}
+
+	return instanceCount, err
+}
+
+func selectCountDesktopConnected() (int, error) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectCountDesktopConnected",
+	}).Infof("DB connect success")
+	var desktopConnectedCount int
+	queryString := "SELECT count(*) FROM vm_instances AS vm " +
+		"LEFT JOIN workspaces w" +
+		" ON vm.workspace_uuid = w.uuid" +
+		" WHERE vm.removed IS NULL" +
+		" AND vm.connected = 1" +
+		" AND w.workspace_type = 'desktop'"
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectCountDesktopConnected",
+	}).Infof("Query [%v]", queryString)
+	err = db.QueryRow(queryString).Scan(&desktopConnectedCount)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("Instance Connected Count Select Query FAILED [%v]", err)
+	}
+
+	return desktopConnectedCount, err
+}
+
+func selectCountAppConnected() (int, error) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("selectCountInstance DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectCountInstance",
+	}).Info("selectCountInstance DB connect success")
+	var instanceConnectedCount int
+	err = db.QueryRow("SELECT count(*) FROM vm_instances AS vm LEFT JOIN workspaces w on vm.workspace_uuid = w.uuid WHERE vm.removed IS NULL AND vm.connected = 1 AND w.workspace_type = 'app'").Scan(&instanceConnectedCount)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectCountInstance",
+		}).Errorf("Instance Connected Count Select Query FAILED [%v]", err)
+	}
+
+	return instanceConnectedCount, err
+}
+
 func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "selectInstanceList",
@@ -509,4 +584,33 @@ func updateInstanceChecked0() {
 	}
 
 	time.Sleep(60 * time.Second)
+}
+
+func deleteWorkspace(workspaceUuid string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "deleteWorkspace",
+	}).Infof("workspaceUuid [%v]", workspaceUuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE workspaces SET removed=NOW() WHERE uuid=?", workspaceUuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+	return resultReturn
 }

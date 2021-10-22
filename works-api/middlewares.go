@@ -13,13 +13,15 @@ var expirationTime = 5 * time.Minute
 var allowUrl string
 
 func SetHeader(c *gin.Context) {
-	allowUrlList := []string{"http://localhost:8080", "http://172.16.0.85:8083", "http://172.16.0.89:8080", "http://172.16.0.85:8081"}
-	for _, url := range allowUrlList {
-		if c.Request.Header.Get("Origin") == url {
-			allowUrl = url
-			break
-		}
-	}
+	//allowUrlList := []string{"http://10.10.1.37:8082", "http://172.16.0.85:8083", "http://172.16.0.89:8080", "http://172.16.0.85:8081", "http://10.10.1.30", "http://10.88.0.70:8085","http://10.10.1.100:8085","http://10.88.2.11:8080"}
+	log.Infof("c.Request.Header INFO [%v]", c.Request.Header.Get("Origin"))
+	//for _, url := range allowUrlList {
+	//	if c.Request.Header.Get("Origin") == url {
+	//		allowUrl = url
+	//		break
+	//	}
+	//}
+	allowUrl = c.Request.Header.Get("Origin")
 	c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin")
 	c.Header("Access-Control-Allow-Credentials", "true")
 	c.Header("Access-Control-Allow-Origin", allowUrl)

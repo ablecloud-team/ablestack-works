@@ -197,13 +197,17 @@ func putWorkspaces(c *gin.Context) {
 // @Router /api/v1/workspace [delete]
 // @Success 200 {object} map[string]interface{}
 func deleteWorkspaces(c *gin.Context) {
-	//result := map[string]interface{}{}
+	returnData := map[string]interface{}{}
 	resultCode := http.StatusNotFound
-	//workspaceUuid = c.PostForm("workspaceUuid")
-	//res := map[string]interface{}{}
+	workspaceUuid := c.Param("workspaceUuid")
+	resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
 
+	if resultDeleteWorkspace["status"] == http.StatusOK{
+		returnData["message"] = "workspace delete success"
+		resultCode = http.StatusOK
+	}
 	c.JSON(resultCode, gin.H{
-		"result": "res",
+		"result": returnData,
 	})
 }
 
@@ -324,11 +328,22 @@ func getInstancesDetail(c *gin.Context) {
 	paramsVolume := []MoldParams{
 		{"virtualmachineid": instanceInfo.MoldUuid},
 	}
-	resultMoldInfo := getListVirtualMachinesMetrics(paramsInstance)
-	resultInstanceVolumeInfo := getlistVolumesMetrics(paramsVolume)
+	virtualMachineList := getListVirtualMachinesMetrics(paramsInstance)
+	virtualMachineVolumeList := getlistVolumesMetrics(paramsVolume)
+
+	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+	virtualMachineInfo, _ := json.Marshal(virtualMachineList["listvirtualmachinesmetricsresponse"])
+	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+	instanceInfo.MoldStatus = listVirtualMachinesMetrics.Virtualmachine[0].State
+
+	instanceInstanceVolumeInfo := InstanceInstanceVolumeInfo{}
+	virtualMachineVolumeInfo, _ := json.Marshal(virtualMachineVolumeList["listvolumesmetricsresponse"])
+	json.Unmarshal([]byte(virtualMachineVolumeInfo), &instanceInstanceVolumeInfo)
+
 	returnData["instanceDBInfo"] = instanceInfo
-	returnData["instanceMoldInfo"] = resultMoldInfo
-	returnData["instanceInstanceVolumeInfo"] = resultInstanceVolumeInfo
+	returnData["instanceMoldInfo"] = listVirtualMachinesMetrics
+	returnData["instanceInstanceVolumeInfo"] = instanceInstanceVolumeInfo
+
 	c.JSON(returnCode, gin.H{
 		"result": returnData,
 	})
@@ -446,5 +461,33 @@ func patchInstances(c *gin.Context) {
 
 	c.JSON(returnCode, gin.H{
 		"result": result,
+	})
+}
+
+// getDashboard godoc
+// @Summary dashboard 조회하는 API
+// @Description 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Router /api/v1/dashboard [get]
+// @Success 200 {object} map[string]interface{}
+func getDashboard(c *gin.Context) {
+	//TODO 데스크톱 연결수, APP 연겴 수
+	resultData := map[string]interface{}{}
+	resultCode := http.StatusNotFound
+	returnCountWorkspace, workspaceErr := selectCountWorkspace()
+	returnCountInstance, instanceErr := selectCountInstance()
+	log.WithFields(logrus.Fields{
+		"workspacesController.go": "getDashboard",
+	}).Infof("clientIP [%v]", c.ClientIP())
+
+
+	if workspaceErr == nil && instanceErr == nil {
+		resultCode = http.StatusOK
+		resultData["workspaceCount"] = returnCountWorkspace
+		resultData["instanceCount"] = returnCountInstance
+	}
+	c.JSON(resultCode, gin.H{
+		"result":              resultData,
 	})
 }
