@@ -8,10 +8,7 @@
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
-        <TableContent
-          :tap-name="'user'"
-          :action-from="'UserDetail'"
-        />
+        <TableContent :tap-name="'user'" :action-from="'UserDetail'" />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.policy.list')">
         <TableContent :tap-name="'policy'" :action-from="'policyDetail'" />

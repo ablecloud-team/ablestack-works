@@ -4,10 +4,10 @@
       @click="$router.push({ name: 'Dashboard' }); selectedKeysSetting(1)" 
     />
     <a-menu
+      v-model:selectedKeys="state.selectedKeys"
       mode="inline"
       theme="light"
       inline="true"
-      v-model:selectedKeys="state.selectedKeys"
       style="padding-top: 14px"
     >
       <a-menu-item key="1" @click="$router.push({ name: 'Dashboard' }); selectedKeysSetting(1)">
@@ -77,8 +77,8 @@ export default defineComponent({
     watch(
       () => state.openKeys,
       (val, oldVal) => {
-        console.log(val);
-        console.log(oldVal);
+        // console.log(val);
+        // console.log(oldVal);
         state.preOpenKeys = oldVal;
       }
     );

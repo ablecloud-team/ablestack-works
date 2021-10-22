@@ -68,7 +68,11 @@
         <a-badge
           class="head-example"
           :color="record.template_ok_check == 'AgentOK' ? 'green' : 'red'"
-          :text="record.template_ok_check == 'AgentOK' ? $t('label.enable') : $t('label.disable')"
+          :text="
+            record.template_ok_check == 'AgentOK'
+              ? $t('label.enable')
+              : $t('label.disable')
+          "
         />
       </a-tooltip>
     </template>

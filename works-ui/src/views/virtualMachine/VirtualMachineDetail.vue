@@ -88,7 +88,9 @@ export default defineComponent({
                       ? ""
                       : response.data.result.member;
                   for (let str of temp) {
-                    this.workspaceUserDataList.push({ name: str.split(",")[0].split("CN=")[1] });
+                    this.workspaceUserDataList.push({
+                      name: str.split(",")[0].split("CN=")[1],
+                    });
                   }
                 } else {
                 }
@@ -96,7 +98,6 @@ export default defineComponent({
               .catch(function (error) {
                 message.error(error);
               });
-
           } else {
             message.error(this.$t("message.response.data.fail"));
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
@@ -117,15 +118,15 @@ export default defineComponent({
         if (value == "vmDestroy") this.modalConfirm = "modal.confirm.vmDestroy";
         if (value == "userUnlock") this.userUnlock = "modal.confirm.userUnlock";
       }
-
     },
     handleCancel: function () {
       this.confirmModalView = false;
       this.userAllocateVmModalBoolean = false;
     },
     handleSubmit: function () {
-      console.log(this.modalTitle + "  ::  " + this.$route.params.vmUuid);
-      let worksUrl, resMessage = "";
+      //console.log(this.modalTitle + "  ::  " + this.$route.params.vmUuid);
+      let worksUrl,
+        resMessage = "";
       if (this.modalTitle.includes("vmStart")) {
         message.loading(this.$t("message.vm.status.starting"), 6);
         worksUrl = "/api/v1/instance/VMStart/" + this.$route.params.vmUuid;
@@ -151,8 +152,8 @@ export default defineComponent({
               message.destroy();
               message.success(resMessage);
               if (this.modalTitle.includes("vmDestroy")) {
-                this.$router.push({ name: 'VirtualMachine' });
-              }else{
+                this.$router.push({ name: "VirtualMachine" });
+              } else {
                 this.fetchData();
               }
             }, 5000);

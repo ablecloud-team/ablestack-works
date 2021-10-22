@@ -153,7 +153,7 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.logging"), 0);
+          message.loading(this.$t("message.logging"), 10);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
           // try {
@@ -163,14 +163,16 @@ export default defineComponent({
             .then((response) => {
               //console.log(response);
               if (response.status === 200) {
-
-                if(response.data.result.isAdmin == "false"){
+                if (response.data.result.isAdmin == "false") {
                   message.error(this.$t("message.login.wrong"));
                   router.push({ name: "Login" });
-                }else{
+                } else {
                   store.dispatch("loginCommit", response.data);
                   sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem("username", response.data.result.username);
+                  sessionStorage.setItem(
+                    "username",
+                    response.data.result.username
+                  );
                   router.push({ name: "Dashboard" });
                   message.destroy();
                   message.success(this.$t("message.login.completed"));

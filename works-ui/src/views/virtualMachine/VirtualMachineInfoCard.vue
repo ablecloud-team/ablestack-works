@@ -17,7 +17,11 @@
       <a-badge
         class="head-example"
         :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
-        :text="vmDbDataInfo.checked === true ? $t('label.vm.status.ready') : $t('label.vm.status.notready')"
+        :text="
+          vmDbDataInfo.checked === true
+            ? $t('label.vm.status.ready')
+            : $t('label.vm.status.notready')
+        "
       />
     </div>
   </div>
@@ -49,19 +53,43 @@
   </div>
   <div class="CardItem">
     <div class="ItemName">{{ $t("label.vm.disk.size") }}</div>
-    <div class="Item">{{ vmDiskInfo.sizegb }}<br>
-      <a-tag> {{$t("label.read") + " " + (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2) }} GB</a-tag>
-      <a-tag> {{$t("label.write") + " " + (vmMoldDataInfo.diskkbswrite/ 1048576).toFixed(2) }} GB</a-tag><br>
-      <a-tag> {{$t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag>
-      <a-tag> {{$t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag>
+    <div class="Item">
+      {{ vmDiskInfo.sizegb }}<br />
+      <a-tag>
+        {{
+          $t("label.read") +
+          " " +
+          (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2)
+        }}
+        GB</a-tag
+      >
+      <a-tag>
+        {{
+          $t("label.write") +
+          " " +
+          (vmMoldDataInfo.diskkbswrite / 1048576).toFixed(2)
+        }}
+        GB</a-tag
+      ><br />
+      <a-tag>
+        {{ $t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag
+      >
+      <a-tag>
+        {{ $t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag
+      >
     </div>
   </div>
   <div class="CardItem">
     <div class="ItemName">{{ $t("label.network") }}</div>
     <div class="Item">
-      <a-tag> <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag>
-      <a-tag> <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag><br>
-      {{ vmNetworkInfo.networkname }}</div>
+      <a-tag>
+        <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
+      >
+      <a-tag>
+        <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+      ><br />
+      {{ vmNetworkInfo.networkname }}
+    </div>
   </div>
   <div class="CardItem">
     <div class="ItemName">{{ $t("label.vm.network.ip") }}</div>
@@ -82,7 +110,7 @@ import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
-export default defineComponent ({
+export default defineComponent({
   components: {},
   props: {
     // vmDbDataInfo: {
@@ -103,8 +131,8 @@ export default defineComponent ({
     return {
       vmDbDataInfo: ref([]),
       vmMoldDataInfo: ref([]),
-      vmNetworkInfo : ref([]),
-      vmDiskInfo : ref([]),
+      vmNetworkInfo: ref([]),
+      vmDiskInfo: ref([]),
       cpuused: ref(0),
     };
   },
@@ -114,14 +142,16 @@ export default defineComponent ({
   methods: {
     fetchData() {
       worksApi
-        .get("/api/v1/instance/detail/"+this.$route.params.vmUuid)
+        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
         .then((response) => {
           if (response.status === 200) {
-            console.log(response.data.result.instanceDBInfo);
+            //console.log(response.data.result.instanceDBInfo);
             this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo = response.data.result.instanceMoldInfo.virtualmachine[0];
+            this.vmMoldDataInfo =
+              response.data.result.instanceMoldInfo.virtualmachine[0];
             this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
-            this.vmDiskInfo = response.data.result.instanceInstanceVolumeInfo.volume[0];
+            this.vmDiskInfo =
+              response.data.result.instanceInstanceVolumeInfo.volume[0];
             this.cpuused = this.vmMoldDataInfo.cpuused.split("%")[0];
           } else {
             message.error(this.$t("message.response.data.fail"));

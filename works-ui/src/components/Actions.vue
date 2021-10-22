@@ -1,77 +1,34 @@
 <template class="able-action">
-  <a-space :size="size">
+  <a-space :size="8">
     <!--Start-->
-    <a-tooltip v-if="state.buttonBoolean.start" placement="top">
-      <template #title>{{ $t("tooltip.start") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('start')">
+    <a-tooltip v-if="state.buttonBoolean.vmStart" placement="bottom">
+      <template #title>{{ $t("tooltip.vmStart") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('vmStart')">
         <CaretRightOutlined />
       </a-button>
     </a-tooltip>
     <!--Stop-->
-    <a-tooltip v-if="state.buttonBoolean.stop" placement="top">
-      <template #title>{{ $t("tooltip.stop") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('stop')">
+    <a-tooltip v-if="state.buttonBoolean.vmStop" placement="bottom">
+      <template #title>{{ $t("tooltip.vmStop") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('vmStop')">
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
     <!--reset -->
-    <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="top">
+    <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.userAllocate") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userAllocate')">
         <UserAddOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.userUnlock" placement="top">
+    <a-tooltip v-if="state.buttonBoolean.userUnlock" placement="bottom">
       <template #title>{{ $t("tooltip.userUnlock") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userUnlock')">
         <UserDeleteOutlined />
       </a-button>
     </a-tooltip>
-    <!--reinstall-->
-    <a-tooltip v-if="state.buttonBoolean.reinstall" placement="top">
-      <template #title>{{ $t("tooltip.reinstall") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('reinstall')">
-        <SyncOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--snapshot-->
-    <a-tooltip v-if="state.buttonBoolean.snapshot" placement="top">
-      <template #title>{{ $t("tooltip.snapshot") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('snapshot')">
-        <CameraOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--volsnapshot-->
-    <a-tooltip v-if="state.buttonBoolean.volsnapshot" placement="top">
-      <template #title>{{ $t("tooltip.volsnapshot") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('volsnapshot')">
-        <i class="fas fa-camera-retro"></i>
-        <VideoCameraAddOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--isoattach-->
-    <a-tooltip v-if="state.buttonBoolean.isoattach" placement="top">
-      <template #title>{{ $t("tooltip.isoattach") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('isoattach')">
-        <PaperClipOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--edit-->
-    <a-tooltip v-if="state.buttonBoolean.edit" placement="top">
-      <template #title>{{ $t("tooltip.edit") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('edit')">
-        <EditOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--pause-->
-    <a-tooltip v-if="state.buttonBoolean.pause" placement="top">
-      <template #title>{{ $t("tooltip.pause") }}</template>
-      <a-button shape="circle" @click="asdf()">
-        <PauseOutlined />
-      </a-button>
-    </a-tooltip>
     <!--workspaceDestroy-->
-    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="top">
+    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
@@ -83,7 +40,7 @@
       </a-button>
     </a-tooltip>
     <!--vmDestroy-->
-    <a-tooltip v-if="state.buttonBoolean.vmDestroy" placement="top">
+    <a-tooltip v-if="state.buttonBoolean.vmDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
@@ -95,7 +52,7 @@
       </a-button>
     </a-tooltip>
     <!--accountDestroy-->
-    <a-tooltip v-if="state.buttonBoolean.accountDestroy" placement="top">
+    <a-tooltip v-if="state.buttonBoolean.accountDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
@@ -109,27 +66,26 @@
 
     <!-- Confirm Modal -->
     <a-modal
+      v-model:visible="confirmModalView"
       :title="$t('tooltip.' + modalTitle)"
-      :visible="confirmModalView"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
       @cancel="handleCancel"
-      @ok="handleSubmit(actionFrom, workspace, uuid)"
+      @ok="handleSubmit(actionFrom)"
     >
       <p>{{ $t(modalConfirm) }}</p>
     </a-modal>
 
     <a-modal
-      :title="$t('tooltip.desktop.allocate.user')"
       v-model:visible="userAllocateVmModalBoolean"
+      :title="$t('tooltip.desktop.allocate.user')"
       width="400px"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
-      @ok="putUserAllocateVm(workspace, uuid)"
+      @ok="putUserAllocateVm()"
     >
       <a-select
         v-model:value="selectedUser"
-        :placeholder="$t('tooltip.user')"
         show-search
         style="width: 100%; margin-top: 7px"
         option-filter-prop="label"
@@ -152,6 +108,7 @@
 import { defineComponent, onMounted, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
+import router from "@/router";
 
 export default defineComponent({
   components: {},
@@ -161,17 +118,12 @@ export default defineComponent({
       requires: true,
       default: "",
     },
-    uuid: {
+    workspaceUuid: {
       type: String,
       requires: false,
       default: "",
     },
-    workspace: {
-      type: String,
-      requires: false,
-      default: "",
-    },
-    status: {
+    vmUuid: {
       type: String,
       requires: false,
       default: "",
@@ -182,19 +134,20 @@ export default defineComponent({
       default: "",
     },
   },
+  emits: ["fetchData"],
   setup(props) {
-    const sizeValue = 8;
     //console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
     const state = reactive({
       callComponent: ref(props.actionFrom),
-      workspace: ref(props.workspace),
-      uuid: ref(props.uuid),
+      workspaceUuid: ref(props.workspaceUuid),
       allocateStatus: ref(props.allocateStatus),
-      status: ref(props.status),
+      workspaceName: ref(""),
+      vmUuid: ref(props.vmUuid),
+      vmStatus: ref(""),
       buttonBoolean: {
         showModal: ref(false),
-        start: ref(false),
-        stop: ref(false),
+        vmStart: ref(false),
+        vmStop: ref(false),
         userAllocate: ref(false),
         userUnlock: ref(false),
         reinstall: ref(false),
@@ -208,80 +161,93 @@ export default defineComponent({
         pause: ref(false),
       },
     });
-    onMounted(() => {
-      if (state.callComponent === "WorkspaceList" || state.callComponent === "WorkspaceDetail") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.workspaceDestroy = true;
-      } else if (state.callComponent === "VirtualMachineList" || state.callComponent === "VirtualMachineDetail") {
-        if (state.status === "Running") {
-          state.buttonBoolean.stop = true;
-        } else {
-          state.buttonBoolean.start = true;
-        }
-        if (state.allocateStatus == "") {
-          state.buttonBoolean.userAllocate = true;
-        } else {
-          state.buttonBoolean.userUnlock = true;
-        }
-        state.buttonBoolean.vmDestroy = true;
-      } else if (state.callComponent === "AccountList" || state.callComponent === "AccountDetail") {
-        state.buttonBoolean.accountDestroy = true;
-      } else if (state.callComponent === "GroupPolicyList" || state.callComponent === "GroupPolicyDetail") {
-        state.buttonBoolean.destroy = true;
-      }
-    });
     return {
-      size: ref(sizeValue),
       confirmModalView: ref(false),
       userAllocateVmModalBoolean: ref(false),
       workspaceUserDataList: ref([]),
       modalTitle: ref(""),
       modalConfirm: ref(""),
-      popView: ref(true),
       state,
     };
   },
   data() {
     return {
       selectedUser: ref(""),
-    }
+    };
   },
   created() {
     this.fetchData();
   },
   methods: {
-    fetchData: function () {
-      if (this.state.callComponent === "VirtualMachineList" ) {
-        //해당 워크스페이스에 추가 된 사용자 목록 조회
+    fetchData() {
+      if (this.state.callComponent.includes("Workspace")) {
+        this.state.buttonBoolean.workspaceDestroy = true;
+      } else if (this.state.callComponent.includes("Account")) {
+        this.state.buttonBoolean.accountDestroy = true;
+      } else if (this.state.callComponent.includes("GroupPolicy")) {
+        this.state.buttonBoolean.destroy = true;
+      }
+
+      if (this.state.callComponent.includes("VirtualMachine")) {
+        let _uuid = this.$route.params.vmUuid === undefined ? this.state.vmUuid : this.$route.params.vmUuid;
+        //console.log("this.$route.params.vmUuid :: "+this.$route.params.vmUuid+ " :: this.state.vmUuid :: " +this.state.vmUuid);
         worksApi
-          .get("/api/v1/group/" + this.state.workspace)
+          .get("/api/v1/instance/detail/" + _uuid)
           .then((response) => {
             if (response.status == 200) {
-              //console.log(response.data.result.member);
-              const temp =
-                response.data.result.member == undefined
-                  ? ""
-                  : response.data.result.member;
-              for (let str of temp) {
-                this.workspaceUserDataList.push({ name: str.split(",")[0].split("CN=")[1] });
+              //this.vmDbDataInfo = response.data.result.instanceDBInfo;
+              this.state.vmUuid = response.data.result.instanceDBInfo.uuid;
+              this.state.vmStatus = response.data.result.instanceDBInfo.mold_status;
+              this.state.workspaceName = response.data.result.instanceDBInfo.workspace_name;
+              this.state.allocateStatus = response.data.result.instanceDBInfo.owner_account_id;
+
+              if (this.state.vmStatus === "Running") {
+                this.state.buttonBoolean.vmStop = true;
+                this.state.buttonBoolean.vmStart = false;
+              } else {
+                this.state.buttonBoolean.vmStop = false;
+                this.state.buttonBoolean.vmStart = true;
               }
+              if (this.state.allocateStatus == "") {
+                this.state.buttonBoolean.userAllocate = true;
+                this.state.buttonBoolean.userUnlock = false;
+              } else {
+                this.state.buttonBoolean.userAllocate = false;
+                this.state.buttonBoolean.userUnlock = true;
+              }
+              this.state.buttonBoolean.vmDestroy = true;
+
+              //해당 워크스페이스에 추가 된 사용자 목록 조회
+              worksApi
+                .get("/api/v1/group/" + this.state.workspaceName)
+                .then((response) => {
+                  if (response.status == 200) {
+                    const temp =
+                      response.data.result.member == undefined
+                        ? ""
+                        : response.data.result.member;
+                    for (let str of temp) {
+                      this.workspaceUserDataList.push({ name: str.split(",")[0].split("CN=")[1] });
+                    }
+                  } else {
+                    //message.error(this.t("message.response.data.fail"));
+                  }
+                })
+                .catch(function (error) {
+                  //message.error(error);
+                });
             } else {
-              //message.error(this.t("message.response.data.fail"));
-              //console.log(response.message);
+              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
             }
           })
           .catch(function (error) {
-            message.error(error);
-            //console.log(error);
+            console.log(error);
           });
       }
-      
     },
-    putUserAllocateVm: function (workspace, uuid) {
-      //console.log(this.selectedUser + "  ::  " + uuid + "  :: " + workspace);
+    putUserAllocateVm() {
       let params = new URLSearchParams();
-      params.append("uuid", uuid);
+      params.append("instanceUuid", this.state.vmUuid);
       params.append("username", this.selectedUser);
       worksApi
         .post("/api/v1/instance", params)
@@ -289,7 +255,8 @@ export default defineComponent({
           if (response.status === 200) {
             message.success(this.$t("message.user.vm.allocated.completed"), 3);
             setTimeout(() => {
-              this.$emit("fetchData", "desktop");
+              this.$emit("fetchData");
+              this.fetchData();
             }, 1000);
             this.handleCancel();
           } else {
@@ -300,43 +267,45 @@ export default defineComponent({
           console.log(error);
         });
     },
-    setCircleButtonModal: function (value) {
+    setCircleButtonModal(value) {
       if (value == "userAllocate") {
         this.userAllocateVmModalBoolean = true;
       } else {
         this.confirmModalView = true;
-        this.popView = false;
         this.modalTitle = value;
       }
-      if (value == "start") this.modalConfirm = "modal.confirm.start";
-      if (value == "stop") this.modalConfirm = "modal.confirm.stop";
+      if (value == "workspaceStart") this.modalConfirm = "modal.confirm.workspaceStart";
+      if (value == "workspaceStop") this.modalConfirm = "modal.confirm.workspaceStop";
       if (value == "workspaceDestroy") this.modalConfirm = "modal.confirm.workspaceDestroy";
+
+      if (value == "vmStart") this.modalConfirm = "modal.confirm.vmStart";
+      if (value == "vmStop") this.modalConfirm = "modal.confirm.vmStop";
       if (value == "vmDestroy") this.modalConfirm = "modal.confirm.vmDestroy";
+
       if (value == "accountDestroy") this.modalConfirm = "modal.confirm.accountDestroy";
-      if (value == "userUnlock") this.userUnlock = "modal.confirm.userUnlock";
+      if (value == "userUnlock") this.modalConfirm = "modal.confirm.userUnlock";
     },
-    handleCancel: function () {
+    handleCancel() {
       this.confirmModalView = false;
       this.userAllocateVmModalBoolean = false;
     },
-    handleSubmit: function (actionFrom, workspace, uuid) {
-      //console.log(this.modalTitle + "  ::  " + actionFrom + " ::  " + workspace + " :: " + uuid);
-      
-      if (actionFrom == "VirtualMachineList") {
+    handleSubmit(actionFrom) {
+      //console.log(this.modalTitle + "  ::  " + this.state.vmUuid);
+      if (actionFrom.includes("VirtualMachine")) {
         let worksUrl, resMessage = "";
-        if (this.modalTitle.includes("start")) {
-          message.loading(this.$t("message.vm.status.starting"), 6);
-          worksUrl = "/api/v1/instance/VMStart/" + uuid;
+        if (this.modalTitle.includes("vmStart")) {
+          message.loading(this.$t("message.vm.status.starting"), 12);
+          worksUrl = "/api/v1/instance/VMStart/" + this.state.vmUuid;
           resMessage = this.$t("message.vm.status.update");
         }
-        if (this.modalTitle.includes("stop")) {
-          message.loading(this.$t("message.vm.status.stopping"), 6);
-          worksUrl = "/api/v1/instance/VMStop/" + uuid;
+        if (this.modalTitle.includes("vmStop")) {
+          message.loading(this.$t("message.vm.status.stopping"), 12);
+          worksUrl = "/api/v1/instance/VMStop/" + this.state.vmUuid;
           resMessage = this.$t("message.vm.status.update");
         }
         if (this.modalTitle.includes("vmDestroy")) {
-          message.loading(this.$t("message.vm.status.destroying"), 6);
-          worksUrl = "/api/v1/instance/VMDestroy/" + uuid;
+          message.loading(this.$t("message.vm.status.destroying"), 12);
+          worksUrl = "/api/v1/instance/VMDestroy/" + this.state.vmUuid;
           resMessage = this.$t("message.vm.status.delete");
         }
         worksApi
@@ -348,10 +317,51 @@ export default defineComponent({
               setTimeout(() => {
                 message.destroy();
                 message.success(resMessage);
-                this.$emit("fetchData", "desktop");
-              }, 6000);
+                if (actionFrom =="VirtualMachineDetail" && this.modalTitle.includes("vmDestroy")){
+                  router.push({ name: "VirtualMachine" });
+                } else {
+                  this.$emit("fetchData");
+                  this.fetchData();
+                }
+              }, 12000);
             } else {
               message.error(this.$t("message.vm.status.update.fail"));
+            }
+          })
+          .catch(function (error) {
+            message.error(error);
+          });
+      }
+
+      if (actionFrom.includes("Workspace")) {
+        worksApi
+          .get("/api/v1/workspace/" + this.state.workspaceUuid)
+          .then((response) => {
+            if (response.status == 200) {
+              if(response.data.result.workspaceInfo.quantity == 0){
+                message.loading(this.$t("message.workspace.status.destroying"), 6);
+                worksApi
+                  .delete("/api/v1/workspace/" + this.state.workspaceUuid)
+                  .then((response) => {
+                    if (response.status == 200) {
+                      this.vmDataList = response.data.result.list;
+                      this.handleCancel();
+                      setTimeout(() => {
+                        message.destroy();
+                        message.success(this.$t("message.workspace.status.delete"));
+                        if(actionFrom =="WorkspaceDetail") router.push({ name: "Workspace" });
+                        if(actionFrom =="WorkspaceList") this.$emit("fetchData");
+                      }, 3000);
+                    } else {
+                      message.error(this.$t("message.workspace.delete.fail"), 5);
+                    }
+                  })
+                  .catch(function (error) {
+                    message.error(error);
+                  });
+              } else {
+                message.error(this.$t("message.workspace.delete.existvm"));
+              }
             }
           })
           .catch(function (error) {

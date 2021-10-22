@@ -77,7 +77,10 @@ const requireAuth = (to, from, next) => {
 };
 
 const routes = [
-  { path: "/:catchAll(.*)", redirect: "/login" },// 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
+  {
+    path: "/:catchAll(.*)",
+    redirect: "/login"
+  },// 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
     path: "/login",
     name: "Login",

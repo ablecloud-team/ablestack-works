@@ -102,34 +102,34 @@
         </a-row>
         <a-row :gutter="12">
           <a-col :md="24" :lg="12">
-             <a-form-item
-                has-feedback
-                name="password"
-                :label="$t('label.password')"
-                :labelCol="12"
-                autocomplete="off"
-              >
-                <a-input
-                  v-model:value="formState.password"
-                  type="password"
-                  :placeholder="$t('tooltip.user.password')"
-                />
-              </a-form-item>
+            <a-form-item
+              has-feedback
+              name="password"
+              :label="$t('label.password')"
+              :label-col="12"
+              autocomplete="off"
+            >
+              <a-input
+                v-model:value="formState.password"
+                type="password"
+                :placeholder="$t('tooltip.user.password')"
+              />
+            </a-form-item>
           </a-col>
           <a-col :md="24" :lg="12">
             <a-form-item
-                has-feedback
-                name="passwordCheck"
-                :label="$t('label.passwordCheck')"
-                :labelCol="12"
-                autocomplete="off"
-              >
-                <a-input
-                  v-model:value="formState.passwordCheck"
-                  type="password"
-                  :placeholder="$t('tooltip.user.passwordCheck')"
-                />
-              </a-form-item>
+              has-feedback
+              name="passwordCheck"
+              :label="$t('label.passwordCheck')"
+              :label-col="12"
+              autocomplete="off"
+            >
+              <a-input
+                v-model:value="formState.passwordCheck"
+                type="password"
+                :placeholder="$t('tooltip.user.passwordCheck')"
+              />
+            </a-form-item>
           </a-col>
         </a-row>
         <a-form-item name="email" :label="$t('label.email')">
@@ -139,7 +139,7 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <a-form-item name="phone" :label="$t('label.phone')" >
+        <a-form-item name="phone" :label="$t('label.phone')">
           <a-input
             v-model:value="formState.phone"
             :placeholder="$t('tooltip.user.phone')"
@@ -241,15 +241,15 @@ export default defineComponent({
         validator: validatePass2,
         trigger: "change",
       },
-      email: { 
+      email: {
         required: false,
-        type: "email", 
+        type: "email",
       },
       phone: {
         required: false,
         pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
       },
-      title: { required: false, },
+      title: { required: false },
     };
     return {
       labelCol: { span: 10 },
@@ -307,12 +307,12 @@ export default defineComponent({
                 message.error(this.$t("message.name.dupl"));
               }
             })
-            .catch((error) => { //중복 이름 없을 때
+            .catch((error) => {//중복 이름 없을 때
               message.loading(this.$t("message.user.createing"), 1);
               worksApi
                 .put("/api/v1/user", params)
                 .then((response) => {
-                  console.log(response.status);
+                  //console.log(response.status);
                   if (response.status === 200) {
                     message.loading(this.$t("message.user.create.success"), 1);
                   } else {

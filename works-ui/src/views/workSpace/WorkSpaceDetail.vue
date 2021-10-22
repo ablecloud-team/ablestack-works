@@ -15,7 +15,10 @@
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions :action-from="actionFrom" :workspace-uuid="workspaceUuid"/>
+              <Actions
+                :action-from="actionFrom"
+                :workspace-uuid="workspaceUuid"
+              />
             </a-col>
           </a-row>
         </div>

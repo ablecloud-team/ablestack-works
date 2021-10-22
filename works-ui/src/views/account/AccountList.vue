@@ -159,7 +159,7 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t('label.lastname'),
+          title: this.$t("label.lastname"),
           dataIndex: "sn",
           key: "sn",
           width: "10%",
@@ -167,27 +167,34 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.firstname'),
+          title: this.$t("label.firstname"),
           dataIndex: "givenName",
           key: "givenName",
           width: "10%",
-          sorter: (a, b) => (a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0),
+          sorter: (a, b) =>
+            a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.title'),
+          title: this.$t("label.title"),
           dataIndex: "title",
           key: "title",
           width: "15%",
-          sorter: (a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0),
+          sorter: (a, b) =>
+            a.title < b.title ? -1 : a.title > b.title ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t('label.phone'),
+          title: this.$t("label.phone"),
           dataIndex: "telephoneNumber",
           key: "telephoneNumber",
           width: "15%",
-          sorter: (a, b) => (a.telephoneNumber < b.telephoneNumber ? -1 : a.telephoneNumber > b.telephoneNumber ? 1 : 0),
+          sorter: (a, b) =>
+            a.telephoneNumber < b.telephoneNumber
+              ? -1
+              : a.telephoneNumber > b.telephoneNumber
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
         },
         {

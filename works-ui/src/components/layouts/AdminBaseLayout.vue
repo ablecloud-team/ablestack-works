@@ -1,17 +1,22 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-sider
+      v-model:collapsed="state.collapsed"
+      collapsed-width="80"
       class="admin-sider-layout"
       width="280"
       breakpoint="lg"
-      collapsed-width="80"
-      v-model:collapsed="state.collapsed" :trigger="null" collapsible
+      :trigger="null"
+      collapsible
     >
-      <AdminSider :collapsed="state.collapsed"/>
+      <AdminSider :collapsed="state.collapsed" />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="admin-layout-header">
-        <AdminHeader :collapsed="state.collapsed" v-on:setCollapsed="setCollapsed"/>
+        <AdminHeader
+          :collapsed="state.collapsed"
+          @setCollapsed="setCollapsed"
+        />
       </a-layout-header>
       <a-layout-content class="admin-layout-content">
         <router-view />
@@ -73,6 +78,4 @@ export default defineComponent({
   background: #f0f2f5;
   text-align: center;
 }
-
-
 </style>
