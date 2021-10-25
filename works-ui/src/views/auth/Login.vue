@@ -102,8 +102,8 @@ export default defineComponent({
   setup() {
     const formRef = ref();
     const formState = reactive({
-      id: "administrator",
-      password: "Ablecloud1!",
+      id: ref(""),
+      password: ref(""),
     });
     const rules = {
       id: {
