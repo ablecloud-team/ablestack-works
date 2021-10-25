@@ -26,6 +26,20 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 로그인 하는 API
+  /api/v1/dashboard:
+    get:
+      consumes:
+      - application/json
+      description: 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: dashboard 조회하는 API
   /api/v1/group:
     delete:
       consumes:
@@ -350,6 +364,25 @@ paths:
             type: object
       summary: 사용자 상세조회 하는 API
   /api/v1/workspace:
+    delete:
+      consumes:
+      - application/json
+      description: 워크스페이를 추가하는 API 입니다.
+      parameters:
+      - description: 워크스페이스 UUID
+        in: path
+        name: workspaceUuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 워크스페이스를 추가하는 API
     get:
       consumes:
       - application/json

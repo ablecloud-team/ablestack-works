@@ -18,11 +18,19 @@ const (
 	ServiceWorks    = "ServiceWorks"
 	WorkspaceName   = "WorkspaceName"
 	AblecloudWorks  = "Ablecloud.Works"
+	ClusterName = "ClusterName"
 	AgentOK         = "AgentOK"
+	AgentCheck      = "AgentCheck"
 	Enable          = "Enable"
 	Disable         = "Disable"
 	UserVm          = "UserVm"
 	ALL             = "all"
+
+	Trace = "Trace"
+	Debug = "Debug"
+	Info = "Info"
+	Warn = "Warn"
+	Error = "Error"
 
 	VMStart   = "VMStart"
 	VMStop    = "VMStop"
@@ -117,7 +125,7 @@ func RegexpPassword(payload string) bool {
 }
 
 func postfixFill(value int) string {
-	return fmt.Sprintf("%06d", value)
+	return fmt.Sprintf("%03d", value)
 }
 
 func baseEncoding(payload string) string {

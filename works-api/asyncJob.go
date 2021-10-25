@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -21,17 +22,22 @@ type AsyncJob struct {
 
 func asyncJobMonitoring() {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	log.WithFields(logrus.Fields{
+		"asyncJob.go": "asyncJobMonitoring",
+	}).Infof("Exec")
 	if err != nil {
-		fmt.Println("DB connect error")
-		fmt.Println(err)
+		log.WithFields(logrus.Fields{
+			"asyncJob.go": "asyncJobMonitoring",
+		}).Errorf("DB connect error")
 	}
 	defer db.Close()
 	for {
 		var count int
 		err = db.QueryRow("SELECT count(*) FROM async_job where ready = 1").Scan(&count)
 		if err != nil {
-			log.Error("async_job 테이블 조회중 에러가 발생했습니다.")
-			log.Error(err)
+			log.WithFields(logrus.Fields{
+				"asyncJob.go": "asyncJobMonitoring",
+			}).Errorf("async_job 테이블 조회중 에러가 발생했습니다. [%v]", err)
 		}
 		if count > 0 {
 			log.Info("Async Job Execution")
@@ -52,74 +58,90 @@ func asyncJobExec() {
 	asyncJob := AsyncJob{}
 	err = db.QueryRow("SELECT id, name, exec_uuid, ready, parameter, create_date FROM async_job where ready = 1 order by create_date limit 1").Scan(&asyncJob.Id, &asyncJob.Name, &asyncJob.ExecUuid, &asyncJob.Ready, &asyncJob.Parameter, &asyncJob.CreateDate)
 	log.WithFields(logrus.Fields{"asyncJob.go": "asyncJob 정보"}).Infof("%v", asyncJob)
-	if asyncJob.Name == VMDestroy {
-		log.Info("Async Job VM Destroy Execution.")
-		params := []MoldParams{
-			{"id": asyncJob.ExecUuid},
-		}
-		result := getDestroyVirtualMachine(params)
-		log.Info(result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"])
-		if result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"] != nil {
-			deleteAsyncJob(asyncJob.Id)
-			deleteInstance(asyncJob.ExecUuid)
-		} else {
-			deleteAsyncJob(asyncJob.Id)
 
+	if asyncJob.Name == VMDestroy { //instance 삭제
+		log.Info("Async Job VM Destroy Execution.")
+		instanceList, _ := selectInstanceList(asyncJob.ExecUuid, InstanceString)
+		if instanceList == nil {
+			return
+		} else {
+			instanceInfo := instanceList[0]
+			params := []MoldParams{
+				{"id": instanceInfo.MoldUuid},
+			}
+			result := getDestroyVirtualMachine(params)
+			log.Info(result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"])
+			if result["destroyvirtualmachineresponse"].(map[string]interface{})["jobid"] != nil {
+				workspaceList, _ := selectWorkspaceList(instanceInfo.WorkspaceUuid)
+				workspaceInfo := workspaceList[0]
+				deleteAsyncJob(asyncJob.Id)
+				deleteInstance(asyncJob.ExecUuid)
+				updateWorkspaceQuantity(workspaceInfo.Uuid)
+			} else {
+				deleteAsyncJob(asyncJob.Id)
+
+			}
 		}
-	} else if asyncJob.Name == VMsDeploy {
+
+	} else if asyncJob.Name == VMsDeploy { //instance 추가
 		log.Info("Async Job VMs Deploy Execution.")
 		deployQuantity, _ := strconv.Atoi(asyncJob.Parameter)
 		resultQuantity := 0
 		resultFailQuantity := 0
+		workspaceList, _ := selectWorkspaceList(asyncJob.ExecUuid)
+		workspaceInfo := workspaceList[0]
 		for i := 1; i <= deployQuantity; i++ {
-			resultSelectWorkspaceDetail := selectWorkspaceDetail(asyncJob.ExecUuid)
-			log.WithFields(logrus.Fields{"asyncJob.go": "resultSelectWorkspaceDetail"}).Infof("%v", resultSelectWorkspaceDetail)
+			log.Infof("resultWorkspaceInfo [%v]", workspaceInfo)
 			instanceUuid := getUuid()
-			for y := 1; y <= 3; y++ {
-				resultGetDeployVirtualMachine := getDeployVirtualMachine(resultSelectWorkspaceDetail.Uuid, instanceUuid, InstanceString)
-				log.WithFields(logrus.Fields{"asyncJob.go": "resultGetDeployVirtualMachine"}).Infof("%v", resultGetDeployVirtualMachine)
-				time.Sleep(time.Second * 10)
-				if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"] == nil {
-					log.WithFields(logrus.Fields{"asyncJob.go": "VMsDeploy 실패"}).Infof("%v", resultGetDeployVirtualMachine)
-					resultFailQuantity = resultFailQuantity + 1
-				} else if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
-					resultPostfixFill := postfixFill(resultSelectWorkspaceDetail.Postfix)
-					instance := Instance{}
-					instance.Uuid = instanceUuid
-					instance.MoldUuid = resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
-					instance.Name = resultSelectWorkspaceDetail.Name + "-" + resultPostfixFill
-					instance.WorkspaceUuid = resultSelectWorkspaceDetail.Uuid
-					instance.WorkspaceName = resultSelectWorkspaceDetail.Name
-					resultInsertInstance := insertInstance(instance)
-					params := []MoldParams{
-						{"resourceids": instance.Uuid},
-						{"resourcetype": UserVm},
-						{"tags[0].key": ServiceDaaS},
-						{"tags[0].value": AblecloudWorks},
-						{"tags[1].key": WorkspaceName},
-						{"tags[1].value": resultSelectWorkspaceDetail.Name},
-					}
-					aaa := getCreateTags(params)
-					log.Info(aaa)
-
-					updateWorkspacePostfix(resultSelectWorkspaceDetail.Uuid, resultSelectWorkspaceDetail.Postfix)
-
-					log.Info("The virtual machine has been successfully created.")
-					log.Info(resultInsertInstance)
-
-					break
+			resultGetDeployVirtualMachine := getDeployVirtualMachine(workspaceInfo.Uuid, instanceUuid, InstanceString)
+			log.WithFields(logrus.Fields{"asyncJob.go": "resultGetDeployVirtualMachine"}).Infof("%v", resultGetDeployVirtualMachine)
+			time.Sleep(time.Second * 10)
+			if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"] == nil {
+				log.WithFields(logrus.Fields{"asyncJob.go": "VMsDeploy 실패"}).Infof("%v", resultGetDeployVirtualMachine)
+				resultFailQuantity = resultFailQuantity + 1
+			} else if resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
+				updateWorkspacePostfix(workspaceInfo.Uuid, workspaceInfo.Postfix)
+				paramsMold := []MoldParams{
+					{"id": resultGetDeployVirtualMachine["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)},
 				}
+				resultMoldInstanceInfo := getListVirtualMachinesMetrics(paramsMold)
+				listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+				virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
+				json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+
+				instance := Instance{}
+				instance.Uuid = instanceUuid
+				instance.MoldUuid = listVirtualMachinesMetrics.Virtualmachine[0].Id
+				instance.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
+				instance.WorkspaceUuid = workspaceInfo.Uuid
+				instance.WorkspaceName = workspaceInfo.Name
+				resultInsertInstance := insertInstance(instance)
+				params := []MoldParams{
+					{"resourceids": instance.MoldUuid},
+					{"resourcetype": UserVm},
+					{"tags[0].key": ServiceDaaS},
+					{"tags[0].value": AblecloudWorks},
+					{"tags[1].key": WorkspaceName},
+					{"tags[1].value": workspaceInfo.Name},
+					{"tags[2].key": ClusterName},
+					{"tags[2].value": "WorkspaceIP"},
+				}
+				aaa := getCreateTags(params)
+				log.Info(aaa)
+
+				log.Info("The virtual machine has been successfully created.")
+				log.Info(resultInsertInstance)
 			}
-			if resultFailQuantity == 3 {
-				updateWorkspacePostfix(resultSelectWorkspaceDetail.Uuid, resultSelectWorkspaceDetail.Postfix)
-			}
-			updateWorkspaceQuantity(resultSelectWorkspaceDetail.Uuid)
+			updateWorkspaceQuantity(workspaceInfo.Uuid)
 		}
 		log.Infof("%v개의 가상머신 async_job 등록이 완료 되었습니다..\n", resultQuantity)
 		deleteAsyncJob(asyncJob.Id)
-	} else if asyncJob.Name == VMStop {
+	} else if asyncJob.Name == VMStop { //instance stop
+		log.Info("Async Job VM Stop Execution.")
+		instanceList, _ := selectInstanceList(asyncJob.ExecUuid, InstanceString)
+		instanceInfo := instanceList[0]
 		params := []MoldParams{
-			{"id": asyncJob.ExecUuid},
+			{"id": instanceInfo.MoldUuid},
 		}
 		resultdata := getStopVirtualMachine(params)
 		log.Info(resultdata)
@@ -127,9 +149,12 @@ func asyncJobExec() {
 		if resultdata["stopvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
 			deleteAsyncJob(asyncJob.Id)
 		}
-	} else if asyncJob.Name == VMStart {
+	} else if asyncJob.Name == VMStart { //instance start
+		log.Info("Async Job VM Start Execution.")
+		instanceList, _ := selectInstanceList(asyncJob.ExecUuid, InstanceString)
+		instanceInfo := instanceList[0]
 		params := []MoldParams{
-			{"id": asyncJob.ExecUuid},
+			{"id": instanceInfo.MoldUuid},
 		}
 		resultdata := getStartVirtualMachine(params)
 		log.Info(resultdata)

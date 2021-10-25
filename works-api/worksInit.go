@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	nested "github.com/antonfisher/nested-logrus-formatter"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -23,6 +24,36 @@ func DBSetting() {
 	os.Setenv("MysqlServerPort", getWorksInfo().Database.Host.Port)
 	os.Setenv("MysqlDb", getWorksInfo().Database.DB)
 	os.Setenv("DbInfo", getWorksInfo().Database.User.ID+":"+getWorksInfo().Database.User.Password+"@"+getWorksInfo().Database.Host.Protocol+"("+getWorksInfo().Database.Host.Address+":"+getWorksInfo().Database.Host.Port+")/"+getWorksInfo().Database.DB)
+}
+
+func Setup() {
+	i := 0
+	for i == 1{
+		db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"worksInit": "Setup",
+			}).Errorf("DB connect error[%v]", err)
+		} else {
+			DBSetting()        //DB 접속정보 셋팅
+			MoldSetting()      //Mold 정보 셋팅
+			DCSetting()        //DC 정보 셋팅
+			WorksSetting()     //Works-API 정보 셋팅
+			SambaSetting()     //SAMBA 정보 셋팅
+			GuacamoleSetting() //guacamole 정보 셋팅
+			i = 1
+		}
+		defer db.Close()
+	}
+}
+
+func logSetting() {
+	log.SetFormatter(&nested.Formatter{
+		HideKeys:    false,
+		CallerFirst: false,
+	})
+	log.SetReportCaller(true)
+	log.SetLevel(logrus.DebugLevel)
 }
 
 func MoldSetting() {
@@ -75,12 +106,14 @@ func MoldSetting() {
 	postfix := moldValue["mold.default.url.postfix"].(string)
 	apiKey := moldValue["mold.default.api.key"].(string)
 	secretKey := moldValue["mold.default.secret.key"].(string)
+	domainId := moldValue["mold.default.domain.id"].(string)
 	log.WithFields(logrus.Fields{
 		"worksInit": "MoldSetting",
 	}).Infof("Set Mold URL [%v%v%v%v]", protocol, url, port, postfix)
 	os.Setenv("MoldUrl", protocol+url+port+postfix)
 	os.Setenv("MoldApiKey", apiKey)
 	os.Setenv("MoldSecretKey", secretKey)
+	os.Setenv("MoldDomainId", domainId)
 }
 
 func DCSetting() {

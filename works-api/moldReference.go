@@ -14,20 +14,26 @@ func getTemplate(params []MoldParams) map[string]interface{} {
 	}
 	params = append(params, params1...)
 	log.WithFields(logrus.Fields{
-		"params": "params",
-	}).Debugf("%v", params)
+		"moldReference.go": "getTemplate",
+	}).Infof("params [%v]", params)
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	resp, err := http.Get(endUrl)
 	log.WithFields(logrus.Fields{
-		"MoldEndURL": endUrl,
-	}).Infof("Starting application")
+		"moldReference.go": "getTemplate",
+	}).Infof("endUrl [%v]", endUrl)
+	resp, err := http.Get(endUrl)
+
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(listTemplates)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getTemplate",
+		}).Errorf("Mold 와 통신에 실패했습니다.(listTemplates) [%v]", err)
 	}
-	log.Infof("Template 조회 결과값 [%v]", resp)
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getTemplate",
+	}).Debugf("result [%v]", resp)
+
 	var res map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&res)
 
@@ -41,15 +47,29 @@ func getComputeOffering(params []MoldParams) map[string]interface{} {
 	}
 	params = append(params, params1...)
 
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getComputeOffering",
+	}).Infof("params [%v]", params)
+
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getComputeOffering",
+	}).Infof("endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(listServiceOfferings)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getComputeOffering",
+		}).Errorf("Mold 와 통신에 실패했습니다.(listServiceOfferings) [%v]", err)
 	}
-	log.Infof("ComputeOffering 조회 결과값 [%v]", resp)
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getComputeOffering",
+	}).Debugf("result [%v]", resp)
+
 	var res map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&res)
 
@@ -63,36 +83,28 @@ func getNetwork(params []MoldParams) map[string]interface{} {
 	}
 	params = append(params, params1...)
 
-	stringParams := makeStringParams(params)
-	sig := makeSignature(stringParams)
-	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
-	resp, err := http.Get(endUrl)
-	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(listNetworks)")
-		log.Error(err.Error())
-	}
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
-
-	return res
-}
-
-func getDiskOffering(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
-	params1 := []MoldParams{
-		{"command": "listDiskOfferings"},
-	}
-	params = append(params, params1...)
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getNetwork",
+	}).Infof("params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getNetwork",
+	}).Infof("endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getComputeOffering",
+	}).Debugf("result [%v]", resp)
+
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(listDiskOfferings)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getComputeOffering",
+		}).Errorf("Mold 와 통신에 실패했습니다.(listNetworks) [%v]", err)
 	}
 	var res map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&res)
@@ -102,8 +114,19 @@ func getDiskOffering(params []MoldParams) map[string]interface{} {
 
 func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instanceType string) map[string]interface{} {
 	var baseurl string = os.Getenv("MoldUrl")
-	workspaceInfo := selectWorkspaceDetail(workspaceUuid)
-	displayName := workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
+	workspaceList, _ := selectWorkspaceList(workspaceUuid)
+	workspaceInfo := workspaceList[0]
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getDeployVirtualMachine",
+	}).Infof("payload workspaceUuid [%v], instanceUuid [%v], instanceType [%v]", workspaceUuid, instanceUuid, instanceType)
+
+	var displayName string
+	if workspaceInfo.Postfix == 0 {
+		displayName = workspaceInfo.Name + "-TestVM"
+	} else {
+		displayName = workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
+	}
 	SambaIP := os.Getenv("SambaUrl")
 	SambaDomain := os.Getenv("SambaDomain") + ".local"
 	MyDomain := os.Getenv("SambaDomain")
@@ -112,9 +135,28 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 	VmName := displayName
 	InstanceUuid := instanceUuid
 	Type := instanceType
-	payload := "<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \"" + SambaIP + "\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \"" + SambaDomain + "\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$" + MyDomain + "\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName " + VmName + "\necho '{  \"WorksServer\": \"" + WorksIP + "\",  \"WorksPort\": " + WorksPort + ",  \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'| Out-File -Encoding ascii \"c:\\agent\\conf.json\" \n</powershell>"
-	log.Info(payload)
-	log.Error(workspaceInfo.ComputeOfferingUuid)
+	//"Invoke-WebRequest -Uri http://10.1.1.1/latest/user-data >> \"c:\\agent\\userdata.txt\"\n" +
+	payload := "<powershell>\n" +
+		"date > \"c:\\agent\\installed.txt\"\n" +
+		"$dnsip = \"" + SambaIP + "\"\n" +
+		"echo $dnsip >> \"c:\\agent\\installed.txt\"\n" +
+		"set-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses " + SambaIP + "\n" +
+		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n" +
+		"$username = \"$" + MyDomain + "\\administrator\" \n" +
+		"$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n" +
+		"echo Rename-Computer >> \"c:\\agent\\installed.txt\"\n" +
+		"Rename-Computer -NewName " + VmName + "\n" +
+		"echo Add-Computer >> \"c:\\agent\\installed.txt\"\n" +
+		"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
+		"echo Add-Computer end>> \"c:\\agent\\installed.txt\"\n" +
+		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'\n" +
+		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
+		"echo $conf\n" +
+		"echo $conf >> \"c:\\agent\\installed.txt\"\n" +
+		"C:\\agent\\nssm.exe set \"Ablecloud Works Agent\" start SERVICE_DELAYED_AUTO_START\n" +
+		"C:\\agent\\nssm.exe restart \"Ablecloud Works Agent\"\n" +
+		"date >> \"c:\\agent\\installed.txt\"\n" +
+		"</powershell>"
 	params := []MoldParams{
 		{"command": "deployVirtualMachine"},
 		{"templateid": workspaceInfo.TemplateUuid},
@@ -123,28 +165,33 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		{"zoneid": selectZoneId()},
 		{"userdata": baseEncoding(payload)},
 	}
-	//{"userdata": baseEncoding("<powershell>\ndate >> \"c:\\test\\test.txt\"\n\n$dnsip = \""+ SambaIP +"\"\nset-DnsClientServerAddress -InterfaceIndex (Get-NetAdapter |Select-Object InterfaceAlias, interfaceindex).interfaceindex -ServerAddresses ($dnsip)\n$domain = \""+DCDomanin+"\"\n\n$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force\n\n$username = \"$"+MyDomain+"\\administrator \" \n\n$credential = New-Object System.Management.Automation.PSCredential($username,$password)\n\nAdd-Computer -DomainName $domain -Credential $credential -NewName "+displayName+"\necho '{  \"WorksServer\": \""+WorksIP+"\",  \"WorksPort\": "+WorksPort+",  \"Type\": \""+Type+"\", \"UUID\": \""+InstanceUuid+"\"}' > c:\\agent\\conf.json\n\n</powershell>")},
-	//{"networkids": workspaceInfo.NetworkUuid},
-	log.Info("09909090909090909090909090")
-	log.Info(workspaceInfo)
-	log.Info(params)
-	log.Info("09909090909090909090909090")
-	//params = append(params, params1...)
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getDeployVirtualMachine",
+	}).Infof("params params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold stringParams [" + stringParams + "]")
-	log.Info("Mold sig [" + sig + "]")
-	log.Info("Mold 통신 URL [" + endUrl + "]")
-	log.Info("endUrl1 [" + baseurl + "?" + stringParams + "&signature=" + sig + "]")
-	log.Info("endUrl2 [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getDeployVirtualMachine",
+	}).Infof("endUrl [%v]", endUrl)
+
 	res := map[string]interface{}{}
-	resp, err := http.Get(baseurl + "?" + stringParams + "&signature=" + sig)
+	resp, err := http.Get(endUrl)
 	if err != nil {
-		res["message"] = "Mold 와 통신에 실패했습니다.(deployVirtualMachine)"
+
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getDeployVirtualMachine",
+		}).Errorf("Mold 와 통신에 실패했습니다.(getDeployVirtualMachine) [%v]", err)
+
+		res["message"] = "Mold 와 통신에 실패했습니다.(getDeployVirtualMachine)"
 		res["status"] = BaseErrorCode
 	} else {
+		if instanceType == WorkspaceString {
+			updateWorkspaceTemplateCheck(workspaceInfo.Uuid, AgentCheck)
+		}
 		json.NewDecoder(resp.Body).Decode(&res)
 		res["status"] = http.StatusOK
 	}
@@ -276,7 +323,7 @@ func getListVirtualMachinesMetrics(params []MoldParams) map[string]interface{} {
 	log.Infof("stringParams = [%v]", stringParams)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+	log.Infof("getListVirtualMachinesMetrics URL [%v]", endUrl)
 	resp, err := http.Get(endUrl)
 	if err != nil {
 		log.Error("Mold 와 통신에 실패했습니다.(listVirtualMachinesMetrics)")
@@ -285,7 +332,7 @@ func getListVirtualMachinesMetrics(params []MoldParams) map[string]interface{} {
 	var res map[string]interface{}
 	json.NewDecoder(resp.Body).Decode(&res)
 
-	log.Infof("%v", res)
+	log.Debugf("getListVirtualMachinesMetrics result [%v]", res)
 
 	return res
 }
