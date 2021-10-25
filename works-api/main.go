@@ -36,7 +36,6 @@ func StartClientApp() (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-
 func main() {
 	var (
 		err error
@@ -81,8 +80,6 @@ func main() {
 			v1.PUT("/instance", putInstances)
 			v1.POST("/instance", postInstances)
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
-
-
 
 			v1.GET("/logout", getLogout)
 

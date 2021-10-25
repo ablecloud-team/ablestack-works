@@ -28,7 +28,7 @@ func DBSetting() {
 
 func Setup() {
 	i := 0
-	for i == 1{
+	for i == 1 {
 		db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 		if err != nil {
 			log.WithFields(logrus.Fields{

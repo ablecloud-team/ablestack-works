@@ -202,7 +202,7 @@ func deleteWorkspaces(c *gin.Context) {
 	workspaceUuid := c.Param("workspaceUuid")
 	resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
 
-	if resultDeleteWorkspace["status"] == http.StatusOK{
+	if resultDeleteWorkspace["status"] == http.StatusOK {
 		returnData["message"] = "workspace delete success"
 		resultCode = http.StatusOK
 	}
@@ -481,13 +481,12 @@ func getDashboard(c *gin.Context) {
 		"workspacesController.go": "getDashboard",
 	}).Infof("clientIP [%v]", c.ClientIP())
 
-
 	if workspaceErr == nil && instanceErr == nil {
 		resultCode = http.StatusOK
 		resultData["workspaceCount"] = returnCountWorkspace
 		resultData["instanceCount"] = returnCountInstance
 	}
 	c.JSON(resultCode, gin.H{
-		"result":              resultData,
+		"result": resultData,
 	})
 }
