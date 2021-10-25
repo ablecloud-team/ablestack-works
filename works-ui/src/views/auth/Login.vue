@@ -13,6 +13,7 @@
         layout="horizontal"
         :model="formState"
         :rules="rules"
+        @finish="onSubmit"
         class="user-layout-login"
       >
         <a-form-item has-feedback name="id">
@@ -39,7 +40,7 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" block class="login-button" @click="onSubmit">
+          <a-button type="primary" block class="login-button" html-type="submit">
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
