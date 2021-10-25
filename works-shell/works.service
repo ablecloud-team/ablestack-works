@@ -1,0 +1,12 @@
+[Unit]
+Description=Works Container daemon
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/works/works-shell
+KillMode=process
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

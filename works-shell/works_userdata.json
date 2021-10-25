@@ -1,0 +1,17 @@
+{
+	"cluster.default.name": "testCluster",
+	"dc.default.url": "10.10.1.99",
+	"mold.default.api.key": "WuiJ_rWUllvp5a9Wkj1ZzwE_VqShM-3eJr1O2Jvi4RmaIfsWgbJh-GKxMpJ78V47wVX8BWACi9KilsaRusjZ7w",
+	"mold.default.domain.account": "Y3sJNJuK6fHuMigdOYqaJHAGgVaIb9RDUTfTfAAeQzR7UAUPUfcOjhekIHStirtLIfgb6Nbre_x1Lz9S7c7HHQ",
+	"mold.default.domain.id": "d294bfc7-f86e-4f67-ac83-80220110b23f",
+	"mold.default.port": "80",
+	"mold.default.protocol": "https://",
+	"mold.default.secret.key": "Y3sJNJuK6fHuMigdOYqaJHAGgVaIb9RDUTfTfAAeQzR7UAUPUfcOjhekIHStirtLIfgb6Nbre_x1Lz9S7c7HHQ",
+	"mold.default.url": "mold.ablecloud.io",
+	"mold.network.uuid": "205",
+	"mold.zone.id": "82bfaf86-ea6b-4cbc-88c5-0a951fd57aa0",
+	"samba.default.domain": "testdomain",
+	"samba.default.url": "10.10.1.98",
+	"works.default.url": "10.10.1.98",
+	"bootstrapped": "false"
+}
