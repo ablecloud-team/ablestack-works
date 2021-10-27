@@ -89,7 +89,7 @@ func dcBootstrap() {
 		var DCInfo = os.Getenv("DCUrl")
 
 		client := http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: 60 * time.Second,
 		}
 		r, _ := http.NewRequest("PATCH", DCInfo+"/v1/policy", nil) // URL-encoded payload
 
@@ -97,6 +97,7 @@ func dcBootstrap() {
 		res := map[string]interface{}{}
 		resp, err := client.Do(r)
 		defer resp.Body.Close()
+		log.Infof("resp.Status [%v], resp.Body [%v]", resp.Status, resp.Body)
 		if err != nil {
 			log.Errorf("err [%v]", err)
 		} else if resp.Status == OK200 {

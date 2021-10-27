@@ -570,20 +570,21 @@ func updateInstanceChecked0() {
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "updateInstanceChecked0",
 	}).Debugf("updateInstanceChecked0 query [%v]", queryString)
+	for {
+		result, err := db.Exec(queryString)
+		if err != nil {
+			log.Error(MsgDBConnectError)
+			log.Error(err)
+			resultReturn["message"] = MsgDBConnectError
+			resultReturn["status"] = SQLQueryError
+		}
+		n1, _ := result.RowsAffected()
+		if n1 == 1 {
+			resultReturn["status"] = http.StatusOK
+		}
 
-	result, err := db.Exec(queryString)
-	if err != nil {
-		log.Error(MsgDBConnectError)
-		log.Error(err)
-		resultReturn["message"] = MsgDBConnectError
-		resultReturn["status"] = SQLQueryError
+		time.Sleep(60 * time.Second)
 	}
-	n1, _ := result.RowsAffected()
-	if n1 == 1 {
-		resultReturn["status"] = http.StatusOK
-	}
-
-	time.Sleep(60 * time.Second)
 }
 
 func deleteWorkspace(workspaceUuid string) map[string]interface{} {
