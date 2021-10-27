@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 // getLogin godoc
@@ -249,22 +248,16 @@ func putUser(c *gin.Context) {
 			log.Errorf("An error occurred while converting http.Response to JSON.")
 		}
 		resultValue["dcResult"] = res
-		resultInsertUserGuacamole := insertGuacamoleUser(userInfo.Username, userInfo.Password)
-		log.Infof("[%v]", resultInsertUserGuacamole.Status)
-		if strings.TrimSpace(resultInsertUserGuacamole.Status) == "200" {
-			log.Info("등록 성공")
-			log.Infof("곽콰몰리 유저 등록 결과 [%v]", resultInsertUserGuacamole)
-			resultInsertUserDB := insertUserDB(userInfo)
-			if resultInsertUserDB["status"] == http.StatusOK {
-				resultCode = http.StatusOK
-				resultValue["insertDBResult"] = resultInsertUserDB
-			} else {
-				result, _ := deleteDCUser(userInfo.Username)
-				log.Errorf("DC 에 유저 생성 후 Works DB에 insert 중 에러가 발생하여 rollback 되었습니다.")
-				resultCode = http.StatusUnauthorized
-				resultValue["message"] = "After creating a user on DC, an error occurred while inserting into the Works DB and it was rolled back."
-				resultValue["result"] = result
-			}
+		resultInsertUserDB := insertUserDB(userInfo)
+		if resultInsertUserDB["status"] == http.StatusOK {
+			resultCode = http.StatusOK
+			resultValue["insertDBResult"] = resultInsertUserDB
+		} else {
+			result, _ := deleteDCUser(userInfo.Username)
+			log.Errorf("DC 에 유저 생성 후 Works DB에 insert 중 에러가 발생하여 rollback 되었습니다.")
+			resultCode = http.StatusUnauthorized
+			resultValue["message"] = "After creating a user on DC, an error occurred while inserting into the Works DB and it was rolled back."
+			resultValue["result"] = result
 		}
 	} else if result.Status == Conflict409 {
 		resultCode = http.StatusConflict

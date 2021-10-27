@@ -47,6 +47,7 @@ func main() {
 	SambaSetting()     //SAMBA 정보 셋팅
 	GuacamoleSetting() //guacamole 정보 셋팅
 	logSetting()
+	dcBootstrap()
 
 	router := gin.Default()
 	router.Use(SetHeader)
@@ -63,6 +64,7 @@ func main() {
 		})
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
+		//v1.Use(updateInstanceChecked0)
 		{
 			v1.GET("/token", getUserToken)
 

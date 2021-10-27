@@ -32,6 +32,7 @@ func asyncJobMonitoring() {
 	}
 	defer db.Close()
 	for {
+		log.Info("1111")
 		var count int
 		err = db.QueryRow("SELECT count(*) FROM async_job where ready = 1").Scan(&count)
 		if err != nil {
