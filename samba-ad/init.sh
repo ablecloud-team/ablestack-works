@@ -1,49 +1,35 @@
 #!/bin/sh
-#Author  Achu Abebe
-#Email:  Achusime@gmail.com
+#Author  YeoCheon Yun
+#Email:  ycyun@ablecloud.io
+
+10.10.1.100
+
+/samba4 경로에 guacSchema1.ldif, guacSchema2.ldif,  guacSchema3.ldif
+
+1. Samba 스키마 파일 생성 (/samba4 경로 guacSchema1.ldif, guacSchema2.ldif,  guacSchema3.ldif)
+
+**** guacSchema1.ldif
 
 
-# # You should run this with root privilage.
-# Variables
-IP=10.1.1.8
-NM=255.255.255.0
-NW=10.1.1.0
-BC=10.1.1.255
-GW=10.1.1.1
-NSI=10.1.1.1 #NS interne
-# NSI2= X.X.X.X
-NSE=8.8.8.8 #NS externe/forwarder
-# NSE2= X.X.X.X
-FQDN=dc1.local
-HN=mydomain
-ETH=eth0
+
+**** guacSchema2.ldif
 
 
 
 
-echo ================NETWORK CONFIGURATION=======================
-# Configuring the hosts file
-# sed -i  "s/127.0.1.1	$HN"/"$IP	$HN"."$FQDN	$HN"/"" /etc/hosts
-echo "$IP $HN"."$FQDN $HN" >> /etc/hosts
-# Configuration hostname file
-echo $HN'.'$FQDN > /etc/hostname
+**** guacSchema3.ldif
 
-sleep 10
-echo ================PREREQUISITES SETUP=====================
-# mise a jour
-apt-get update && apt-get upgrade -y
-# Installing the necessary packages
-apt-get install dialog git build-essential libacl1-dev libattr1-dev libblkid-dev net-tools iproute2 libreadline-dev python-dev python-dnspython gdb pkg-config libpopt-dev libldap2-dev dnsutils libbsd-dev attr krb5-user docbook-xsl libcups2-dev libpam0g-dev ntp -y
 
-echo ================SAMBA4 DOWNLOAD AND SETUP=====================
-cd /
-# Download Samba from git
-git clone -b v4-14-stable https://git.samba.org/samba.git/ samba4
-cd samba4
-git clean -x -f -d # Disposal of obsolete files eventually
-./configure --enable-debug --enable-selftest #Configuration
-make # Compilation
-make install # Installation
-echo ========================PLEASE REBOOT NOW and Have some Ethiopian Coffee==========================
-exit
 
+2. Samba 스키마 파일 추가
+
+#/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /samba4/guacSchema1.ldif
+#/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /samba4/guacSchema2.ldif
+#/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /samba4/guacSchema3.ldif
+
+
+podman run -d -t --net host --name samba localhost/smb:test-09 config <dnsip(ex: 8.8.8.8)> <domain name(ex: mydomain)> <administrator password(ex: Ablecloud1!)> <adserver hostname(ex: ad)>
+
+podman run -d -t --net host --name samba localhost/smb:flat config 8.8.8.8 testdomain Ablecloud1 ad3
+
+podman run -d -t --net host --name samba localhost/works-ad:v3 config 8.8.8.8 mydomain Ablecloud1! ad

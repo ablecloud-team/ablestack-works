@@ -104,6 +104,6 @@ func main() {
 	log.WithFields(logrus.Fields{
 		"serverVersion": Version,
 	}).Infof("Starting application")
-	err = router.Run("0.0.0.0:8082")
+	err = router.Run("0.0.0.0:9017")
 	fmt.Println(err)
 }

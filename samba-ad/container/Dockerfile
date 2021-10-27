@@ -119,17 +119,32 @@ RUN apt-get -y clean
 
 # RUN pip3 install
 
-RUN git clone -b v4-14-stable https://git.samba.org/samba.git/ samba4
-WORKDIR samba4
-RUN git clean -x -f -d # Disposal of obsolete files eventually
-RUN ./configure --enable-debug --enable-selftest #Configuration
-RUN make -j4 # Compilation
-RUN make install # Installation
+RUN bash -xc "\
+    git clone -b v4-14-stable https://git.samba.org/samba.git/ /samba4 && \
+    pushd /samba4 && \
+    git clean -x -f -d && \
+    ./configure --enable-debug --enable-selftest && \
+    make -j16 && \
+    make install && \
+    popd && \
+    rm -rf samba4 \
+    "
 
+
+#WORKDIR samba4
+#RUN git clean -x -f -d # Disposal of obsolete files eventually
+#RUN ./configure --enable-debug --enable-selftest #Configuration
+#RUN make -j4 # Compilation
+#RUN make install # Installation
+
+RUN pip3 install sh
+RUN mkdir /opt/able-ad/
 COPY samba-ad /usr/bin/
 COPY entrypoint.py /usr/local/bin/
 COPY samba_run.sh /usr/local/bin/
 COPY samba_config.sh /usr/local/bin/
+COPY *.ldif /opt/able-ad/
+
 #   BINDIR: /usr/local/samba/bin
 #   SBINDIR: /usr/local/samba/sbin
 #   CONFIGFILE: /usr/local/samba/etc/smb.conf
@@ -150,7 +165,9 @@ COPY samba_config.sh /usr/local/bin/
 ENV PATH $PATH:/usr/local/samba/bin:/usr/local/samba/sbin
 ENV ETH eth0
 # VOLUME ["/etc/samba", "/var/lib/samba", "/var/run/samba"]
-VOLUME ["/usr/local/samba/etc/", "/usr/local/samba/var/run","/usr/local/samba/var", "/usr/local/samba/share"]
-EXPOSE 22 53 389 88 135 139 138 445 464 3268 3269
+VOLUME ["/usr/local/samba/etc/", "/usr/local/samba/var/run","/usr/local/samba/var", "/usr/local/samba/share", "/usr/local/samba/var"]
+EXPOSE 22 53 389 88 135 139 138 445 464 3268 3269 9017
 # CMD ["app:start"]
-ENTRYPOINT "/bin/bash"
+#ENTRYPOINT "/bin/bash"
+ENTRYPOINT ["/usr/local/bin/entrypoint.py"]
+CMD ["run"]

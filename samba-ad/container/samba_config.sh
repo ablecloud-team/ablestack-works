@@ -58,7 +58,12 @@ echo ==================KERBEROS CONFIGURATION==============
 # # deKerberos configuration
 Newvariable=$( echo "$FQDN" | tr -s  '[:lower:]'  '[:upper:]' )
 sed -i "s/\${REALM\([^}]*\)}/$Newvariable/g" /usr/local/samba/share/setup/krb5.conf
-date > /samba4/installed
+sed -i "s/DOMAINNAME/$DN/g" /opt/able-ad/*.ldif
+/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /opt/able-ad/guacSchema1.ldif
+/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /opt/able-ad/guacSchema2.ldif
+/usr/local/samba/bin/ldbadd -H /usr/local/samba/private/sam.ldb --option="dsdb:schema update allowed"=true /opt/able-ad/guacSchema3.ldif
+date > /usr/local/samba/etc/installed
+killall samba
 # #verification of operation of Kerberos
 # kinit administrator@"$Newvariable"
 # klist -e

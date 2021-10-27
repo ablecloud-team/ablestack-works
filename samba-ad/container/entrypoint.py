@@ -24,18 +24,21 @@ pprint.pprint(parsed[0])
 pprint.pprint(parsed[1])
 
 def runsamba():
-    if os.path.isfile("/samba4/installed"):
+    if os.path.isfile("/usr/local/samba/etc/installed"):
         runsh = sh.Command("/usr/local/bin/samba_run.sh")
-        runsh(_bg=True)
+        print("========samba started=========")
+        for output in runsh(_iter=True, _err_to_out=True):
+            print(output,end='')
     else:
         parser.print_help()
 
 if parsed[0].action=="config":
+  if not os.path.isfile("/usr/local/samba/etc/installed"):
     config_parsed = config_parser.parse_args(parsed[1])
     print("========config_parsed=========")
     arg = config_parsed
     pprint.pprint(arg)
     configsh = sh.Command("/usr/local/bin/samba_config.sh")
-    output = configsh(arg.nameserver, arg.domain, arg.password, arg.hostname)
-    print(output)
+    for output in configsh(arg.nameserver, arg.domain, arg.password, arg.hostname, _iter=True, _err_to_out=True):
+        print(output,end='')
 runsamba()
