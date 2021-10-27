@@ -13,12 +13,13 @@ import (
 )
 
 const (
-	WorksDB = "works-db"
-	WorksApi = "works-api"
+	WorksDB    = "works-db"
+	WorksApi   = "works-api"
 	WorksSamba = "works-samba"
-	Guacd = "guacd"
-	Guacamole = "guacamole"
+	Guacd      = "guacd"
+	Guacamole  = "guacamole"
 )
+
 type Config struct {
 	ClusterDefaultName       string `json:"cluster.default.name"`
 	DcDefaultUrl             string `json:"dc.default.url"`
@@ -34,7 +35,7 @@ type Config struct {
 	SambaDefaultDomain       string `json:"samba.default.domain"`
 	SambaDefaultUrl          string `json:"samba.default.url"`
 	WorksDefaultUrl          string `json:"works.default.url"`
-	Bootstrapped          string `json:"bootstrapped"`
+	Bootstrapped             string `json:"bootstrapped"`
 }
 
 func containerChecker(containerName string) bool {
@@ -45,7 +46,7 @@ func containerChecker(containerName string) bool {
 	return containerExecBool
 }
 
-func main () {
+func main() {
 	var writers []io.Writer
 	writers = append(writers, os.Stdout)
 	file, err := os.OpenFile("/works/works_bootstrap.log", os.O_CREATE|os.O_RDWR|os.O_SYNC, 0666)
@@ -66,7 +67,7 @@ func main () {
 	}).Infof("=========Bootstrap exec=========")
 	configMap := map[string]string{}
 	configStruct := Config{}
-	for  {
+	for {
 		configJson, err1 := os.Open("/works/works_userdata.json")
 		defer file.Close()
 		if err1 != nil {
@@ -88,12 +89,11 @@ func main () {
 		}
 	}
 
-
 	if configStruct.Bootstrapped != "true" {
 		containers1 := []string{
 			WorksDB, Guacd,
 		}
-		for _, container := range containers1{
+		for _, container := range containers1 {
 			for {
 				if !containerChecker(container) {
 					cmdWorksDBStart, _ := exec.Command("podman", "start", container).Output()
@@ -114,7 +114,7 @@ func main () {
 			configStruct.SambaDefaultDomain,
 			"Ablecloud1!", "ad",
 		).Output()
-		log.Infof("SAMBA run exec [%v], error [%v]",string(cmdSamba), errSamba)
+		log.Infof("SAMBA run exec [%v], error [%v]", string(cmdSamba), errSamba)
 		time.Sleep(10 * time.Second)
 
 		cmdGuacamole, errGuacamole := exec.Command(
@@ -131,10 +131,10 @@ func main () {
 			"-d", "-p", "8080:8080",
 			"guacamole:v0.1",
 		).Output()
-		log.Infof("guacamole run exec [%v], error [%v]",string(cmdGuacamole), errGuacamole)
+		log.Infof("guacamole run exec [%v], error [%v]", string(cmdGuacamole), errGuacamole)
 		time.Sleep(10 * time.Second)
 
-		for key,value := range(configMap) {
+		for key, value := range configMap {
 			log.Infof("key [%v], value [%v]", key, value)
 			cmdDB, errDB := exec.Command(
 				"podman", "exec",
@@ -144,14 +144,14 @@ func main () {
 				"-e",
 				"UPDATE configuration SET value='"+value+"' WHERE name='"+key+"'",
 			).Output()
-			log.Infof("mysql update exec [%v], error [%v]",string(cmdDB), errDB)
+			log.Infof("mysql update exec [%v], error [%v]", string(cmdDB), errDB)
 			fmt.Println(string(cmdDB))
 			time.Sleep(2 * time.Second)
 		}
 		containers2 := []string{
 			WorksApi,
 		}
-		for _, container := range containers2{
+		for _, container := range containers2 {
 			for {
 				if !containerChecker(container) {
 					cmdWorksDBStart, _ := exec.Command("podman", "start", container).Output()
@@ -166,13 +166,13 @@ func main () {
 		jsonDoc, _ := json.Marshal(configStruct)
 		errWriteFile := ioutil.WriteFile("/works/works_userdata.json", jsonDoc, os.FileMode(0755))
 		if errWriteFile != nil {
-			log.Errorf("works_userdata.json write file error [%v]",errWriteFile)
+			log.Errorf("works_userdata.json write file error [%v]", errWriteFile)
 		}
 	} else {
 		containers := []string{
 			WorksSamba, WorksDB, Guacd, Guacamole, WorksApi,
 		}
-		for _, container := range containers{
+		for _, container := range containers {
 			for {
 				if !containerChecker(container) {
 					cmdWorksDBStart, _ := exec.Command("podman", "start", container).Output()
@@ -186,7 +186,6 @@ func main () {
 }
 
 //podman run --name guacamole --net works --ip 10.88.2.10 -v share:/share -e LDAP_HOSTNAME=10.1.1.155 -e LDAP_USER_BASE_DN=CN=Users,DC=cl,DC=local -e LDAP_USERNAME_ATTRIBUTE=cn -e LDAP_CONFIG_BASE_DN=CN=Users,DC=cl,DC=local -e GUACD_HOSTNAME=10.88.2.14 -d -p 8080:8080 guacamole:v0.1
-
 
 // guacd     IP : 10.88.2.14
 // gucamole  IP : 10.88.2.10 , port forwarding : 8080 -> 8080
