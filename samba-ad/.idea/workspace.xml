@@ -5,35 +5,57 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../LdapAdmin.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build.ps1" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/container/entrypoint.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/container/samba-ad" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/container/samba-ad.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/container/samba_run.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/agent.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/conf.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/go.mod" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/go.sum" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/logrus.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/main.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/psutil.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../windows-agent/utils.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/Abledc" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/Abledc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/Unattend.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/Unattend.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/cloudbase-init-unattend.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/cloudbase-init.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/manifest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/policylist.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/Preferences/NetworkShares/NetworkShares.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/Backup.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/comment.cmtx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/registry.pol" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/bkupInfo.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/gpreport.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/sysprep audit.cmd" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/sysprep oobe.cmd" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/Abledc.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/Abledc.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/authconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/conf.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/logrus.log" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/logrus.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/utils.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/utils.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/container/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.sh" beforeDir="false" afterPath="$PROJECT_DIR$/container/samba_config.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/agent.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init-unattend.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init-unattend.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init-unattend.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init-unattend.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,6 +67,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$USER_HOME$/sdk/go1.16.6/src/io/ioutil/ioutil.go" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/main.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/users.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/utils.go" root0="FORCE_HIGHLIGHTING" />
@@ -66,7 +89,7 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/container" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RecentsManager">

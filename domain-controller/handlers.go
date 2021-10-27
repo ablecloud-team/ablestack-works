@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
-type shellReturnModel struct{
+
+type shellReturnModel struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
 }
@@ -28,7 +31,7 @@ type shellReturnModel struct{
 func exeShellHandler(c *gin.Context) {
 
 	var (
-		pscmd PSCMD
+		pscmd  PSCMD
 		stdout string
 		stderr string
 	)
@@ -72,7 +75,6 @@ func exeShellHandler(c *gin.Context) {
 	return
 }
 
-
 // appListHandler godoc
 // @Summary 윈도우 앱 목록
 // @Description 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
@@ -103,12 +105,12 @@ type userModel struct {
 	Username string `json:"username"`
 	Msg      string `json:"msg"`
 }
-type policyModel struct{
-	Name string `json:"name"`
+type policyModel struct {
+	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-type errorModel struct{
-	Msg string `json:"msg"`
+type errorModel struct {
+	Msg    string `json:"msg"`
 	Target string `json:"target"`
 }
 
@@ -128,17 +130,17 @@ func loginHandler(c *gin.Context) {
 	conn, status, err := ConnectAD()
 	defer conn.Conn.Close()
 	if err != nil {
-		log.Errorf("%v",err)
+		log.Errorf("%v", err)
 	}
 	if !status {
-		log.Errorf("%v, %v",status, err)
+		log.Errorf("%v, %v", status, err)
 	}
 	username := c.PostForm("username")
 	userPW := c.PostForm("password")
 	result, groups, isAdmin, err := login(conn, username, userPW)
 	setLog(fmt.Sprintf("%v, %v, %v, %v", result, groups, isAdmin, err))
 	if !status {
-		log.Errorf("%v, %v",result, err)
+		log.Errorf("%v, %v", result, err)
 	}
 	//loginResult :=
 	ret := loginModel{
@@ -215,9 +217,9 @@ func addUserHandler(c *gin.Context) {
 	err = addUser(l, user)
 	if err != nil {
 		log.Errorln(err)
-		if strings.Contains(err.Error(), "Exists"){
+		if strings.Contains(err.Error(), "Exists") {
 			c.JSON(http.StatusConflict, errorModel{
-				Msg: err.Error(),
+				Msg:    err.Error(),
 				Target: userID,
 			})
 			return
@@ -228,7 +230,7 @@ func addUserHandler(c *gin.Context) {
 		}
 		c.JSON(http.StatusBadRequest, userModel{
 			Username: userID,
-			Msg:		err.Error()+err2.Error(),
+			Msg:      err.Error() + err2.Error(),
 		})
 		return
 	}
@@ -247,10 +249,9 @@ func addUserHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, userModel{
 		Username: userID,
-		Msg:	"OK",
+		Msg:      "OK",
 	})
 }
-
 
 // listUserHandler godoc
 // @Summary 사용자 목록 조회
@@ -325,7 +326,6 @@ func getUserHandler(c *gin.Context) {
 
 }
 
-
 func setUserHandler(c *gin.Context) {
 
 	setLog()
@@ -377,7 +377,7 @@ func setUserPasswordHandler(c *gin.Context) {
 	user["username"] = user_.Username
 
 	err2 := setPassword(l, user, c.PostForm("password"))
-	log.Errorf("passworderr: %v",err2)
+	log.Errorf("passworderr: %v", err2)
 	if err2 != nil {
 		c.JSON(http.StatusRequestedRangeNotSatisfiable, gin.H{
 			"userID":   1,
@@ -479,8 +479,6 @@ func addGroupHandler(c *gin.Context) {
 	return
 }
 
-
-
 //func addConnectionHandler(c *gin.Context) {
 //	setLog()
 //
@@ -543,7 +541,6 @@ func addGroupHandler(c *gin.Context) {
 //	return
 //}
 
-
 func addConnectionHandler(c *gin.Context) {
 	setLog()
 
@@ -567,8 +564,7 @@ func addConnectionHandler(c *gin.Context) {
 	}
 	l := conn.Conn
 
-
-	if user.username != "" && connection != "" && guacparameterval != ""{
+	if user.username != "" && connection != "" && guacparameterval != "" {
 		err = addConnection(l, user, connection, guacparameter)
 		if err != nil {
 			log.Infof("%v", err.Error())
@@ -607,7 +603,6 @@ func addConnectionHandler(c *gin.Context) {
 	return
 }
 
-
 func deleteConnectionHandler(c *gin.Context) {
 	setLog()
 
@@ -626,9 +621,8 @@ func deleteConnectionHandler(c *gin.Context) {
 	}
 	l := conn.Conn
 
-
 	if connection != "" {
-		err = delConnection(l,  connection)
+		err = delConnection(l, connection)
 		if err != nil {
 			log.Infof("%v", err.Error())
 
@@ -655,11 +649,6 @@ func deleteConnectionHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, "Connection Created")
 	return
 }
-
-
-
-
-
 
 func listGroupHandler(c *gin.Context) {
 	setLog()
@@ -704,14 +693,13 @@ func getGroupHandler(c *gin.Context) {
 
 	}
 
-
 	var group GROUP
 	err = c.ShouldBindUri(&group)
 	u, err := getGroup(l, &group)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"groupname": group.Groupname,
-			"err":      err.Error(),
+			"err":       err.Error(),
 		})
 		return
 	} else {
@@ -751,7 +739,7 @@ func setGroupHandler(c *gin.Context) {
 	c.JSON(http.StatusAccepted, adgroup)
 	return
 }
-func addUserToGroupHandler(c *gin.Context){
+func addUserToGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
 	defer conn.Conn.Close()
@@ -775,34 +763,33 @@ func addUserToGroupHandler(c *gin.Context){
 
 	aduser["username"] = user.Username
 
-
 	group_, err := addUserToGroup(l, aduser, adgroup)
 	log.Infof("add user group: %v", group_)
 	log.Infof("add user group: %v", err)
-	if err == nil{
+	if err == nil {
 		log.Infof("add user group: %v", group_)
 		c.JSON(http.StatusAccepted, group_)
 		return
-	} else if err.Error() == "Not Found"{
+	} else if err.Error() == "Not Found" {
 		log.Errorf("add user error: %v", err)
-		c.JSON(http.StatusBadRequest,errorModel{Msg: "User Not found", Target: user.Username})
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "User Not found", Target: user.Username})
 		return
 	} else if strings.Contains(err.Error(), "No Such Object") {
 		log.Errorf("add user error: %v", err)
 		c.JSON(http.StatusBadRequest, errorModel{Msg: "Group Not found", Target: group.Groupname})
 		return
-	} else if strings.Contains(err.Error(), "Entry Already Exists"){
+	} else if strings.Contains(err.Error(), "Entry Already Exists") {
 		log.Errorf("add user error: %v", err)
-		c.JSON(http.StatusBadRequest, errorModel{Msg: "Already Exists", Target: fmt.Sprintf("%v@%v", user.Username,group.Groupname)})
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Already Exists", Target: fmt.Sprintf("%v@%v", user.Username, group.Groupname)})
 		return
-	} else if err != nil{
+	} else if err != nil {
 		log.Errorf("add user error: %v", err)
-		c.JSON(http.StatusBadRequest,errorModel{Msg: "Unknown error", Target: "addUserToGroup"})
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Unknown error", Target: "addUserToGroup"})
 		return
 	}
 }
 
-func deleteUserFromGroupHandler(c *gin.Context){
+func deleteUserFromGroupHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
 	defer conn.Conn.Close()
@@ -825,7 +812,6 @@ func deleteUserFromGroupHandler(c *gin.Context){
 	err = c.ShouldBindUri(&user)
 
 	aduser["username"] = user.Username
-
 
 	group_, err := deleteUserFromGroup(l, aduser, adgroup)
 
@@ -857,14 +843,14 @@ func deleteGroupHandler(c *gin.Context) {
 	err = c.ShouldBindUri(&group_)
 
 	groupname := ""
-	if err != nil  || group_.Groupname == ""{
+	if err != nil || group_.Groupname == "" {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"err": "Groupname is not provided",
 		})
 		return
-	} else if group_.Groupname != "" && err == nil{
+	} else if group_.Groupname != "" && err == nil {
 		err = delGroup(l, group_.Groupname)
-		if err != nil{
+		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"err": "Delete group failed",
 			})
@@ -881,21 +867,19 @@ func deleteGroupHandler(c *gin.Context) {
 	return
 }
 
-
-
 func detachPolicyHandler(c *gin.Context) {
-	policyname:=c.PostForm("policyname")
-	groupname:=c.Param("groupname")
+	policyname := c.PostForm("policyname")
+	groupname := c.Param("groupname")
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 	stdout, err := shell.Exec(fmt.Sprintf("Remove-GPLink -name %v -Target \"ou=%v,%v\"", policyname, groupname, ADconfig.ADbasedn))
-	if err != nil{
-		errorlines:=strings.Split(err.Error(), "\r\n")
-		for i, line :=range errorlines{
+	if err != nil {
+		errorlines := strings.Split(err.Error(), "\r\n")
+		for i, line := range errorlines {
 
 			log.Errorf("%v, %v", i, line)
 		}
@@ -907,18 +891,18 @@ func detachPolicyHandler(c *gin.Context) {
 }
 
 func attachPolicyHandler(c *gin.Context) {
-	policyname:=c.PostForm("policyname")
-	groupname:=c.Param("groupname")
+	policyname := c.PostForm("policyname")
+	groupname := c.Param("groupname")
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 	stdout, err := shell.Exec(fmt.Sprintf("New-GPLink -name %v -Target \"ou=%v,%v\" -Enforced Yes", policyname, groupname, ADconfig.ADbasedn))
-	if err != nil{
-		errorlines:=strings.Split(err.Error(), "\r\n")
-		for i, line :=range errorlines{
+	if err != nil {
+		errorlines := strings.Split(err.Error(), "\r\n")
+		for i, line := range errorlines {
 
 			log.Errorf("%v, %v", i, line)
 		}
@@ -931,9 +915,9 @@ func attachPolicyHandler(c *gin.Context) {
 
 func getGroupPolicyHandler(c *gin.Context) {
 	setLog()
-	groupname:=c.Param("groupname")
+	groupname := c.Param("groupname")
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 
@@ -944,11 +928,11 @@ func getGroupPolicyHandler(c *gin.Context) {
 	//log.Infof("%v", err)
 	lines := strings.Split(stdout, "\r\n")
 	var policylist []policyModel
-	for _, line := range lines{
-		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != ""{
+	for _, line := range lines {
+		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != "" {
 			log.Infof("policy: %v\n", line)
 			description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
-			if err != nil{
+			if err != nil {
 				log.Errorf("%v:, %v", description, err)
 			}
 			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
@@ -961,9 +945,9 @@ func getGroupPolicyHandler(c *gin.Context) {
 
 func getPolicyHandler(c *gin.Context) {
 	setLog()
-	policyname:=c.Param("policyname")
+	policyname := c.Param("policyname")
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 
@@ -989,22 +973,115 @@ func getPolicyHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, groups)
 }
 
+func bootStrapHandler(c *gin.Context) {
+
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusNotFound, map[string]string{"msg": fmt.Sprintf("%v", err)})
+		return
+	}
+	aduser := fmt.Sprintf("%v\\%v", strings.Split(ADconfig.ADdomain, ".")[0], ADconfig.ADusername)
+	service := fmt.Sprintf("c:\\Works-DC\\nssm.exe set Works-DC objectName %v %v", aduser, ADconfig.ADpassword)
+	stdout1, err1 := shell.Exec(service)
+	log.Infof("stdout: %v, \nstderr: %v\n", stdout1, err1)
+	//service = fmt.Sprintf("c:\\Works-DC\\nssm.exe restart Works-DC > c:\\Works-DC\\nssm.txt")
+	service = "shutdown /r /f /t 10"
+	stdout2, err2 := shell.Exec(service)
+	log.Infof("stdout: %v, \nstderr: %v\n", stdout2, err2)
+
+	val := map[string]string{
+		"stdout1": stdout1,
+		"stdout2": stdout2,
+		"err1":    fmt.Sprintf("%v", err1),
+		"err2":    fmt.Sprintf("%v", err2),
+	}
+	ADconfig.BootStraped = true
+	ADsave()
+	c.JSON(http.StatusOK, val)
+	return
+}
+func updatePolicyHandler(c *gin.Context) {
+	err2 := ""
+	currentWorkingDirectory, err := os.Getwd()
+	policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
+	data, err := os.Open(policyfile)
+	if err != nil {
+		log.Fatalf("Can not find %v file, %v", policyfile, err)
+		c.JSON(http.StatusNotFound, map[string]string{"msg": fmt.Sprintf("Can not find %v file, %v", policyfile, err)})
+		return
+	}
+
+	byteValue, err := ioutil.ReadAll(data)
+	if err != nil {
+		c.JSON(http.StatusNotFound, map[string]string{"msg": fmt.Sprintf("%v", err)})
+		return
+	}
+	var policyList []map[string]string
+	err = json.Unmarshal(byteValue, &policyList)
+	for _, policyItem := range policyList {
+		shell, err := setupShell()
+		if err != nil {
+			c.JSON(http.StatusNotFound, map[string]string{"msg": fmt.Sprintf("%v", err)})
+			return
+		}
+		policy := policyItem["name"]
+		description := policyItem["description"]
+		//aduser:=fmt.Sprintf("%v\\%v", strings.Split(ADconfig.ADdomain, ".")[0], ADconfig.ADusername)
+		//service:=fmt.Sprintf("c:\\Works-DC\\nssm.exe set Works-DC objectName %v %v", aduser, ADconfig.ADpassword)
+		//stdout, err := shell.Exec(service)
+		//log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+		//service=fmt.Sprintf("c:\\Works-DC\\nssm.exe retate Works-DC")
+		//stdout, err = shell.Exec(service)
+		//log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+
+		//cmd := fmt.Sprintf("c:\\Works-DC\\psexec.exe -accepteula -u %v -p %v powershell import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", aduser, ADconfig.ADpassword, policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH)
+		cmd := fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH)
+		log.Infof("%v", cmd)
+		stdout, err := shell.Exec(cmd)
+		log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+		if err != nil {
+			err2 = fmt.Sprintf("%v, %v", err2, err)
+			c.JSON(http.StatusInternalServerError,
+				map[string]string{"stdout": stdout, "err2": err2})
+			return
+		}
+		stdout, err = shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
+		if err != nil {
+			err2 = fmt.Sprintf("%v, %v", err2, err)
+			c.JSON(http.StatusInternalServerError,
+				map[string]string{"stdout": stdout, "err2": err2})
+			return
+		}
+		stdout, err = shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
+		if err != nil {
+			err2 = fmt.Sprintf("%v, %v", err2, err)
+			c.JSON(http.StatusInternalServerError,
+				map[string]string{"stdout": stdout, "err2": err2})
+			return
+		}
+
+	}
+
+	var policylist []policyModel
+	c.JSON(http.StatusOK, policylist)
+	return
+}
 func listPolicyHandler(c *gin.Context) {
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 	stdout, err := shell.Exec("(get-gpo -all).displayname")
-	if err != nil{
+	if err != nil {
 		log.Errorf("%v", err)
 	}
 	lines := strings.Split(stdout, "\r\n")
 	var policylist []policyModel
-	for _, line := range lines{
-		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != ""{
+	for _, line := range lines {
+		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != "" {
 			log.Infof("policy: %v\n", line)
 			description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
-			if err != nil{
+			if err != nil {
 				log.Errorf("%v:, %v", description, err)
 			}
 			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
@@ -1013,4 +1090,5 @@ func listPolicyHandler(c *gin.Context) {
 	//log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
 
 	c.JSON(http.StatusOK, policylist)
+	return
 }

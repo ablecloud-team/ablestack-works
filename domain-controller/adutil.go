@@ -32,6 +32,7 @@ type ADConfig struct {
 	PolicyPATH string
 	PolicyLIST string
 	UpdatePolicy bool
+	BootStraped bool
 }
 
 var ADconfig = ADConfig{}
@@ -89,23 +90,23 @@ var authconfig = &auth.Config{}
 
 func ADsave() (err error) {
 
-	ADconfig.ADusername = "Administrator"
-	ADconfig.ADpassword = "Ablecloud1!"
-	ADconfig.ADdomain = "dc1.local"
-	ADconfig.ADserver = "dc1.local"
-	ADconfig.ADport = 636
-	ADconfig.ADbasedn = "DC=dc1,DC=local"
-	ADconfig.PolicyPATH = "./grouppolicy"
-	ADconfig.PolicyLIST = "policylist.json"
-	ADconfig.UpdatePolicy = false
-	ADconfig.Silent = false
+	//ADconfig.ADusername = "Administrator"
+	//ADconfig.ADpassword = "Ablecloud1!"
+	//ADconfig.ADdomain = "dc1.local"
+	//ADconfig.ADserver = "dc1.local"
+	//ADconfig.ADport = 636
+	//ADconfig.ADbasedn = "DC=dc1,DC=local"
+	//ADconfig.PolicyPATH = "./grouppolicy"
+	//ADconfig.PolicyLIST = "policylist.json"
+	//ADconfig.UpdatePolicy = false
+	//ADconfig.Silent = false
 
 	byteValue, err := json.MarshalIndent(ADconfig, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile("authconfig.json", byteValue, 0644)
+	err = ioutil.WriteFile("conf.json", byteValue, 0644)
 	if err != nil {
 		return err
 	}
@@ -114,7 +115,7 @@ func ADsave() (err error) {
 }
 
 func ADinit() (err error) {
-	conffile:="authconfig.json"
+	conffile:="conf.json"
 	data, err := os.Open(conffile)
 	if err != nil {
 		log.Fatalf("Can not find %v file", conffile)
@@ -157,7 +158,8 @@ func ADinit() (err error) {
 	if err != nil {
 		return err
 	}
-	if ADconfig.UpdatePolicy {
+
+	if ADconfig.UpdatePolicy != ADconfig.UpdatePolicy {
 		for _, policyItem := range policyList {
 			shell, err := setupShell()
 			if err != nil {
@@ -166,7 +168,7 @@ func ADinit() (err error) {
 			}
 			policy := policyItem["name"]
 			description := policyItem["description"]
-			stdout, err := shell.Exec(fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
+			stdout, err := shell.Exec(fmt.Sprintf("c:\\Works-DC\\psexec.exe -accepteula -u %v\\%v -p %v \"powershell import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded\"", ADconfig.ADdomain, ADconfig.ADusername, ADconfig.ADpassword, policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
 			log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
 			if err != nil {
 				err2 = fmt.Sprintf("%v, %v", err2, err)
@@ -888,7 +890,7 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) error {
 	data.Set("username", user["username"].(string))
 	data.Set("password", password)
 
-	req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("http://%v:8082/api/v1/user", ADconfig.ADserver), strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("http://%v:9017/api/v1/user", ADconfig.ADserver), strings.NewReader(data.Encode()))
 	if err != nil {
 		panic(err)
 	}

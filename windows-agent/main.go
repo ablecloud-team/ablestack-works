@@ -97,36 +97,7 @@ func main() {
 	logoutchan := make(chan map[string]string, 1)
 	go healthCheck(loginchan, logoutchan, c1, interval)
 	log.Infof("healthCehck thread started")
-	//go logincheck(loginchan, c1, interval-1)
-	//log.Infof("logincheck thread started")
-	//go logoutcheck(logoutchan, c1, interval+1)
-	//log.Infof("logoutcheck thread started")
 
-	
-
-	//testLDAP()
-
-	//router.LoadHTMLGlob("templates/*")
-
-	/*
-		go func() {
-			//login check
-			for i=0; i>0;  {
-
-					Get-EventLog System -Source Microsoft-Windows-WinLogon | where {($_.instanceID -eq 7001) -or ($_.instanceID -eq 7002)} | select *| ogv
-					Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4624) -or ($_.instanceID -eq 4625)} | select * |ogv
-	Get-EventLog System -Source Microsoft-Windows-WinLogon | where {($_.instanceID -eq 7001) -or ($_.instanceID -eq 7002)} | select *| ogv
-	Get-EventLog System -Source Microsoft-Windows-WinLogon | where {($_.instanceID -eq 7001)} | select *| ogv
-	Get-EventLog System -Source Microsoft-Windows-WinLogon | where {($_.instanceID -eq 7002)} | select *| ogv
-	Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4624) -or ($_.instanceID -eq 4625)} | select * |ogv
-	Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4624)} | select * |ogv	#로그인 성공
-	Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4625)} | select * |ogv	#로그인 실패
-	Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4634)} | select * |ogv	#로그아웃?
-
-	Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.CategoryNumber -eq 12544)} | select * |ogv	#로그인 성공
-			}
-		}()
-	*/
 	router := gin.Default()
 
 	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))

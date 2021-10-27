@@ -4,7 +4,6 @@ import (
 	_ "domain-controller/docs"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
-	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -16,9 +15,6 @@ import (
 	"path"
 	"runtime"
 	"strings"
-	"time"
-
-	"github.com/getsentry/sentry-go"
 )
 
 var log = logrus.New() //.WithField("who", "Main")[
@@ -99,14 +95,6 @@ func main() {
 
 	//l, err := setupLdap()
 	setup()
-	err = sentry.Init(sentry.ClientOptions{
-		TracesSampleRate: 1,
-		Dsn: "https://f0f2fdd530cc4bfe86f60ba333bc3d6f@o961393.ingest.sentry.io/5909805",
-	})
-	if err != nil {
-		log.Fatalf("sentry.Init: %s", err)
-	}
-	defer sentry.Flush(2 * time.Second)
 
 	//ADsave()
 	err = ADinit()
@@ -115,7 +103,6 @@ func main() {
 	}
 	router := gin.Default()
 	router.Use(CORSMiddleware())
-	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	//testLDAP()
 
@@ -139,7 +126,7 @@ func main() {
 		v1 := api.Group("/v1")
 		{
 			v1.GET("/version", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version})
+				c.JSON(http.StatusOK, gin.H{"version": Version, "Bootstraped":ADconfig.BootStraped})
 			})
 			v1.POST("/login", loginHandler)
 
@@ -170,6 +157,7 @@ func main() {
 			v1.PUT("/group/:groupname/policy", attachPolicyHandler)
 			v1.DELETE("/group/:groupname/policy", detachPolicyHandler)
 
+
 			/*
 			backup-gpo usb_block
 			import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded
@@ -185,6 +173,11 @@ func main() {
 			install_block:{91ad635c-2486-4dd4-ba0c-7a361ba947d8}
 			update_block:{142cae05-9f35-4a33-8da5-ce00af5d2af0}
 			 */
+
+			//초기화
+			v1.PATCH("/", bootStrapHandler)
+			//초기화
+			v1.PATCH("/policy", updatePolicyHandler)
 
 			//목록
 			v1.GET("/policy", listPolicyHandler)
