@@ -1,0 +1,1 @@
+C:\Windows\System32\Sysprep\sysprep.exe /generalize /audit /shutdown /unattend:C:\agent\Unattend.xml
