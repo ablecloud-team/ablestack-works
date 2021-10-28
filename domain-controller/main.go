@@ -157,7 +157,8 @@ func main() {
 			v1.PUT("/group/:groupname/policy", attachPolicyHandler)
 			v1.DELETE("/group/:groupname/policy", detachPolicyHandler)
 
-
+			v1.PUT("/computer/:computername/:groupname", addComputerToGroupHandler)
+			v1.DELETE("/computer/:computername/:groupname", delComputerFromGroupHandler)
 			/*
 			backup-gpo usb_block
 			import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded

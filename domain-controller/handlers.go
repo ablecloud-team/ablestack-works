@@ -868,7 +868,7 @@ func deleteGroupHandler(c *gin.Context) {
 }
 
 func detachPolicyHandler(c *gin.Context) {
-	policyname := c.PostForm("policyname")
+	policyname := c.Param("policyname")
 	groupname := c.Param("groupname")
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
@@ -891,7 +891,7 @@ func detachPolicyHandler(c *gin.Context) {
 }
 
 func attachPolicyHandler(c *gin.Context) {
-	policyname := c.PostForm("policyname")
+	policyname := c.Param("policyname")
 	groupname := c.Param("groupname")
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("policyname: %v, groupname%v", policyname, groupname))
@@ -1091,4 +1091,65 @@ func listPolicyHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, policylist)
 	return
+}
+
+
+func addComputerToGroupHandler(c *gin.Context) {
+	setLog()
+	computername := c.Param("computername")
+	groupname := c.Param("groupname")
+
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+
+	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
+	err = addComputerToGroup(l, computername, groupname)
+	if err != nil {
+		//errorlines := strings.Split(err.Error(), "\r\n")
+		//for i, line := range errorlines {
+		//
+		//	log.Errorf("%v, %v", i, line)
+		//}
+		c.JSON(http.StatusNotFound, errorModel{Msg: err.Error(), Target: "addComputerToGroup"})
+		return
+	}
+	c.JSON(http.StatusOK, simpleReturnModel{Msg: "addComputerToGroup Succes"})
+}
+
+func delComputerFromGroupHandler(c *gin.Context) {
+	setLog()
+	computername := c.Param("computername")
+	groupname := c.Param("groupname")
+
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+
+	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
+	err = delComputerFromGroup(l, computername, groupname)
+	if err != nil {
+		//errorlines := strings.Split(err.Error(), "\r\n")
+		//for i, line := range errorlines {
+		//
+		//	log.Errorf("%v, %v", i, line)
+		//}
+		c.JSON(http.StatusNotFound, errorModel{Msg: err.Error(), Target: "delComputerFromGroup"})
+		return
+	}
+	c.JSON(http.StatusOK, simpleReturnModel{Msg: "delComputerFromGroup Succes"})
 }

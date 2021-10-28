@@ -963,3 +963,31 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 	return err
 
 }
+
+
+//add computer to group
+
+func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err error) {
+
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn), []ldap.Control{})
+	modReq.Replace("distinguishedName", []string{fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn)})
+
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
+	}
+	return err
+}
+
+// del computer from group
+func delComputerFromGroup(l *ldap.Conn, comname string, groupname string) (err error) {
+
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn), []ldap.Control{})
+	modReq.Replace("distinguishedName", []string{fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn)})
+
+	err = l.Modify(modReq)
+	if err != nil {
+		log.Errorf("error moding group: %v, %v", modReq, err)
+	}
+	return err
+}
