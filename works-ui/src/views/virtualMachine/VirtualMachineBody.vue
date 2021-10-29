@@ -4,16 +4,17 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <VirtualMachineInfoCard />
+          <VirtualMachineInfoCard 
+            ref="listRefleshCall1"
+          />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <VirtualMachineTab
-            :vm-mold-data-info="vmMoldDataInfo"
-            :vm-db-data-info="vmDbDataInfo"
+          <VirtualMachineTab 
+            ref="listRefleshCall2"
           />
         </ACard>
       </ACol>
@@ -30,21 +31,18 @@ import VirtualMachineInfoCard from "./VirtualMachineInfoCard.vue";
 export default defineComponent({
   components: { VirtualMachineTab, VirtualMachineInfoCard },
   props: {
-    vmDbDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    vmMoldDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
+
   },
   setup() {
     return {
       actionFrom: ref("VirtualMachineDetail"),
     };
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      this.$refs.listRefleshCall2.reflesh();
+    },
   },
 });
 </script>

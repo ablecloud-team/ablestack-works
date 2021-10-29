@@ -46,7 +46,7 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
+      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid +'/' + record.name}">{{
         record.name
       }}</router-link>
     </template>

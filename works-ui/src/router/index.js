@@ -78,8 +78,9 @@ const requireAuth = (to, from, next) => {
 
 const routes = [
   {
-    path: "/:catchAll(.*)",
-    redirect: "/login"
+    path: '/:catchAll(.*)', 
+    redirect: "/login",
+    name: 'NotFound'
   },// 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
     path: "/login",
@@ -111,7 +112,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/workspaceDetail/:workspaceUuid",
+        path: "/workspaceDetail/:workspaceUuid/:workspaceName",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
         beforeEnter: requireAuth,
@@ -124,7 +125,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/virtualMachineDetail/:vmUuid",
+        path: "/virtualMachineDetail/:vmUuid/:vmName",
         name: "VirtualMachineDetail",
         component: VirtualMachineDetail,
         beforeEnter: requireAuth,
@@ -209,6 +210,7 @@ const routes = [
 
 const index = createRouter({
   history: createWebHistory(process.env.BASE_URL),
+  mode: 'history',
   routes,
 });
 

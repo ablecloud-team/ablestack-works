@@ -3,13 +3,13 @@
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')">
         <DetailContent
-          :data-info="vmMoldDataInfo"
-          :vm-db-data-info="vmDbDataInfo"
+          ref="listRefleshCall1"
           :action-from="'VirtualMachineDetail'"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.disk.list')">
         <TableContent
+          ref="listRefleshCall2"
           :tap-name="'datadisk'"
           :action-from="'VirtualMachineDetail'"
         />
@@ -30,18 +30,7 @@ export default defineComponent({
     TableContent,
     DetailContent,
   },
-  props: {
-    vmMoldDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    vmDbDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-  },
+  props: {},
   setup() {
     const tabPosition = ref("top");
     const activeKey = ref("1");
@@ -52,6 +41,14 @@ export default defineComponent({
   },
   data() {
     return {};
+  },
+  created() {
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      this.$refs.listRefleshCall2.fetchData();
+    },
   },
 });
 </script>

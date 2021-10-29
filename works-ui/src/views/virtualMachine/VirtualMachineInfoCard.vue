@@ -1,108 +1,110 @@
 <template>
-  <div class="resource-details">
-    <div class="resource-details__name">
-      <a-avatar shape="square" :size="60">
-        <template #icon>
-          <DesktopOutlined />
-        </template>
-      </a-avatar>
-      <h4 style="margin-left: 20px">
-        {{ vmDbDataInfo.name }}
-      </h4>
+  <a-spin :spinning="spinning">
+    <div class="resource-details">
+      <div class="resource-details__name">
+        <a-avatar shape="square" :size="60">
+          <template #icon>
+            <DesktopOutlined />
+          </template>
+        </a-avatar>
+        <h4 style="margin-left: 20px">
+          {{ vmDbDataInfo.name }}
+        </h4>
+      </div>
     </div>
-  </div>
-  <div id="Status" class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
-    <div class="Item">
-      <a-badge
-        class="head-example"
-        :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
-        :text="
-          vmDbDataInfo.checked === true
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
-        "
-      />
+    <div id="Status" class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
+      <div class="Item">
+        <a-badge
+          class="head-example"
+          :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
+          :text="
+            vmDbDataInfo.checked === true
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
+          "
+        />
+      </div>
     </div>
-  </div>
-  <div id="ID" class="CardItem">
-    <div class="ItemName">{{ $t("label.uuid") }}</div>
-    <div class="Item">
-      <a-button shape="circle" type="dashed">
-        <BarcodeOutlined />
-      </a-button>
-      {{ vmDbDataInfo.uuid }}
+    <div id="ID" class="CardItem">
+      <div class="ItemName">{{ $t("label.uuid") }}</div>
+      <div class="Item">
+        <a-button shape="circle" type="dashed">
+          <BarcodeOutlined />
+        </a-button>
+        {{ vmDbDataInfo.uuid }}
+      </div>
     </div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.createdate") }}</div>
-    <div class="Item">{{ vmDbDataInfo.create_date }}</div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.ostype") }}</div>
-    <div class="Item">{{ vmMoldDataInfo.osdisplayname }}</div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
-    <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
-    <a-progress :percent="cpuused" size="small" status="active" />
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
-    <div class="Item">{{ vmMoldDataInfo.memory }} MB</div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.disk.size") }}</div>
-    <div class="Item">
-      {{ vmDiskInfo.sizegb }}<br />
-      <a-tag>
-        {{
-          $t("label.read") +
-          " " +
-          (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2)
-        }}
-        GB</a-tag
-      >
-      <a-tag>
-        {{
-          $t("label.write") +
-          " " +
-          (vmMoldDataInfo.diskkbswrite / 1048576).toFixed(2)
-        }}
-        GB</a-tag
-      ><br />
-      <a-tag>
-        {{ $t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag
-      >
-      <a-tag>
-        {{ $t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag
-      >
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.createdate") }}</div>
+      <div class="Item">{{ vmDbDataInfo.create_date }}</div>
     </div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.network") }}</div>
-    <div class="Item">
-      <a-tag>
-        <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
-      >
-      <a-tag>
-        <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
-      ><br />
-      {{ vmNetworkInfo.networkname }}
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.ostype") }}</div>
+      <div class="Item">{{ vmMoldDataInfo.osdisplayname }}</div>
     </div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.network.ip") }}</div>
-    <div class="Item">{{ vmNetworkInfo.ipaddress }}</div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.template") }}</div>
-    <div class="Item">{{ vmMoldDataInfo.templatename }}</div>
-  </div>
-  <div class="CardItem">
-    <div class="ItemName">{{ $t("label.vm.serviceOffering") }}</div>
-    <div class="Item">{{ vmMoldDataInfo.serviceofferingname }}</div>
-  </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
+      <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
+      <a-progress :percent="cpuused" size="small" status="active" />
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
+      <div class="Item">{{ vmMoldDataInfo.memory }} MB</div>
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.disk.size") }}</div>
+      <div class="Item">
+        {{ vmDiskInfo.sizegb }}<br />
+        <a-tag>
+          {{
+            $t("label.read") +
+            " " +
+            (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2)
+          }}
+          GB</a-tag
+        >
+        <a-tag>
+          {{
+            $t("label.write") +
+            " " +
+            (vmMoldDataInfo.diskkbswrite / 1048576).toFixed(2)
+          }}
+          GB</a-tag
+        ><br />
+        <a-tag>
+          {{ $t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag
+        >
+        <a-tag>
+          {{ $t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag
+        >
+      </div>
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.network") }}</div>
+      <div class="Item">
+        <a-tag>
+          <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
+        >
+        <a-tag>
+          <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+        ><br />
+        {{ vmNetworkInfo.networkname }}
+      </div>
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.network.ip") }}</div>
+      <div class="Item">{{ vmNetworkInfo.ipaddress }}</div>
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.template") }}</div>
+      <div class="Item">{{ vmMoldDataInfo.templatename }}</div>
+    </div>
+    <div class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.serviceOffering") }}</div>
+      <div class="Item">{{ vmMoldDataInfo.serviceofferingname }}</div>
+    </div>
+  </a-spin>
 </template>
 
 <script>
@@ -113,22 +115,13 @@ import { message } from "ant-design-vue";
 export default defineComponent({
   components: {},
   props: {
-    // vmDbDataInfo: {
-    //   type: Object,
-    //   required: true,
-    //   default: null,
-    // },
-    // vmMoldDataInfo: {
-    //   type: Object,
-    //   required: true,
-    //   default: null,
-    // },
   },
   setup() {
     return {};
   },
   data() {
     return {
+      spinning: ref(true),
       vmDbDataInfo: ref([]),
       vmMoldDataInfo: ref([]),
       vmNetworkInfo: ref([]),
@@ -137,9 +130,16 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.reflesh();
   },
   methods: {
+    reflesh() {
+      this.fetchData();
+      this.spinning = true;
+      setTimeout(() => {
+        this.spinning = false;
+      }, 500);
+    },
     fetchData() {
       worksApi
         .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
