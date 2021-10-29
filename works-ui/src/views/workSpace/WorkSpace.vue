@@ -94,22 +94,38 @@
         <!--워크스페이스 설명 end-->
         <!--워크스페이스 타입 start-->
         <a-form-item
-          has-feedback
           name="workspaceType"
           :label="$t('label.type')"
         >
-          <a-select
+          <!-- <a-select
             v-model:value="formState.workspaceType"
             :placeholder="$t('tooltip.workspace.type')"
             @change="workspaceTypeChange"
           >
             <a-select-option value="desktop">Desktop</a-select-option>
             <a-select-option value="application">Application</a-select-option>
-          </a-select>
+          </a-select> -->
+
+          <a-radio-group
+            v-model:value="formState.workspaceType"
+            button-style="solid"
+            @change="selected => { workspaceTypeChange(selected) }"
+          >
+            <a-radio-button value="desktop">{{
+              $t("label.desktop")
+            }}</a-radio-button>
+            <a-radio-button value="application">{{
+              $t("label.application")
+            }}</a-radio-button>
+          </a-radio-group>
         </a-form-item>
         <!--워크스페이스 타입 end-->
         <!--워크스페이스 전용 여부 start-->
-        <a-form-item v-show="desktopBoolean">
+        <a-form-item
+          v-show="formState.desktopBoolean"
+          name="dedicatedOrSharedBoolean"
+          :label="$t('label.dedicated.shared')"
+        >
           <!-- {{ $t(switchLabel) }}
             <a-switch
               v-model:checked="formState.dedicatedOrSharedBoolean"
@@ -120,8 +136,6 @@
             v-model:value="formState.dedicatedOrSharedBoolean"
             button-style="solid"
           >
-            <!-- <a-radio :value="false">{{ $t("label.dedicated") }}</a-radio>
-              <a-radio :value="true">{{ $t("label.shared") }}</a-radio> -->
             <a-radio-button :value="false">{{
               $t("label.dedicated")
             }}</a-radio-button>
@@ -212,8 +226,9 @@ export default defineComponent({
       description: ref(""),
       selectedTemplateId: ref(""),
       selectedOfferingId: ref(""),
-      workspaceType: ref(""),
+      workspaceType: ref("desktop"),
       dedicatedOrSharedBoolean: ref(false),
+      desktopBoolean: ref(true),
     });
     let validateName = async (rule, value) => {
       let lengthCheck = value.length > rule.max ? true : false; //길이체크
@@ -240,15 +255,15 @@ export default defineComponent({
         max: 32,
       },
       workspaceType: { required: true },
-      dedicatedOrSharedBoolean: { required: false },
+      dedicatedOrSharedBoolean: { required: true },
       selectedTemplateId: { required: true },
       selectedOfferingId: { required: true },
     };
-    const templates = [];
-    const offerings = [];
     return {
-      templates,
-      offerings,
+      templates: ref([]),
+      desktopTemplates: ref([]),
+      applicationTemplates: ref([]),
+      offerings: ref([]),
       labelCol: { span: 10 },
       wrapperCol: { span: 40 },
       formRef,
@@ -262,7 +277,6 @@ export default defineComponent({
   data() {
     return {
       addModalTitle: this.$t("label.workspace.add"),
-      desktopBoolean: ref(false),
       actionFrom: ref("Workspace"),
     };
   },
@@ -292,10 +306,12 @@ export default defineComponent({
       }
     },
     workspaceTypeChange(value) {
-      if (value === "desktop") {
-        this.desktopBoolean = ref(true);
+      if (value.target.value === "application") {
+        this.formState.desktopBoolean = ref(false);
+        this.templates = this.applicationTemplates;
       } else {
-        this.desktopBoolean = ref(false);
+        this.formState.desktopBoolean = ref(true);
+        this.templates = this.desktopTemplates;
       }
     },
     putWorkspace() {
@@ -305,12 +321,20 @@ export default defineComponent({
       this.rules.selectedTemplateId.message = this.$t("input.workspace.selectedTemplateId");
       this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
 
+      // 실제 template uuid 를 넘겨주기 위함.
+      var realTemplateId = "";
+      for (let str of this.templates) {
+        if(str.id === this.formState.selectedTemplateId){
+          realTemplateId = str.templateId;
+          break;
+        }
+      }
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
       params.append("description", this.formState.description);
       params.append("type", this.formState.workspaceType);
       params.append("shared", this.formState.dedicatedOrSharedBoolean);
-      params.append("templateUuid", this.formState.selectedTemplateId);
+      params.append("templateUuid", realTemplateId);
       params.append("computeOfferingUuid", this.formState.selectedOfferingId);
       //console.log(params);
       this.formRef
@@ -358,10 +382,17 @@ export default defineComponent({
         .get("/api/v1/offering")
         .then((response) => {
           if (response.status == 200) {
-            this.offerings =
-              response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
-            this.templates =
-              response.data.templateList.listtemplatesresponse.template;
+            this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
+            const temp = response.data.templateList.listtemplatesresponse.template;
+
+            for (let str of temp) {
+              if(str.mastertemplatetype === "DESKTOP"){
+                this.desktopTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
+                this.templates = this.desktopTemplates; //기본값 desktop용 template 목록 세팅
+              } else if(str.mastertemplatetype === "APP"){
+                this.applicationTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
+              }
+            }
           } else {
             //console.log(response.message);
           }

@@ -46,7 +46,7 @@
     </template>
     <!-- 검색 필터링 template-->
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/workspaceDetail/' + record.uuid }"
+      <router-link :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }"
         >{{ record.name }}
       </router-link>
     </template>

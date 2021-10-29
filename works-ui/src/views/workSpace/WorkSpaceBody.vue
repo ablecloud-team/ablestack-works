@@ -5,9 +5,7 @@
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <WorkspaceInfoCard
-            :workspace-info="workspaceInfo"
-            :template-data-list="templateDataList"
-            :offering-data-list="offeringDataList"
+            ref="listRefleshCall1"
           />
         </ACard>
       </a-col>
@@ -15,7 +13,9 @@
       <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
-          <WorkSpaceTab :workspace-info="workspaceInfo" />
+          <WorkSpaceTab 
+            ref="listRefleshCall2"
+          />
         </a-card>
       </a-col>
     </a-row>
@@ -29,25 +29,15 @@ import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
 export default defineComponent({
   components: { WorkSpaceTab, WorkspaceInfoCard },
-  props: {
-    workspaceInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    templateDataList: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    offeringDataList: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-  },
+  props: {},
   setup() {
     return {};
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      this.$refs.listRefleshCall2.reflesh();
+    },
   },
 });
 </script>

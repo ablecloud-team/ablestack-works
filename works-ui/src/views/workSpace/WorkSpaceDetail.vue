@@ -9,9 +9,18 @@
               <Apath
                 :paths="[
                   { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceInfo.name, component: null },
+                  { name: workspaceName, component: null },
                 ]"
               />
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                </template>
+              </a-button>
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
@@ -26,9 +35,7 @@
       <a-layout-content>
         <div id="content-body">
           <WorkSpaceBody
-            :workspace-info="workspaceInfo"
-            :template-data-list="templateDataList"
-            :offering-data-list="offeringDataList"
+            ref="listRefleshCall"
           />
         </div>
       </a-layout-content>
@@ -54,34 +61,15 @@ export default defineComponent({
   },
   data() {
     return {
-      workspaceInfo: ref([]),
-      templateDataList: ref([]),
-      offeringDataList: ref([]),
       workspaceUuid: ref(this.$route.params.workspaceUuid),
+      workspaceName: ref(this.$route.params.workspaceName),
     };
   },
   created() {
-    this.fetchData();
   },
   methods: {
-    fetchData() {
-      worksApi
-        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
-        .then((response) => {
-          if (response.status == 200) {
-            this.workspaceInfo = response.data.result.workspaceInfo;
-            this.templateDataList =
-              response.data.result.templateInfo.template[0];
-            this.offeringDataList =
-              response.data.result.serviceOfferingInfo.serviceoffering[0];
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+    reflesh() {
+      this.$refs.listRefleshCall.reflesh();
     },
   },
 });

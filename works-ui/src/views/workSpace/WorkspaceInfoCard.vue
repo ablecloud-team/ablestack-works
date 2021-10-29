@@ -1,4 +1,9 @@
 <template>
+
+  <a-spin :spinning="spinning">
+
+
+
   <div class="resource-details">
     <div class="resource-details__name">
       <a-avatar shape="square" :size="60">
@@ -99,32 +104,56 @@
     <div class="ItemName">{{ $t("label.compute.offering") }}</div>
     <div class="Item">{{ offeringDataList.displaytext }}</div>
   </div>
+    </a-spin>
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
   components: {},
-  props: {
-    workspaceInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-    templateDataList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    offeringDataList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
+  props: {},
+  data() {
+    return {
+      spinning: ref(true),
+      workspaceInfo: ref([]),
+      templateDataList: ref([]),
+      offeringDataList: ref([]),
+      workspaceUuid: ref(this.$route.params.workspaceUuid),
+    };
   },
-  setup() {
-    return {};
+  created() {
+    this.reflesh();
   },
+  methods: {
+    reflesh() {
+      this.fetchData();
+      this.spinning = true;
+      setTimeout(() => {
+        this.spinning = false;
+      }, 500);
+    },
+    fetchData() {
+        worksApi
+        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
+        .then((response) => {
+          if (response.status == 200) {
+            this.workspaceInfo = response.data.result.workspaceInfo;
+            this.templateDataList =
+              response.data.result.templateInfo.template[0];
+            this.offeringDataList =
+              response.data.result.serviceOfferingInfo.serviceoffering[0];
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
 });
 </script>
 
