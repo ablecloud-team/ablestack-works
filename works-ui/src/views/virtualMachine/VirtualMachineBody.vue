@@ -31,7 +31,6 @@ import VirtualMachineInfoCard from "./VirtualMachineInfoCard.vue";
 export default defineComponent({
   components: { VirtualMachineTab, VirtualMachineInfoCard },
   props: {
-
   },
   setup() {
     return {

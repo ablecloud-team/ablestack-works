@@ -9,7 +9,7 @@
               <Apath
                 :paths="[
                   { name: $t('label.vm'), component: 'VirtualMachine' },
-                  { name: vmDbDataInfo.name, component: null },
+                  { name: vmName, component: null },
                 ]"
               />
               <a-button
@@ -26,7 +26,6 @@
             <a-col id="content-action" :span="12">
               <Actions
                 :action-from="actionFrom"
-                :vm-uuid="uuid"
                 @fetchData="reflesh"
               />
             </a-col>
@@ -61,7 +60,10 @@ export default defineComponent({
     };
   },
   data() {
-    return {};
+    return {
+      vmUuid: ref(this.$route.params.vmUuid),
+      vmName: ref(this.$route.params.vmName),
+    };
   },
   created() {
   },
