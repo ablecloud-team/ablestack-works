@@ -338,7 +338,7 @@ export default defineComponent({
           break;
         }
       }
-      console.log(this.formState.selectedTemplateId);
+      //console.log(this.formState.selectedTemplateId);
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
       params.append("description", this.formState.description);
@@ -347,45 +347,45 @@ export default defineComponent({
       params.append("templateUuid", realTemplateId);
       params.append("computeOfferingUuid", this.formState.selectedOfferingId);
       //console.log(params);
-      // this.formRef
-      //   .validate()
-      //   .then(() => {
-      //     worksApi
-      //       .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
-      //       .then((response) => {
-      //         if (response.status === 200) {
-      //           //이름 중복일때 메시지 확인
-      //           message.error(this.$t("message.name.dupl"));
-      //         }
-      //       })
-      //       .catch((error) => {
-      //         //이름 중복이 아닐때(status code = 401)
-      //         message.loading(this.$t("message.workspace.createing"), 1);
-      //         worksApi
-      //           .put("/api/v1/workspace", params)
-      //           .then((response) => {
-      //             if (response.status === 200) {
-      //               message.loading(
-      //                 this.$t("message.workspace.create.success"),1
-      //               );
-      //             } else {
-      //               message.error(this.$t("message.workspace.create.fail"));
-      //             }
-      //             this.showModal(false);
-      //             setTimeout(() => {
-      //               this.$refs.listRefleshCall.fetchData();
-      //             }, 1500);
-      //           })
-      //           .catch(function (error) {
-      //             message.error(error);
-      //             //console.log(error);
-      //           });
-      //       });
-      //   })
-      //   .catch((error) => {
-      //     console.log("error", error);
-      //     //message.error(error);
-      //   });
+      this.formRef
+        .validate()
+        .then(() => {
+          worksApi
+            .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
+            .then((response) => {
+              if (response.status === 200) {
+                //이름 중복일때 메시지 확인
+                message.error(this.$t("message.name.dupl"));
+              }
+            })
+            .catch((error) => {
+              //이름 중복이 아닐때(status code = 401)
+              message.loading(this.$t("message.workspace.createing"), 1);
+              worksApi
+                .put("/api/v1/workspace", params)
+                .then((response) => {
+                  if (response.status === 200) {
+                    message.loading(
+                      this.$t("message.workspace.create.success"),1
+                    );
+                  } else {
+                    message.error(this.$t("message.workspace.create.fail"));
+                  }
+                  this.showModal(false);
+                  setTimeout(() => {
+                    this.$refs.listRefleshCall.fetchData();
+                  }, 1500);
+                })
+                .catch(function (error) {
+                  message.error(error);
+                  //console.log(error);
+                });
+            });
+        })
+        .catch((error) => {
+          console.log("error", error);
+          //message.error(error);
+        });
     },
     fetchOfferingsAndTemplates() {
       worksApi
