@@ -157,12 +157,14 @@
             show-search
             option-filter-prop="label"
             class="addmodal-aform-item-div"
+            
           >
             <a-select-option
               v-for="option in templates"
               :key="option.name"
               :value="option.id"
               :label="option.name"
+              
             >
               {{ option.name }}
             </a-select-option>
@@ -261,6 +263,7 @@ export default defineComponent({
     };
     return {
       templates: ref([]),
+      templateDisabled: ref(true),
       desktopTemplates: ref([]),
       applicationTemplates: ref([]),
       offerings: ref([]),
@@ -306,6 +309,7 @@ export default defineComponent({
       }
     },
     workspaceTypeChange(value) {
+      this.formState.selectedTemplateId = ref("");
       if (value.target.value === "application") {
         this.formState.desktopBoolean = ref(false);
         this.templates = this.applicationTemplates;
@@ -313,6 +317,11 @@ export default defineComponent({
         this.formState.desktopBoolean = ref(true);
         this.templates = this.desktopTemplates;
       }
+      // if(this.templates.length == 0){
+      //   this.templateDisabled = true;
+      // }else {
+      //   this.templateDisabled = false;
+      // }
     },
     putWorkspace() {
       this.rules.name.message = this.$t("input.workspace.name");
@@ -329,6 +338,7 @@ export default defineComponent({
           break;
         }
       }
+      console.log(this.formState.selectedTemplateId);
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
       params.append("description", this.formState.description);
@@ -337,45 +347,45 @@ export default defineComponent({
       params.append("templateUuid", realTemplateId);
       params.append("computeOfferingUuid", this.formState.selectedOfferingId);
       //console.log(params);
-      this.formRef
-        .validate()
-        .then(() => {
-          worksApi
-            .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
-            .then((response) => {
-              if (response.status === 200) {
-                //이름 중복일때 메시지 확인
-                message.error(this.$t("message.name.dupl"));
-              }
-            })
-            .catch((error) => {
-              //이름 중복이 아닐때(status code = 401)
-              message.loading(this.$t("message.workspace.createing"), 1);
-              worksApi
-                .put("/api/v1/workspace", params)
-                .then((response) => {
-                  if (response.status === 200) {
-                    message.loading(
-                      this.$t("message.workspace.create.success"),1
-                    );
-                  } else {
-                    message.error(this.$t("message.workspace.create.fail"));
-                  }
-                  this.showModal(false);
-                  setTimeout(() => {
-                    this.$refs.listRefleshCall.fetchData();
-                  }, 1500);
-                })
-                .catch(function (error) {
-                  message.error(error);
-                  //console.log(error);
-                });
-            });
-        })
-        .catch((error) => {
-          console.log("error", error);
-          //message.error(error);
-        });
+      // this.formRef
+      //   .validate()
+      //   .then(() => {
+      //     worksApi
+      //       .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
+      //       .then((response) => {
+      //         if (response.status === 200) {
+      //           //이름 중복일때 메시지 확인
+      //           message.error(this.$t("message.name.dupl"));
+      //         }
+      //       })
+      //       .catch((error) => {
+      //         //이름 중복이 아닐때(status code = 401)
+      //         message.loading(this.$t("message.workspace.createing"), 1);
+      //         worksApi
+      //           .put("/api/v1/workspace", params)
+      //           .then((response) => {
+      //             if (response.status === 200) {
+      //               message.loading(
+      //                 this.$t("message.workspace.create.success"),1
+      //               );
+      //             } else {
+      //               message.error(this.$t("message.workspace.create.fail"));
+      //             }
+      //             this.showModal(false);
+      //             setTimeout(() => {
+      //               this.$refs.listRefleshCall.fetchData();
+      //             }, 1500);
+      //           })
+      //           .catch(function (error) {
+      //             message.error(error);
+      //             //console.log(error);
+      //           });
+      //       });
+      //   })
+      //   .catch((error) => {
+      //     console.log("error", error);
+      //     //message.error(error);
+      //   });
     },
     fetchOfferingsAndTemplates() {
       worksApi
@@ -383,12 +393,17 @@ export default defineComponent({
         .then((response) => {
           if (response.status == 200) {
             this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
-            const temp = response.data.templateList.listtemplatesresponse.template;
+            const temp = response.data.templateList.listdesktopmasterversionsresponse.desktopmasterversion;
 
             for (let str of temp) {
               if(str.mastertemplatetype === "DESKTOP"){
                 this.desktopTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
                 this.templates = this.desktopTemplates; //기본값 desktop용 template 목록 세팅
+                // if(this.templates.length == 0){
+                //   this.templateDisabled = true;
+                // }else {
+                //   this.templateDisabled = false;
+                // }
               } else if(str.mastertemplatetype === "APP"){
                 this.applicationTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
               }
