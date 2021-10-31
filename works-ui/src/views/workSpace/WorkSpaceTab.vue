@@ -27,8 +27,7 @@
       </a-tab-pane>
     </a-tabs>
   </div>
-</template>¸
-
+</template>
 <script>
 import { defineComponent, ref } from "vue";
 import TableContent from "@/components/TableContent";

@@ -131,7 +131,7 @@ export default defineComponent({
       }, 500);
     },
     fetchData() {
-        worksApi
+      worksApi
         .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
         .then((response) => {
           if (response.status == 200) {
@@ -147,8 +147,8 @@ export default defineComponent({
         .catch(function (error) {
           console.log(error);
         });
-    }
-  }
+    },
+  },
 });
 </script>
 

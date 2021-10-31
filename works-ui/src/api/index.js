@@ -5,7 +5,7 @@ function setInterceptors(instance) {
   instance.interceptors.request.use(
     function (config) {
       // Do something before request is sent
-      config.headers ={
+      config.headers = {
         "Authorization": "works" + (sessionStorage.getItem("token") == "" ? store.state.user.token : sessionStorage.getItem("token")),
       };
       return config;

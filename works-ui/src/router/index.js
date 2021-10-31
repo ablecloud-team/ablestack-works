@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { worksApi } from "../api";
 import { message } from "ant-design-vue";
-import store from "../store/index";
 import Login from "../views/auth/Login.vue";
 import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
@@ -17,11 +16,11 @@ import Account from "../views/account/Account.vue";
 import AccountDetail from "../views/account/AccountDetail.vue";
 import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
-import Audit from "../views/audit/Audit.vue";
-import AuditDetail from "../views/audit/AuditDetail.vue";
-import Community from "../views/community/Community.vue";
-import CommunityDetail from "../views/community/CommunityDetail.vue";
-import axios from "axios";
+// import Audit from "../views/audit/Audit.vue";
+// import AuditDetail from "../views/audit/AuditDetail.vue";
+// import Community from "../views/community/Community.vue";
+// import CommunityDetail from "../views/community/CommunityDetail.vue";
+// import axios from "axios";
 
 const requireAuth = (to, from, next) => {
   //console.log("-----------------------------------");
@@ -63,7 +62,7 @@ const requireAuth = (to, from, next) => {
             next({ name: "Login" });
           }
         })
-        .catch(function (error) {
+        .catch(function () {
           message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
           sessionStorage.setItem("token", "");
           next({ name: "Login" });
@@ -78,10 +77,10 @@ const requireAuth = (to, from, next) => {
 
 const routes = [
   {
-    path: '/:catchAll(.*)', 
+    path: "/:catchAll(.*)",
     redirect: "/login",
-    name: 'NotFound'
-  },// 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
+    name: "NotFound"
+  }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
     path: "/login",
     name: "Login",
@@ -210,7 +209,7 @@ const routes = [
 
 const index = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  mode: 'history',
+  mode: "history",
   routes,
 });
 

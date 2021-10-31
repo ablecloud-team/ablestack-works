@@ -65,8 +65,7 @@ export default defineComponent({
       workspaceName: ref(this.$route.params.workspaceName),
     };
   },
-  created() {
-  },
+  created() {},
   methods: {
     reflesh() {
       this.$refs.listRefleshCall.reflesh();
