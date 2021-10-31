@@ -92,8 +92,8 @@
     </div> -->
 
     <div class="CardItem">
-      <div class="ItemName">{{ $t("label.template") }}</div>
-      <div class="Item">{{ templateDataList.displaytext }}</div>
+      <div class="ItemName">{{ $t("label.mastertemplate") }}</div>
+      <div class="Item">{{ workspaceInfo.master_template_name }}</div>
     </div>
 
     <div class="CardItem">
@@ -114,7 +114,7 @@ export default defineComponent({
     return {
       spinning: ref(true),
       workspaceInfo: ref([]),
-      templateDataList: ref([]),
+      //templateDataList: ref([]),
       offeringDataList: ref([]),
       workspaceUuid: ref(this.$route.params.workspaceUuid),
     };
@@ -136,8 +136,7 @@ export default defineComponent({
         .then((response) => {
           if (response.status == 200) {
             this.workspaceInfo = response.data.result.workspaceInfo;
-            this.templateDataList =
-              response.data.result.templateInfo.template[0];
+            //this.templateDataList = response.data.result.templateInfo.template[0];
             this.offeringDataList =
               response.data.result.serviceOfferingInfo.serviceoffering[0];
           } else {

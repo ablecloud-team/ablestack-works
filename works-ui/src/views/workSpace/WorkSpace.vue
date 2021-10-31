@@ -148,11 +148,11 @@
         <!--워크스페이스 템플릿 start-->
         <a-form-item
           has-feedback
-          name="selectedTemplateId"
-          :label="$t('label.template')"
+          name="selectedMasterTemplateId"
+          :label="$t('label.mastertemplate')"
         >
           <a-select
-            v-model:value="formState.selectedTemplateId"
+            v-model:value="formState.selectedMasterTemplateId"
             :placeholder="$t('tooltip.workspace.template')"
             show-search
             option-filter-prop="label"
@@ -166,7 +166,7 @@
               :label="option.name"
               
             >
-              {{ option.name }}
+              {{ option.name + '(' + option.version +')' }}
             </a-select-option>
           </a-select>
         </a-form-item>
@@ -226,7 +226,7 @@ export default defineComponent({
     const formState = reactive({
       name: ref(""),
       description: ref(""),
-      selectedTemplateId: ref(""),
+      selectedMasterTemplateId: ref(""),
       selectedOfferingId: ref(""),
       workspaceType: ref("desktop"),
       dedicatedOrSharedBoolean: ref(false),
@@ -258,7 +258,7 @@ export default defineComponent({
       },
       workspaceType: { required: true },
       dedicatedOrSharedBoolean: { required: true },
-      selectedTemplateId: { required: true },
+      selectedMasterTemplateId: { required: true },
       selectedOfferingId: { required: true },
     };
     return {
@@ -288,7 +288,7 @@ export default defineComponent({
     this.rules.name.message = this.$t("input.workspace.name");
     this.rules.description.message = this.$t("input.workspace.description");
     this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
-    this.rules.selectedTemplateId.message = this.$t("input.workspace.selectedTemplateId");
+    this.rules.selectedMasterTemplateId.message = this.$t("input.workspace.selectedTemplateId");
     this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
   },
   methods: {
@@ -309,7 +309,7 @@ export default defineComponent({
       }
     },
     workspaceTypeChange(value) {
-      this.formState.selectedTemplateId = ref("");
+      this.formState.selectedMasterTemplateId = ref("");
       if (value.target.value === "application") {
         this.formState.desktopBoolean = ref(false);
         this.templates = this.applicationTemplates;
@@ -317,33 +317,31 @@ export default defineComponent({
         this.formState.desktopBoolean = ref(true);
         this.templates = this.desktopTemplates;
       }
-      // if(this.templates.length == 0){
-      //   this.templateDisabled = true;
-      // }else {
-      //   this.templateDisabled = false;
-      // }
     },
     putWorkspace() {
       this.rules.name.message = this.$t("input.workspace.name");
       this.rules.description.message = this.$t("input.workspace.description");
       this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
-      this.rules.selectedTemplateId.message = this.$t("input.workspace.selectedTemplateId");
+      this.rules.selectedMasterTemplateId.message = this.$t("input.workspace.selectedTemplateId");
       this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
 
       // 실제 template uuid 를 넘겨주기 위함.
       var realTemplateId = "";
+      var masterTemplateName = "";
       for (let str of this.templates) {
-        if(str.id === this.formState.selectedTemplateId){
+        if(str.id === this.formState.selectedMasterTemplateId){
           realTemplateId = str.templateId;
+          masterTemplateName =str.name + "(" +str.version + ")";
           break;
         }
       }
-      //console.log(this.formState.selectedTemplateId);
+      //console.log(this.formState.selectedMasterTemplateId + " :: " + realTemplateId + " :: " + masterTemplateName);
       let params = new URLSearchParams();
       params.append("name", this.formState.name);
       params.append("description", this.formState.description);
       params.append("type", this.formState.workspaceType);
       params.append("shared", this.formState.dedicatedOrSharedBoolean);
+      params.append("masterTemplateName", masterTemplateName);
       params.append("templateUuid", realTemplateId);
       params.append("computeOfferingUuid", this.formState.selectedOfferingId);
       //console.log(params);
@@ -393,19 +391,14 @@ export default defineComponent({
         .then((response) => {
           if (response.status == 200) {
             this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
-            const temp = response.data.templateList.listdesktopmasterversionsresponse.desktopmasterversion;
+            const masterTemplates = response.data.templateList.listdesktopmasterversionsresponse.desktopmasterversion;
 
-            for (let str of temp) {
+            for (let str of masterTemplates) {
               if(str.mastertemplatetype === "DESKTOP"){
-                this.desktopTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
+                this.desktopTemplates.push({ id: str.id, templateId: str.templateid, name: str.name, version: str.version });
                 this.templates = this.desktopTemplates; //기본값 desktop용 template 목록 세팅
-                // if(this.templates.length == 0){
-                //   this.templateDisabled = true;
-                // }else {
-                //   this.templateDisabled = false;
-                // }
               } else if(str.mastertemplatetype === "APP"){
-                this.applicationTemplates.push({ id: str.id, templateId: str.templateid, name: str.name });
+                this.applicationTemplates.push({ id: str.id, templateId: str.templateid, name: str.name, version: str.version });
               }
             }
           } else {
