@@ -104,6 +104,7 @@
     "label.workspace.public.boolean": "Public",
     "label.ok": "OK",
     "label.cancel": "Cancel",
+    "label.mastertemplate": "Master Template",
     "label.template": "Template",
     "label.dedicated": "Dedicated",
     "label.shared": "Shared",

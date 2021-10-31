@@ -83,9 +83,9 @@
     <template #vmReadyStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.checked === true ? 'green' : 'red'"
+        :color="record.mold_status == 'Running' && record.checked === true ? 'green' : 'red'"
         :text="
-          record.checked === true
+          record.mold_status == 'Running' && record.checked === true
             ? $t('label.vm.status.ready')
             : $t('label.vm.status.notready')
         "

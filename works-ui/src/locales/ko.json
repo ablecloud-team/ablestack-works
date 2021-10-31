@@ -104,6 +104,7 @@
     "label.workspace.public.boolean": "Public",
     "label.ok": "확인",
     "label.cancel": "취소",
+    "label.mastertemplate": "마스터 템플릿",
     "label.template": "템플릿",
     "label.dedicated": "전용",
     "label.shared": "공유",

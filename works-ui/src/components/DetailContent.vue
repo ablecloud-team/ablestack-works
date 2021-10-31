@@ -55,54 +55,54 @@
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ dataInfo.username }}
+        {{ userDataInfo.username }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.country") }}</strong
         ><br />
-        {{ dataInfo.co }}
+        {{ userDataInfo.co }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.countryCode") }}</strong
         ><br />
-        {{ dataInfo.countryCode }}
+        {{ userDataInfo.countryCode }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.title") }}</strong
         ><br />
-        {{ dataInfo.title }}
+        {{ userDataInfo.title }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.email") }}</strong
         ><br />
-        {{ dataInfo.mail }}
+        {{ userDataInfo.mail }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.isAdmin") }}</strong
         ><br />
-        {{ dataInfo.isAdmin }}
+        {{ userDataInfo.isAdmin }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.telephoneNumber") }}</strong
         ><br />
-        {{ dataInfo.telephoneNumber }}
+        {{ userDataInfo.telephoneNumber }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.userPrincipalName") }}</strong
         ><br />
-        {{ dataInfo.userPrincipalName }}
+        {{ userDataInfo.userPrincipalName }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.distinguishedName") }}</strong
         ><br />
-        {{ dataInfo.distinguishedName }}
+        {{ userDataInfo.distinguishedName }}
       </a-list-item>
     </a-list>
     <a-list v-if="actionFrom === 'GroupPolicyDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ dataInfo.username }}
+        {{ userDataInfo.username }}
       </a-list-item>
     </a-list>
   </a-spin>
@@ -135,6 +135,7 @@ export default defineComponent({
       spinning: ref(true),
       vmDbDataInfo: ref([]),
       vmMoldDataInfo: ref([]),
+      userDataInfo: ref([]),
     };
   },
   created() {
@@ -167,9 +168,20 @@ export default defineComponent({
           console.log(error);
         });
       }else if (this.state.actionFrom === "UserDetail") {
-
+        worksApi
+          .get("/api/v1/user/" + this.$route.params.userName)
+          .then((response) => {
+            if (response.status == 200) {
+              this.userDataInfo = response.data.result;
+            } else {
+              message.error(this.$t("message.response.data.fail"));
+              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       }
-
     },
   },
 });

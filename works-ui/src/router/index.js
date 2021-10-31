@@ -138,7 +138,7 @@ const routes = [
         beforeEnter: requireAuth,
       },
       {
-        path: "/accountDetail/:username",
+        path: "/accountDetail/:userName",
         name: "AccountDetail",
         component: AccountDetail,
         beforeEnter: requireAuth,
