@@ -2,16 +2,31 @@
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent :data-info="userDataInfo" :action-from="'UserDetail'" />
+        <DetailContent
+          ref="listRefleshCall1"
+          :action-from="'UserDetail'"
+        />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.vm.list')">
-        <TableContent :data="vmDiskList" :columns="vmDiskListColumns" />
+        <!-- <TableContent
+          ref="listRefleshCall2"
+          :tap-name="'desktop'"
+          :action-from="'VirtualMachineList'"
+        /> -->
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.app.list')">
-        <TableContent :data="vmNetworkList" :columns="vmNetworkListColumns" />
+        <!-- <TableContent
+          ref="listRefleshCall3"
+          :tap-name="'app'"
+          :action-from="'VirtualMachineList'"
+        /> -->
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.policy.list')">
-        <TableContent :data="vmNetworkList" :columns="vmNetworkListColumns" />
+        <!-- <TableContent
+          ref="listRefleshCall4"
+          :tap-name="'policy'"
+          :action-from="'PolicyGroupList'"
+        /> -->
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -56,84 +71,15 @@ export default defineComponent({
   },
   data() {
     return {
-      vmDiskList: JSON.parse(
-        '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
-          '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
-          '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
-      ),
-      vmNetworkList: JSON.parse(
-        '[{"name":"Datadisk1","state":"Allocated","size":"50GB","conn":"VM1","action":""},' +
-          '{"name":"Datadisk2","state":"Allocated","size":"100GB","conn":"VM2","action":""},' +
-          '{"name":"Datadisk3","state":"Allocated","size":"200GB","conn":"VM3","action":""}]'
-      ),
-      vmDiskListColumns: [
-        {
-          dataIndex: "name",
-          key: "name",
-          slots: { customRender: "nameRender" },
-          title: this.$t("label.name"),
-          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: "",
-          key: "action",
-          dataIndex: "action",
-          align: "right",
-          width: "5px",
-          slots: { customRender: "actionRender" },
-        },
-        {
-          title: this.$t("label.state"),
-          dataIndex: "state",
-          key: "state",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.size"),
-          dataIndex: "size",
-          key: "size",
-          sorter: (a, b) => (a.size < b.size ? -1 : a.size > b.size ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.connected.desktop"),
-          dataIndex: "conn",
-          key: "conn",
-          sorter: (a, b) => (a.conn < b.conn ? -1 : a.conn > b.conn ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-      ],
-
-      vmNetworkListColumns: [
-        {
-          dataIndex: "name",
-          key: "name",
-          slots: { customRender: "nameRender" },
-          title: this.$t("label.name"),
-          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: "",
-          key: "action",
-          dataIndex: "action",
-          align: "right",
-          width: "5px",
-          slots: { customRender: "actionRender" },
-        },
-        {
-          title: this.$t("label.state"),
-          dataIndex: "state",
-          key: "state",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-        },
-      ],
     };
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      // this.$refs.listRefleshCall2.fetchData();
+      // this.$refs.listRefleshCall3.fetchData();
+      // this.$refs.listRefleshCall4.fetchData();
+    },
   },
 });
 </script>

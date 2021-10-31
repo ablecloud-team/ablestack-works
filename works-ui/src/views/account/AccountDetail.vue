@@ -9,9 +9,18 @@
               <Apath
                 :paths="[
                   { name: $t('label.users'), component: 'Account' },
-                  { name: userDataInfo.name, component: null },
+                  { name: userName, component: null },
                 ]"
               />
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                </template>
+              </a-button>
             </a-col>
 
             <!-- 왼쪽 액션 -->
@@ -23,7 +32,9 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody :user-data-info="userDataInfo" />
+          <AccountBody 
+            ref="listRefleshCall"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -51,16 +62,19 @@ export default defineComponent({
   },
   data() {
     return {
-      userDataInfo: [],
+      userName: ref(this.$route.params.userName),
     };
   },
   created() {
     this.fetchData();
   },
   methods: {
+    reflesh() { 
+      this.$refs.listRefleshCall.reflesh();
+    },
     fetchData() {
       worksApi
-        .get("/api/v1/user/" + this.$route.params.username)
+        .get("/api/v1/user/" + this.$route.params.userName)
         .then((response) => {
           if (response.status == 200) {
             this.userDataInfo = response.data.result;
