@@ -29,5 +29,6 @@ export default {
   display: inline-block;
   vertical-align: middle;
   height: 43px;
+  width: 240px;
 }
 </style>

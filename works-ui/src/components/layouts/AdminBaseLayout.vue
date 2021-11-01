@@ -2,9 +2,9 @@
   <a-layout style="height: 100%">
     <a-layout-sider
       v-model:collapsed="state.collapsed"
-      collapsed-width="80"
+      collapsed-width="72"
       class="admin-sider-layout"
-      width="280"
+      width="240"
       breakpoint="lg"
       :trigger="null"
       collapsible
