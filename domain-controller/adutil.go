@@ -75,10 +75,20 @@ var UserAttributes = []string{
 	"memberOf",
 	"member",
 }
+
+
+var ComputerAttributes = []string{
+	"dn",
+	"distinguishedName",
+	"cn",
+	"name",
+	"sAMAccountName",
+}
 var GroupAttributes = []string{
 	"dn",
 	"cn",
 	"distinguishedName",
+	"dispalyName",
 	"member",
 }
 
@@ -969,10 +979,9 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 
 func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err error) {
 
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn), []ldap.Control{})
-	modReq.Replace("distinguishedName", []string{fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn)})
+	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname ), true, fmt.Sprintf("ou=%v,%v", groupname, ADconfig.ADbasedn))
 
-	err = l.Modify(modReq)
+	err = l.ModifyDN(modReq)
 	if err != nil {
 		log.Errorf("error moding group: %v, %v", modReq, err)
 	}
@@ -982,12 +991,90 @@ func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err err
 // del computer from group
 func delComputerFromGroup(l *ldap.Conn, comname string, groupname string) (err error) {
 
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn), []ldap.Control{})
-	modReq.Replace("distinguishedName", []string{fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn)})
+	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname ), true, fmt.Sprintf("cn=Computers,%v", ADconfig.ADbasedn))
 
-	err = l.Modify(modReq)
+	err = l.ModifyDN(modReq)
 	if err != nil {
 		log.Errorf("error moding group: %v, %v", modReq, err)
 	}
 	return err
+}
+
+//list computer
+func listComputer(l *ldap.Conn) (retusers []ADCOMPUTER) {
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADconfig.ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		"(&(objectCategory=computer)(objectClass=user))",
+		ComputerAttributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+	var adusers = []ADCOMPUTER{}
+	for _, userentry := range sr.Entries {
+		aduser := ADCOMPUTER{} //NewADUser()
+		//log.Infoln(aduser)
+		//sr.PrettyPrint(4)
+		for i := range userentry.Attributes {
+			if len(userentry.Attributes[i].Values) >= 2 {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
+			} else {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
+			}
+		}
+		adusers = append(adusers, aduser)
+	}
+	ret, err := json.Marshal(adusers)
+	log.Infoln(string(ret))
+	return adusers
+}
+
+
+//get computer from group
+func getComputer(l *ldap.Conn, computer string) (retuser ADCOMPUTER, err error) {
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADconfig.ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		fmt.Sprintf("(&(cn=%v$)(objectclass=computer))", computer),
+		ComputerAttributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		return nil, err
+	}
+	if len(sr.Entries) >= 1 {
+		userentry := sr.Entries[0]
+		log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+
+		aduser := ADCOMPUTER{} //NewADUser()
+		log.Infoln(aduser)
+		//sr.PrettyPrint(4)
+		for i := range userentry.Attributes {
+			if len(userentry.Attributes[i].Values) >= 2 {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
+			} else {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
+			}
+		}
+		ret, err := json.Marshal(aduser)
+		log.Infoln(string(ret))
+		return aduser, err
+	} else {
+		return nil, errors.New(http.StatusText(http.StatusNotFound))
+	}
 }

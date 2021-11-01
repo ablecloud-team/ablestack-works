@@ -1153,3 +1153,80 @@ func delComputerFromGroupHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, simpleReturnModel{Msg: "delComputerFromGroup Succes"})
 }
+
+
+// listComputerHandler godoc
+// @Summary 사용자 목록 조회
+// @Description 사용자 목록 조회
+// @Accept  multipart/form-data
+// @Produce  json
+// @Success 200 {object} []ADUser "사용자 생성 성공"
+// @Failure 401 {object} errorModel "사용자 생성 실패"
+// @Failure default {objects} string
+// @Router /user [get]
+func listComputerHandler(c *gin.Context) {
+	setLog()
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+	//l, err := setupLdap()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "listuser"})
+		return
+
+	}
+	u := listComputer(l)
+	c.JSON(http.StatusOK, u)
+	return /*gin.H{
+		"userID": 1,
+		"username": user.Username,
+	})*/
+}
+
+
+// getComputerHandler godoc
+// @Summary 사용자 목록 조회
+// @Description 사용자 목록 조회
+// @Accept  multipart/form-data
+// @Produce  json
+// @Success 200 {object} []ADUser "사용자 생성 성공"
+// @Failure 401 {object} errorModel "사용자 생성 실패"
+// @Failure default {objects} string
+// @Router /user [get]
+func getComputerHandler(c *gin.Context) {
+	setLog()
+
+	computername := c.Param("computername")
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+	//l, err := setupLdap()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+
+	}
+	u, err := getComputer(l, computername)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+
+	}
+	c.JSON(http.StatusOK, u)
+	return /*gin.H{
+		"userID": 1,
+		"username": user.Username,
+	})*/
+}

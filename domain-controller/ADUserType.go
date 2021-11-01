@@ -13,6 +13,16 @@ type ADOU map[string]interface{}
 
 type ABLEGROUP map[string]interface{}
 
+
+type ADCOMPUTER map[string]interface{}
+type ADComputer struct {
+	distinguishedName          string   `uri:"distinguishedName" form:"distinguishedName"`
+	cn string `uri:"cn" from:"cn"`
+
+	name string `uri:"name" from:"name"`
+	sAMAccountName string `uri:"sAMAccountName" from:"sAMAccountName"`
+}
+
 type ADUser struct {
 	sn                         string   `uri:"sn" form:"sn"`                                                 //성
 	givenName                  string   `uri:"givenName" form:"givenName"`                                   //이름

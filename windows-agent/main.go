@@ -109,7 +109,11 @@ func main() {
 			v1.GET("/version", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"version": Version})
 			})
+			v1.GET("/cmd/", exeShellHandler)
 			v1.GET("/app", appListHandler)
+			v1.PUT("/ad/:domain/", adjoinHandler)
+			v1.PATCH("/", bootstrapHandler)
+			v1.GET("/ad", adStatusHandler)
 		}
 	}
 
@@ -155,6 +159,76 @@ func ipcheck() []string{
 	return ips
 }
 
+
+type shellReturnModel struct {
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
+}
+
+type errorModel struct {
+	Msg    string `json:"msg"`
+	Target string `json:"target"`
+}
+
+// exeShellHandler godoc
+// @Summary powershell 명령 처리기
+// @Description powershell 명령 처리기
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param cmd query string true "명령어"
+// @Param arg query string false "인자"
+// @Param timeout query int false "시간제한, 기본값"
+// @Success 200 {object} shellReturnModel "명령 성공"
+// @Failure 401 {object} errorModel "명령 실패"
+// @Failure default {objects} string
+// @Router /cmd/ [get]
+func exeShellHandler(c *gin.Context) {
+
+	var (
+		pscmd  PSCMD
+		stdout string
+		stderr string
+	)
+	if err := c.Bind(&pscmd); err != nil {
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "입력 오류", Target: err.Error()})
+		return
+	}
+	if pscmd.CMD == "" {
+		c.JSON(http.StatusBadRequest, errorModel{Msg: "Command not found", Target: "powershell"})
+		return
+	}
+	if pscmd.TIMEOUT == 0 {
+		pscmd.TIMEOUT = 3
+	}
+
+	c1 := make(chan []string, 1)
+	go func() {
+
+		shell, _ := setupShell()
+		stdout, err := shell.Exec(fmt.Sprintf("%v %v", pscmd.CMD, pscmd.ARG))
+
+		if err == nil {
+			c1 <- []string{stdout, ""}
+		} else {
+			c1 <- []string{stdout, err.Error()}
+		}
+
+	}()
+
+	select {
+	case res := <-c1:
+		stdout = res[0]
+		stderr = res[1]
+	case <-time.After(time.Duration(pscmd.TIMEOUT) * time.Second):
+		stdout = "Timeout Reached"
+		stderr = "Timeout Reached"
+	}
+
+	log.Infof("cmd: %v, arg: %v, stdout: %v, stderr: %v", pscmd.CMD, pscmd.ARG, stdout, stderr)
+	c.JSON(http.StatusOK, shellReturnModel{Stdout: stdout, Stderr: stderr})
+	return
+}
+
 func logoutcheckfnc() map[string]string {
 	shell, err := setupShell()
 	stdout, err := shell.Exec("$elog=(Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4634)} | select TimeGenerated,ReplacementStrings,Message -First 1)")
@@ -163,27 +237,6 @@ func logoutcheckfnc() map[string]string {
 	if err != nil {
 		log.Errorf("logoutcheck error: %v", err)
 	}
-	/*
-		count, err := shell.Exec("$elog.ReplacementStrings.count")
-		log.Infof("count: %v", count)
-		if err != nil {
-			log.Errorf("vdi-name error: %v", err)
-		} //vdi-name
-		lens, err:=strconv.Atoi(strings.TrimSpace(count))
-		if err != nil {
-			log.Errorf("atoi error: %v", err)
-		} //vdi-name
-		log.Infof("lens: %v", lens)
-		for  i := 0; i<lens; i++ {
-			out_, err := shell.Exec(fmt.Sprintf("$elog.ReplacementStrings[%v]", i))
-			out := strings.TrimSpace(out_)
-			log.Infof("i=%v: %v", i, out)
-			if err != nil {
-				log.Errorf("vdi-name error: %v", err)
-			}
-		}
-
-	*/
 	vdinameout_, err := shell.Exec("$elog.ReplacementStrings[1]")
 	if err != nil {
 		log.Errorf("vdi-name error: %v", err)
@@ -318,6 +371,7 @@ type AGENTCONFIG struct {
 	UUID        string `json:"UUID"`
 	Silent		bool   `json:"Silent"`
 	Interval	int	   `json:"Interval"`
+	Status		string `json:"Status"`
 }
 var Agentconfig = AGENTCONFIG{Silent: false, Interval: 10}
 
@@ -340,6 +394,27 @@ func AgentInit() (err error) {
 		return err
 	}
 	log.Infof("Agentconfig: %v", Agentconfig)
+	return nil
+
+}
+
+
+func AgentSave() (err error) {
+	data, err := os.OpenFile("conf.json", os.O_RDWR, 0777)
+	if err != nil {
+		log.Fatalf("agentsave: %s", err)
+		return err
+	}
+	byteValue, err:=json.Marshal(Agentconfig)
+	if err != nil {
+		log.Fatalf("ADinit: %s", err)
+		return err
+	}
+	_, err = data.Write(byteValue)
+	if err != nil {
+		log.Fatalf("ADinit: %s", err)
+		return err
+	}
 	return nil
 
 }
@@ -409,4 +484,136 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 	//}
 	//cmd=string(respBody)
 	return nil
+}
+
+
+func adjoinHandler(c *gin.Context) {
+	setLog()
+	domain := c.Param("domain")
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	output, err := shell.Exec("$username = \"$testdomain\\administrator\" ;" +
+		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force ;" +
+		"$credential = New-Object System.Management.Automation.PSCredential($username,$password) ;" +
+		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential ;", domain) +
+		"shutdown /r /t 10")
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	Agentconfig.Status = "Joining"
+	_=AgentSave()
+	c.JSON(http.StatusOK, output)
+	return
+}
+
+
+func bootstrapHandler(c *gin.Context) {
+	setLog()
+
+	//computername := c.Param("computername")
+	domain := c.PostForm("domain")
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	service1 := fmt.Sprintf("c:\\agent\\nssm.exe set \"Ablecloud Works Agent\" objectName %v\\administrator Ablecloud1!", domain)
+	output1, err1 := shell.Exec(service1)
+	if err1 != nil {
+
+		log.Errorf("err1: %v", service1)
+		log.Errorf("err1: %v", err1)
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err1.Error(), Target: "getComputer"})
+		return
+	}
+	service2 := fmt.Sprintf("gpupdate /force")
+	output2, err2 := shell.Exec(service2)
+	if err2 != nil {
+		log.Errorf("err1: %v", service2)
+		log.Errorf("err2: %v", err2)
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err2.Error(), Target: "getComputer"})
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"output1": output1, "output2":output2})
+	return
+}
+
+
+func adStatusHandler(c *gin.Context) {
+	setLog()
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	output, err := shell.Exec("get-computerinfo -property csdomain | format-list")
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	domain:=strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
+
+	if strings.EqualFold(domain, "WORKGROUP") && Agentconfig.Status!="Joining"{
+		Agentconfig.Status = "Pending"
+		_=AgentSave()
+		c.JSON(http.StatusOK,
+		map[string]string{
+			"status": Agentconfig.Status,
+			"next": "PUT <vdi>/ad/:domain/",
+		})
+		return
+	} else {
+		output, err := shell.Exec("get-computerinfo -property csname | format-list")
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+			return
+		}
+		comname:=strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
+		output, err = shell.Exec(fmt.Sprintf("gpresult /scope computer /r | select-string -pattern cn=%v", comname))
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+			return
+		}
+		if strings.Contains(strings.TrimSpace(output),  "OU=")		{
+			Agentconfig.Status = "Joined"
+			_=AgentSave()
+		}
+		output, err = shell.Exec("gpresult /scope computer /r | select-string -pattern remote")
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+			return
+		}
+		if strings.Contains(strings.TrimSpace(output),  "remotefx")		{
+			Agentconfig.Status = "Ready"
+			_=AgentSave()
+		}
+		if Agentconfig.Status == "Joining" {
+			c.JSON(http.StatusOK,
+				map[string]string{
+					"status": Agentconfig.Status,
+					"next": "PUT <dc>/computer/:computername/:groupname",
+				})
+			return
+		} else if Agentconfig.Status == "Joined"{
+			c.JSON(http.StatusOK,
+				map[string]string{
+					"status": Agentconfig.Status,
+					"next": "GET <vdi>/cmd/?timeout=60&cmd=gpupdate /force",
+				})
+			return
+		} else if Agentconfig.Status == "Ready"{
+			c.JSON(http.StatusOK,
+				map[string]string{
+					"status": Agentconfig.Status,
+					"next": "Ready to use",
+				})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, output)
+	return
 }

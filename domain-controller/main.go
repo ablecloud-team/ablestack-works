@@ -159,6 +159,8 @@ func main() {
 
 			v1.PUT("/computer/:computername/:groupname", addComputerToGroupHandler)
 			v1.DELETE("/computer/:computername/:groupname", delComputerFromGroupHandler)
+			v1.GET("/computer/", listComputerHandler)
+			v1.GET("/computer/:computername", getComputerHandler)
 			/*
 			backup-gpo usb_block
 			import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded
