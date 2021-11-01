@@ -15,6 +15,7 @@ import (
 const (
 	WorksDB    = "works-db"
 	WorksApi   = "works-api"
+	WorksUi   = "works-ui"
 	WorksSamba = "works-samba"
 	Guacd      = "guacd"
 	Guacamole  = "guacamole"
@@ -91,7 +92,7 @@ func main() {
 
 	if configStruct.Bootstrapped != "true" {
 		containers1 := []string{
-			WorksDB, Guacd,
+			WorksDB, Guacd, WorksUi,
 		}
 		for _, container := range containers1 {
 			for {
@@ -127,7 +128,7 @@ func main() {
 			"-e", "LDAP_USER_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
 			"-e", "LDAP_USERNAME_ATTRIBUTE=cn",
 			"-e", "LDAP_CONFIG_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
-			"-e", "GUACD_HOSTNAME='10.88.2.14'",
+			"-e", "GUACD_HOSTNAME=10.88.2.14",
 			"-d", "-p", "8080:8080",
 			"guacamole:v0.1",
 		).Output()
@@ -170,7 +171,7 @@ func main() {
 		}
 	} else {
 		containers := []string{
-			WorksSamba, WorksDB, Guacd, Guacamole, WorksApi,
+			WorksSamba, WorksDB, Guacd, Guacamole, WorksApi, WorksUi,
 		}
 		for _, container := range containers {
 			for {
