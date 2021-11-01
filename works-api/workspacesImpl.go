@@ -22,6 +22,7 @@ type Workspace struct {
 	NetworkUuid         string  `json:"network_uuid"`
 	ComputeOfferingUuid string  `json:"compute_offering_uuid"`
 	TemplateUuid        string  `json:"template_uuid"`
+	MasterTemplateName  string  `json:"master_template_name"`
 	Postfix             int     `json:"postfix"`
 	Shared              bool    `json:"shared"`
 	CreateDate          string  `json:"create_date"`
@@ -38,7 +39,7 @@ type Instance struct {
 	Status         string  `json:"status"`
 	OwnerAccountId *string `json:"owner_account_id,omitempty"`
 	Checked        bool    `json:"checked"`
-	Connected      bool    `json:"connected"`
+	Connected      int     `json:"connected"`
 	CreateDate     string  `json:"create_date"`
 	CheckedDate    *string `json:"checked_date"`
 	Removed        string  `json:"removed"`
@@ -62,7 +63,8 @@ func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
 	queryString := "SELECT" +
 		" id, name, description, uuid, state," +
 		"workspace_type, template_ok_check, quantity, network_uuid, compute_offering_uuid," +
-		"template_uuid, postfix, shared, create_date, removed" +
+		"template_uuid, postfix, shared, create_date, removed," +
+		"master_template_name" +
 		" FROM workspaces" +
 		" WHERE removed IS NULL"
 	if workspaceUuid != ALL {
@@ -85,7 +87,8 @@ func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
 		err = rows.Scan(
 			&workspace.Id, &workspace.Name, &workspace.Description, &workspace.Uuid, &workspace.State,
 			&workspace.WorkspaceType, &workspace.TemplateOkCheck, &workspace.Quantity, &workspace.NetworkUuid, &workspace.ComputeOfferingUuid,
-			&workspace.TemplateUuid, &workspace.Postfix, &workspace.Shared, &workspace.CreateDate, &workspace.Removed)
+			&workspace.TemplateUuid, &workspace.Postfix, &workspace.Shared, &workspace.CreateDate, &workspace.Removed,
+			&workspace.MasterTemplateName)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"workspaceImpl": "selectWorkspaceList",
@@ -272,8 +275,8 @@ func insertWorkspace(workspace Workspace) (map[string]interface{}, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO workspaces(name, description, uuid, workspace_type, network_uuid, compute_offering_uuid, template_uuid, create_date) VALUES (?, ?, ?, ?, ?, ?, ?,  NOW())",
-		workspace.Name, workspace.Description, workspace.Uuid, workspace.WorkspaceType, workspace.NetworkUuid, workspace.ComputeOfferingUuid, workspace.TemplateUuid)
+	result, err := db.Exec("INSERT INTO workspaces(name, description, uuid, workspace_type, network_uuid, compute_offering_uuid, template_uuid, create_date, master_template_name) VALUES (?, ?, ?, ?, ?, ?, ?,  NOW(), ?)",
+		workspace.Name, workspace.Description, workspace.Uuid, workspace.WorkspaceType, workspace.NetworkUuid, workspace.ComputeOfferingUuid, workspace.TemplateUuid, workspace.MasterTemplateName)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"workspaceImpl": "insertWorkspace",

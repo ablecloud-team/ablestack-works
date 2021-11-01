@@ -95,13 +95,12 @@ func getWorkspacesDetail(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 func getOffering(c *gin.Context) {
 	var params []MoldParams
-	paramsTemplate := []MoldParams{
-		{"templatefilter": "all"},
-	}
+	paramsTemplate := []MoldParams{}
+	//{"templatefilter": "all"},
 	result := map[string]interface{}{
 		"status": http.StatusOK,
 	}
-	templateResult := getTemplate(paramsTemplate)
+	templateResult := getListDesktopMasterVersions(paramsTemplate)
 	serviceOfferingResult := getComputeOffering(params)
 	//networkResult := getNetwork(params)
 	//diskOfferingResult := getDiskOffering(params)
@@ -136,6 +135,7 @@ func putWorkspaces(c *gin.Context) {
 	workspace.Description = c.PostForm("description")
 	workspace.WorkspaceType = c.PostForm("type")
 	workspace.TemplateUuid = c.PostForm("templateUuid")
+	workspace.MasterTemplateName = c.PostForm("masterTemplateName")
 	workspace.ComputeOfferingUuid = c.PostForm("computeOfferingUuid")
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()

@@ -40,6 +40,39 @@ func getTemplate(params []MoldParams) map[string]interface{} {
 	return res
 }
 
+func getListDesktopMasterVersions(params []MoldParams) map[string]interface{} {
+	var baseurl string = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "listDesktopMasterVersions"},
+	}
+	params = append(params, params1...)
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Infof("params [%v]", params)
+	stringParams := makeStringParams(params)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Infof("endUrl [%v]", endUrl)
+	resp, err := http.Get(endUrl)
+
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getListDesktopMasterVersions",
+		}).Errorf("Mold 와 통신에 실패했습니다.(getListDesktopMasterVersions) [%v]", err)
+	}
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Debugf("result [%v]", resp)
+
+	var res map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
 func getComputeOffering(params []MoldParams) map[string]interface{} {
 	var baseurl string = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
