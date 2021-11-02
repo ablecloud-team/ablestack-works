@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -125,13 +126,14 @@ func asyncJobExec() {
 					{"tags[1].key": WorkspaceName},
 					{"tags[1].value": workspaceInfo.Name},
 					{"tags[2].key": ClusterName},
-					{"tags[2].value": "WorkspaceIP"},
+					{"tags[2].value": os.Getenv("ClutsterName")},
 				}
 				aaa := getCreateTags(params)
 				log.Info(aaa)
 
 				log.Info("The virtual machine has been successfully created.")
 				log.Info(resultInsertInstance)
+				go bootstrapVdi(listVirtualMachinesMetrics)
 			}
 			updateWorkspaceQuantity(workspaceInfo.Uuid)
 		}
@@ -264,4 +266,103 @@ func deleteAsyncJob(asyncJobUuid string) map[string]interface{} {
 	}
 
 	return returnValue
+}
+
+func bootstrapVdi(listVirtualMachinesMetrics ListVirtualMachinesMetrics) {
+	vdiUrl := "http://" + listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress + ":8083/api"
+	var DCInfo = os.Getenv("DCUrl")
+	MyDomain := os.Getenv("SambaDomain")
+	boolFor := true
+	res := map[string]interface{}{}
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+	for i := 0; i <= 5; i++ {
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%v/v1/ad/", vdiUrl), nil)
+		if err != nil {
+			log.Errorf("An error occurred while setting the URL. [%v]", err)
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		resp, err1 := client.Do(req)
+		if err1 != nil {
+			log.Errorf("VDI communication failed. [%v]", err1)
+			boolFor = false
+		} else {
+			respBody, err2 := ioutil.ReadAll(resp.Body)
+			if err2 != nil {
+				log.Errorf("ioutil.ReadAll error [%v]", err2)
+			}
+			json.Unmarshal(respBody, &res)
+			break
+		}
+	}
+
+	for boolFor {
+		req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/ad/:%v", vdiUrl, MyDomain), nil)
+		if err != nil {
+			log.Errorf("An error occurred while setting the URL. [%v]", err)
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		resp, err1 := client.Do(req)
+		if err1 != nil {
+			log.Errorf("VDI communication failed. [%v]", err1)
+		} else {
+			respBody, err2 := ioutil.ReadAll(resp.Body)
+			if err2 != nil {
+				log.Errorf("ioutil.ReadAll error [%v]", err2)
+			}
+			json.Unmarshal(respBody, &res)
+			if resp.Status == OK200 {
+				req1, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/computer/:%v/:%v", DCInfo, MyDomain, listVirtualMachinesMetrics.Virtualmachine[0].Displayname), nil)
+				if err != nil {
+					log.Errorf("An error occurred while setting the URL. [%v]", err)
+				}
+				req1.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				resp1, err1 := client.Do(req1)
+				if err1 != nil {
+					log.Errorf("DC communication failed. [%v]", err1)
+				}
+				if resp1.Status == OK200 {
+					boolFor = false
+				}
+			}
+			break
+		}
+	}
+
+	for boolFor {
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%v/v1/ad/", vdiUrl), nil)
+		if err != nil {
+			log.Errorf("An error occurred while setting the URL. [%v]", err)
+		}
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		resp, err1 := client.Do(req)
+		if err1 != nil {
+			log.Errorf("VDI communication failed. [%v]", err1)
+			boolFor = false
+		} else {
+			respBody, err2 := ioutil.ReadAll(resp.Body)
+			if err2 != nil {
+				log.Errorf("ioutil.ReadAll error [%v]", err2)
+			}
+			json.Unmarshal(respBody, &res)
+			if res["status"] == "Joined" {
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%v/v1/cmd/?timeout=60&cmd='gpupdate /force'", vdiUrl), nil)
+				if err != nil {
+					log.Errorf("An error occurred while setting the URL. [%v]", err)
+				}
+				req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+				resp, err1 := client.Do(req)
+				if err1 != nil {
+					log.Errorf("VDI communication failed. [%v]", err1)
+					boolFor = false
+				} else {
+					if resp.Status == OK200 {
+						break
+					}
+				}
+			}
+			break
+		}
+	}
 }

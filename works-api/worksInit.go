@@ -325,3 +325,50 @@ func GuacamoleSetting() {
 	os.Setenv("GuacamolePort", port)
 	os.Setenv("GuacamoleUsername", username)
 }
+
+func ClusterNameSetting() {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "ClusterNameSetting",
+		}).Errorf("DB connect error[%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"worksInit": "ClusterNameSetting",
+	}).Infof("DB connect success")
+
+	rows, err := db.Query("SELECT * FROM configuration WHERE name LIKE 'cluster.default%'")
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "ClusterNameSetting",
+		}).Errorf("worksInit Guacamole Setting Query Failed[%v]", err)
+	}
+	defer rows.Close()
+
+	result, err := rowsToString(rows)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "ClusterNameSetting",
+		}).Errorf("Row to String conversion error [%v]", err)
+	}
+
+	jsonUnmarshal := []Configuration{}
+	err = json.Unmarshal([]byte(result), &jsonUnmarshal)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "ClusterNameSetting",
+		}).Errorf("String to JSON conversion error [%v]", err)
+	}
+
+	clusterValue := map[string]interface{}{}
+	for _, v := range jsonUnmarshal {
+		clusterValue[v.Name] = v.Value
+	}
+	clutsterName := clusterValue["cluster.default.name"].(string)
+
+	log.WithFields(logrus.Fields{
+		"worksInit": "WorksSetting",
+	}).Infof("clutster Name [%v]", clutsterName)
+	os.Setenv("ClutsterName", clutsterName)
+}

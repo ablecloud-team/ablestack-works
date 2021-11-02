@@ -161,7 +161,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		displayName = workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
 	}
 	SambaIP := os.Getenv("SambaUrl")
-	SambaDomain := os.Getenv("SambaDomain") + ".local"
+	//SambaDomain := os.Getenv("SambaDomain") + ".local"
 	MyDomain := os.Getenv("SambaDomain")
 	WorksIP := os.Getenv("WorksIp")
 	WorksPort := os.Getenv("WorksPort")
@@ -180,7 +180,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		"echo Rename-Computer >> \"c:\\agent\\installed.txt\"\n" +
 		"Rename-Computer -NewName " + VmName + "\n" +
 		"echo Add-Computer >> \"c:\\agent\\installed.txt\"\n" +
-		"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
+		//"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
 		"echo Add-Computer end>> \"c:\\agent\\installed.txt\"\n" +
 		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'\n" +
 		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
