@@ -91,6 +91,32 @@ func main() {
 	if err != nil {
 		log.Fatalf("ADinit: %s", err)
 	}
+
+	shell, err := setupShell()
+	if err != nil{
+		fmt.Errorf("%v", err)
+	}
+	hostname, err := shell.Exec("hostname")
+	if err != nil{
+		fmt.Errorf("%v", err)
+	}
+	hostname = strings.TrimSpace(hostname)
+	log.Println(hostname)
+	log.Println(Agentconfig.HostName)
+
+	if !strings.EqualFold(hostname,Agentconfig.HostName) && Agentconfig.HostName != ""{
+		cmd := fmt.Sprintf("Rename-Computer -NewName %v", Agentconfig.HostName)
+		log.Errorf("cmd: %v", cmd)
+		out, err := shell.Exec(cmd)
+		log.Errorf("out: %v", out)
+		log.Errorf("err: %v", err)
+		cmd = fmt.Sprintf("shutdown /r /t 0")
+		log.Errorf("cmd: %v", cmd)
+		out, err = shell.Exec(cmd)
+		log.Errorf("out: %v", out)
+		log.Errorf("err: %v", err)
+	}
+
 	interval := Agentconfig.Interval
 	c1 := make(chan string, 1)
 	loginchan := make(chan map[string]string, 1)
@@ -111,7 +137,7 @@ func main() {
 			})
 			v1.GET("/cmd/", exeShellHandler)
 			v1.GET("/app", appListHandler)
-			v1.PUT("/ad/:domain/", adjoinHandler)
+			v1.PUT("/ad/:domain/:computer", adjoinHandler)
 			v1.PATCH("/", bootstrapHandler)
 			v1.GET("/ad", adStatusHandler)
 		}
@@ -369,9 +395,11 @@ type AGENTCONFIG struct {
 	WorksPort   int    `json:"WorksPort"`
 	Type        string `json:"Type"`
 	UUID        string `json:"UUID"`
-	Silent		bool   `json:"Silent"`
-	Interval	int	   `json:"Interval"`
-	Status		string `json:"Status"`
+	Silent      bool   `json:"Silent"`
+	Interval    int    `json:"Interval"`
+	Status      string `json:"Status"`
+	HostName    string `json:"HostName"`
+	Domain    string `json:"Domain"`
 }
 var Agentconfig = AGENTCONFIG{Silent: false, Interval: 10}
 
@@ -490,6 +518,7 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 func adjoinHandler(c *gin.Context) {
 	setLog()
 	domain := c.Param("domain")
+	comname := c.Param("computer")
 	shell, err := setupShell()
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
@@ -498,7 +527,7 @@ func adjoinHandler(c *gin.Context) {
 	output, err := shell.Exec("$username = \"$testdomain\\administrator\" ;" +
 		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force ;" +
 		"$credential = New-Object System.Management.Automation.PSCredential($username,$password) ;" +
-		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential ;", domain) +
+		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential -Newname %v;", domain, comname) +
 		"shutdown /r /t 10")
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})

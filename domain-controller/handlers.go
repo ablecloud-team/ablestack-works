@@ -1111,7 +1111,8 @@ func addComputerToGroupHandler(c *gin.Context) {
 
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
-	err = addComputerToGroup(l, computername, groupname)
+	computercn, _:= getComputerCN(l, computername)
+	err = addComputerToGroup(l, computercn, groupname)
 	if err != nil {
 		//errorlines := strings.Split(err.Error(), "\r\n")
 		//for i, line := range errorlines {
@@ -1141,7 +1142,8 @@ func delComputerFromGroupHandler(c *gin.Context) {
 
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
-	err = delComputerFromGroup(l, computername, groupname)
+	computercn, _:= getComputerCN(l, computername)
+	err = delComputerFromGroup(l, computercn, groupname)
 	if err != nil {
 		//errorlines := strings.Split(err.Error(), "\r\n")
 		//for i, line := range errorlines {

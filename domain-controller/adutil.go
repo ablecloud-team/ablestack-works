@@ -975,6 +975,46 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 }
 
 
+func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error){
+	setLog()
+	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
+
+	l, _ = setupLdap()
+
+	searchRequest := ldap.NewSearchRequest(
+		ADconfig.ADbasedn,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
+		fmt.Sprintf("(&(displayname=%v$)(objectclass=computer))", comname),
+		ComputerAttributes,
+		nil)
+
+	sr, err := l.Search(searchRequest)
+
+	if err != nil {
+		return "", err
+	}
+	if len(sr.Entries) >= 1 {
+		userentry := sr.Entries[0]
+		log.Infof("TestSearch: %s -> num of entries = %d", searchRequest.Filter, len(sr.Entries))
+
+		aduser := ADCOMPUTER{} //NewADUser()
+		log.Infoln(aduser)
+		//sr.PrettyPrint(4)
+		for i := range userentry.Attributes {
+			if len(userentry.Attributes[i].Values) >= 2 {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values
+			} else {
+				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
+			}
+		}
+		ret, err := json.Marshal(aduser)
+		log.Infoln(string(ret))
+		return sr.Entries[0].GetAttributeValue("cn"), err
+	} else {
+		return "", errors.New(http.StatusText(http.StatusNotFound))
+	}
+}
+
 //add computer to group
 
 func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err error) {
