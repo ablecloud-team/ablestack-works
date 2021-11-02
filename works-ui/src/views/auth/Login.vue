@@ -3,7 +3,7 @@
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-          src="../../assets/ablestack-logo.png"
+          src="@/assets/ablestack-logo.png"
           alt="logo"
           class="user-layout-logo"
         />
@@ -40,7 +40,12 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" block class="login-button" html-type="submit">
+          <a-button
+            type="primary"
+            block
+            class="login-button"
+            html-type="submit"
+          >
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
@@ -157,26 +162,31 @@ export default defineComponent({
           message.loading(this.$t("message.logging"), 10);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
-          // try {
-          //  res = await axiosLogin(params)
+
           worksApi
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
               if (response.status === 200) {
-                if (response.data.result.isAdmin == "false") {
-                  message.error(this.$t("message.login.wrong"));
-                  router.push({ name: "Login" });
-                } else {
+                if (
+                  response.data.result.status === 200 &&
+                  response.data.result.login === true
+                ) {
                   store.dispatch("loginCommit", response.data);
                   sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem(
-                    "username",
-                    response.data.result.username
-                  );
-                  router.push({ name: "Dashboard" });
+                  sessionStorage.setItem("username", response.data.result.username);
+                  sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
+                  if (response.data.result.username === "Administrator") {
+                    router.push({ name: "Dashboard" });
+                  } else {
+                    router.push({ name: "Favorite" });
+                  }
                   message.destroy();
                   message.success(this.$t("message.login.completed"));
+                } else {
+                  message.destroy();
+                  message.error(this.$t("message.login.wrong"));
+                  //router.push({ name: "Login" });
                 }
               } else {
                 message.destroy();
@@ -186,12 +196,6 @@ export default defineComponent({
             .catch(function (error) {
               console.log(error);
             });
-          // }catch (error){
-          //   message.destroy();
-          //   //TODO i18n 적용
-          //   console.log(error)
-          //   message.error(this.$t("message.login.wrong"))
-          // }
         })
         .catch((error) => {
           console.log("error", error);

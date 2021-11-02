@@ -29,7 +29,7 @@
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        <a-button shape="circle" type="dashed">
+        <a-button shape="circle" type="dashed" >
           <BarcodeOutlined />
         </a-button>
         {{ vmDbDataInfo.uuid }}
@@ -87,9 +87,10 @@
           <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
         >
         <a-tag>
-          <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+          <ArrowDownOutlined /> TX
+          {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
         ><br />
-        {{ vmNetworkInfo.networkname }}
+        {{ vmNetworkInfo.networkname }} ({{ vmNetworkInfo.type }})
       </div>
     </div>
     <div class="CardItem">
@@ -114,8 +115,7 @@ import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
-  props: {
-  },
+  props: {},
   setup() {
     return {};
   },
