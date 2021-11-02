@@ -8,8 +8,8 @@
             <a-col id="content-path" :span="12">
               <Apath
                 :paths="[
-                  { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceName, component: null },
+                  { name: $t('label.users'), component: 'Account' },
+                  { name: userName, component: null },
                 ]"
               />
               <a-button
@@ -22,19 +22,17 @@
                 </template>
               </a-button>
             </a-col>
-            <!-- 우측 액션 -->
+
+            <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions
-                :action-from="actionFrom"
-                :workspace-uuid="workspaceUuid"
-              />
+              <Actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody
+          <AccountBody 
             ref="listRefleshCall"
           />
         </div>
@@ -44,31 +42,50 @@
 </template>
 
 <script>
-import Actions from "@/components/Actions";
-import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workSpace/WorkSpaceBody";
+import Actions from "../../components/Actions";
+import Apath from "../../components/Apath";
+import AccountBody from "./AccountBody";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
 export default defineComponent({
-  components: { Apath, Actions, WorkSpaceBody },
+  components: {
+    AccountBody,
+    Apath,
+    Actions,
+  },
   props: {},
-  setup(props) {
+  setup() {
     return {
-      actionFrom: ref("WorkspaceDetail"),
+      actionFrom: ref("AccountDetail"),
     };
   },
   data() {
     return {
-      workspaceUuid: ref(this.$route.params.workspaceUuid),
-      workspaceName: ref(this.$route.params.workspaceName),
+      userName: ref(this.$route.params.userName),
     };
   },
-  created() {},
+  created() {
+    this.fetchData();
+  },
   methods: {
-    reflesh() {
+    reflesh() { 
       this.$refs.listRefleshCall.reflesh();
+    },
+    fetchData() {
+      worksApi
+        .get("/api/v1/user/" + this.$route.params.userName)
+        .then((response) => {
+          if (response.status == 200) {
+            this.userDataInfo = response.data.result;
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 });

@@ -1,17 +1,21 @@
 <template>
-  <a-space direction="horizontal" id="content-space">
-    <a-row style="min-height: 400px" id="content-row">
+  <a-space id="content-space" direction="horizontal">
+    <a-row id="content-row" style="min-height: 400px">
       <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
+          <WorkspaceInfoCard
+            ref="listRefleshCall1"
+          />
         </ACard>
       </a-col>
 
       <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
-          <WorkSpaceTab />
+          <WorkSpaceTab 
+            ref="listRefleshCall2"
+          />
         </a-card>
       </a-col>
     </a-row>
@@ -19,15 +23,21 @@
 </template>
 
 <script>
-import InfoCard from "../../components/InfoCard";
+import { defineComponent, ref } from "vue";
 import WorkSpaceTab from "./WorkSpaceTab";
-import { defineComponent } from "vue";
+import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
 export default defineComponent({
-  components: { WorkSpaceTab, InfoCard },
-  props: {
-    name: String,
-    info: Object,
+  components: { WorkSpaceTab, WorkspaceInfoCard },
+  props: {},
+  setup() {
+    return {};
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      this.$refs.listRefleshCall2.reflesh();
+    },
   },
 });
 </script>

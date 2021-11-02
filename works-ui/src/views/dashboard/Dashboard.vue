@@ -1,159 +1,164 @@
 <template>
-  <div class="dashboard-main-grid">
-    <div class="dashboard-left-grid">
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <div class="dashboard-card-field">20 / 30</div>
+  <div style="width: 100%; padding: 10px">
+    <a-row>
+      <a-col flex="100%">
+        <a-row :gutter="12" type="flex">
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card
+              :title="$t('label.workspace.count')"
+              class="dashboard-a-card-cl"
+              hoverable
+              @click="$router.push({ name: 'Workspace' })"
+            >
+              <span style="font-size: 80px">{{ workspaceCount }}</span>
+            </a-card>
+          </a-col>
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card
+              :title="$t('label.desktop.count')"
+              class="dashboard-a-card-cl"
+              hoverable
+              @click="$router.push({ name: 'VirtualMachine' })"
+            >
+              <span style="font-size: 80px">{{ instanceCount }}</span>
+            </a-card>
+          </a-col>
+          <!-- <a-col flex="25%" class="dashboard-a-col">
+            <a-card :title="$t('label.allocated.cpu.count')" class="dashboard-a-card-cl" hoverable>
+              <a-progress type="dashboard" :percent="33"/>
+            </a-card>
+          </a-col>
+          <a-col flex="25%" class="dashboard-a-col">
+            <a-card :title="$t('label.allocated.memory.count')" class="dashboard-a-card-cl" hoverable>
+              <a-progress type="dashboard" :percent="22"/>
+            </a-card>
+          </a-col>
+          <a-col flex="25%" class="dashboard-a-col">
+            <a-card :title="$t('label.allocated.disk.count')" class="dashboard-a-card-cl" hoverable>
+              <a-progress type="dashboard" :percent="70" />
+            </a-card>
+          </a-col>
+          <a-col flex="25%" class="dashboard-a-col">
+            <a-card :title="$t('label.allocated.IP.count')" class="dashboard-a-card-cl" hoverable>
+              <a-progress type="dashboard" :percent="70" />
+            </a-card>
+          </a-col> -->
+        </a-row>
+        <a-row :gutter="12" type="flex">
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card
+              :title="$t('label.desktop.connected.count')"
+              class="dashboard-a-card-cl"
+              hoverable
+            >
+              <span style="font-size: 80px">{{ desktopConCount }}</span>
+            </a-card>
+          </a-col>
+          <a-col flex="50%" class="dashboard-a-col">
+            <a-card
+              :title="$t('label.app.connected.count')"
+              class="dashboard-a-card-cl"
+              hoverable
+            >
+              <span style="font-size: 80px">{{ appConCount }}</span>
+            </a-card>
+          </a-col>
+        </a-row>
+      </a-col>
+      <!-- <a-col flex="30%" class="dashboard-a-col">
+        <a-card :bordered="true" class="dashboard-right-card">
+          <a-timeline style="text-align: left">
+            <a-timeline-item color="green"
+              >Create a services site 2015-09-01</a-timeline-item
+            >
+            <a-timeline-item color="green"
+              >Create a services site 2015-09-01</a-timeline-item
+            >
+            <a-timeline-item color="red">
+              <p>Solve initial network problems 1</p>
+              <p>Solve initial network problems 2</p>
+              <p>Solve initial network problems 3 2015-09-01</p>
+            </a-timeline-item>
+            <a-timeline-item>
+              <p>Technical testing 1</p>
+              <p>Technical testing 2</p>
+              <p>Technical testing 3 2015-09-01</p>
+            </a-timeline-item>
+            <a-timeline-item color="gray">
+              <p>Technical testing 1</p>
+              <p>Technical testing 2</p>
+              <p>Technical testing 3 2015-09-01</p>
+            </a-timeline-item>
+            <a-timeline-item color="gray">
+              <p>Technical testing 1</p>
+              <p>Technical testing 2</p>
+              <p>Technical testing 3 2015-09-01</p>
+            </a-timeline-item>
+          </a-timeline>
         </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-      <a-card class="dashboard-card" hoverable>
-        <span style="font-size: x-large; margin-bottom: 10px">
-          {{ $t("label.workspace") }}
-        </span>
-        <a-progress type="dashboard" :percent="70" style="margin-top: 10px" />
-        <a-card class="dashboard-card-footer" :bodyStyle="{ padding: '5px' }">
-          <span class="dashboard-card-field">20 / 30</span>
-        </a-card>
-      </a-card>
-    </div>
-    <div class="dashboard-right-grid">
-      <a-card :bordered="true" class="dashboard-right-card">
-        <a-timeline style="text-align: left">
-          <a-timeline-item color="green"
-            >Create a services site 2015-09-01</a-timeline-item
-          >
-          <a-timeline-item color="green"
-            >Create a services site 2015-09-01</a-timeline-item
-          >
-          <a-timeline-item color="red">
-            <p>Solve initial network problems 1</p>
-            <p>Solve initial network problems 2</p>
-            <p>Solve initial network problems 3 2015-09-01</p>
-          </a-timeline-item>
-          <a-timeline-item>
-            <p>Technical testing 1</p>
-            <p>Technical testing 2</p>
-            <p>Technical testing 3 2015-09-01</p>
-          </a-timeline-item>
-          <a-timeline-item color="gray">
-            <p>Technical testing 1</p>
-            <p>Technical testing 2</p>
-            <p>Technical testing 3 2015-09-01</p>
-          </a-timeline-item>
-          <a-timeline-item color="gray">
-            <p>Technical testing 1</p>
-            <p>Technical testing 2</p>
-            <p>Technical testing 3 2015-09-01</p>
-          </a-timeline-item>
-        </a-timeline>
-      </a-card>
-    </div>
+      </a-col> -->
+    </a-row>
   </div>
 </template>
-
 <script>
-export default {
+import { defineComponent, reactive, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+export default defineComponent({
   name: "Dashboard",
-};
+  components: {},
+  props: {},
+  setup(props) {
+    const state = reactive({});
+    return {
+      state,
+    };
+  },
+  data() {
+    return {
+      workspaceCount: ref("0"),
+      instanceCount: ref("0"),
+      desktopConCount: ref("0"),
+      appConCount: ref("0"),
+    };
+  },
+  created() {
+    this.fetchData();
+    this.timer = setInterval(() => {
+      //30초 자동 갱신
+      this.fetchData();
+    }, 30000);
+  },
+  unmounted() {
+    clearInterval(this.timer);
+  },
+  methods: {
+    fetchData() {
+      worksApi
+        .get("/api/v1/dashboard")
+        .then((response) => {
+          if (response.status == 200) {
+            this.workspaceCount = response.data.result.workspaceCount;
+            this.instanceCount = response.data.result.instanceCount;
+            this.desktopConCount = "0";
+            this.appConCount = "0";
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+  },
+});
 </script>
 
 <style scoped>
-.dashboard-main-grid {
-  display: grid;
-  grid-template-columns: 3fr 1fr;
-  grid-template-rows: 1fr;
+.dashboard-a-card-cl {
+  width: 100%;
   height: 100%;
   text-align: center;
-  padding: 5px;
 }
-.dashboard-left-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 291px 291px;
-  grid-gap: 14px;
-  padding: 14px;
-  text-align: center;
-}
-
-.dashboard-card {
-  max-height: 291px;
-}
-.dashboard-right-card {
-  width: 100%;
-  height: auto;
-  margin: 14px;
-}
-
-.dashboard-card-footer {
-  border: 0px;
-  border-top: 1px solid #e8e8e8;
-  margin-top: 20px;
-  padding: 0px;
-}
-
-.dashboard-card-field {
-  position: relative;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0;
+.dashboard-a-col {
+  padding-bottom: 10px;
 }
 </style>

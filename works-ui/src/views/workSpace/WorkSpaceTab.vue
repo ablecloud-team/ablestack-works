@@ -1,94 +1,59 @@
 <template>
   <div id="ContentTab">
-    <a-tabs
-      type="card"
-      v-model:activeKey="activeKey"
-      :tab-position="tabPosition"
-      @change="changeTap"
-    >
+    <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.vm.list')">
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="VMListData"
-          :columns="VMListColumns"
-          comp="VirtualMachineDetail"
+          ref="listRefleshCall1"
+          :tap-name="'desktop'"
+          :action-from="'VirtualMachineList'"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="UserListData"
-          :columns="UserListColumns"
+          ref="listRefleshCall2"
+          :tap-name="'user'"
+          :action-from="'UserDetail'"
         />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('label.disk.list')">
+      <a-tab-pane key="3" :tab="$t('label.policy.list')">
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="VMDiskListData"
-          :columns="VMDiskListColumns"
+          ref="listRefleshCall3"
+          :tap-name="'policy'"
+          :action-from="'policyDetail'"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent
-          v-model:tapName="state.callTap"
-          :data="NWListData"
-          :columns="NWListColumns"
-        />
+        <TableContent ref="listRefleshCall4" :tap-name="'network'" />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
-
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import TableContent from "../../components/TableContent";
+import { defineComponent, ref } from "vue";
+import TableContent from "@/components/TableContent";
 
-import {
-  VMListData,
-  VMListColumns,
-  VMDiskListData,
-  VMDiskListColumns,
-  NWListData,
-  NWListColumns,
-  UserListData,
-  UserListColumns,
-} from "../../data";
 export default defineComponent({
   components: { TableContent },
-  setup() {
+  props: {},
+  setup(props) {
     const tabPosition = ref("top");
     const activeKey = ref("1");
-    const state = reactive({
-      callTap: ref("desktop"),
-    });
-    const changeTap = (value) => {
-      console.log(`${value}`);
-      if (`${value}` === "1") {
-        state.callTap = ref("desktop");
-      } else if (`${value}` === "2") {
-        state.callTap = ref("user");
-      } else if (`${value}` === "3") {
-        state.callTap = ref("datadisk");
-      } else if (`${value}` === "4") {
-        state.callTap = ref("network");
-      }
-      console.log("sdfsdfsdf");
-      console.log(state.callTap);
-    };
     return {
-      state,
-      changeTap,
       tabPosition,
       activeKey,
-      VMListData,
-      VMListColumns,
-      VMDiskListData,
-      VMDiskListColumns,
-      NWListData,
-      NWListColumns,
-      UserListData,
-      UserListColumns,
     };
+  },
+  data() {
+    return {};
+  },
+  created() {},
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.fetchData();
+      this.$refs.listRefleshCall2.fetchData();
+      this.$refs.listRefleshCall3.fetchData();
+      this.$refs.listRefleshCall4.fetchData();
+    },
   },
 });
 </script>

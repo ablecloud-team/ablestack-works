@@ -1,226 +1,373 @@
 <template class="able-action">
-  <a-space :size="size">
-    <a-tooltip placement="top" v-if="state.buttonBoolean.addButton">
-      <template #title>{{ add }}</template>
-      <a-button
-        type="primary"
-        shape="round"
-        size="size"
-        @click="setAddModalValue(true)"
-      >
-        <template #icon>
-          {{ add }}
-          <PlusOutlined />
-        </template>
-      </a-button>
-    </a-tooltip>
-    <!--Start circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.start">
-      <template #title>{{ $t("tooltip.start") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.start')">
+  <a-space :size="8">
+    <!--Start-->
+    <a-tooltip v-if="state.buttonBoolean.vmStart" placement="bottom">
+      <template #title>{{ $t("tooltip.vmStart") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('vmStart')">
         <CaretRightOutlined />
       </a-button>
     </a-tooltip>
-    <!--Start circle button end-->
-    <!--Stop circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.stop">
-      <template #title>{{ $t("tooltip.stop") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.stop')">
+    <!--Stop-->
+    <a-tooltip v-if="state.buttonBoolean.vmStop" placement="bottom">
+      <template #title>{{ $t("tooltip.vmStop") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('vmStop')">
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
-    <!--Stop circle button end-->
-    <!--reset circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.reset">
-      <template #title>{{ $t("tooltip.reset") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.reset')">
-        <ReloadOutlined />
+    <!--reset -->
+    <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="bottom">
+      <template #title>{{ $t("tooltip.userAllocate") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('userAllocate')">
+        <UserAddOutlined />
       </a-button>
     </a-tooltip>
-    <!--reinstall circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.reinstall">
-      <template #title>{{ $t("tooltip.reinstall") }}</template>
-      <a-button
-        shape="circle"
-        @click="setCircleButtonModal('tooltip.reinstall')"
-      >
-        <SyncOutlined />
+    <a-tooltip v-if="state.buttonBoolean.userUnlock" placement="bottom">
+      <template #title>{{ $t("tooltip.userUnlock") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('userUnlock')">
+        <UserDeleteOutlined />
       </a-button>
     </a-tooltip>
-    <!--reinstall circle button end-->
-    <!--snapshot circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.snapshot">
-      <template #title>{{ $t("tooltip.snapshot") }}</template>
-      <a-button
-        shape="circle"
-        @click="setCircleButtonModal('tooltip.snapshot')"
-      >
-        <CameraOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--snapshot circle button end-->
-    <!--volsnapshot circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.volsnapshot">
-      <template #title>{{ $t("tooltip.volsnapshot") }}</template>
-      <a-button
-        shape="circle"
-        @click="setCircleButtonModal('tooltip.volsnapshot')"
-      >
-        <i class="fas fa-camera-retro"></i>
-        <VideoCameraAddOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--volsnapshot circle button end-->
-    <!--isoattach circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.isoattach">
-      <template #title>{{ $t("tooltip.isoattach") }}</template>
-      <a-button
-        shape="circle"
-        @click="setCircleButtonModal('tooltip.isoattach')"
-      >
-        <PaperClipOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--isoattach circle button end-->
-    <!--edit circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.edit">
-      <template #title>{{ $t("tooltip.edit") }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.edit')">
-        <EditOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--edit circle button end-->
-    <!--pause circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.destroy">
-      <template #title>{{ "pause" }}</template>
-      <a-button shape="circle" @click="setCircleButtonModal('tooltip.destroy')">
-        <PauseCircleOutlined />
-      </a-button>
-    </a-tooltip>
-    <!--pause circle button end-->
-    <!--destroy circle button start-->
-    <a-tooltip placement="top" v-if="state.buttonBoolean.destroy">
+    <!--workspaceDestroy-->
+    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
-        @click="setCircleButtonModal('tooltip.destroy')"
         danger
+        @click="setCircleButtonModal('workspaceDestroy')"
       >
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <!--destroy circle button ens-->
-    <!--AddModal start-->
-    <AddModal
-      :visible="showAddModal"
-      :actionFrom="'Actions'"
-      :add="add"
-      @changeAddModal="setAddModalValue"
-    />
-    <!--AddModal end-->
-    <!--circle button check modal start-->
+    <!--vmDestroy-->
+    <a-tooltip v-if="state.buttonBoolean.vmDestroy" placement="bottom">
+      <template #title>{{ $t("tooltip.destroy") }}</template>
+      <a-button
+        type="primary"
+        shape="circle"
+        danger
+        @click="setCircleButtonModal('vmDestroy')"
+      >
+        <DeleteFilled />
+      </a-button>
+    </a-tooltip>
+    <!--accountDestroy-->
+    <a-tooltip v-if="state.buttonBoolean.accountDestroy" placement="bottom">
+      <template #title>{{ $t("tooltip.destroy") }}</template>
+      <a-button
+        type="primary"
+        shape="circle"
+        danger
+        @click="setCircleButtonModal('accountDestroy')"
+      >
+        <DeleteFilled />
+      </a-button>
+    </a-tooltip>
+
+    <!-- Confirm Modal -->
     <a-modal
-      :title="$t(modalTitle)"
-      :visible="visible"
+      v-model:visible="confirmModalView"
+      :title="$t('tooltip.' + modalTitle)"
+      :ok-text="$t('label.ok')"
+      :cancel-text="$t('label.cancel')"
       @cancel="handleCancel"
-      @ok="handleCancel"
+      @ok="handleSubmit(actionFrom)"
     >
-      <p>{{ $t(modalTitle) }} 하시겠습니까?</p>
+      <p>{{ $t(modalConfirm) }}</p>
     </a-modal>
-    <!--circle button check modal end-->
+
+    <a-modal
+      v-model:visible="userAllocateVmModalBoolean"
+      :title="$t('tooltip.desktop.allocate.user')"
+      width="400px"
+      :ok-text="$t('label.ok')"
+      :cancel-text="$t('label.cancel')"
+      @ok="putUserAllocateVm()"
+    >
+      <a-select
+        v-model:value="selectedUser"
+        show-search
+        style="width: 100%; margin-top: 7px"
+        option-filter-prop="label"
+        class="addmodal-aform-item-div"
+      >
+        <a-select-option
+          v-for="option in workspaceUserDataList"
+          :key="option.name"
+          :value="option.name"
+          :label="option.name"
+        >
+          {{ option.name }}
+        </a-select-option>
+      </a-select>
+    </a-modal>
   </a-space>
 </template>
 
 <script>
 import { defineComponent, onMounted, reactive, ref } from "vue";
-import AddModal from "@/components/AddModal";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+import router from "@/router";
+
 export default defineComponent({
-  components: {
-    AddModal,
-  },
+  components: {},
   props: {
     actionFrom: {
-      String,
+      type: String,
+      requires: true,
+      default: "",
     },
-    add: {
-      String,
+    workspaceUuid: {
+      type: String,
+      requires: false,
+      default: "",
+    },
+    vmUuid: {
+      type: String,
+      requires: false,
+      default: "",
+    },
+    allocateStatus: {
+      type: String,
+      requires: false,
+      default: "",
     },
   },
+  emits: ["fetchData"],
   setup(props) {
-    const sizeValue = 8;
-    console.log("==================== props.actionFrom ====================");
-    console.log(props.actionFrom);
+    //console.log("==================== props.actionFrom ====================:::: "+props.actionFrom);
     const state = reactive({
       callComponent: ref(props.actionFrom),
+      workspaceUuid: ref(props.workspaceUuid),
+      allocateStatus: ref(props.allocateStatus),
+      workspaceName: ref(""),
+      vmUuid: ref(props.vmUuid),
+      vmStatus: ref(""),
       buttonBoolean: {
         showModal: ref(false),
-        addButton: ref(false),
-        start: ref(false),
-        stop: ref(false),
-        reset: ref(false),
+        vmStart: ref(false),
+        vmStop: ref(false),
+        userAllocate: ref(false),
+        userUnlock: ref(false),
         reinstall: ref(false),
         snapshot: ref(false),
         volsnapshot: ref(false),
         iso: ref(false),
-        destroy: ref(false),
+        workspaceDestroy: ref(false),
+        vmDestroy: ref(false),
+        accountDestroy: ref(false),
         edit: ref(false),
         pause: ref(false),
       },
     });
-    onMounted(() => {
-      if (state.callComponent === "Workspace") {
-        state.buttonBoolean.addButton = true;
-      } else if (state.callComponent === "WorkspaceDetail") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "VirtualMachine") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.reset = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "VirtualMachineList") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "VirtualMachineDetail") {
-        state.buttonBoolean.start = true;
-        state.buttonBoolean.stop = true;
-        state.buttonBoolean.edit = true;
-        state.buttonBoolean.destroy = true;
-      } else if (state.callComponent === "User") {
-        state.buttonBoolean.addButton = true;
-      } else if (state.callComponent === "UserDetail") {
-        state.buttonBoolean.destroy = true;
-        state.buttonBoolean.pause = true;
-      }
-    });
     return {
-      size: ref(sizeValue),
-      showAddModal: ref(false),
-      visible: ref(false),
-      //TODO:2021.07.30 mobalTitle i18n 적용필요
-      //fixm
-      modalTitle: ref("tooltip.start"),
+      confirmModalView: ref(false),
+      userAllocateVmModalBoolean: ref(false),
+      workspaceUserDataList: ref([]),
+      modalTitle: ref(""),
+      modalConfirm: ref(""),
       state,
     };
   },
-  // emits: [
-  //   'changeAddModal',
-  // ],
+  data() {
+    return {
+      selectedUser: ref(""),
+    };
+  },
+  created() {
+    this.fetchData();
+  },
   methods: {
-    setAddModalValue: function (value) {
-      this.showAddModal = value;
+    fetchData() {
+      if (this.state.callComponent.includes("Workspace")) {
+        this.state.buttonBoolean.workspaceDestroy = true;
+      } else if (this.state.callComponent.includes("Account")) {
+        this.state.buttonBoolean.accountDestroy = true;
+      } else if (this.state.callComponent.includes("GroupPolicy")) {
+        this.state.buttonBoolean.destroy = true;
+      }
+
+      if (this.state.callComponent.includes("VirtualMachine")) {
+        let _uuid = this.$route.params.vmUuid === undefined ? this.state.vmUuid : this.$route.params.vmUuid;
+        //console.log("this.$route.params.vmUuid :: "+this.$route.params.vmUuid+ " :: this.state.vmUuid :: " +this.state.vmUuid);
+        worksApi
+          .get("/api/v1/instance/detail/" + _uuid)
+          .then((response) => {
+            if (response.status == 200) {
+              //this.vmDbDataInfo = response.data.result.instanceDBInfo;
+              this.state.vmUuid = response.data.result.instanceDBInfo.uuid;
+              this.state.vmStatus = response.data.result.instanceDBInfo.mold_status;
+              this.state.workspaceName = response.data.result.instanceDBInfo.workspace_name;
+              this.state.allocateStatus = response.data.result.instanceDBInfo.owner_account_id;
+
+              if (this.state.vmStatus === "Running") {
+                this.state.buttonBoolean.vmStop = true;
+                this.state.buttonBoolean.vmStart = false;
+              } else {
+                this.state.buttonBoolean.vmStop = false;
+                this.state.buttonBoolean.vmStart = true;
+              }
+              if (this.state.allocateStatus == "") {
+                this.state.buttonBoolean.userAllocate = true;
+                this.state.buttonBoolean.userUnlock = false;
+              } else {
+                this.state.buttonBoolean.userAllocate = false;
+                this.state.buttonBoolean.userUnlock = true;
+              }
+              this.state.buttonBoolean.vmDestroy = true;
+
+              //해당 워크스페이스에 추가 된 사용자 목록 조회
+              worksApi
+                .get("/api/v1/group/" + this.state.workspaceName)
+                .then((response) => {
+                  if (response.status == 200) {
+                    const temp =
+                      response.data.result.member == undefined
+                        ? ""
+                        : response.data.result.member;
+                    for (let str of temp) {
+                      this.workspaceUserDataList.push({ name: str.split(",")[0].split("CN=")[1] });
+                    }
+                  } else {
+                    //message.error(this.t("message.response.data.fail"));
+                  }
+                })
+                .catch(function (error) {
+                  //message.error(error);
+                });
+            } else {
+              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
     },
-    setCircleButtonModal: function (value) {
-      this.visible = true;
-      this.modalTitle = value;
+    putUserAllocateVm() {
+      let params = new URLSearchParams();
+      params.append("instanceUuid", this.state.vmUuid);
+      params.append("username", this.selectedUser);
+      worksApi
+        .post("/api/v1/instance", params)
+        .then((response) => {
+          if (response.status === 200) {
+            message.success(this.$t("message.user.vm.allocated.completed"), 3);
+            setTimeout(() => {
+              this.$emit("fetchData");
+              this.fetchData();
+            }, 1000);
+            this.handleCancel();
+          } else {
+            message.error("message.user.vm.allocated.fail");
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
-    handleCancel: function () {
-      this.visible = false;
+    setCircleButtonModal(value) {
+      if (value == "userAllocate") {
+        this.userAllocateVmModalBoolean = true;
+      } else {
+        this.confirmModalView = true;
+        this.modalTitle = value;
+      }
+      if (value == "workspaceStart") this.modalConfirm = "modal.confirm.workspaceStart";
+      if (value == "workspaceStop") this.modalConfirm = "modal.confirm.workspaceStop";
+      if (value == "workspaceDestroy") this.modalConfirm = "modal.confirm.workspaceDestroy";
+
+      if (value == "vmStart") this.modalConfirm = "modal.confirm.vmStart";
+      if (value == "vmStop") this.modalConfirm = "modal.confirm.vmStop";
+      if (value == "vmDestroy") this.modalConfirm = "modal.confirm.vmDestroy";
+
+      if (value == "accountDestroy") this.modalConfirm = "modal.confirm.accountDestroy";
+      if (value == "userUnlock") this.modalConfirm = "modal.confirm.userUnlock";
+    },
+    handleCancel() {
+      this.confirmModalView = false;
+      this.userAllocateVmModalBoolean = false;
+    },
+    handleSubmit(actionFrom) {
+      //console.log(this.modalTitle + "  ::  " + this.state.vmUuid);
+      if (actionFrom.includes("VirtualMachine")) {
+        let worksUrl, resMessage = "";
+        if (this.modalTitle.includes("vmStart")) {
+          message.loading(this.$t("message.vm.status.starting"), 12);
+          worksUrl = "/api/v1/instance/VMStart/" + this.state.vmUuid;
+          resMessage = this.$t("message.vm.status.update");
+        }
+        if (this.modalTitle.includes("vmStop")) {
+          message.loading(this.$t("message.vm.status.stopping"), 12);
+          worksUrl = "/api/v1/instance/VMStop/" + this.state.vmUuid;
+          resMessage = this.$t("message.vm.status.update");
+        }
+        if (this.modalTitle.includes("vmDestroy")) {
+          message.loading(this.$t("message.vm.status.destroying"), 12);
+          worksUrl = "/api/v1/instance/VMDestroy/" + this.state.vmUuid;
+          resMessage = this.$t("message.vm.status.delete");
+        }
+        worksApi
+          .patch(worksUrl)
+          .then((response) => {
+            if (response.status == 200) {
+              this.vmDataList = response.data.result.list;
+              this.handleCancel();
+              setTimeout(() => {
+                message.destroy();
+                message.success(resMessage);
+                if (actionFrom =="VirtualMachineDetail" && this.modalTitle.includes("vmDestroy")){
+                  router.push({ name: "VirtualMachine" });
+                } else {
+                  this.$emit("fetchData");
+                  this.fetchData();
+                }
+              }, 12000);
+            } else {
+              message.error(this.$t("message.vm.status.update.fail"));
+            }
+          })
+          .catch(function (error) {
+            message.error(error);
+          });
+      }
+
+      if (actionFrom.includes("Workspace")) {
+        worksApi
+          .get("/api/v1/workspace/" + this.state.workspaceUuid)
+          .then((response) => {
+            if (response.status == 200) {
+              if(response.data.result.workspaceInfo.quantity == 0){
+                message.loading(this.$t("message.workspace.status.destroying"), 6);
+                worksApi
+                  .delete("/api/v1/workspace/" + this.state.workspaceUuid)
+                  .then((response) => {
+                    if (response.status == 200) {
+                      this.vmDataList = response.data.result.list;
+                      this.handleCancel();
+                      setTimeout(() => {
+                        message.destroy();
+                        message.success(this.$t("message.workspace.status.delete"));
+                        if(actionFrom =="WorkspaceDetail") router.push({ name: "Workspace" });
+                        if(actionFrom =="WorkspaceList") this.$emit("fetchData");
+                      }, 3000);
+                    } else {
+                      message.error(this.$t("message.workspace.delete.fail"), 5);
+                    }
+                  })
+                  .catch(function (error) {
+                    message.error(error);
+                  });
+              } else {
+                message.error(this.$t("message.workspace.delete.existvm"));
+              }
+            }
+          })
+          .catch(function (error) {
+            message.error(error);
+          });
+      }
     },
   },
 });

@@ -1,17 +1,21 @@
 <template>
-  <ASpace direction="horizontal" id="content-space">
-    <ARow style="min-height: 400px" id="content-row">
+  <ASpace id="content-space" direction="horizontal">
+    <ARow id="content-row" style="min-height: 400px">
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
+          <VirtualMachineInfoCard 
+            ref="listRefleshCall1"
+          />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <VirtualMachineTab />
+          <VirtualMachineTab 
+            ref="listRefleshCall2"
+          />
         </ACard>
       </ACol>
     </ARow>
@@ -20,15 +24,24 @@
 
 <script>
 // import TabbedContent from "@/components/TabbedContent";
-import InfoCard from "@/components/InfoCard";
-import VirtualMachineTab from "@/views/virtualMachine/VirtualMachineTab";
-import { defineComponent } from "vue";
+import VirtualMachineTab from "./VirtualMachineTab.vue";
+import { defineComponent, ref } from "vue";
+import VirtualMachineInfoCard from "./VirtualMachineInfoCard.vue";
 
 export default defineComponent({
-  components: { VirtualMachineTab, InfoCard },
+  components: { VirtualMachineTab, VirtualMachineInfoCard },
   props: {
-    name: String,
-    info: Object,
+  },
+  setup() {
+    return {
+      actionFrom: ref("VirtualMachineDetail"),
+    };
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall1.reflesh();
+      this.$refs.listRefleshCall2.reflesh();
+    },
   },
 });
 </script>

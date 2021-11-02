@@ -4,26 +4,37 @@
       <a-layout-header id="content-header">
         <div>
           <a-row>
-            <!-- 오른쪽 경로 -->
+            <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
-                  { name: $t('label.vm'), component: 'Virtualmachine' },
-                  { name: name, component: null },
+                :paths="[
+                  { name: $t('label.vm'), component: 'VirtualMachine' },
+                  { name: vmName, component: null },
                 ]"
               />
+              <a-button
+                shape="round"
+                style="margin-left: 20px; height: 30px"
+                @click="reflesh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                </template>
+              </a-button>
             </a-col>
-
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <Actions
+                :action-from="actionFrom"
+                @fetchData="reflesh"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody :name="name" :info="info" />
+          <VirtualMachineBody ref="listRefleshCall"/>
         </div>
       </a-layout-content>
     </a-layout>
@@ -33,18 +44,33 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import VirtualMachineBody from "@/views/virtualMachine/VirtualMachineBody";
+import VirtualMachineBody from "./VirtualMachineBody.vue";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
-  },
   components: { VirtualMachineBody, Apath, Actions },
+  props: {},
   setup() {
     return {
+      vmDbDataInfo: ref([]),
+      vmMoldDataInfo: ref([]),
       actionFrom: ref("VirtualMachineDetail"),
     };
+  },
+  data() {
+    return {
+      vmUuid: ref(this.$route.params.vmUuid),
+      vmName: ref(this.$route.params.vmName),
+    };
+  },
+  created() {
+  },
+  methods: {
+    reflesh() {
+      this.$refs.listRefleshCall.reflesh();
+    },
   },
 });
 </script>

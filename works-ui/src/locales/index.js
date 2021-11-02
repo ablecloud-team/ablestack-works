@@ -20,7 +20,7 @@ function loadLocaleMessages() {
 }
 
 export default createI18n({
-  locale: process.env.VUE_APP_I18N_LOCALE || "en",
-  fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || "en",
+  locale: sessionStorage.getItem("locale") == null ? process.env.VUE_APP_I18N_LOCALE : sessionStorage.getItem("locale"),
+  fallbackLocale: sessionStorage.getItem("locale") == null ? process.env.VUE_APP_I18N_FALLBACK_LOCALE : sessionStorage.getItem("locale"),
   messages: loadLocaleMessages(),
 });

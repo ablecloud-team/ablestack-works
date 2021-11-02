@@ -3,13 +3,14 @@
     size="middle"
     :loading="loading"
     class="ant-table-striped"
-    :columns="vmListColumns"
-    :data-source="vmDataList"
+    :columns="UserListColumns"
+    :data-source="userDataList"
     :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
-    :bordered="bordered ? bordered : false"
+    :bordered="false"
     style="overflow-y: auto; overflow: auto"
+    :row-key="(record, index) => index"
     :pagination="pagination"
   >
     <!-- 검색 필터링 template-->
@@ -46,55 +47,17 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid +'/' + record.name}">{{
+      <router-link :to="{ path: '/accountDetail/' + record.name }">{{
         record.name
       }}</router-link>
     </template>
-
-    <template #actionRender="{ record }">
+    <template #actionRender>
       <a-Popover placement="topLeft">
         <template #content>
-          <Actions
-            :action-from="actionFrom"
-            :vm-uuid="record.uuid"
-            @fetchData="fetchData"
-          />
+          <Actions :action-from="actionFrom" />
         </template>
         <MoreOutlined />
       </a-Popover>
-    </template>
-    <template #vmStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="record.mold_status === 'Running' ? 'green' : 'red'"
-        :text="
-          record.mold_status === 'Running'
-            ? $t('label.vm.status.running')
-            : $t('label.vm.status.stopped')
-        "
-      />
-    </template>
-    <template #vmReadyStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="record.mold_status == 'Running' && record.checked === true ? 'green' : 'red'"
-        :text="
-          record.mold_status == 'Running' && record.checked === true
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
-        "
-      />
-    </template>
-    <template #userRender="{ record }">
-      <!-- {{
-        record.owner_account_id === ""
-          ? $t("label.owner.account.false")
-          : record.owner_account_id
-      }} -->
-      {{ record.owner_account_id }}
-    </template>
-    <template #sessionRender="{ record }">
-      {{ record.connected }}
     </template>
   </a-table>
 </template>
@@ -104,6 +67,22 @@ import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
+
+// const rowSelection = {
+//   onChange: (selectedRowKeys, selectedRows) => {
+//     console.log(
+//       `selectedRowKeys: ${selectedRowKeys}`,
+//       "selectedRows: ",
+//       selectedRows
+//     );
+//   },
+//   onSelect: (record, selected, selectedRows) => {
+//     console.log(record, selected, selectedRows);
+//   },
+//   onSelectAll: (selected, selectedRows, changeRows) => {
+//     console.log(selected, selectedRows, changeRows);
+//   },
+// };
 export default defineComponent({
   components: {
     Actions,
@@ -127,9 +106,9 @@ export default defineComponent({
       state.searchText = "";
     };
     return {
-      // rowSelection,
+      //rowSelection,
       loading: ref(false),
-      actionFrom: ref("VirtualMachineList"),
+      actionFrom: ref("AccountList"),
       pagination: {
         pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
@@ -145,15 +124,14 @@ export default defineComponent({
   },
   data() {
     return {
-      timer: ref(null),
       selectedRowKeys: [],
-      vmDataList: [],
-      vmListColumns: [
+      userDataList: [],
+      UserListColumns: [
         {
-          title: this.$t("label.name"),
+          title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
-          width: "20%",
+          width: "32%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -181,81 +159,63 @@ export default defineComponent({
           slots: { customRender: "actionRender" },
         },
         {
-          title: this.$t("label.workspace"),
-          dataIndex: "workspace_name",
-          key: "workspace_name",
-          width: "20%",
+          title: this.$t("label.lastname"),
+          dataIndex: "sn",
+          key: "sn",
+          width: "10%",
+          sorter: (a, b) => (a.sn < b.sn ? -1 : a.sn > b.sn ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.firstname"),
+          dataIndex: "givenName",
+          key: "givenName",
+          width: "10%",
           sorter: (a, b) =>
-            a.workspace_name < b.workspace_name
+            a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.title"),
+          dataIndex: "title",
+          key: "title",
+          width: "15%",
+          sorter: (a, b) =>
+            a.title < b.title ? -1 : a.title > b.title ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.phone"),
+          dataIndex: "telephoneNumber",
+          key: "telephoneNumber",
+          width: "15%",
+          sorter: (a, b) =>
+            a.telephoneNumber < b.telephoneNumber
               ? -1
-              : a.workspace_name > b.workspace_name
+              : a.telephoneNumber > b.telephoneNumber
               ? 1
               : 0,
           sortDirections: ["descend", "ascend"],
-          ellipsis: true,
         },
         {
-          title: this.$t("label.users"),
-          dataIndex: "owner_account_id",
-          key: "owner_account_id",
-          width: "10%",
-          sorter: (a, b) =>
-            a.owner_account_id < b.owner_account_id
-              ? -1
-              : a.owner_account_id > b.owner_account_id
-              ? 1
-              : 0,
+          title: this.$t("label.email"),
+          dataIndex: "mail",
+          key: "mail",
+          width: "15%",
+          sorter: (a, b) => (a.mail < b.mail ? -1 : a.mail > b.mail ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "userRender" },
-        },
-        {
-          title: this.$t("label.vm.state"),
-          dataIndex: "status",
-          key: "status",
-          width: "10%",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-          slots: { customRender: "vmStateRender" },
-        },
-        {
-          title: this.$t("label.vm.ready.state"),
-          dataIndex: "status",
-          key: "status",
-          width: "10%",
-          sorter: (a, b) =>
-            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-          slots: { customRender: "vmReadyStateRender" },
-        },
-        {
-          title: this.$t("label.vm.session.count"),
-          dataIndex: "connected",
-          key: "connected",
-          width: "10%",
-          sorter: (a, b) =>
-            a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
-          sortDirections: ["descend", "ascend"],
-          slots: { customRender: "sessionRender" },
         },
       ],
     };
   },
   created() {
     this.fetchData();
-    this.timer = setInterval(() => {
-      //10초 자동 갱신
-      this.fetchData();
-    }, 15000);
-  },
-  beforeUnmount() {
-    clearInterval(this.timer);
   },
   methods: {
     setSelection(selection) {
       this.selectedRowKeys = selection;
       if (this.selectedRowKeys.length == 0) {
-        this.$emit("actionFromChange", "VirtualMachine");
+        this.$emit("actionFromChange", "User");
       } else {
         this.$emit("actionFromChange", this.actionFrom);
       }
@@ -266,19 +226,20 @@ export default defineComponent({
     onSelectChange(selectedRowKeys, selectedRows) {
       this.setSelection(selectedRowKeys);
     },
-    fetchData(val) {
+    fetchData() {
       this.loading = true;
       worksApi
-        .get("/api/v1/instance/all")
+        .get("/api/v1/user")
         .then((response) => {
-          if (response.status == 200) {
-            this.vmDataList = response.data.result.instanceInfo;
+          if (response.data.result.status == 200) {
+            this.userDataList = response.data.result.result;
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            message.error(this.t("message.response.data.fail"));
+            //console.log(response.message);
           }
         })
         .catch(function (error) {
-          message.error(error);
+          message.error(error.message);
           //console.log(error);
         });
       setTimeout(() => {
@@ -288,11 +249,8 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped lang="scss">
-::v-deep(.ant-badge-status-dot) {
-  width: 12px;
-  height: 12px;
-}
+
+<style scoped>
 ::v-deep(.ant-table-thead) {
   background-color: #f9f9f9;
 }
@@ -308,7 +266,9 @@ export default defineComponent({
 ::v-deep(.dark-row) {
   background-color: #f9f9f9;
 }
+</style>
 
+<style scoped lang="scss">
 .shift-btns {
   display: flex;
 }

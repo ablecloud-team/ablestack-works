@@ -3,35 +3,36 @@
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-            src="../../assets/ablestack-logo.png"
-            alt="logo"
-            class="user-layout-logo"
+          src="../../assets/ablestack-logo.png"
+          alt="logo"
+          class="user-layout-logo"
         />
       </div>
       <a-form
-          ref="formRef"
-          layout="horizontal"
-          :model="formState"
-          :rules="rules"
-          class="user-layout-login"
+        ref="formRef"
+        layout="horizontal"
+        :model="formState"
+        :rules="rules"
+        @finish="onSubmit"
+        class="user-layout-login"
       >
-        <a-form-item name="id">
+        <a-form-item has-feedback name="id">
           <a-input
-              v-model:value="formState.id"
-              :placeholder="$t('label.user.id')"
-              size="large"
+            v-model:value="formState.id"
+            :placeholder="$t('label.user.id')"
+            size="large"
           >
             <template #prefix>
               <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item name="password">
+        <a-form-item has-feedback name="password">
           <a-input-password
-              v-model:value="formState.password"
-              type="password"
-              :placeholder="$t('label.password')"
-              size="large"
+            v-model:value="formState.password"
+            type="password"
+            :placeholder="$t('label.password')"
+            size="large"
           >
             <template #prefix>
               <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -39,18 +40,18 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" @click="onSubmit" block class="login-button">
+          <a-button type="primary" block class="login-button" html-type="submit">
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <a-popover placement="bottom">
+        <!-- <a-popover placement="bottom">
           <template #content>
-            <a-button type="text" @click="$i18n.locale = 'ko'">
+            <a-button type="text" @click="setLocale('ko')">
               한국어
             </a-button>
             <br />
-            <a-button type="text" @click="$i18n.locale = 'en'">
+            <a-button type="text" @click="setLocale('en')">
               English
             </a-button>
           </template>
@@ -64,7 +65,26 @@
               />
             </template>
           </a-button>
-        </a-popover>
+        </a-popover> -->
+        <a-dropdown>
+          <a-button type="text" shape="circle" class="header-notice-button">
+            <a class="ant-dropdown-link" @click.prevent>
+              <font-awesome-icon
+                :icon="['fas', 'language']"
+                size="2x"
+                style="color: #666"
+                class="login-icon"
+              />
+              <!-- <GlobalOutlined /> -->
+            </a>
+          </a-button>
+          <template #overlay>
+            <a-menu :selected-keys="[language]" @click="setLocaleClick">
+              <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+              <a-menu-item key="en" value="enUS"> English </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
         <!--   언어변환 버튼 끝     -->
       </a-form>
     </div>
@@ -74,86 +94,108 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosLogin } from "../../api/index";
-import store from "../../store/index"
-import router from "../../router";
+import { worksApi } from "@/api/index";
+import store from "@/store/index";
+import router from "@/router";
 
 export default defineComponent({
   name: "Login",
   setup() {
     const formRef = ref();
     const formState = reactive({
-      id: "administrator",
-      password: "Ablecloud1!",
-      // id: "",
-      // password: "",
+      id: ref(""),
+      password: ref(""),
     });
-    const rulesIdMeassage = ref();
-    const rulesPasswordMeassage = ref();
     const rules = {
       id: {
         required: true,
-        message: "message.login.failure",
+        trigger: "change",
       },
       password: {
         required: true,
-        message: "Please input name",
+        trigger: "change",
       },
     };
-
     return {
       formRef,
       formState,
       rules,
-      rulesIdMeassage,
-      rulesPasswordMeassage
     };
   },
   data() {
-    let rulesIdMeassage = this.$t(`message.please.enter.your.id`)
-    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
-    return {
-      rulesIdMeassage,
-      rulesPasswordMeassage,
-    };
+    return {};
   },
-  computed: {
-
+  computed: {},
+  created() {
+    this.rules.id.message = this.$t("message.please.enter.your.id");
+    this.rules.password.message = this.$t("message.please.enter.your.password");
+    this.onClear();
   },
   methods: {
+    setLocaleClick(e) {
+      let localeValue = e.key;
+      if (!localeValue) {
+        localeValue = "ko";
+      }
+      this.setLocale(localeValue);
+    },
+    setLocale(localeValue) {
+      this.$locale = localeValue;
+      this.$i18n.locale = localeValue;
+      this.language = localeValue;
+      sessionStorage.setItem("locale", localeValue);
+      //this.loadLanguageAsync(localeValue);
+    },
+    onClear() {
+      sessionStorage.clear();
+    },
     onSubmit() {
-      this.rules.id.message = this.rulesIdMeassage;
-      this.rules.password.message = this.rulesPasswordMeassage;
       let params = new URLSearchParams();
-      let res
       this.formRef
-          .validate()
-          .then(async () => {
-            message.loading(this.$t("message.logging"), 0);
-            params.append("id", this.formState.id);
-            params.append("password", this.formState.password);
-            try {
-              res = await axiosLogin(params)
-              // console.log(res);
-              if (res.status === 200) {
+        .validate()
+        .then(() => {
+          message.loading(this.$t("message.logging"), 10);
+          params.append("id", this.formState.id);
+          params.append("password", this.formState.password);
+          // try {
+          //  res = await axiosLogin(params)
+          worksApi
+            .post("/api/login", params)
+            .then((response) => {
+              //console.log(response);
+              if (response.status === 200) {
+                if (response.data.result.isAdmin == "false") {
+                  message.error(this.$t("message.login.wrong"));
+                  router.push({ name: "Login" });
+                } else {
+                  store.dispatch("loginCommit", response.data);
+                  sessionStorage.setItem("token", response.data.result.token);
+                  sessionStorage.setItem(
+                    "username",
+                    response.data.result.username
+                  );
+                  router.push({ name: "Dashboard" });
+                  message.destroy();
+                  message.success(this.$t("message.login.completed"));
+                }
+              } else {
                 message.destroy();
-                message.success(this.$t("message.login.completed"), 2);
-                await store.dispatch("loginCommit", res.data)
-                await router.push({name: "home"})
-                // console.log("res.data.result");
-                // console.log(res.data);
-                // console.log(store.state.user.accessToken);
+                message.error(this.$t("message.login.wrong"));
               }
-            }catch (error){
-              message.destroy();
-              //TODO i18n 적용
-              console.log(error)
-              message.error("로그인에 실패했습니다. 관리자에게 문의해주세요")
-            }
-          })
-          .catch((error) => {
-            console.log("error", error);
-          });
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          // }catch (error){
+          //   message.destroy();
+          //   //TODO i18n 적용
+          //   console.log(error)
+          //   message.error(this.$t("message.login.wrong"))
+          // }
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     },
   },
 });

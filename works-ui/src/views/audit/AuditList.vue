@@ -4,7 +4,7 @@
     class="ant-table-striped"
     :columns="columns"
     :data-source="data"
-    :rowClassName="
+    :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="bordered ? bordered : false"
@@ -40,20 +40,6 @@
         :
       </a-Popover>
     </template>
-
-    <template #tags="{ text: tags }">
-      <span>
-        <a-tag
-          v-for="tag in tags"
-          :key="tag"
-          :color="
-            tag === 'loser' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
-          "
-        >
-          {{ tag.toUpperCase() }}
-        </a-tag>
-      </span>
-    </template>
   </a-table>
 </template>
 
@@ -77,18 +63,30 @@ const rowSelection = {
   },
 };
 export default defineComponent({
+  components: {
+    Actions,
+  },
   props: {
-    data: Object,
-    columns: Object,
-    bordered: Boolean,
+    data: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    columns: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    bordered: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   setup() {
     return {
       rowSelection,
     };
-  },
-  components: {
-    Actions,
   },
 });
 </script>

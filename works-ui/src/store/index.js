@@ -2,7 +2,16 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
-    user: [{ isLogin: false, isAdmin: false, userID: null, accessToken: null }],
+    user: {
+      isLogin: false,
+      isAdmin: false,
+      userID: null,
+      token: null,
+    },
+    workspace: {
+      status: "",
+      name: "",
+    },
   },
   getters: {},
   mutations: {
@@ -10,9 +19,7 @@ export default createStore({
       state.user.isLogin = true;
       state.user.isAdmin = payload.result.isAdmin;
       state.user.userID = payload.result.username;
-      state.user.accessToken = payload.accessToken;
-      // console.log("store index loginSuccess");
-      // console.log(state);
+      state.user.token = payload.result.token;
     },
     logoutSuccess(state) {
       state.user.isLogin = false;
@@ -22,12 +29,12 @@ export default createStore({
   actions: {
     loginCommit({ commit }, payload) {
       // console.log("store index loginCommit");
-      // console.log(payload);
+      //console.log(payload);
       commit("loginSuccess", payload);
-      // localStorage.setItem("token", payload.accessToken);
     },
     logoutCommit({ commit }) {
       commit("logoutSuccess");
+      sessionStorage.clear();
     },
   },
   modules: {},
