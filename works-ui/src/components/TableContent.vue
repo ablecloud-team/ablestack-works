@@ -4,7 +4,7 @@
     type="dashed"
     block
     style="margin-bottom: 14px"
-    :disabled="buttonDisable"
+    :disabled="state.buttonDisable"
     @click="changeModal(state.callTapName, true)"
   >
     <PlusOutlined />
@@ -24,7 +24,7 @@
       <span
         v-if="actionFrom !== undefined && actionFrom === 'VirtualMachineList'"
       >
-        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
+        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid + '/' + record.name}">{{
           record.name
         }}</router-link>
       </span>
@@ -206,6 +206,7 @@ export default defineComponent({
       callTapName: ref(props.tapName),
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
+      buttonDisable: ref(true),
       modalConfirm: ref(""),
       modalTitle: ref(""),
       confirmModalView: ref(false),
@@ -236,8 +237,6 @@ export default defineComponent({
       confirmModalView: ref(false),
       deleteUser: ref(""),
       timer: ref(null),
-      buttonDisable: ref(false),
-      workspaceName: ref(""),
     };
   },
   created() {
@@ -270,12 +269,9 @@ export default defineComponent({
           .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
           .then((response) => {
             if (response.status == 200) {
-              this.workspaceName = response.data.result.workspaceInfo.name;
               if (
-                response.data.result.workspaceInfo.template_ok_check !==
-                "AgentOK"
-              ) {
-                this.buttonDisable = true; //워크스페이스 Agent상태가 OK일때 데스크톱가상머신추가 버튼 활성화
+                response.data.result.workspaceInfo.template_ok_check === "AgentOK" ) {
+                this.state.buttonDisable = ref(false); //워크스페이스 Agent상태가 OK일때 데스크톱가상머신추가 활성화
               }
               if (this.state.callTapName === "desktop") {
                 this.fetchDesktop();
@@ -409,7 +405,7 @@ export default defineComponent({
 
       //해당 워크스페이스에 추가 된 사용자 목록 조회
       worksApi
-        .get("/api/v1/group/" + this.workspaceName)
+        .get("/api/v1/group/" + this.$route.params.workspaceName)
         .then((response) => {
           if (response.status == 200) {
             //console.log(response.data.result.member);
@@ -613,7 +609,7 @@ export default defineComponent({
       //console.log(this.selectedUser);
       if (!this.selectedUser) return false;
       worksApi
-        .put("/api/v1/group/" + this.workspaceName + "/" + this.selectedUser)
+        .put("/api/v1/group/" + this.$route.params.workspaceName + "/" + this.selectedUser)
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.add"), 5);
@@ -632,7 +628,7 @@ export default defineComponent({
     },
     onUserDelete(val) {
       worksApi
-        .delete("/api/v1/group/" + this.workspaceName + "/" + val)
+        .delete("/api/v1/group/" + this.$route.params.workspaceName + "/" + val)
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.delete"), 1);
