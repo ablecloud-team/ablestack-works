@@ -63,6 +63,12 @@ import {
   UsergroupAddOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  LoginOutlined,
+  WindowsFilled,
+  StarFilled, 
+  StarTwoTone,
+  CloudDownloadOutlined,
+  CodeFilled
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -110,5 +116,11 @@ app.component("Html5Outlined", Html5Outlined);
 app.component("UsergroupAddOutlined", UsergroupAddOutlined);
 app.component("ArrowUpOutlined", ArrowUpOutlined);
 app.component("ArrowDownOutlined", ArrowDownOutlined);
+app.component("LoginOutlined", LoginOutlined);
+app.component("WindowsFilled", WindowsFilled);
+app.component("StarFilled", StarFilled);
+app.component("StarTwoTone", StarTwoTone);
+app.component("CloudDownloadOutlined", CloudDownloadOutlined);
+app.component("CodeFilled", CodeFilled);
 
 app.use(i18n).use(store).use(router).use(Antd).mount("#app");
