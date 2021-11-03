@@ -52,8 +52,8 @@ func main() {
 	router := gin.Default()
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
-	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
-	//router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
+	//router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
+	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
 	api := router.Group("/api")
 	{
 		api.POST("/login", getLogin)
@@ -105,7 +105,7 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	go asyncJobMonitoring()
-	go updateInstanceChecked0()
+	go updateInstanceChecked()
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8080")

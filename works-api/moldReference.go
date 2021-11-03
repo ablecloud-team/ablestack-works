@@ -182,7 +182,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		"echo Add-Computer >> \"c:\\agent\\installed.txt\"\n" +
 		//"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
 		"echo Add-Computer end>> \"c:\\agent\\installed.txt\"\n" +
-		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'\n" +
+		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\",\"HostName\": \"" + VmName + "\",\"Domain\": \"" + MyDomain + "\"}'\n" +
 		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
 		"echo $conf\n" +
 		"echo $conf >> \"c:\\agent\\installed.txt\"\n" +
@@ -197,6 +197,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		{"serviceofferingid": workspaceInfo.ComputeOfferingUuid},
 		{"zoneid": selectZoneId()},
 		{"userdata": baseEncoding(payload)},
+		{"name": displayName},
 	}
 
 	log.WithFields(logrus.Fields{
