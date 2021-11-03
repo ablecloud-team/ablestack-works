@@ -179,6 +179,7 @@ func putWorkspaces(c *gin.Context) {
 				if resultInsertInstance["status"] == http.StatusOK {
 					resultCode = http.StatusOK
 					result["resultInsertDeploy"] = resultInsertInstance
+					go handshakeVdi(listVirtualMachinesMetrics, instance)
 				}
 			}
 		}
