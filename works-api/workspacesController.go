@@ -140,6 +140,7 @@ func putWorkspaces(c *gin.Context) {
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
 	resultInsertGroup, err := insertGroup(workspace.Name)
+	insertPolicyRemotefx(workspace.Name)
 	if err != nil {
 		log.Errorf("워크스페이스 그룹 생성 DC API 통신중 에러가 발생했습니다.[%v]", err)
 	}

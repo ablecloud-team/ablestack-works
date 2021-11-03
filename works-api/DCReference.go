@@ -120,6 +120,20 @@ func insertGroup(groupName string) (*http.Response, error) {
 	return resp, err
 }
 
+func insertPolicyRemotefx(groupName string) (*http.Request, error) {
+	var DCInfo = os.Getenv("DCUrl")
+	params := url.Values{
+		"groupname": {groupName},
+	}
+	log.Infof("paramsInfo = [%v]", params)
+
+	resp, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/policy/remotefx/%v", DCInfo, groupName), nil)
+
+	log.Infof("%v %v", resp, err)
+
+	return resp, err
+}
+
 func selectGroupList() (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 
