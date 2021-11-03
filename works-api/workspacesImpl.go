@@ -30,20 +30,21 @@ type Workspace struct {
 }
 
 type Instance struct {
-	Id             int     `json:"id"`
-	Name           string  `json:"name"`
-	Uuid           string  `json:"uuid"`
-	WorkspaceUuid  string  `json:"workspace_uuid"`
-	WorkspaceName  string  `json:"workspace_name"`
-	MoldUuid       string  `json:"mold_uuid"`
-	Status         string  `json:"status"`
-	OwnerAccountId *string `json:"owner_account_id,omitempty"`
-	Checked        bool    `json:"checked"`
-	Connected      int     `json:"connected"`
-	CreateDate     string  `json:"create_date"`
-	CheckedDate    *string `json:"checked_date"`
-	Removed        string  `json:"removed"`
-	MoldStatus     string  `json:"mold_status"`
+	Id              int     `json:"id"`
+	Name            string  `json:"name"`
+	Uuid            string  `json:"uuid"`
+	WorkspaceUuid   string  `json:"workspace_uuid"`
+	WorkspaceName   string  `json:"workspace_name"`
+	MoldUuid        string  `json:"mold_uuid"`
+	Status          string  `json:"status"`
+	HandshakeStatus string  `json:"handshake_status"`
+	OwnerAccountId  *string `json:"owner_account_id,omitempty"`
+	Checked         bool    `json:"checked"`
+	Connected       int     `json:"connected"`
+	CreateDate      string  `json:"create_date"`
+	CheckedDate     *string `json:"checked_date"`
+	Removed         string  `json:"removed"`
+	MoldStatus      string  `json:"mold_status"`
 }
 
 func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
@@ -216,9 +217,9 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 		"workspaceImpl": "selectInstanceList",
 	}).Info("selectInstanceList DB connect success")
 	queryString := "SELECT" +
-		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid, " +
-		"IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date, " +
-		"vi.checked_date, vi.workspace_name" +
+		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid," +
+		" IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date," +
+		" vi.checked_date, vi.workspace_name, vi.handshake_status" +
 		" FROM vm_instances AS vi" +
 		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
 		" WHERE vi.removed IS NULL"
@@ -247,7 +248,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 		err = rows.Scan(
 			&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
 			&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate,
-			&instance.CheckedDate, &instance.WorkspaceName)
+			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"workspaceImpl": "selectInstanceList",
@@ -546,40 +547,31 @@ func updateInstanceUser(instanceUuid string, userName string) map[string]interfa
 	return resultReturn
 }
 
-func updateInstanceChecked0() {
+func updateInstanceChecked() {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
-		log.Error("DB connect error")
-		log.Error(err)
-		resultReturn["message"] = MsgDBConnectError
-		resultReturn["status"] = BaseErrorCode
+		log.Errorf("DB connect error err [%v]", err)
 	}
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "updateInstanceChecked0",
-	}).Infof("updateInstanceChecked0 exec")
 	defer db.Close()
 	queryString := "UPDATE vm_instances" +
 		" SET checked = 0," +
 		" status = 'Not Ready'" +
 		" WHERE uuid IN (" +
-		"SELECT vmUuid.uuid FROM (" +
-		"SELECT uuid, checked_date, connected, removed FROM vm_instances" +
+		" SELECT vmUuid.uuid FROM (" +
+		" SELECT uuid, checked_date, connected, removed FROM vm_instances" +
 		" WHERE removed IS NULL" +
 		" AND checked = 1" +
 		" AND checked_date < DATE_ADD(NOW(), INTERVAL -5 MINUTE)" +
-		") vmUuid)"
+		" ) vmUuid)"
 
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "updateInstanceChecked0",
-	}).Debugf("updateInstanceChecked0 query [%v]", queryString)
 	for {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "updateInstanceChecked exec",
+		}).Debugf("updateInstanceChecked query [%v]", queryString)
 		result, err := db.Exec(queryString)
 		if err != nil {
-			log.Error(MsgDBConnectError)
-			log.Error(err)
-			resultReturn["message"] = MsgDBConnectError
-			resultReturn["status"] = SQLQueryError
+			log.Errorf("updateInstanceChecked query failed err [%v]", err)
 		}
 		n1, _ := result.RowsAffected()
 		if n1 == 1 {
@@ -587,6 +579,30 @@ func updateInstanceChecked0() {
 		}
 
 		time.Sleep(60 * time.Second)
+	}
+}
+
+func updateInstanceHandshakeStatus(handshakeStatus string, instanceUuid string) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Errorf("DB connect error err [%v]", err)
+	}
+	defer db.Close()
+	queryString := "UPDATE vm_instances" +
+		" SET handshake_status = '" + handshakeStatus + "'" +
+		" WHERE uuid = " + instanceUuid
+
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updateInstanceHandshakeStatus exec",
+	}).Debugf("updateInstanceHandshakeStatus query [%v]", queryString)
+	result, err := db.Exec(queryString)
+	if err != nil {
+		log.Errorf("updateInstanceHandshakeStatus query failed err [%v]", err)
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
 	}
 }
 
