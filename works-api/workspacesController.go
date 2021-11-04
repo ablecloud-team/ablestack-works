@@ -140,7 +140,10 @@ func putWorkspaces(c *gin.Context) {
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
 	resultInsertGroup, err := insertGroup(workspace.Name)
-	insertPolicyRemotefx(workspace.Name)
+	if resultInsertGroup.Status == Created201 {
+		insertPolicyRemotefx(workspace.Name)
+	}
+
 	if err != nil {
 		log.Errorf("워크스페이스 그룹 생성 DC API 통신중 에러가 발생했습니다.[%v]", err)
 	}
@@ -175,11 +178,12 @@ func putWorkspaces(c *gin.Context) {
 				instance.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
 				instance.WorkspaceUuid = workspaceInfo.Uuid
 				instance.WorkspaceName = workspaceInfo.Name
+				instance.Ipaddress = listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
 				resultInsertInstance := insertInstance(instance)
 				if resultInsertInstance["status"] == http.StatusOK {
 					resultCode = http.StatusOK
 					result["resultInsertDeploy"] = resultInsertInstance
-					go handshakeVdi(listVirtualMachinesMetrics, instance)
+					go handshakeVdi(instance, WorkspaceString)
 				}
 			}
 		}
@@ -462,6 +466,28 @@ func patchInstances(c *gin.Context) {
 	}
 
 	c.JSON(returnCode, gin.H{
+		"result": result,
+	})
+}
+
+// patchInstances godoc
+// @Summary instance 의 상태 변경하는 API
+// @Description instance 의 상태를 변경하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다."
+// @Param instanceUuid path string true "Instance UUID"
+// @Router /api/v1/instance/:action/:instanceUuid [PATCH]
+// @Success 200 {object} map[string]interface{}
+func patchInstancesHandshake(c *gin.Context) {
+	result := map[string]interface{}{}
+	instanceUuid := c.Param("instanceUuid")
+	instanceType := c.Param("instanceType")
+	log.Debugf("instanceUuid [%v]", instanceUuid)
+	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
+	instanceInfo := instanceList[0]
+	handshakeVdi(instanceInfo, instanceType)
+	c.JSON(http.StatusOK, gin.H{
 		"result": result,
 	})
 }

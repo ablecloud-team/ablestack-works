@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"os"
@@ -120,17 +121,23 @@ func insertGroup(groupName string) (*http.Response, error) {
 	return resp, err
 }
 
-func insertPolicyRemotefx(groupName string) (*http.Request, error) {
+func insertPolicyRemotefx(groupName string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 20 * time.Second,
+	}
 	params := url.Values{
 		"groupname": {groupName},
 	}
 	log.Infof("paramsInfo = [%v]", params)
 
-	resp, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/policy/remotefx/%v", DCInfo, groupName), nil)
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/policy/remotefx/%v", DCInfo, groupName), nil)
 
-	log.Infof("%v %v", resp, err)
-
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	log.WithFields(logrus.Fields{
+		"dcDAO": "insertPolicyRemotefx",
+	}).Infof("workspace group add remotrfx status. resp [%v], err [%v]", resp, err)
 	return resp, err
 }
 

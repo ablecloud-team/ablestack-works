@@ -39,6 +39,7 @@ type Instance struct {
 	Status          string  `json:"status"`
 	HandshakeStatus string  `json:"handshake_status"`
 	OwnerAccountId  *string `json:"owner_account_id,omitempty"`
+	Ipaddress       string  `json:"ipaddress"`
 	Checked         bool    `json:"checked"`
 	Connected       int     `json:"connected"`
 	CreateDate      string  `json:"create_date"`
@@ -219,7 +220,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 	queryString := "SELECT" +
 		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid," +
 		" IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date," +
-		" vi.checked_date, vi.workspace_name, vi.handshake_status" +
+		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress" +
 		" FROM vm_instances AS vi" +
 		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
 		" WHERE vi.removed IS NULL"
@@ -248,7 +249,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 		err = rows.Scan(
 			&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
 			&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate,
-			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus)
+			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"workspaceImpl": "selectInstanceList",
@@ -306,8 +307,8 @@ func insertInstance(instance Instance) map[string]interface{} {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO vm_instances(name, uuid, mold_uuid, workspace_uuid, workspace_name, create_date) VALUES (?, ?, ?, ?, ?, NOW())",
-		instance.Name, instance.Uuid, instance.MoldUuid, instance.WorkspaceUuid, instance.WorkspaceName)
+	result, err := db.Exec("INSERT INTO vm_instances(name, uuid, mold_uuid, workspace_uuid, workspace_name, create_date, ipaddress) VALUES (?, ?, ?, ?, ?, NOW(), ?)",
+		instance.Name, instance.Uuid, instance.MoldUuid, instance.WorkspaceUuid, instance.WorkspaceName, instance.Ipaddress)
 	if err != nil {
 		log.Error("가상머신 DB Insert 중 오류가 발생하였습니다.")
 		log.Error(err)
@@ -591,7 +592,7 @@ func updateInstanceHandshakeStatus(handshakeStatus string, instanceUuid string) 
 	defer db.Close()
 	queryString := "UPDATE vm_instances" +
 		" SET handshake_status = '" + handshakeStatus + "'" +
-		" WHERE uuid = " + instanceUuid
+		" WHERE uuid = '" + instanceUuid + "'"
 
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "updateInstanceHandshakeStatus exec",

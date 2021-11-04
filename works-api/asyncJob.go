@@ -116,6 +116,7 @@ func asyncJobExec() {
 				instance.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
 				instance.WorkspaceUuid = workspaceInfo.Uuid
 				instance.WorkspaceName = workspaceInfo.Name
+				instance.Ipaddress = listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
 				resultInsertInstance := insertInstance(instance)
 				params := []MoldParams{
 					{"resourceids": instance.MoldUuid},
@@ -132,7 +133,7 @@ func asyncJobExec() {
 
 				log.Info("The virtual machine has been successfully created.")
 				log.Info(resultInsertInstance)
-				go handshakeVdi(listVirtualMachinesMetrics, instance)
+				go handshakeVdi(instance, InstanceString)
 			}
 			updateWorkspaceQuantity(workspaceInfo.Uuid)
 		}
