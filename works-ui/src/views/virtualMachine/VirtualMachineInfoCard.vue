@@ -15,23 +15,26 @@
     <div id="Status" class="CardItem">
       <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
       <div class="Item">
-        <a-badge
-          class="head-example"
-          :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
-          :text="
-            vmDbDataInfo.checked === true
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
-          "
-        />
+        <a-tooltip placement="bottom">
+          <template #title>{{ vmDbDataInfo.handshake_status }}</template>
+            <a-badge
+              class="head-example"
+              :color="'red'"
+              :text="
+                (vmDbDataInfo.mold_status == 'Running' && vmDbDataInfo.handshake_status === 'Ready') 
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
+              "
+            />
+        </a-tooltip>
       </div>
     </div>
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        <a-button shape="circle" type="dashed" >
+        <!-- <a-button shape="circle" type="dashed" >
           <BarcodeOutlined />
-        </a-button>
+        </a-button> -->
         {{ vmDbDataInfo.uuid }}
       </div>
     </div>

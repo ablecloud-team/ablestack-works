@@ -75,14 +75,18 @@
       />
     </template>
     <template #vmReadyStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="'red'"
-        :text="
-          record.handshake_status
-      
-        "
-      />
+      <a-tooltip placement="bottom">
+        <template #title>{{ record.handshake_status }}</template>
+          <a-badge
+            class="head-example"
+            :color="'red'"
+            :text="
+              (record.mold_status == 'Running' && record.handshake_status === 'Ready') 
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
+            "
+          />
+      </a-tooltip>
     </template>
     <template #userRender="{ record }">
       <!-- {{
