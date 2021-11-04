@@ -70,8 +70,10 @@ export default defineComponent({
 
 .admin-layout-content {
   background: #f0f2f5;
-  min-height: 700px;
-  height: 100%;
+}
+
+.ant-layout-content {
+  min-height: fit-content !important;
 }
 
 .admin-layout-footer {

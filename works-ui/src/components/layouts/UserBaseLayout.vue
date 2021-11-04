@@ -58,24 +58,4 @@ export default defineComponent({
 </script>
 
 <style>
-.admin-sider-layout {
-  min-width: 10px !important;
-  background: white;
-}
-
-.admin-layout-header {
-  background: white;
-  padding: 0;
-}
-
-.admin-layout-content {
-  background: #f0f2f5;
-  min-height: 700px;
-  height: 100%;
-}
-
-.admin-layout-footer {
-  background: #f0f2f5;
-  text-align: center;
-}
 </style>
