@@ -77,11 +77,10 @@
     <template #vmReadyStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.mold_status == 'Running' && record.checked === true ? 'green' : 'red'"
+        :color="'red'"
         :text="
-          record.mold_status == 'Running' && record.checked === true
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
+          record.handshake_status
+      
         "
       />
     </template>
@@ -153,7 +152,7 @@ export default defineComponent({
           title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "20%",
+          width: "22%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -198,7 +197,7 @@ export default defineComponent({
           title: this.$t("label.users"),
           dataIndex: "owner_account_id",
           key: "owner_account_id",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.owner_account_id < b.owner_account_id
               ? -1
@@ -212,7 +211,7 @@ export default defineComponent({
           title: this.$t("label.vm.state"),
           dataIndex: "status",
           key: "status",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -222,17 +221,26 @@ export default defineComponent({
           title: this.$t("label.vm.ready.state"),
           dataIndex: "status",
           key: "status",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "vmReadyStateRender" },
         },
         {
+          title: this.$t("label.vm.network.ip"),
+          dataIndex: "ipaddress",
+          key: "ipaddress",
+          width: "11%",
+          sorter: (a, b) =>
+            a.ipaddress < b.ipaddress ? -1 : a.ipaddress > b.ipaddress ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
           title: this.$t("label.vm.session.count"),
           dataIndex: "connected",
           key: "connected",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
