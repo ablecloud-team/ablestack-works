@@ -107,12 +107,12 @@
               name="password"
               :label="$t('label.password')"
               :label-col="12"
-              autocomplete="off"
             >
               <a-input
                 v-model:value="formState.password"
                 type="password"
                 :placeholder="$t('tooltip.user.password')"
+                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
@@ -122,12 +122,12 @@
               name="passwordCheck"
               :label="$t('label.passwordCheck')"
               :label-col="12"
-              autocomplete="off"
             >
               <a-input
                 v-model:value="formState.passwordCheck"
                 type="password"
                 :placeholder="$t('tooltip.user.passwordCheck')"
+                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
