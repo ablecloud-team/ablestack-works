@@ -73,7 +73,7 @@
     "tooltip.vmDestroy":"Destroy the desktop virtual machine",
     "tooltip.workspaceDestroy":"Destroy the workspace",
 
-    "label.reflesh": "Reflesh",
+    "label.reflesh": "Refresh",
     "label.dashboard": "Dashboard",
     "label.workspace": "Workspaces",
     "label.vm": "Virtual Machines",
@@ -177,6 +177,9 @@
     "label.vm.status.notready": "Unable to Connect",
     "label.enable": "Enable",
     "label.disable": "Disable",
+    "label.configuration": "Setting",
+    "label.value": "Value",
+    "label.action": "Action",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",

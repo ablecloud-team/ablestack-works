@@ -73,7 +73,7 @@
     "tooltip.vmDestroy":"데스크톱 가상머신 파기",
     "tooltip.workspaceDestroy":"워크스페이스 파기",
 
-    "label.reflesh": "새로 고침",
+    "label.reflesh": "업데이트",
     "label.dashboard": "대시보드",
     "label.workspace": "워크스페이스",
     "label.vm": "가상머신",
@@ -177,6 +177,9 @@
     "label.vm.status.notready": "접속 불가",
     "label.enable": "사용가능",
     "label.disable": "사용불가",
+    "label.configuration": "설정",
+    "label.value": "값",
+    "label.action": "작업",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
