@@ -68,7 +68,10 @@ import {
   StarFilled, 
   StarTwoTone,
   CloudDownloadOutlined,
-  CodeFilled
+  CodeFilled,
+  SettingOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -122,5 +125,8 @@ app.component("StarFilled", StarFilled);
 app.component("StarTwoTone", StarTwoTone);
 app.component("CloudDownloadOutlined", CloudDownloadOutlined);
 app.component("CodeFilled", CodeFilled);
+app.component("SettingOutlined", SettingOutlined);
+app.component("CheckCircleOutlined", CheckCircleOutlined);
+app.component("CloseCircleOutlined", CloseCircleOutlined);
 
 app.use(i18n).use(store).use(router).use(Antd).mount("#app");
