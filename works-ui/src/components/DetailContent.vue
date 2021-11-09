@@ -51,7 +51,7 @@
         {{ vmMoldDataInfo.pooltype }}
       </a-list-item>
     </a-list>
-    <a-list v-if="actionFrom === 'UserDetail'" item-layout="horizontal">
+    <a-list v-if="actionFrom === 'UserDetail' || actionFrom === 'AccountDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
@@ -167,9 +167,13 @@ export default defineComponent({
         .catch(function (error) {
           console.log(error);
         });
-      }else if (this.state.actionFrom === "UserDetail") {
+      }else if (this.state.actionFrom === "UserDetail" || this.state.actionFrom === "AccountDetail") {
+
+        let apiUrl = this.state.actionFrom === "AccountDetail" ? "/api/v1/user/" + this.$route.params.userName : 
+                  this.state.actionFrom === "UserDetail" ? "/api/v1/user/" + sessionStorage.getItem("username") : "";
+
         worksApi
-          .get("/api/v1/user/" + this.$route.params.userName)
+          .get(apiUrl)
           .then((response) => {
             if (response.status == 200) {
               this.userDataInfo = response.data.result;

@@ -5,17 +5,20 @@ import Login from "../views/auth/Login.vue";
 import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
 import Dashboard from "../views/dashboard/Dashboard.vue";
-import Workspace from "../views/workSpace/WorkSpace.vue";
+import Workspace from "../views/workspace/WorkSpace.vue";
 import UserBaseLayout from "../components/layouts/UserBaseLayout.vue";
-import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
+import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
-import Favorite from "../views/favorite/Favorite.vue";
-import UserDesktop from "../views/desktop/UserDesktop.vue";
+import Favorite from "../views/userFavorite/Favorite.vue";
+import UserDesktop from "../views/userDesktop/UserDesktop.vue";
 import Account from "../views/account/Account.vue";
 import AccountDetail from "../views/account/AccountDetail.vue";
 import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
+import Configuration from "../views/configuration/Configuration.vue";
+import UserDetail from "../views/user/UserDetail.vue";
+
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
 // import Community from "../views/community/Community.vue";
@@ -32,6 +35,7 @@ const adminAuthCheck = (to, from, next) => {
   if (to.name.includes("GroupPolicy")) { menukey = "5"; }
   if (to.name.includes("Audit")) { menukey = "6"; }
   if (to.name.includes("Community")) { menukey = "7"; }
+  if (to.name.includes("Configuration")) { menukey = "8"; }
   sessionStorage.setItem("menukey", menukey);
 
   tokenCheck(to, from, next, true);
@@ -39,7 +43,7 @@ const adminAuthCheck = (to, from, next) => {
 
 const userAuthCheck = (to, from, next) => {
   //console.log("userAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
-  if (to.name.includes("Favorite")) { menukey = "1"; }
+  if (to.name.includes("UserFavorite")) { menukey = "1"; }
   if (to.name.includes("UserDesktop")) { menukey = "2"; }
   sessionStorage.setItem("menukey", menukey);
 
@@ -49,7 +53,7 @@ const userAuthCheck = (to, from, next) => {
 const tokenCheck = (to, from, next, isAdmin) => {
   const isToken = sessionStorage.getItem("token");
   if (isToken && isToken !== "") {
-    if ((to.name === "Favorite" || to.name === "Dashboard") && from.name === "Login") {
+    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
       goRoute(0, next);
     } else {
       worksApi
@@ -59,8 +63,8 @@ const tokenCheck = (to, from, next, isAdmin) => {
           if (response.status === 200) {
             if (
               /*response.data.result.isAdmin === isAdmin */
-              (isAdmin && response.data.result.name === "Administrator") ||
-              (!isAdmin && response.data.result.name !== "Administrator")
+              (isAdmin && response.data.result.name.toLowerCase() === "administrator") ||
+              (!isAdmin && response.data.result.name.toLowerCase() !== "administrator")
             ) {
               goRoute(0, next);
             } else {
@@ -208,6 +212,12 @@ const routes = [
       //   beforeEnter: adminAuthCheck,
       //   props: true,
       // },
+      {
+        path: "/configuration",
+        name: "Configuration",
+        component: Configuration,
+        beforeEnter: adminAuthCheck,
+      },
     ],
   },
   {
@@ -215,11 +225,11 @@ const routes = [
     name: "User",
     component: UserBaseLayout,
     meta: { icon: "home" },
-    redirect: "/favorite",
+    redirect: "/userFavorite",
     children: [
       {
-        path: "/favorite",
-        name: "Favorite",
+        path: "/userFavorite",
+        name: "UserFavorite",
         component: Favorite,
         beforeEnter: userAuthCheck,
       },
@@ -227,6 +237,12 @@ const routes = [
         path: "/userDesktop",
         name: "UserDesktop",
         component: UserDesktop,
+        beforeEnter: userAuthCheck,
+      },
+      {
+        path: "/userDetail",
+        name: "UserDetail",
+        component: UserDetail,
         beforeEnter: userAuthCheck,
       },
     ],

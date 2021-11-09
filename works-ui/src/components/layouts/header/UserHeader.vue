@@ -47,7 +47,7 @@
               <template #icon>
                 <UserOutlined />
               </template>
-              <router-link :to="{ path: '/accountDetail/' + username }" style="margin-left: 4px;">
+              <router-link :to="{ path: '/userDetail' }" style="margin-left: 4px;">
                 {{ $t("label.profile") }}
               </router-link>
             </a-menu-item>
@@ -173,20 +173,20 @@ export default defineComponent({
         await router.push({ name: "Login" });
       }
     },
-    setLanguage(lang, message) {
-      if (i18n) {
-        i18n.locale = lang;
-        if (message && Object.keys(message).length > 0) {
-          i18n.setLocaleMessage(lang, message);
-        }
-      }
-      if (!this.loadedLanguage.includes(lang)) {
-        this.loadedLanguage.push(lang);
-      }
-      if (message && Object.keys(message).length > 0) {
-        messages[lang] = message;
-      }
-    },
+    // setLanguage(lang, message) {
+    //   if (i18n) {
+    //     i18n.locale = lang;
+    //     if (message && Object.keys(message).length > 0) {
+    //       i18n.setLocaleMessage(lang, message);
+    //     }
+    //   }
+    //   if (!this.loadedLanguage.includes(lang)) {
+    //     this.loadedLanguage.push(lang);
+    //   }
+    //   if (message && Object.keys(message).length > 0) {
+    //     messages[lang] = message;
+    //   }
+    // },
   },
 });
 </script>
