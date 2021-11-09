@@ -14,7 +14,8 @@
               />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
+                style="margin-left: 20px;"
+                size="small"
                 @click="reflesh()"
               >
                 <template #icon>

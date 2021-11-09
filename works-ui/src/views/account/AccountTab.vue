@@ -4,7 +4,7 @@
       <a-tab-pane key="1" :tab="$t('label.detail')">
         <DetailContent
           ref="listRefleshCall1"
-          :action-from="'UserDetail'"
+          :action-from="'AccountDetail'"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.vm.list')">

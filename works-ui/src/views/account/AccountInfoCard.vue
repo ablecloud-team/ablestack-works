@@ -38,13 +38,7 @@ import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
-  props: {
-    userDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-  },
+  props: {},
   data() {
     return {
       spinning: ref(true),

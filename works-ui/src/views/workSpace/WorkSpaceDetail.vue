@@ -14,7 +14,8 @@
               />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
+                style="margin-left: 20px"
+                size="small"
                 @click="reflesh()"
               >
                 <template #icon>
@@ -46,15 +47,13 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workSpace/WorkSpaceBody";
+import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: { Apath, Actions, WorkSpaceBody },
   props: {},
-  setup(props) {
+  setup() {
     return {
       actionFrom: ref("WorkspaceDetail"),
     };

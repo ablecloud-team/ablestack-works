@@ -33,13 +33,7 @@ export default defineComponent({
     AccountInfoCard,
     AccountTab,
   },
-  props: {
-    userDataInfo: {
-      type: Object,
-      required: true,
-      default: null,
-    },
-  },
+  props: {},
   setup() {
     return {};
   },

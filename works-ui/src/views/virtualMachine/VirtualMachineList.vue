@@ -77,15 +77,16 @@
     <template #vmReadyStateRender="{ record }">
       <a-tooltip placement="bottom">
         <template #title>{{ record.handshake_status }}</template>
-          <a-badge
-            class="head-example"
-            :color="'red'"
-            :text="
-              (record.mold_status == 'Running' && record.handshake_status === 'Ready') 
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
-            "
-          />
+        <a-badge
+          class="head-example"
+          :color="(record.mold_status == 'Running' && record.handshake_status === 'Ready')
+            ? 'green' : 'red'"
+          :text="
+            (record.mold_status == 'Running' && record.handshake_status === 'Ready')
+            ? $t('label.vm.status.ready')
+            : $t('label.vm.status.notready')
+          "
+        />
       </a-tooltip>
     </template>
     <template #userRender="{ record }">
@@ -275,10 +276,10 @@ export default defineComponent({
     resetSelection() {
       this.setSelection([]);
     },
-    onSelectChange(selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys) {
       this.setSelection(selectedRowKeys);
     },
-    fetchData(val) {
+    fetchData() {
       this.loading = true;
       worksApi
         .get("/api/v1/instance/all")
