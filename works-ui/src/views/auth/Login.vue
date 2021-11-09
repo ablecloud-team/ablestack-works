@@ -179,7 +179,7 @@ export default defineComponent({
                   if (response.data.result.username === "Administrator") {
                     router.push({ name: "Dashboard" });
                   } else {
-                    router.push({ name: "Favorite" });
+                    router.push({ name: "UserFavorite" });
                   }
                   message.destroy();
                   message.success(this.$t("message.login.completed"));
@@ -193,8 +193,10 @@ export default defineComponent({
                 message.error(this.$t("message.login.wrong"));
               }
             })
-            .catch(function (error) {
-              console.log(error);
+            .catch(error => {
+                console.log(error)
+                message.destroy();
+                message.error(this.$t("message.login.wrong"));
             });
         })
         .catch((error) => {
