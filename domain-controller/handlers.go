@@ -1111,14 +1111,13 @@ func addComputerToGroupHandler(c *gin.Context) {
 
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
-	computercn, _:= getComputerCN(l, computername)
+	//computercn, _:= getComputerCN(l, computername)
+	computercn := computername
+	setLog(fmt.Sprintf("computername: %v, groupname: %v", computercn, groupname))
 	err = addComputerToGroup(l, computercn, groupname)
 	if err != nil {
-		//errorlines := strings.Split(err.Error(), "\r\n")
-		//for i, line := range errorlines {
-		//
-		//	log.Errorf("%v, %v", i, line)
-		//}
+		setLog(fmt.Sprintf("error!! computername: %v, groupname: %v [%v]", computercn, groupname, err))
+
 		c.JSON(http.StatusNotFound, errorModel{Msg: err.Error(), Target: "addComputerToGroup"})
 		return
 	}
@@ -1142,7 +1141,8 @@ func delComputerFromGroupHandler(c *gin.Context) {
 
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
-	computercn, _:= getComputerCN(l, computername)
+	//computercn, _:= getComputerCN(l, computername)
+	computercn:=computername
 	err = delComputerFromGroup(l, computercn, groupname)
 	if err != nil {
 		//errorlines := strings.Split(err.Error(), "\r\n")
@@ -1231,4 +1231,207 @@ func getComputerHandler(c *gin.Context) {
 		"userID": 1,
 		"username": user.Username,
 	})*/
+}
+
+
+func checkStatus(){
+
+	err2 := ""
+	shell, err := setupShell()
+	if err != nil{
+		fmt.Errorf("%v", err)
+	}
+
+	//rename
+	hostname, err := shell.Exec("hostname")
+	if err != nil{
+		fmt.Errorf("%v", err)
+	}
+	hostname = strings.TrimSpace(hostname)
+	log.Println(hostname)
+	log.Println(ADconfig.HostName)
+	if !strings.EqualFold(hostname,ADconfig.HostName) && ADconfig.HostName != ""{
+		cmd := fmt.Sprintf("Rename-Computer -NewName %v", ADconfig.HostName)
+		log.Errorf("cmd: %v", cmd)
+		out, err := shell.Exec(cmd)
+		log.Errorf("out: %v", out)
+		log.Errorf("err: %v", err)
+		ADconfig.Status = ADconfig.Status + " renamehost"
+		ADsave()
+		cmd = fmt.Sprintf("shutdown /r /t 10")
+		log.Errorf("cmd: %v", cmd)
+		out, err = shell.Exec(cmd)
+		log.Errorf("out: %v", out)
+		log.Errorf("err: %v", err)
+	}
+
+
+	//ad join
+	cmd := "get-computerinfo -property csdomainrole | Format-list"
+	output, err := shell.Exec(cmd)
+	outputs := strings.Split(strings.TrimSpace(output), ":")
+	log.Infof("DomainRole: %v", outputs)
+	if strings.TrimSpace(outputs[1]) == "StandaloneWorkstation"{
+		cmd := fmt.Sprintf("$username = \"administrator@%v\"; ", ADconfig.Domain) +
+			"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force; " +
+			"$credential = New-Object System.Management.Automation.PSCredential($username,$password); " +
+			fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential", ADconfig.Domain)
+		log.Debugln(cmd)
+		output, err := shell.Exec(cmd)
+		log.Debugf("output: %v", output)
+		log.Debugf("error: %v", err)
+		cmd = "shutdown /r /t 10"
+		log.Debugln(cmd)
+		ADconfig.Status = ADconfig.Status + " adjoin"
+		ADsave()
+		output, err = shell.Exec(cmd)
+	}
+
+
+	//service 권한 elevate
+	cmd = "c:\\Works-DC\\nssm.exe get Works-DC ObjectName"
+	output_, err := shell.Exec(cmd)
+	output = strings.TrimSpace(output_)
+	if strings.EqualFold(output, "localsystem"){
+		aduser := fmt.Sprintf("%v\\%v", strings.Split(ADconfig.ADdomain, ".")[0], ADconfig.ADusername)
+		service := fmt.Sprintf("c:\\Works-DC\\nssm.exe set Works-DC objectName %v %v", aduser, ADconfig.ADpassword)
+		stdout1, err1 := shell.Exec(service)
+		log.Infof("stdout: %v, \nstderr: %v\n", stdout1, err1)
+		//service = fmt.Sprintf("c:\\Works-DC\\nssm.exe restart Works-DC > c:\\Works-DC\\nssm.txt")
+		service = "shutdown /r /f /t 10"
+		ADconfig.Status = ADconfig.Status+" serviceupdated"
+		ADsave()
+		stdout2, err2 := shell.Exec(service)
+		log.Infof("stdout: %v, \nstderr: %v\n", stdout2, err2)
+	}
+
+
+	///gp import
+	stdout, err := shell.Exec("(get-gpo -all).displayname")
+	if err != nil {
+		log.Errorf("%v", err)
+	}
+	lines := strings.Split(stdout, "\r\n")
+	var policylist []policyModel
+	for _, line := range lines {
+		if line != "Default Domain Controllers Policy" && line != "Default Domain Policy" && line != "" {
+			log.Infof("policy: %v\n", line)
+			description, err := shell.Exec(fmt.Sprintf("(get-gpo %v).description", line))
+			if err != nil {
+				log.Errorf("%v:, %v", description, err)
+			}
+			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
+		}
+	}
+
+	if len(policylist)<1{
+		currentWorkingDirectory, err := os.Getwd()
+		policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
+		data, err := os.Open(policyfile)
+		if err != nil {
+			log.Fatalf("Can not find %v file, %v", policyfile, err)
+			os.Exit(1)
+		}
+
+		byteValue, err := ioutil.ReadAll(data)
+		if err != nil {
+			log.Debugf("%v", err)
+			os.Exit(1)
+		}
+		var policyList []map[string]string
+		err = json.Unmarshal(byteValue, &policyList)
+		for _, policyItem := range policyList {
+			shell, err := setupShell()
+			if err != nil {
+				log.Debugf("%v", err)
+				os.Exit(1)
+			}
+			policy := policyItem["name"]
+			description := policyItem["description"]
+
+			//cmd := fmt.Sprintf("c:\\Works-DC\\psexec.exe -accepteula -u %v -p %v powershell import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", aduser, ADconfig.ADpassword, policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH)
+			cmd := fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH)
+			log.Infof("%v", cmd)
+			stdout, err := shell.Exec(cmd)
+			log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
+			if err != nil {
+				log.Debugf("%v, %v", err2, err)
+				os.Exit(1)
+			}
+			stdout, err = shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
+			if err != nil {
+				log.Debugf("%v, %v", err2, err)
+				os.Exit(1)
+			}
+			stdout, err = shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
+			if err != nil {
+				log.Debugf("%v, %v", err2, err)
+				os.Exit(1)
+			}
+
+		}
+	}
+
+}
+
+
+func statusHandler(c *gin.Context) {
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	cmd:="get-computerinfo -property csdomain,csdnshostname,csdomainrole,csname,csworkgroup,csusername,logonserver"
+	output, err := shell.Exec(cmd)
+	outputs := strings.Split(output, "\n")
+	fmt.Println(outputs)
+	//"restart-computer -force"
+
+	c.JSON(http.StatusOK, map[string]string{
+		"ad":"notjoined",
+		"policy":"loaded",
+		"agent":"patched",
+		"output":output,
+	})
+	return /*gin.H{
+		"userID": 1,
+		"username": user.Username,
+	})*/
+}
+
+
+func adjoinHandler(c *gin.Context) {
+	setLog()
+
+	domain := ADconfig.ADdomain
+	shell, err := setupShell()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	cmd := fmt.Sprintf("$username = \"$%v\\administrator\"; ", domain) +
+		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force; " +
+		"$credential = New-Object System.Management.Automation.PSCredential($username,$password); " +
+		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential", domain)
+	log.Debugln(cmd)
+	output, err := shell.Exec(cmd)
+	log.Debugf("output: %v", output)
+	log.Debugf("error: %v", err)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	cmd = "shutdown /r /t 10"
+	log.Debugln(cmd)
+	output, err = shell.Exec(cmd)
+	log.Debugf("output: %v", output)
+	log.Debugf("error: %v", err)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	ADconfig.Status = "Joining"
+	_=ADsave()
+	c.JSON(http.StatusOK, output)
+	return
 }

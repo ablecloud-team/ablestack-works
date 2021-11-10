@@ -104,6 +104,8 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
+
+	checkStatus()
 	//testLDAP()
 
 	//router.LoadHTMLGlob("templates/*")
@@ -194,6 +196,8 @@ func main() {
 			//그룹에 해제
 			v1.DELETE("/policy/:policyname/:groupname", detachPolicyHandler)
 
+
+			v1.GET("/status", statusHandler)
 			/* TODO:
 			사용자를 그룹에 추가(or그룹에 사용자를 추가)
 			https://mpain.tistory.com/tag/group%20policy

@@ -110,13 +110,13 @@ func main() {
 		out, err := shell.Exec(cmd)
 		log.Errorf("out: %v", out)
 		log.Errorf("err: %v", err)
-		cmd = fmt.Sprintf("shutdown /r /t 0")
+		cmd = fmt.Sprintf("shutdown /r /t 10")
 		log.Errorf("cmd: %v", cmd)
 		out, err = shell.Exec(cmd)
 		log.Errorf("out: %v", out)
 		log.Errorf("err: %v", err)
 	}
-
+	time.Sleep(10*time.Second)
 	interval := Agentconfig.Interval
 	c1 := make(chan string, 1)
 	loginchan := make(chan map[string]string, 1)
@@ -137,7 +137,7 @@ func main() {
 			})
 			v1.GET("/cmd/", exeShellHandler)
 			v1.GET("/app", appListHandler)
-			v1.PUT("/ad/:domain/:computer", adjoinHandler)
+			v1.PUT("/ad/:domain", adjoinHandler)
 			v1.PATCH("/", bootstrapHandler)
 			v1.GET("/ad", adStatusHandler)
 		}
@@ -518,17 +518,29 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 func adjoinHandler(c *gin.Context) {
 	setLog()
 	domain := c.Param("domain")
-	comname := c.Param("computer")
+	domain = Agentconfig.Domain
 	shell, err := setupShell()
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 		return
 	}
-	output, err := shell.Exec("$username = \"$testdomain\\administrator\" ;" +
-		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force ;" +
-		"$credential = New-Object System.Management.Automation.PSCredential($username,$password) ;" +
-		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential -Newname %v;", domain, comname) +
-		"shutdown /r /t 10")
+	cmd := fmt.Sprintf("$username = \"$%v\\administrator\"; ", domain) +
+		"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force; " +
+		"$credential = New-Object System.Management.Automation.PSCredential($username,$password); " +
+		fmt.Sprintf("Add-Computer -DomainName %v -Credential $credential", domain)
+	log.Debugln(cmd)
+	output, err := shell.Exec(cmd)
+	log.Debugf("output: %v", output)
+	log.Debugf("error: %v", err)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
+		return
+	}
+	cmd = "shutdown /r /t 10"
+	log.Debugln(cmd)
+	output, err = shell.Exec(cmd)
+	log.Debugf("output: %v", output)
+	log.Debugf("error: %v", err)
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 		return

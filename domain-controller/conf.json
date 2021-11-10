@@ -1,10 +1,10 @@
 {
   "ADusername": "Administrator",
   "ADpassword": "Ablecloud1!",
-  "ADdomain": "dc1.local",
-  "ADserver": "dc1.local",
+  "ADdomain": "ycyun.local",
+  "ADserver": "ycyun.local",
   "ADport": 636,
-  "ADbasedn": "DC=dc1,DC=local",
+  "ADbasedn": "DC=ycyun,DC=local",
   "Silent": false,
   "PolicyPATH": "./grouppolicy",
   "PolicyLIST": "policylist.json",

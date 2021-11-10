@@ -33,6 +33,9 @@ type ADConfig struct {
 	PolicyLIST string
 	UpdatePolicy bool
 	BootStraped bool
+	Status	string
+	HostName string
+	Domain string
 }
 
 var ADconfig = ADConfig{}
@@ -141,7 +144,10 @@ func ADinit() (err error) {
 	if err != nil {
 		return err
 	}
-
+	if ADconfig.HostName == ""{
+		ADconfig.Domain = strings.Replace(ADconfig.ADdomain,".local", "", 1)
+		ADconfig.HostName = fmt.Sprintf("%v-dc", ADconfig.Domain)
+	}
 	authconfig = &auth.Config{
 		Server:   ADconfig.ADserver,
 		Port:     ADconfig.ADport,
@@ -1007,9 +1013,10 @@ func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error){
 				aduser[userentry.Attributes[i].Name] = userentry.Attributes[i].Values[0]
 			}
 		}
-		ret, err := json.Marshal(aduser)
-		log.Infoln(string(ret))
-		return sr.Entries[0].GetAttributeValue("cn"), err
+		//ret, err := json.Marshal(aduser)
+		cn:=strings.Split(strings.Split(sr.Entries[0].DN, ",")[0], "")[1]
+		log.Infof("CN!!! %v", cn)
+		return cn, err
 	} else {
 		return "", errors.New(http.StatusText(http.StatusNotFound))
 	}
