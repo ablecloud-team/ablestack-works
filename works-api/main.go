@@ -80,9 +80,13 @@ func main() {
 			v1.GET("/instance/:instanceUuid", getInstances)
 			v1.GET("/instance/detail/:instanceUuid", getInstancesDetail)
 			v1.PUT("/instance", putInstances)
-			v1.POST("/instance", postInstances)
+			//v1.POST("/instance", postInstances) // VDI 에 유저 할당
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
-			v1.PATCH("/instance/handshake/:instanceUuid/:instanceType", patchInstancesHandshake)
+
+			v1.PUT("/connection/:instanceUuid/:username", putConnection)
+			v1.DELETE("/connection/:instanceUuid", deleteConnection)
+
+			v1.PATCH("/handshake/:instanceUuid/:instanceType", patchHandshake)
 
 			v1.GET("/logout", getLogout)
 
