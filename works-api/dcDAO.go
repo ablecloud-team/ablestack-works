@@ -23,9 +23,7 @@ func login(id string, password string) map[string]interface{} {
 		"username": {id},
 		"password": {password},
 	}
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
+	client := http.Client{}
 	var res map[string]interface{}
 	resp, err := client.PostForm(DCInfo+"/v1/login", params)
 	if err != nil {
@@ -112,9 +110,7 @@ func insertGroup(groupName string) (*http.Response, error) {
 		"groupname": {groupName},
 	}
 	log.Infof("paramsInfo = [%v]", params)
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
+	client := http.Client{}
 	resp, err := client.PostForm(DCInfo+"/v1/group", params)
 
 	log.Infof("%v %v", resp, err)
@@ -257,7 +253,7 @@ func insertUserAllocatedInstance1(username string, instanceUuid string) *http.Re
 	return resp
 }
 
-func insertUserAllocatedInstance(username string, connectName string, parameter string) *http.Response {
+func insertConnection(username string, connectName string, parameter string) *http.Response {
 	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
 		Timeout: 5 * time.Second,
@@ -267,12 +263,34 @@ func insertUserAllocatedInstance(username string, connectName string, parameter 
 		"username":  {username},
 		"parameter": {parameter},
 	}
-	resp, err := client.PostForm(DCInfo+"/v1/connection/"+connectName, params)
-	//req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/user/%v", DCInfo, username), params)
+	//resp, err := client.PostForm(DCInfo+"/v1/connection/"+connectName, params)
+	resp, err := client.PostForm(fmt.Sprintf("%v/v1/connection/%v", DCInfo, connectName), params)
 	if err != nil {
 		log.Errorf("유저 삭제중 에러가 발생했습니다. [%v]", err)
 	}
 
 	log.Infof(resp.Status)
+	return resp
+}
+
+func delConnection(connectName string) *http.Response {
+	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+
+	//params := url.Values{
+	//	"username":  {username},
+	//	"parameter": {parameter},
+	//}
+	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/connection/%v", DCInfo, connectName), nil)
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "delConnection",
+		}).Errorf("An error occurred while deleting the connection. resp [%v], err [%v]", resp, err)
+	}
 	return resp
 }

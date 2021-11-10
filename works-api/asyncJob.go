@@ -128,8 +128,8 @@ func asyncJobExec() {
 					{"tags[2].key": ClusterName},
 					{"tags[2].value": os.Getenv("ClutsterName")},
 				}
-				aaa := getCreateTags(params)
-				log.Info(aaa)
+				resultGetCreateTags := getCreateTags(params)
+				log.Infof("Create Tag Result [%v], params [%v]",resultGetCreateTags, params)
 
 				log.Info("The virtual machine has been successfully created.")
 				log.Info(resultInsertInstance)
