@@ -429,7 +429,6 @@ func putConnection(c *gin.Context) {
 	log.Debugf("[%v]", resultInstanceAllocatedUser.Status)
 	updateInstanceUser(instanceInfo.Uuid, resultUserInfo.UserName)
 
-
 	c.JSON(http.StatusOK, gin.H{
 		"result": resultReturn,
 	})
@@ -466,12 +465,11 @@ func deleteConnection(c *gin.Context) {
 	if resultDelConnection.Status == OK200 {
 		updateInstanceUser(instanceInfo.Uuid, "")
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"result": resultReturn,
 	})
 }
-
 
 // patchInstances godoc
 // @Summary instance 의 상태 변경하는 API
@@ -521,7 +519,7 @@ func patchHandshake(c *gin.Context) {
 	log.Debugf("instanceUuid [%v]", instanceUuid)
 	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
 	instanceInfo := instanceList[0]
-	handshakeVdi(instanceInfo, instanceType)
+	go handshakeVdi(instanceInfo, instanceType)
 	c.JSON(http.StatusOK, gin.H{
 		"result": result,
 	})

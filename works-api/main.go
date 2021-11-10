@@ -40,12 +40,13 @@ func main() {
 	var (
 		err error
 	)
-	DBSetting()        //DB 접속정보 셋팅
-	MoldSetting()      //Mold 정보 셋팅
-	DCSetting()        //DC 정보 셋팅
-	WorksSetting()     //Works-API 정보 셋팅
-	SambaSetting()     //SAMBA 정보 셋팅
-	GuacamoleSetting() //guacamole 정보 셋팅
+	DBSetting()          //DB 접속정보 셋팅
+	MoldSetting()        //Mold 정보 셋팅
+	DCSetting()          //DC 정보 셋팅
+	WorksSetting()       //Works-API 정보 셋팅
+	SambaSetting()       //SAMBA 정보 셋팅
+	GuacamoleSetting()   //guacamole 정보 셋팅
+	ClusterNameSetting() //clusterName 정보 셋팅
 	logSetting()
 	dcBootstrap()
 

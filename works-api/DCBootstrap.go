@@ -49,58 +49,23 @@ func dcBootstrap() {
 		r1, _ := http.NewRequest("GET", DCInfo+"/v1/policy", nil) // URL-encoded payload
 		resp1, err := client.Do(r1)
 		if err != nil {
-			log.Errorf("%v/v1/policy err [%v]",DCInfo, err)
+			log.Errorf("%v/v1/policy err [%v]", DCInfo, err)
 		} else {
 			respBody1, err1 := ioutil.ReadAll(resp1.Body)
 			if err1 != nil {
-				log.Errorf("[%v] [%v]",respBody1, err1)
-			}else if string(respBody1) == "[]" {
-				log.Errorf("%v/v1/policy err [%v]",DCInfo, err)
+				log.Errorf("[%v] [%v]", respBody1, err1)
+			} else if string(respBody1) == "[]" {
+				log.Infof("%v/v1/policy err [%v]", DCInfo, err)
 				r, _ := http.NewRequest("PATCH", DCInfo+"/v1/policy", nil) // URL-encoded payload
 
 				r.Header.Add("Content-Type", "application/json")
 				resp, err := client.Do(r)
-				log.Infof("%v, %v",resp, err)
+				log.Infof("%v, %v", resp, err)
 			} else {
-				log.Errorf("%v/v1/policy respBody [%v]",DCInfo, respBody1)
+				log.Infof("%v/v1/policy respBody [%v]", DCInfo, respBody1)
 				log.Infof("4th bootstrap end")
 				break
 			}
 		}
 	}
-	//for {
-	//	log.Infof("4th bootstrap start")
-	//	time.Sleep(10 * time.Second)
-	//	var DCInfo = os.Getenv("DCUrl")
-	//
-	//	client := http.Client{
-	//		Timeout: 60 * time.Second,
-	//	}
-	//	r, _ := http.NewRequest("PATCH", DCInfo+"/v1/policy", nil) // URL-encoded payload
-	//
-	//	r.Header.Add("Content-Type", "application/json")
-	//	res := map[string]interface{}{}
-	//	resp, err := client.Do(r)
-	//	defer resp.Body.Close()
-	//	log.Infof("resp.Status [%v], resp.Body [%v]", resp.Status, resp.Body)
-	//	if err != nil {
-	//		log.Errorf("err [%v]", err)
-	//	} else if resp.Status == OK200 {
-	//		respBody, err := ioutil.ReadAll(resp.Body)
-	//		if err != nil {
-	//			log.Errorf("resp1 [%v], err [%v]", resp.Body, err)
-	//		}
-	//		json.Unmarshal(respBody, &res)
-	//		r1, _ := http.NewRequest("GET", DCInfo+"/v1/policy", nil) // URL-encoded payload
-	//		resp1, err := client.Do(r1)
-	//		respBody1, _ := ioutil.ReadAll(resp1.Body)
-	//		if string(respBody1) == "null" {
-	//			log.Errorf("%v/v1/policy err [%v]",DCInfo, err)
-	//		} else {
-	//			log.Errorf("%v/v1/policy respBody [%v]",DCInfo, respBody1)
-	//			log.Infof("4th bootstrap end")
-	//			break
-	//		}
-	//	}
-	//}
 }

@@ -133,7 +133,7 @@ func handshakeVdi(instance Instance, vdiType string) {
 
 func getVdiAdStatus(vdiUrl string) (string, error) {
 	client := http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 300 * time.Second,
 	}
 	returnString := Failed
 	res := map[string]interface{}{}
