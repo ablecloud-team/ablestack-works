@@ -207,7 +207,7 @@ export default defineComponent({
               });
             }
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })

@@ -10,7 +10,7 @@ import UserBaseLayout from "../components/layouts/UserBaseLayout.vue";
 import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
-import Favorite from "../views/userFavorite/Favorite.vue";
+import Favorite from "../views/favorite/Favorite.vue";
 import UserDesktop from "../views/userDesktop/UserDesktop.vue";
 import Account from "../views/account/Account.vue";
 import AccountDetail from "../views/account/AccountDetail.vue";
@@ -43,7 +43,7 @@ const adminAuthCheck = (to, from, next) => {
 
 const userAuthCheck = (to, from, next) => {
   //console.log("userAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
-  if (to.name.includes("UserFavorite")) { menukey = "1"; }
+  if (to.name.includes("Favorite")) { menukey = "1"; }
   if (to.name.includes("UserDesktop")) { menukey = "2"; }
   sessionStorage.setItem("menukey", menukey);
 
@@ -225,11 +225,11 @@ const routes = [
     name: "User",
     component: UserBaseLayout,
     meta: { icon: "home" },
-    redirect: "/userFavorite",
+    redirect: "/favorite",
     children: [
       {
-        path: "/userFavorite",
-        name: "UserFavorite",
+        path: "/favorite",
+        name: "Favorite",
         component: Favorite,
         beforeEnter: userAuthCheck,
       },

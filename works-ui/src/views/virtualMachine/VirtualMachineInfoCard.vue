@@ -19,7 +19,12 @@
           <template #title>{{ vmDbDataInfo.handshake_status }}</template>
           <a-badge
             class="head-example"
-            :color="'red'"
+          :color="
+            vmDbDataInfo.mold_status == 'Running' &&
+            vmDbDataInfo.handshake_status === 'Ready'
+              ? 'green'
+              : 'red'
+          "
             :text="
               vmDbDataInfo.mold_status == 'Running' &&
               vmDbDataInfo.handshake_status === 'Ready'
@@ -164,7 +169,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error);
-          message.error(this.t("message.response.data.fail"));
+          message.error(this.$t("message.response.data.fail"));
         });
     },
   },

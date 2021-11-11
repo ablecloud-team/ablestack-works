@@ -188,7 +188,7 @@ export default defineComponent({
                   ) {
                     router.push({ name: "Dashboard" });
                   } else {
-                    router.push({ name: "UserFavorite" });
+                    router.push({ name: "Favorite" });
                   }
                   message.destroy();
                   message.success(this.$t("message.login.completed"));

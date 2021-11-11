@@ -435,12 +435,12 @@ export default defineComponent({
       //     if (response.data.result.status == 200) {
       //       this.userDataList = response.data.result.result;
       //     } else {
-      //       message.error(this.t("message.response.data.fail"));
+      //       message.error(this.$t("message.response.data.fail"));
       //       //console.log(response.message);
       //     }
       //   })
       //   .catch((error) => {
-      //     message.error(this.t("message.response.data.fail"));
+      //     message.error(this.$t("message.response.data.fail"));
       //     //console.log(error);
       //   });
       setTimeout(() => {

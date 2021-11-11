@@ -436,7 +436,7 @@ export default defineComponent({
               this.dataList.push({ name: str.split(",")[0].split("CN=")[1] });
             }
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
@@ -452,7 +452,7 @@ export default defineComponent({
           if (response.data.result.status == 200) {
             this.userDataList = response.data.result.result;
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
