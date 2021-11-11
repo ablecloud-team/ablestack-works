@@ -1,6 +1,9 @@
 <template>
   <a-spin :spinning="spinning">
-    <a-list v-if="actionFrom === 'VirtualMachineDetail'" item-layout="horizontal">
+    <a-list
+      v-if="actionFrom === 'VirtualMachineDetail'"
+      item-layout="horizontal"
+    >
       <a-list-item>
         <strong>{{ $t("label.name") }}</strong>
         <br />
@@ -13,8 +16,8 @@
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.vm.state") }}</strong>
-        <br />{{vmDbDataInfo.state}}
-        
+        <br />{{ vmDbDataInfo.state }}
+
         {{
           vmMoldDataInfo.state == "Running"
             ? $t("label.vm.status.running")
@@ -51,7 +54,10 @@
         {{ vmMoldDataInfo.pooltype }}
       </a-list-item>
     </a-list>
-    <a-list v-if="actionFrom === 'UserDetail' || actionFrom === 'AccountDetail'" item-layout="horizontal">
+    <a-list
+      v-if="actionFrom === 'UserDetail' || actionFrom === 'AccountDetail'"
+      item-layout="horizontal"
+    >
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
@@ -123,7 +129,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-     const state = reactive({
+    const state = reactive({
       actionFrom: ref(props.actionFrom),
     });
     return {
@@ -139,10 +145,10 @@ export default defineComponent({
     };
   },
   created() {
-    this.reflesh();
+    this.refresh();
   },
   methods: {
-    reflesh() {
+    refresh() {
       this.fetchData();
       this.spinning = true;
       setTimeout(() => {
@@ -153,24 +159,31 @@ export default defineComponent({
       // 가상머신 상세조회
       if (this.state.actionFrom == "VirtualMachineDetail") {
         worksApi
-        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-        .then((response) => {
-          if (response.status === 200) {
-            this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo =
-              response.data.result.instanceMoldInfo.virtualmachine[0];
-          } else {
+          .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
+          .then((response) => {
+            if (response.status === 200) {
+              this.vmDbDataInfo = response.data.result.instanceDBInfo;
+              this.vmMoldDataInfo =
+                response.data.result.instanceMoldInfo.virtualmachine[0];
+            } else {
+              message.error(this.$t("message.response.data.fail"));
+              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
             message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      }else if (this.state.actionFrom === "UserDetail" || this.state.actionFrom === "AccountDetail") {
-
-        let apiUrl = this.state.actionFrom === "AccountDetail" ? "/api/v1/user/" + this.$route.params.userName : 
-                  this.state.actionFrom === "UserDetail" ? "/api/v1/user/" + sessionStorage.getItem("username") : "";
+          });
+      } else if (
+        this.state.actionFrom === "UserDetail" ||
+        this.state.actionFrom === "AccountDetail"
+      ) {
+        let apiUrl =
+          this.state.actionFrom === "AccountDetail"
+            ? "/api/v1/user/" + this.$route.params.userName
+            : this.state.actionFrom === "UserDetail"
+            ? "/api/v1/user/" + sessionStorage.getItem("username")
+            : "";
 
         worksApi
           .get(apiUrl)
@@ -182,8 +195,9 @@ export default defineComponent({
               //console.log("데이터를 정상적으로 가져오지 못했습니다.");
             }
           })
-          .catch(function (error) {
+          .catch((error) => {
             console.log(error);
+            message.error(this.$t("message.response.data.fail"));
           });
       }
     },

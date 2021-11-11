@@ -5,7 +5,7 @@
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <WorkspaceInfoCard
-            ref="listRefleshCall1"
+            ref="listRefreshCall1"
           />
         </ACard>
       </a-col>
@@ -14,7 +14,7 @@
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
           <WorkSpaceTab 
-            ref="listRefleshCall2"
+            ref="listRefreshCall2"
           />
         </a-card>
       </a-col>
@@ -34,9 +34,9 @@ export default defineComponent({
     return {};
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      this.$refs.listRefleshCall2.reflesh();
+    refresh() {
+      this.$refs.listRefreshCall1.refresh();
+      this.$refs.listRefreshCall2.refresh();
     },
   },
 });

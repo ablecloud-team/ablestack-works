@@ -9,12 +9,12 @@
               <Apath :paths="[$t('label.users')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px;"
+                style="margin-left: 20px"
                 size="small"
-                @click="reflesh()"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -44,7 +44,7 @@
       <a-layout-content>
         <div id="content-body">
           <AccountList
-            ref="listRefleshCall"
+            ref="listRefreshCall"
             @actionFromChange="actionFromChange"
           />
         </div>
@@ -80,7 +80,11 @@
         </a-form-item>
         <a-row :gutter="12">
           <a-col :md="24" :lg="12">
-            <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
+            <a-form-item
+              has-feedback
+              name="lastName"
+              :label="$t('label.lastname')"
+            >
               <a-input
                 v-model:value="formState.lastName"
                 :placeholder="$t('tooltip.user.lastname')"
@@ -280,8 +284,8 @@ export default defineComponent({
     this.rules.title.message = this.$t("input.user.title");
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall.fetchData();
     },
     actionFromChange(val) {
       //console.log(val);
@@ -304,11 +308,13 @@ export default defineComponent({
           worksApi //이름 중복 확인 체크
             .get("/api/v1/user/" + this.formState.account)
             .then((response) => {
-              if (response.status === 200) { //중복일 때 
+              if (response.status === 200) {
+                //중복일 때
                 message.error(this.$t("message.name.dupl"));
               }
             })
-            .catch((error) => {//중복 이름 없을 때
+            .catch((error) => {
+              //중복 이름 없을 때
               message.loading(this.$t("message.user.createing"), 1);
               worksApi
                 .put("/api/v1/user", params)
@@ -321,11 +327,12 @@ export default defineComponent({
                   }
                   this.showModal(false);
                   setTimeout(() => {
-                    this.$refs.listRefleshCall.fetchData();
+                    this.$refs.listRefreshCall.fetchData();
                   }, 1500);
                 })
                 .catch((error) => {
-                  message.error(error);
+                  message.error(this.$t("message.user.create.fail"));
+                  console.log("error", error);
                 });
             });
         })
@@ -351,7 +358,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -359,6 +366,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

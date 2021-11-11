@@ -238,9 +238,9 @@ export default defineComponent({
             //console.log(response.message);
           }
         })
-        .catch(function (error) {
-          message.error(error.message);
-          //console.log(error);
+        .catch((error) => {
+          console.log(error);
+          message.error(this.t("message.response.data.fail"));
         });
       setTimeout(() => {
         this.loading = false;

@@ -40,19 +40,25 @@
         </template>
         <span>{{ $t("label.group.policy") }}</span>
       </a-menu-item> -->
-      <a-menu-item key="6">
-        <!-- <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)"> -->
+      <!-- <a-menu-item key="6">
+        <a-menu-item key="6" @click="$router.push({ name: 'Audit' }); selectedKeysSetting(6)">
         <template #icon>
           <BarChartOutlined />
         </template>
         <span>{{ $t("label.audit") }}</span>
-      </a-menu-item>
+      </a-menu-item> -->
       <!-- <a-menu-item key="7" @click="$router.push({ name: 'Community' }); selectedKeysSetting(7)">
         <template #icon>
           <CoffeeOutlined />
         </template>
         <span>{{ $t("label.community") }}</span>
       </a-menu-item> -->
+      <a-menu-item key="8" @click="$router.push({ name: 'Configuration' }); selectedKeysSetting(8)">
+        <template #icon>
+          <SettingOutlined />
+        </template>
+        <span>{{ $t("label.configuration") }}</span>
+      </a-menu-item>
     </a-menu>
   </div>
 </template>

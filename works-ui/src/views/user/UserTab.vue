@@ -2,10 +2,7 @@
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent
-          ref="listRefleshCall1"
-          :action-from="'UserDetail'"
-        />
+        <DetailContent ref="listRefreshCall1" :action-from="'UserDetail'" />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -29,12 +26,11 @@ export default defineComponent({
     };
   },
   data() {
-    return {
-    };
+    return {};
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
+    refresh() {
+      this.$refs.listRefreshCall1.refresh();
     },
   },
 });

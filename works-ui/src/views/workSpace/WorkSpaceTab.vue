@@ -3,27 +3,27 @@
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.vm.list')">
         <TableContent
-          ref="listRefleshCall1"
+          ref="listRefreshCall1"
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
         />
       </a-tab-pane>
       <a-tab-pane key="2" :tab="$t('label.users')">
         <TableContent
-          ref="listRefleshCall2"
+          ref="listRefreshCall2"
           :tap-name="'user'"
           :action-from="'UserDetail'"
         />
       </a-tab-pane>
       <a-tab-pane key="3" :tab="$t('label.policy.list')">
         <TableContent
-          ref="listRefleshCall3"
+          ref="listRefreshCall3"
           :tap-name="'policy'"
           :action-from="'policyDetail'"
         />
       </a-tab-pane>
       <a-tab-pane key="4" :tab="$t('label.network.list')">
-        <TableContent ref="listRefleshCall4" :tap-name="'network'" />
+        <TableContent ref="listRefreshCall4" :tap-name="'network'" />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -35,7 +35,7 @@ import TableContent from "@/components/TableContent";
 export default defineComponent({
   components: { TableContent },
   props: {},
-  setup(props) {
+  setup() {
     const tabPosition = ref("top");
     const activeKey = ref("1");
     return {
@@ -48,11 +48,11 @@ export default defineComponent({
   },
   created() {},
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.fetchData();
-      this.$refs.listRefleshCall2.fetchData();
-      this.$refs.listRefleshCall3.fetchData();
-      this.$refs.listRefleshCall4.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall1.fetchData();
+      this.$refs.listRefreshCall2.fetchData();
+      this.$refs.listRefreshCall3.fetchData();
+      this.$refs.listRefreshCall4.fetchData();
     },
   },
 });

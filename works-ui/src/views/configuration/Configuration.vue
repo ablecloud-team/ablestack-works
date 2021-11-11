@@ -2,16 +2,11 @@
   <div id="content-layout">
     <a-layout>
       <a-layout-header id="content-header">
-        <div>
-          <a-row>
+        <div id="content-header-body">
+          <a-row id="content-header-row">
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath
-                :paths="[
-                  { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceName, component: null },
-                ]"
-              />
+              <Apath :paths="[$t('label.configuration')]" />
               <a-button
                 shape="round"
                 style="margin-left: 20px"
@@ -23,19 +18,20 @@
                 </template>
               </a-button>
             </a-col>
-            <!-- 우측 액션 -->
+
+            <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions
-                :action-from="actionFrom"
-                :workspace-uuid="workspaceUuid"
-              />
+              <div></div>
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody ref="listRefreshCall" />
+          <ConfigurationList
+            ref="listRefreshCall"
+            @actionFromChange="actionFromChange"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -45,27 +41,32 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
-import { defineComponent, ref } from "vue";
+import ConfigurationList from "@/views/configuration/ConfigurationList";
+import { defineComponent, ref, reactive } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
-  components: { Apath, Actions, WorkSpaceBody },
+  components: {
+    ConfigurationList,
+    Apath,
+    Actions,
+  },
   props: {},
   setup() {
-    return {
-      actionFrom: ref("WorkspaceDetail"),
-    };
+    return {};
   },
   data() {
-    return {
-      workspaceUuid: ref(this.$route.params.workspaceUuid),
-      workspaceName: ref(this.$route.params.workspaceName),
-    };
+    return {};
   },
   created() {},
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.refresh();
+      this.$refs.listRefreshCall.fetchData();
+    },
+    actionFromChange(val) {
+      //console.log(val);
+      this.actionFrom = ref(val);
     },
   },
 });

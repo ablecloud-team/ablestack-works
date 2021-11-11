@@ -17,15 +17,16 @@
       <div class="Item">
         <a-tooltip placement="bottom">
           <template #title>{{ vmDbDataInfo.handshake_status }}</template>
-            <a-badge
-              class="head-example"
-              :color="'red'"
-              :text="
-                (vmDbDataInfo.mold_status == 'Running' && vmDbDataInfo.handshake_status === 'Ready') 
+          <a-badge
+            class="head-example"
+            :color="'red'"
+            :text="
+              vmDbDataInfo.mold_status == 'Running' &&
+              vmDbDataInfo.handshake_status === 'Ready'
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
-              "
-            />
+            "
+          />
         </a-tooltip>
       </div>
     </div>
@@ -112,7 +113,7 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
@@ -133,10 +134,10 @@ export default defineComponent({
     };
   },
   created() {
-    this.reflesh();
+    this.refresh();
   },
   methods: {
-    reflesh() {
+    refresh() {
       this.fetchData();
       this.spinning = true;
       setTimeout(() => {
@@ -161,8 +162,9 @@ export default defineComponent({
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
+          message.error(this.t("message.response.data.fail"));
         });
     },
   },

@@ -46,10 +46,10 @@ export default defineComponent({
     };
   },
   created() {
-    this.reflesh();
+    this.refresh();
   },
   methods: {
-    reflesh() {
+    refresh() {
       this.fetchData();
       this.spinning = true;
       setTimeout(() => {
@@ -67,8 +67,9 @@ export default defineComponent({
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
+          message.error(this.t("message.response.data.fail"));
         });
     },
   },

@@ -6,19 +6,15 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath
-                :paths="[
-                  { name: userName, component: null },
-                ]"
-              />
+              <Apath :paths="[{ name: userName, component: null }]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px;"
+                style="margin-left: 20px"
                 size="small"
-                @click="reflesh()"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -32,9 +28,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody 
-            ref="listRefleshCall"
-          />
+          <UserBody ref="listRefreshCall" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -46,8 +40,7 @@ import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
 import UserBody from "./UserBody";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+
 export default defineComponent({
   components: {
     UserBody,
@@ -63,27 +56,10 @@ export default defineComponent({
   data() {
     return {};
   },
-  created() {
-    this.fetchData();
-  },
+  created() {},
   methods: {
-    reflesh() { 
-      this.$refs.listRefleshCall.reflesh();
-    },
-    fetchData() {
-      // worksApi
-      //   .get("/api/v1/user/" + this.$route.params.userName)
-      //   .then((response) => {
-      //     if (response.status == 200) {
-      //       this.userDataInfo = response.data.result;
-      //     } else {
-      //       message.error(this.$t("message.response.data.fail"));
-      //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-      //     }
-      //   })
-      //   .catch(function (error) {
-      //     console.log(error);
-      //   });
+    refresh() {
+      this.$refs.listRefreshCall.refresh();
     },
   },
 });
@@ -102,7 +78,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -110,6 +86,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

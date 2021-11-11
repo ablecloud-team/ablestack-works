@@ -174,9 +174,18 @@ export default defineComponent({
                 ) {
                   store.dispatch("loginCommit", response.data);
                   sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem("username", response.data.result.username);
-                  sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
-                  if (response.data.result.username === "Administrator") {
+                  sessionStorage.setItem(
+                    "username",
+                    response.data.result.username
+                  );
+                  sessionStorage.setItem(
+                    "isAdmin",
+                    response.data.result.isAdmin
+                  );
+                  if (
+                    response.data.result.username.toLowerCase() ===
+                    "administrator"
+                  ) {
                     router.push({ name: "Dashboard" });
                   } else {
                     router.push({ name: "UserFavorite" });
@@ -193,10 +202,10 @@ export default defineComponent({
                 message.error(this.$t("message.login.wrong"));
               }
             })
-            .catch(error => {
-                console.log(error)
-                message.destroy();
-                message.error(this.$t("message.login.wrong"));
+            .catch((error) => {
+              console.log(error.message);
+              message.destroy();
+              message.error(this.$t("message.login.wrong"));
             });
         })
         .catch((error) => {

@@ -9,12 +9,12 @@
               <Apath :paths="[$t('label.group.policy')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px;"
+                style="margin-left: 20px"
                 size="small"
-                @click="reflesh()"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -36,7 +36,7 @@
       <a-layout-content>
         <div id="content-body">
           <GroupPolicyList
-            ref="listRefleshCall"
+            ref="listRefreshCall"
             @actionFromChange="actionFromChange"
           />
         </div>
@@ -223,8 +223,8 @@ export default defineComponent({
     this.fetchData();
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall.fetchData();
     },
     actionFromChange(val) {
       //console.log(val);
@@ -268,20 +268,19 @@ export default defineComponent({
                   );
                 }
                 this.showModal(false);
-                this.$refs.listRefleshCall.fetchData();
+                this.$refs.listRefreshCall.fetchData();
               })
-              .catch(function (error) {
-                message.error(error.message);
-                //console.log(error);
+              .catch((error) => {
+                message.error(this.$t("message.user.create.fail"));
+                console.log(error);
               });
           } catch (error) {
-            console.log(error);
-            message.error(this.$t("message.user.create.fail"));
+            //console.log(error);
+            //message.error(this.$t("message.user.create.fail"));
           }
         })
         .catch((error) => {
           console.log("error", error);
-          //message.error(error);
         });
     },
   },
@@ -301,7 +300,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -309,6 +308,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

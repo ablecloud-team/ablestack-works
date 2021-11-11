@@ -4,18 +4,14 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <UserInfoCard
-            ref="listRefleshCall1"
-          />
+          <UserInfoCard ref="listRefreshCall1" />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <UserTab 
-            ref="listRefleshCall2"
-          />
+          <UserTab ref="listRefreshCall2" />
         </ACard>
       </ACol>
     </ARow>
@@ -44,9 +40,9 @@ export default defineComponent({
     return {};
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      this.$refs.listRefleshCall2.reflesh();
+    refresh() {
+      this.$refs.listRefreshCall1.refresh();
+      this.$refs.listRefreshCall2.refresh();
     },
   },
 });

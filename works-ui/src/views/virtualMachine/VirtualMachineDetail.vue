@@ -14,28 +14,25 @@
               />
               <a-button
                 shape="round"
-                style="margin-left: 20px;"
+                style="margin-left: 20px"
                 size="small"
-                @click="reflesh()"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions
-                :action-from="actionFrom"
-                @fetchData="reflesh"
-              />
+              <Actions :action-from="actionFrom" @fetchData="refresh" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody ref="listRefleshCall"/>
+          <VirtualMachineBody ref="listRefreshCall" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -47,8 +44,6 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import VirtualMachineBody from "./VirtualMachineBody.vue";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: { VirtualMachineBody, Apath, Actions },
@@ -66,11 +61,10 @@ export default defineComponent({
       vmName: ref(this.$route.params.vmName),
     };
   },
-  created() {
-  },
+  created() {},
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.reflesh();
+    refresh() {
+      this.$refs.listRefreshCall.refresh();
     },
   },
 });
@@ -89,7 +83,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -97,6 +91,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

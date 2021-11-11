@@ -46,9 +46,12 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid +'/' + record.name}">{{
-        record.name
-      }}</router-link>
+      <router-link
+        :to="{
+          path: '/virtualMachineDetail/' + record.uuid + '/' + record.name,
+        }"
+        >{{ record.name }}</router-link
+      >
     </template>
 
     <template #actionRender="{ record }">
@@ -79,12 +82,17 @@
         <template #title>{{ record.handshake_status }}</template>
         <a-badge
           class="head-example"
-          :color="(record.mold_status == 'Running' && record.handshake_status === 'Ready')
-            ? 'green' : 'red'"
+          :color="
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? 'green'
+              : 'red'
+          "
           :text="
-            (record.mold_status == 'Running' && record.handshake_status === 'Ready')
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
           "
         />
       </a-tooltip>
@@ -257,9 +265,9 @@ export default defineComponent({
   created() {
     this.fetchData();
     this.timer = setInterval(() => {
-      //10초 자동 갱신
+      //60초 자동 갱신
       this.fetchData();
-    }, 15000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
@@ -290,9 +298,9 @@ export default defineComponent({
             message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
-          message.error(error);
-          //console.log(error);
+        .catch((error) => {
+          message.error(this.t("message.response.data.fail"));
+          console.log(error);
         });
       setTimeout(() => {
         this.loading = false;
