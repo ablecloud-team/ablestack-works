@@ -63,7 +63,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive, ref, watch } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import Logo from "./Logo";
 export default defineComponent({
   components: {
@@ -76,18 +76,8 @@ export default defineComponent({
   setup(props) {
     const state = reactive({
       collapsed: ref(props.collapsed),
-      selectedKeys: [""],
-      openKeys: [""],
-      preOpenKeys: [""],
+      selectedKeys: ref[sessionStorage.getItem("menukey")],
     });
-    watch(
-      () => state.openKeys,
-      (val, oldVal) => {
-        // console.log(val);
-        // console.log(oldVal);
-        state.preOpenKeys = oldVal;
-      }
-    );
     return {
       state,
     };
@@ -97,14 +87,14 @@ export default defineComponent({
   },
   methods: {
     updateMenu() {
-      this.selectedKeys = [ "" ? "1" : sessionStorage.getItem("menukey") ];
+      this.state.selectedKeys = [ "" ? "1" : sessionStorage.getItem("menukey") ];
     },
     // toggleCollapsed: function () {
     //   this.$emit("changeToggleCollapsed");
     // },
     selectedKeysSetting: function (key) {
       sessionStorage.setItem("menukey", key);
-      //this.selectedKeys = [key];
+      this.state.selectedKeys = [key];
     },
   },
 });
