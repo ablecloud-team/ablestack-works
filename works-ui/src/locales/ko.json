@@ -37,6 +37,8 @@
     "message.workspace.status.delete": "워크스페이스가 삭제되었습니다.",
     "message.workspace.delete.fail": "워크스페이스 삭제에 실패하였습니다.",
     "message.workspace.delete.existvm": "해당 워크스페이스에 가상머신이 존재합니다. 가상머신을 삭제 후 다시 시도해주세요.",
+    "message.user.vm.unlock.completed": "데스크톱에 사용자 할당이 해제되었습니다.",
+    "message.user.vm.unlock.fail": "데스크톱에 사용자 할당 해제에 실패하였습니다.",
 
     "tooltip.vmStart": "시작",
     "tooltip.vmStop": "정지",
@@ -73,7 +75,8 @@
     "tooltip.vmDestroy":"데스크톱 가상머신 파기",
     "tooltip.workspaceDestroy":"워크스페이스 파기",
 
-    "label.reflesh": "업데이트",
+    "label.fetch.latest": "최신 정보 가져오기",
+    "label.refresh": "업데이트",
     "label.dashboard": "대시보드",
     "label.workspace": "워크스페이스",
     "label.vm": "가상머신",
