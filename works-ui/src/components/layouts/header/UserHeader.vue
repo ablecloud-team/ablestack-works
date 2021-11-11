@@ -24,7 +24,11 @@
           </a>
         </a-button>
         <template #overlay>
-          <a-menu :selected-keys="[language]" @click="setLocaleClick">
+          <a-menu
+            v-model:selected-keys="[language]"
+            mode="inline"
+            @click="setLocaleClick"
+          >
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
@@ -35,27 +39,21 @@
           <BellOutlined class="header-notice-icon" />
         </a>
       </a-button>
-      <a-dropdown placement="bottomRight">
+      <a-dropdown placement="bottomRight"  visible="true">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
+            {{ username }}
           </a>
         </a-button>
         <template #overlay>
-          <a-menu style="width: 100%">
-            <a-menu-item key="a">
-              <template #icon>
-                <UserOutlined />
-              </template>
-              <router-link :to="{ path: '/userDetail' }" style="margin-left: 4px;">
-                {{ $t("label.profile") }}
-              </router-link>
+          <a-menu selected-keys="" mode="inline" style="hover">
+            <a-menu-item key="1" @click="userinfo">
+              <UserOutlined /> {{ $t("label.profile") }}
             </a-menu-item>
-            <a-menu-item key="b" @click="logoutSubmit">
-              <template #icon>
-                <LogoutOutlined />
-              </template>
-              {{ $t("label.logout") }}
+            <a-menu-divider />
+            <a-menu-item key="2" @click="logoutSubmit">
+              <LogoutOutlined />{{ $t("label.logout") }}
             </a-menu-item>
           </a-menu>
         </template>
@@ -127,7 +125,7 @@ export default defineComponent({
   data() {
     return {
       language: ref(""),
-      loadedLanguage: [],
+      loadedLanguage: ref[""],
       username: ref(""),
     };
   },
@@ -172,6 +170,9 @@ export default defineComponent({
         await store.dispatch("logoutCommit");
         await router.push({ name: "Login" });
       }
+    },
+    userinfo() {
+      router.push({ path: "/userDetail"});
     },
     // setLanguage(lang, message) {
     //   if (i18n) {
