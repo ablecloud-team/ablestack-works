@@ -183,6 +183,7 @@
     "label.configuration": "설정",
     "label.value": "값",
     "label.action": "작업",
+    "label.go.back": "돌아가기",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",

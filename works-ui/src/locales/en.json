@@ -183,6 +183,7 @@
     "label.configuration": "Setting",
     "label.value": "Value",
     "label.action": "Action",
+    "label.go.back": "Go Back",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",

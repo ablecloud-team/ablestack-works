@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { worksApi } from "../api";
 import { message } from "ant-design-vue";
+import router from "@/router";
 import Login from "../views/auth/Login.vue";
 import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
@@ -18,6 +19,7 @@ import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
 import Configuration from "../views/configuration/Configuration.vue";
 import UserDetail from "../views/user/UserDetail.vue";
+import Exception404 from "../views/exception/404.vue";
 
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
@@ -68,7 +70,7 @@ const tokenCheck = (to, from, next, isAdmin) => {
             ) {
               goRoute(0, next);
             } else {
-              goRoute(2, next);
+              //goRoute(2, next);
             }
           } else {
             goRoute(1, next);
@@ -93,12 +95,12 @@ const goRoute = (cd, next) => {
       sessionStorage.clear();
       next({ name: "Login" });
       break;
-    case 2:
-      message.error("해당 URL을 이용하여 접근할 수 없습니다.");  
-      setTimeout(() => {
-        history.back();
-      }, 1000);
-      break;
+    // case 2:
+    //   message.error("해당 URL을 이용하여 접근할 수 없습니다.");
+    //   setTimeout(() => {
+    //     router.go(-1);
+    //   }, 1000);
+    //   break;
 
     default:
       break;
@@ -108,18 +110,38 @@ const goRoute = (cd, next) => {
 const routes = [
   {
     path: "/:catchAll(.*)",
-    redirect: "/login",
-    name: "NotFound",
+    name: "Exception",
+    hidden: true,
+    component: Exception404,
+    redirect: "/exception/404",
+    children: [
+      // {
+      //   path: '/exception/403',
+      //   name: '403',
+      //   hidden: true,
+      //   component: () => import('@/views/exception/403'),
+      //   meta: { title: '403' }
+      // },
+      {
+        path: "/exception/404",
+        name: "404",
+        hidden: true,
+        component: () => import("@/views/exception/404"),
+        meta: { title: "404" }
+      },
+      // {
+      //   path: '/exception/500',
+      //   name: '500',
+      //   hidden: true,
+      //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
+      //   meta: { title: '500' }
+      // }
+    ]
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
     path: "/login",
     name: "Login",
     component: Login,
-  },
-  {
-    path: "/adminApp",
-    name: "AdminApp",
-    component: AdminApp,
   },
   {
     path: "/admin",
