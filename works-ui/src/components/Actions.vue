@@ -105,7 +105,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, reactive, ref } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 import router from "@/router";
@@ -189,7 +189,10 @@ export default defineComponent({
       }
 
       if (this.state.callComponent.includes("VirtualMachine")) {
-        let _uuid = this.$route.params.vmUuid === undefined ? this.state.vmUuid : this.$route.params.vmUuid;
+        let _uuid =
+          this.$route.params.vmUuid === undefined
+            ? this.state.vmUuid
+            : this.$route.params.vmUuid;
         //console.log("this.$route.params.vmUuid :: "+this.$route.params.vmUuid+ " :: this.state.vmUuid :: " +this.state.vmUuid);
         worksApi
           .get("/api/v1/instance/detail/" + _uuid)
@@ -197,9 +200,12 @@ export default defineComponent({
             if (response.status == 200) {
               //this.vmDbDataInfo = response.data.result.instanceDBInfo;
               this.state.vmUuid = response.data.result.instanceDBInfo.uuid;
-              this.state.vmStatus = response.data.result.instanceDBInfo.mold_status;
-              this.state.workspaceName = response.data.result.instanceDBInfo.workspace_name;
-              this.state.allocateStatus = response.data.result.instanceDBInfo.owner_account_id;
+              this.state.vmStatus =
+                response.data.result.instanceDBInfo.mold_status;
+              this.state.workspaceName =
+                response.data.result.instanceDBInfo.workspace_name;
+              this.state.allocateStatus =
+                response.data.result.instanceDBInfo.owner_account_id;
 
               if (this.state.vmStatus === "Running") {
                 this.state.buttonBoolean.vmStop = true;
@@ -227,30 +233,35 @@ export default defineComponent({
                         ? ""
                         : response.data.result.member;
                     for (let str of temp) {
-                      this.workspaceUserDataList.push({ name: str.split(",")[0].split("CN=")[1] });
+                      this.workspaceUserDataList.push({
+                        name: str.split(",")[0].split("CN=")[1],
+                      });
                     }
                   } else {
-                    //message.error(this.t("message.response.data.fail"));
+                    message.error(this.$t("message.response.data.fail"));
                   }
                 })
-                .catch(function (error) {
-                  //message.error(error);
+                .catch((error) => {
+                  message.destroy();
+                  message.error(this.$t("message.response.data.fail"));
+                  console.log(error);
                 });
             } else {
-              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+              message.error(this.$t("message.response.data.fail"));
             }
           })
-          .catch(function (error) {
+          .catch((error) => {
+            message.destroy();
+            message.error(this.$t("message.response.data.fail"));
             console.log(error);
           });
       }
     },
     putUserAllocateVm() {
-      let params = new URLSearchParams();
-      params.append("instanceUuid", this.state.vmUuid);
-      params.append("username", this.selectedUser);
       worksApi
-        .post("/api/v1/instance", params)
+        .put(
+          "/api/v1/connection/" + this.state.vmUuid + "/" + this.selectedUser
+        )
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.user.vm.allocated.completed"), 3);
@@ -263,7 +274,9 @@ export default defineComponent({
             message.error("message.user.vm.allocated.fail");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error("message.user.vm.allocated.fail");
           console.log(error);
         });
     },
@@ -274,15 +287,19 @@ export default defineComponent({
         this.confirmModalView = true;
         this.modalTitle = value;
       }
-      if (value == "workspaceStart") this.modalConfirm = "modal.confirm.workspaceStart";
-      if (value == "workspaceStop") this.modalConfirm = "modal.confirm.workspaceStop";
-      if (value == "workspaceDestroy") this.modalConfirm = "modal.confirm.workspaceDestroy";
+      if (value == "workspaceStart")
+        this.modalConfirm = "modal.confirm.workspaceStart";
+      if (value == "workspaceStop")
+        this.modalConfirm = "modal.confirm.workspaceStop";
+      if (value == "workspaceDestroy")
+        this.modalConfirm = "modal.confirm.workspaceDestroy";
 
       if (value == "vmStart") this.modalConfirm = "modal.confirm.vmStart";
       if (value == "vmStop") this.modalConfirm = "modal.confirm.vmStop";
       if (value == "vmDestroy") this.modalConfirm = "modal.confirm.vmDestroy";
 
-      if (value == "accountDestroy") this.modalConfirm = "modal.confirm.accountDestroy";
+      if (value == "accountDestroy")
+        this.modalConfirm = "modal.confirm.accountDestroy";
       if (value == "userUnlock") this.modalConfirm = "modal.confirm.userUnlock";
     },
     handleCancel() {
@@ -291,8 +308,12 @@ export default defineComponent({
     },
     handleSubmit(actionFrom) {
       //console.log(this.modalTitle + "  ::  " + this.state.vmUuid);
-      if (actionFrom.includes("VirtualMachine")) {
-        let worksUrl, resMessage = "";
+      if (
+        actionFrom.includes("VirtualMachine") &&
+        this.modalTitle.includes("vm")
+      ) {
+        let worksUrl,
+          resMessage = "";
         if (this.modalTitle.includes("vmStart")) {
           message.loading(this.$t("message.vm.status.starting"), 12);
           worksUrl = "/api/v1/instance/VMStart/" + this.state.vmUuid;
@@ -308,6 +329,7 @@ export default defineComponent({
           worksUrl = "/api/v1/instance/VMDestroy/" + this.state.vmUuid;
           resMessage = this.$t("message.vm.status.delete");
         }
+
         worksApi
           .patch(worksUrl)
           .then((response) => {
@@ -317,7 +339,10 @@ export default defineComponent({
               setTimeout(() => {
                 message.destroy();
                 message.success(resMessage);
-                if (actionFrom =="VirtualMachineDetail" && this.modalTitle.includes("vmDestroy")){
+                if (
+                  actionFrom == "VirtualMachineDetail" &&
+                  this.modalTitle.includes("vmDestroy")
+                ) {
                   router.push({ name: "VirtualMachine" });
                 } else {
                   this.$emit("fetchData");
@@ -328,8 +353,36 @@ export default defineComponent({
               message.error(this.$t("message.vm.status.update.fail"));
             }
           })
-          .catch(function (error) {
+          .catch((error) => {
+            message.destroy();
+            message.error(this.$t("message.vm.status.update.fail"));
             message.error(error);
+          });
+      }
+      if (
+        actionFrom.includes("VirtualMachine") &&
+        this.modalTitle.includes("userUnlock")
+      ) {
+        worksApi
+          .delete("/api/v1/connection/" + this.state.vmUuid)
+          .then((response) => {
+            if (response.status == 200) {
+              this.vmDataList = response.data.result.list;
+              this.handleCancel();
+              setTimeout(() => {
+                message.destroy();
+                message.success(this.$t("message.user.vm.unlock.completed"));
+                this.$emit("fetchData");
+                this.fetchData();
+              }, 1000);
+            } else {
+              message.error(this.$t("message.user.vm.unlock.fail"));
+            }
+          })
+          .catch((error) => {
+            message.destroy();
+            message.error(this.$t("message.user.vm.unlock.fail"));
+            console.log(error);
           });
       }
 
@@ -338,8 +391,11 @@ export default defineComponent({
           .get("/api/v1/workspace/" + this.state.workspaceUuid)
           .then((response) => {
             if (response.status == 200) {
-              if(response.data.result.workspaceInfo.quantity == 0){
-                message.loading(this.$t("message.workspace.status.destroying"), 6);
+              if (response.data.result.workspaceInfo.quantity == 0) {
+                message.loading(
+                  this.$t("message.workspace.status.destroying"),
+                  6
+                );
                 worksApi
                   .delete("/api/v1/workspace/" + this.state.workspaceUuid)
                   .then((response) => {
@@ -348,24 +404,34 @@ export default defineComponent({
                       this.handleCancel();
                       setTimeout(() => {
                         message.destroy();
-                        message.success(this.$t("message.workspace.status.delete"));
-                        if(actionFrom =="WorkspaceDetail") router.push({ name: "Workspace" });
-                        if(actionFrom =="WorkspaceList") this.$emit("fetchData");
+                        message.success(
+                          this.$t("message.workspace.status.delete")
+                        );
+                        if (actionFrom == "WorkspaceDetail")
+                          router.push({ name: "Workspace" });
+                        if (actionFrom == "WorkspaceList")
+                          this.$emit("fetchData");
                       }, 3000);
                     } else {
-                      message.error(this.$t("message.workspace.delete.fail"), 5);
+                      message.error(this.$t("message.workspace.delete.fail"));
                     }
                   })
-                  .catch(function (error) {
-                    message.error(error);
+                  .catch((error) => {
+                    message.destroy();
+                    message.error(this.$t("message.workspace.delete.fail"));
+                    console.log(error);
                   });
               } else {
                 message.error(this.$t("message.workspace.delete.existvm"));
               }
+            } else {
+              message.error(this.$t("message.response.data.fail"));
             }
           })
-          .catch(function (error) {
-            message.error(error);
+          .catch((error) => {
+            message.destroy();
+            message.error(this.$t("message.response.data.fail"));
+            console.log(error);
           });
       }
     },
