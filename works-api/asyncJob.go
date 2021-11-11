@@ -32,6 +32,7 @@ func asyncJobMonitoring() {
 	}
 	defer db.Close()
 	for {
+		log.Debugf("asyncjob exec")
 		var count int
 		err = db.QueryRow("SELECT count(*) FROM async_job where ready = 1").Scan(&count)
 		if err != nil {
@@ -115,6 +116,7 @@ func asyncJobExec() {
 				instance.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
 				instance.WorkspaceUuid = workspaceInfo.Uuid
 				instance.WorkspaceName = workspaceInfo.Name
+				instance.Ipaddress = listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
 				resultInsertInstance := insertInstance(instance)
 				params := []MoldParams{
 					{"resourceids": instance.MoldUuid},
@@ -124,13 +126,14 @@ func asyncJobExec() {
 					{"tags[1].key": WorkspaceName},
 					{"tags[1].value": workspaceInfo.Name},
 					{"tags[2].key": ClusterName},
-					{"tags[2].value": "WorkspaceIP"},
+					{"tags[2].value": os.Getenv("ClutsterName")},
 				}
-				aaa := getCreateTags(params)
-				log.Info(aaa)
+				resultGetCreateTags := getCreateTags(params)
+				log.Infof("Create Tag Result [%v], params [%v]",resultGetCreateTags, params)
 
 				log.Info("The virtual machine has been successfully created.")
 				log.Info(resultInsertInstance)
+				go handshakeVdi(instance, InstanceString)
 			}
 			updateWorkspaceQuantity(workspaceInfo.Uuid)
 		}

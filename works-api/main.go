@@ -36,24 +36,25 @@ func StartClientApp() (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-
 func main() {
 	var (
 		err error
 	)
-	DBSetting()        //DB 접속정보 셋팅
-	MoldSetting()      //Mold 정보 셋팅
-	DCSetting()        //DC 정보 셋팅
-	WorksSetting()     //Works-API 정보 셋팅
-	SambaSetting()     //SAMBA 정보 셋팅
-	GuacamoleSetting() //guacamole 정보 셋팅
+	DBSetting()          //DB 접속정보 셋팅
+	MoldSetting()        //Mold 정보 셋팅
+	DCSetting()          //DC 정보 셋팅
+	WorksSetting()       //Works-API 정보 셋팅
+	SambaSetting()       //SAMBA 정보 셋팅
+	GuacamoleSetting()   //guacamole 정보 셋팅
+	ClusterNameSetting() //clusterName 정보 셋팅
 	logSetting()
+	dcBootstrap()
 
 	router := gin.Default()
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
-	router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
-	//router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
+	//router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
+	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
 	api := router.Group("/api")
 	{
 		api.POST("/login", getLogin)
@@ -64,6 +65,7 @@ func main() {
 		})
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
+		//v1.Use(updateInstanceChecked0)
 		{
 			v1.GET("/token", getUserToken)
 
@@ -79,10 +81,13 @@ func main() {
 			v1.GET("/instance/:instanceUuid", getInstances)
 			v1.GET("/instance/detail/:instanceUuid", getInstancesDetail)
 			v1.PUT("/instance", putInstances)
-			v1.POST("/instance", postInstances)
+			//v1.POST("/instance", postInstances) // VDI 에 유저 할당
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
 
+			v1.PUT("/connection/:instanceUuid/:username", putConnection)
+			v1.DELETE("/connection/:instanceUuid", deleteConnection)
 
+			v1.PATCH("/handshake/:instanceUuid/:instanceType", patchHandshake)
 
 			v1.GET("/logout", getLogout)
 
@@ -106,7 +111,7 @@ func main() {
 		"serverVersion": Version,
 	}).Infof("Starting application")
 	go asyncJobMonitoring()
-	go updateInstanceChecked0()
+	go updateInstanceChecked()
 	url := ginSwagger.URL("/swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8080")

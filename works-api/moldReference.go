@@ -8,40 +8,80 @@ import (
 )
 
 func getTemplate(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "listTemplates"},
 	}
 	params = append(params, params1...)
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getTemplate",
-	}).Infof("params [%v]", params)
+	}).Infof("listTemplates params [%v]", params)
+
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getTemplate",
-	}).Infof("endUrl [%v]", endUrl)
+	}).Infof("listTemplates endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
 
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"moldReference.go": "getTemplate",
-		}).Errorf("Mold 와 통신에 실패했습니다.(listTemplates) [%v]", err)
+		}).Errorf("Failed to communicate with Mold. (listTemplates) [%v]", err)
 	}
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getTemplate",
-	}).Debugf("result [%v]", resp)
+	}).Debugf("listTemplates result [%v]", resp)
 
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
+func getListDesktopMasterVersions(params []MoldParams) map[string]interface{} {
+	var baseurl = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "listDesktopMasterVersions"},
+	}
+	params = append(params, params1...)
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Infof("listDesktopMasterVersions params [%v]", params)
+
+	stringParams := makeStringParams(params)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Infof("listDesktopMasterVersions endUrl [%v]", endUrl)
+
+	resp, err := http.Get(endUrl)
+
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getListDesktopMasterVersions",
+		}).Errorf("Failed to communicate with Mold. (listDesktopMasterVersions) [%v]", err)
+	}
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getListDesktopMasterVersions",
+	}).Debugf("listDesktopMasterVersions result [%v]", resp)
+
+	var res map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getComputeOffering(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "listServiceOfferings"},
 	}
@@ -49,7 +89,7 @@ func getComputeOffering(params []MoldParams) map[string]interface{} {
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getComputeOffering",
-	}).Infof("params [%v]", params)
+	}).Infof("listServiceOfferings params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
@@ -57,27 +97,27 @@ func getComputeOffering(params []MoldParams) map[string]interface{} {
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getComputeOffering",
-	}).Infof("endUrl [%v]", endUrl)
+	}).Infof("listServiceOfferings endUrl [%v]", endUrl)
 
 	resp, err := http.Get(endUrl)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"moldReference.go": "getComputeOffering",
-		}).Errorf("Mold 와 통신에 실패했습니다.(listServiceOfferings) [%v]", err)
+		}).Errorf("Failed to communicate with Mold. (listServiceOfferings) [%v]", err)
 	}
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getComputeOffering",
-	}).Debugf("result [%v]", resp)
+	}).Debugf("listServiceOfferings result [%v]", resp)
 
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getNetwork(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "listNetworks"},
 	}
@@ -85,7 +125,7 @@ func getNetwork(params []MoldParams) map[string]interface{} {
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getNetwork",
-	}).Infof("params [%v]", params)
+	}).Infof("listNetworks params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
@@ -93,27 +133,27 @@ func getNetwork(params []MoldParams) map[string]interface{} {
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getNetwork",
-	}).Infof("endUrl [%v]", endUrl)
+	}).Infof("listNetworks endUrl [%v]", endUrl)
 
 	resp, err := http.Get(endUrl)
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getComputeOffering",
-	}).Debugf("result [%v]", resp)
+	}).Debugf("listNetworks result [%v]", resp)
 
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"moldReference.go": "getComputeOffering",
-		}).Errorf("Mold 와 통신에 실패했습니다.(listNetworks) [%v]", err)
+		}).Errorf("Failed to communicate with Mold. (listNetworks) [%v]", err)
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instanceType string) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	workspaceList, _ := selectWorkspaceList(workspaceUuid)
 	workspaceInfo := workspaceList[0]
 
@@ -128,14 +168,12 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		displayName = workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
 	}
 	SambaIP := os.Getenv("SambaUrl")
-	SambaDomain := os.Getenv("SambaDomain") + ".local"
 	MyDomain := os.Getenv("SambaDomain")
 	WorksIP := os.Getenv("WorksIp")
 	WorksPort := os.Getenv("WorksPort")
 	VmName := displayName
 	InstanceUuid := instanceUuid
 	Type := instanceType
-	//"Invoke-WebRequest -Uri http://10.1.1.1/latest/user-data >> \"c:\\agent\\userdata.txt\"\n" +
 	payload := "<powershell>\n" +
 		"date > \"c:\\agent\\installed.txt\"\n" +
 		"$dnsip = \"" + SambaIP + "\"\n" +
@@ -147,9 +185,8 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		"echo Rename-Computer >> \"c:\\agent\\installed.txt\"\n" +
 		"Rename-Computer -NewName " + VmName + "\n" +
 		"echo Add-Computer >> \"c:\\agent\\installed.txt\"\n" +
-		"Add-Computer -DomainName " + SambaDomain + " -Credential $credential -NewName " + VmName + "\n" +
 		"echo Add-Computer end>> \"c:\\agent\\installed.txt\"\n" +
-		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\"}'\n" +
+		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\",\"HostName\": \"" + VmName + "\",\"Domain\": \"" + MyDomain + "\"}'\n" +
 		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
 		"echo $conf\n" +
 		"echo $conf >> \"c:\\agent\\installed.txt\"\n" +
@@ -164,11 +201,13 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		{"serviceofferingid": workspaceInfo.ComputeOfferingUuid},
 		{"zoneid": selectZoneId()},
 		{"userdata": baseEncoding(payload)},
+		{"name": displayName},
+		{"networkids": workspaceInfo.NetworkUuid},
 	}
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getDeployVirtualMachine",
-	}).Infof("params params [%v]", params)
+	}).Infof("deployVirtualMachine params [%v]", params)
 
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
@@ -176,7 +215,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getDeployVirtualMachine",
-	}).Infof("endUrl [%v]", endUrl)
+	}).Infof("deployVirtualMachine endUrl [%v]", endUrl)
 
 	res := map[string]interface{}{}
 	resp, err := http.Get(endUrl)
@@ -184,22 +223,22 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 
 		log.WithFields(logrus.Fields{
 			"moldReference.go": "getDeployVirtualMachine",
-		}).Errorf("Mold 와 통신에 실패했습니다.(getDeployVirtualMachine) [%v]", err)
+		}).Errorf("Failed to communicate with Mold. (deployVirtualMachine) [%v]", err)
 
-		res["message"] = "Mold 와 통신에 실패했습니다.(getDeployVirtualMachine)"
+		res["message"] = "Failed to communicate with Mold. (deployVirtualMachine)"
 		res["status"] = BaseErrorCode
 	} else {
 		if instanceType == WorkspaceString {
 			updateWorkspaceTemplateCheck(workspaceInfo.Uuid, AgentCheck)
 		}
-		json.NewDecoder(resp.Body).Decode(&res)
+		err = json.NewDecoder(resp.Body).Decode(&res)
 		res["status"] = http.StatusOK
 	}
 	return res
 }
 
 func getDestroyVirtualMachine(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "destroyVirtualMachine"},
 	}
@@ -208,20 +247,26 @@ func getDestroyVirtualMachine(params []MoldParams) map[string]interface{} {
 	stringParams := makeStringParams(params)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getDestroyVirtualMachine",
+	}).Infof("destroyVirtualMachine endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
+
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getDestroyVirtualMachine",
+		}).Errorf("Failed to communicate with Mold. (deployVirtualMachine) [%v]", err)
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getCreateTags(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "createTags"},
 	}
@@ -230,44 +275,27 @@ func getCreateTags(params []MoldParams) map[string]interface{} {
 	stringParams := makeStringParams(params)
 	log.Infof("stringParams = [%v]", stringParams)
 	sig := makeSignature(stringParams)
-	//endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL {" + baseurl + "?" + stringParams + "&signature=" + sig + "}")
-	resp, err := http.Get(baseurl + "?" + stringParams + "&signature=" + sig)
-	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
-		log.Error(err.Error())
-	}
-	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
 
-	return res
-}
-
-func getQueryAsyncJobResult(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
-	params1 := []MoldParams{
-		{"command": "queryAsyncJobResult"},
-	}
-	params = append(params, params1...)
-
-	stringParams := makeStringParams(params)
-	log.Infof("stringParams = [%v]", stringParams)
-	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getCreateTags",
+	}).Infof("createTags endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getCreateTags",
+		}).Errorf("Failed to communicate with Mold. (createTags) [%v]", err)
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getStartVirtualMachine(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "startVirtualMachine"},
 	}
@@ -277,20 +305,25 @@ func getStartVirtualMachine(params []MoldParams) map[string]interface{} {
 	log.Infof("stringParams = [%v]", stringParams)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getStartVirtualMachine",
+	}).Infof("startVirtualMachine endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getCreateTags",
+		}).Errorf("Failed to communicate with Mold. (startVirtualMachine) [%v]", err)
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getStopVirtualMachine(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "stopVirtualMachine"},
 	}
@@ -300,20 +333,25 @@ func getStopVirtualMachine(params []MoldParams) map[string]interface{} {
 	log.Infof("stringParams = [%v]", stringParams)
 	sig := makeSignature(stringParams)
 	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
-	log.Info("Mold 통신 URL [" + endUrl + "]")
+
+	log.WithFields(logrus.Fields{
+		"moldReference.go": "getStopVirtualMachine",
+	}).Infof("stopVirtualMachine endUrl [%v]", endUrl)
+
 	resp, err := http.Get(endUrl)
 	if err != nil {
-		log.Error("Mold 와 통신에 실패했습니다.(deployVirtualMachine)")
-		log.Error(err.Error())
+		log.WithFields(logrus.Fields{
+			"moldReference.go": "getCreateTags",
+		}).Errorf("Failed to communicate with Mold. (stopVirtualMachine) [%v]", err)
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }
 
 func getListVirtualMachinesMetrics(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "listVirtualMachinesMetrics"},
 	}
@@ -330,15 +368,15 @@ func getListVirtualMachinesMetrics(params []MoldParams) map[string]interface{} {
 		log.Error(err.Error())
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	log.Debugf("getListVirtualMachinesMetrics result [%v]", res)
 
 	return res
 }
 
-func getlistVolumesMetrics(params []MoldParams) map[string]interface{} {
-	var baseurl string = os.Getenv("MoldUrl")
+func getListVolumesMetrics(params []MoldParams) map[string]interface{} {
+	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{
 		{"command": "listVolumesMetrics"},
 	}
@@ -355,7 +393,7 @@ func getlistVolumesMetrics(params []MoldParams) map[string]interface{} {
 		log.Error(err.Error())
 	}
 	var res map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&res)
+	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
 }

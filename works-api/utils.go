@@ -18,7 +18,7 @@ const (
 	ServiceWorks    = "ServiceWorks"
 	WorkspaceName   = "WorkspaceName"
 	AblecloudWorks  = "Ablecloud.Works"
-	ClusterName = "ClusterName"
+	ClusterName     = "ClusterName"
 	AgentOK         = "AgentOK"
 	AgentCheck      = "AgentCheck"
 	Enable          = "Enable"
@@ -28,8 +28,8 @@ const (
 
 	Trace = "Trace"
 	Debug = "Debug"
-	Info = "Info"
-	Warn = "Warn"
+	Info  = "Info"
+	Warn  = "Warn"
 	Error = "Error"
 
 	VMStart   = "VMStart"
