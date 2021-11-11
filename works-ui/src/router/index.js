@@ -3,7 +3,6 @@ import { worksApi } from "../api";
 import { message } from "ant-design-vue";
 import router from "@/router";
 import Login from "../views/auth/Login.vue";
-import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
 import Dashboard from "../views/dashboard/Dashboard.vue";
 import Workspace from "../views/workspace/WorkSpace.vue";

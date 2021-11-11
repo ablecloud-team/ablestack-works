@@ -50,27 +50,6 @@
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <!-- <a-popover placement="bottom">
-          <template #content>
-            <a-button type="text" @click="setLocale('ko')">
-              한국어
-            </a-button>
-            <br />
-            <a-button type="text" @click="setLocale('en')">
-              English
-            </a-button>
-          </template>
-          <a-button type="text">
-            <template #icon>
-              <font-awesome-icon
-                  :icon="['fas', 'language']"
-                  size="4x"
-                  style="color: #666"
-                  class="login-ico"
-              />
-            </template>
-          </a-button>
-        </a-popover> -->
         <a-dropdown>
           <a-button type="text" shape="circle" class="header-notice-button">
             <a class="ant-dropdown-link" @click.prevent>
@@ -128,7 +107,10 @@ export default defineComponent({
     };
   },
   data() {
-    return {};
+    return {
+      language: ref(""),
+      loadedLanguage: ref[""],
+    };
   },
   computed: {},
   created() {
