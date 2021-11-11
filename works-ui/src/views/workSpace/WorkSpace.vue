@@ -430,7 +430,7 @@ export default defineComponent({
         })
         .catch((error) => {
           message.destroy();
-          message.error(this.t("message.response.data.fail"));
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
