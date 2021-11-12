@@ -103,7 +103,7 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosUserDetail, axiosLogout } from "@/api/index";
+import { axiosLogout } from "@/api/index";
 import store from "@/store/index";
 import router from "@/router";
 export default defineComponent({

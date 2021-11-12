@@ -39,7 +39,7 @@
           <BellOutlined class="header-notice-icon" />
         </a>
       </a-button>
-      <a-dropdown placement="bottomRight"  visible="true">
+      <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
@@ -102,7 +102,7 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosUserDetail, axiosLogout } from "@/api/index";
+import { axiosLogout } from "@/api/index";
 import store from "@/store/index";
 import router from "@/router";
 export default defineComponent({
@@ -113,7 +113,6 @@ export default defineComponent({
   },
   emits: ["setCollapsed"],
   setup(props) {
-    let res;
     const state = reactive({
       //userID: "",
       collapsed: ref(props.collapsed),
@@ -172,7 +171,7 @@ export default defineComponent({
       }
     },
     userinfo() {
-      router.push({ path: "/userDetail"});
+      router.push({ path: "/userDetail" });
     },
     // setLanguage(lang, message) {
     //   if (i18n) {
