@@ -39,6 +39,8 @@
     "message.workspace.delete.existvm": "A virtual machine exists in that workspace. Please delete the virtual machine and try again.",
     "message.user.vm.unlock.completed": "User unassigned to desktop.",
     "message.user.vm.unlock.fail": "Failed to deallocate user to desktop.",
+    "message.login.wrong.400":"Communication with DC server failed. Contact your administrator.",
+    "message.login.wrong.401":"Failed to generate settlement tokens when logging in. Contact your administrator.",
 
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",

@@ -39,6 +39,8 @@
     "message.workspace.delete.existvm": "해당 워크스페이스에 가상머신이 존재합니다. 가상머신을 삭제 후 다시 시도해주세요.",
     "message.user.vm.unlock.completed": "데스크톱에 사용자 할당이 해제되었습니다.",
     "message.user.vm.unlock.fail": "데스크톱에 사용자 할당 해제에 실패하였습니다.",
+    "message.login.wrong.400":"DC서버와 통신에 실패하였습니다. 관리자에게 문의하세요.",
+    "message.login.wrong.401":"로그인 시 정산적인 토큰생성에 실패하였습니다. 관리자에게 문의하세요.",
 
     "tooltip.vmStart": "시작",
     "tooltip.vmStop": "정지",

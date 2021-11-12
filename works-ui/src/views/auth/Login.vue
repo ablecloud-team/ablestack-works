@@ -113,11 +113,21 @@ export default defineComponent({
     };
   },
   computed: {},
+
   created() {
+    //message.destroy();
+    //message.loading("현재 DC서버를 구성중입니다. 잠시만 기다려주세요.", 10);
+    //this.timer = setInterval(() => {
+    //60초 자동 갱신
+    //}, 10000);
+
     this.rules.id.message = this.$t("message.please.enter.your.id");
     this.rules.password.message = this.$t("message.please.enter.your.password");
     this.onClear();
   },
+  // beforeUnmount() {
+  //   clearInterval(this.timer);
+  // },
   methods: {
     setLocaleClick(e) {
       let localeValue = e.key;
@@ -141,7 +151,7 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.logging"), 10);
+          message.loading(this.$t("message.logging"), 60);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
 
@@ -149,45 +159,41 @@ export default defineComponent({
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
-              if (response.status === 200) {
+              if (
+                response.status === 200 &&
+                response.data.result.login === true
+              ) {
+                store.dispatch("loginCommit", response.data);
+                sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem(
+                  "username",
+                  response.data.result.username
+                );
+                sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
                 if (
-                  response.data.result.status === 200 &&
-                  response.data.result.login === true
+                  response.data.result.username.toLowerCase() ===
+                  "administrator"
                 ) {
-                  store.dispatch("loginCommit", response.data);
-                  sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem(
-                    "username",
-                    response.data.result.username
-                  );
-                  sessionStorage.setItem(
-                    "isAdmin",
-                    response.data.result.isAdmin
-                  );
-                  if (
-                    response.data.result.username.toLowerCase() ===
-                    "administrator"
-                  ) {
-                    router.push({ name: "Dashboard" });
-                  } else {
-                    router.push({ name: "Favorite" });
-                  }
-                  message.destroy();
-                  message.success(this.$t("message.login.completed"));
+                  router.push({ name: "Dashboard" });
                 } else {
-                  message.destroy();
-                  message.error(this.$t("message.login.wrong"));
-                  //router.push({ name: "Login" });
+                  router.push({ name: "Favorite" });
                 }
+                message.destroy();
+                message.success(this.$t("message.login.completed"));
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));
               }
             })
             .catch((error) => {
-              console.log(error.message);
               message.destroy();
-              message.error(this.$t("message.login.wrong"));
+              if (error.response.status === 400) {
+                message.error(this.$t("message.login.wrong.400"));
+              } else if (error.response.status === 401) {
+                message.error(this.$t("message.login.wrong.401"));
+              } else {
+                message.error(this.$t("message.login.wrong"));
+              }
             });
         })
         .catch((error) => {
