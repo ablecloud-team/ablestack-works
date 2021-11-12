@@ -27,7 +27,7 @@ func handshakeVdi(instance Instance, vdiType string) {
 	var DCInfo = os.Getenv("DCUrl")
 	MyDomain := os.Getenv("SambaDomain")
 	client := http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 300 * time.Second,
 	}
 	for i := 0; i <= 120; i++ {
 		statusString, err := getVdiAdStatus(vdiUrl)
@@ -115,15 +115,15 @@ func handshakeVdi(instance Instance, vdiType string) {
 			}).Infof("VDI AD join status. [%v]", statusString)
 			if vdiType == WorkspaceString {
 				workspaceTemplateCheck := updateWorkspaceTemplateCheck(instance.WorkspaceUuid, AgentOK)
+				asyncJob := AsyncJob{}
+				asyncJob.Id = getUuid()
+				asyncJob.Name = VMDestroy
+				asyncJob.ExecUuid = instance.Uuid
+				asyncJob.Ready = 1
+				resultInsertAsyncJob := insertAsyncJob(asyncJob)
+				log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
+				updateWorkspacePostfix(instance.WorkspaceUuid, 0)
 				if workspaceTemplateCheck["status"] == http.StatusOK {
-					asyncJob := AsyncJob{}
-					asyncJob.Id = getUuid()
-					asyncJob.Name = VMDestroy
-					asyncJob.ExecUuid = instance.Uuid
-					asyncJob.Ready = 1
-					resultInsertAsyncJob := insertAsyncJob(asyncJob)
-					log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
-					updateWorkspacePostfix(instance.WorkspaceUuid, 0)
 				}
 			}
 			break
