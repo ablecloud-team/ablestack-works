@@ -18,40 +18,53 @@ import (
 // @Param password path string true "사용자 비밀번호"
 // @Router /api/login [put]
 // @Success 200 {object} map[string]interface{}
+// @Success 400 {object} map[string]interface{} "DC 서버와 통신이 안된경우 발생"
+// @Success 401 {object} map[string]interface{} "로그인처리는 정상적으로 되었으나 토큰생성에서 에러가 발생한경우"
+// @Success 404 {object} map[string]interface{} "DC 서버와 통신이 통신은 정상적이나 계정이나 비밀번호가 일치 하지 않는경우"
 func getLogin(c *gin.Context) {
-	var result map[string]interface{}
 	userId := c.PostForm("id")
 	userPassword := c.PostForm("password")
-	result = login(userId, userPassword)
-	loginBool := result["login"].(bool)
-	log.Debugln(loginBool)
-	if loginBool == false {
-		c.JSON(http.StatusAccepted, gin.H{
-			"result":  result,
-			"message": "Login failed",
-		})
-		c.Abort()
-	} else if loginBool == true {
-		token, err := createToken(userId)
-		if err != nil {
-			if err == jwt.ErrSignatureInvalid {
-				c.JSON(http.StatusUnauthorized,
-					gin.H{"status": http.StatusUnauthorized, "error": "token is expired"})
-				c.Abort()
-				return
-			}
-			c.JSON(http.StatusUnprocessableEntity, err.Error())
-			c.Abort()
-			return
-		}
-		log.Infof("%v token is %v", userId, token)
-		//log.Info(c.sameSite)
-		//c.Header("access-token", token)
-		result["token"] = token
-		result["status"] = http.StatusOK
-		c.JSON(http.StatusOK, gin.H{
+	resultLogin, err := login(userId, userPassword)
+	result := map[string]interface{}{}
+	if err != nil {
+		log.Errorf("result [%v], error [%v]", result, err)
+		result["message"] = "Communication with the DC server failed."
+		c.JSON(http.StatusBadRequest, gin.H{
 			"result": result,
 		})
+		return
+	} else {
+		if resultLogin.Status == OK200 {
+			json.NewDecoder(resultLogin.Body).Decode(&result)
+			loginBool := result["login"].(bool)
+			log.Debugln(loginBool)
+			if loginBool == false {
+				result["message"] = "Login failed"
+				c.JSON(http.StatusNotFound, gin.H{
+					"result": result,
+				})
+				return
+			} else if loginBool == true {
+				token, err := createToken(userId)
+				if err != nil {
+					if err == jwt.ErrSignatureInvalid {
+						result["message"] = "token is expired"
+						c.JSON(http.StatusUnauthorized, gin.H{
+							"result": result,
+						})
+						return
+					}
+				}
+				log.Infof("%v token is %v", userId, token)
+				result["token"] = token
+				//c.Header("access-token", token)
+				//log.Info(c.sameSite)
+				c.JSON(http.StatusOK, gin.H{
+					"result": result,
+				})
+				return
+			}
+		}
 	}
 }
 
@@ -137,6 +150,23 @@ func getUserToken(c *gin.Context) {
 // @Router /api/v1/user [get]
 // @Success 200 {object} map[string]interface{}
 func getUser(c *gin.Context) {
+	result := map[string]interface{}{}
+	result["result"] = selectUserList()
+	log.Info(result["result"])
+	result["status"] = http.StatusOK
+	c.JSON(http.StatusOK, gin.H{
+		"result": result,
+	})
+}
+
+// deleteUser godoc
+// @Summary 사용자 리스트를 조회 하는 API
+// @Description 사용자 리스트를 조회를 위한 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Router /api/v1/user [get]
+// @Success 200 {object} map[string]interface{}
+func deleteUser(c *gin.Context) {
 	result := map[string]interface{}{}
 	result["result"] = selectUserList()
 	log.Info(result["result"])

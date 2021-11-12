@@ -17,23 +17,22 @@ type UserInfo struct {
 }
 
 //login
-func login(id string, password string) map[string]interface{} {
+func login(id string, password string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	params := url.Values{
 		"username": {id},
 		"password": {password},
 	}
 	client := http.Client{}
-	var res map[string]interface{}
 	resp, err := client.PostForm(DCInfo+"/v1/login", params)
-	if err != nil {
-		log.Error(err)
-		log.Errorf("%v\n", resp)
-	} else {
-		json.NewDecoder(resp.Body).Decode(&res)
-	}
+	//if err != nil {
+	//	log.Error(err)
+	//	log.Errorf("%v\n", resp)
+	//} else {
+	//	json.NewDecoder(resp.Body).Decode(&res)
+	//}
 
-	return res
+	return resp, err
 }
 
 func selectUserDetail(id string) *http.Response {
@@ -255,9 +254,7 @@ func insertUserAllocatedInstance1(username string, instanceUuid string) *http.Re
 
 func insertConnection(username string, connectName string, parameter string) *http.Response {
 	var DCInfo = os.Getenv("DCUrl")
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
+	client := http.Client{}
 
 	params := url.Values{
 		"username":  {username},
@@ -266,7 +263,7 @@ func insertConnection(username string, connectName string, parameter string) *ht
 	//resp, err := client.PostForm(DCInfo+"/v1/connection/"+connectName, params)
 	resp, err := client.PostForm(fmt.Sprintf("%v/v1/connection/%v", DCInfo, connectName), params)
 	if err != nil {
-		log.Errorf("유저 삭제중 에러가 발생했습니다. [%v]", err)
+		log.Errorf("An error occurred while creating the connection information. [%v]", err)
 	}
 
 	log.Infof(resp.Status)
@@ -279,11 +276,7 @@ func delConnection(connectName string) *http.Response {
 		Timeout: 30 * time.Second,
 	}
 
-	//params := url.Values{
-	//	"username":  {username},
-	//	"parameter": {parameter},
-	//}
-	req, _ := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/connection/%v", DCInfo, connectName), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/connection/%v", DCInfo, connectName), nil)
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
@@ -292,5 +285,6 @@ func delConnection(connectName string) *http.Response {
 			"moldReference.go": "delConnection",
 		}).Errorf("An error occurred while deleting the connection. resp [%v], err [%v]", resp, err)
 	}
+
 	return resp
 }
