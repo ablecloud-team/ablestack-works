@@ -10,7 +10,7 @@
     </a-col>
     <a-col
       :span="12"
-      style="float: right; text-align: right; padding-right: 40px"
+      style="float: right; text-align: right"
     >
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
