@@ -372,3 +372,50 @@ func ClusterNameSetting() {
 	}).Infof("clutster Name [%v]", clutsterName)
 	os.Setenv("ClutsterName", clutsterName)
 }
+
+func RDPPortSetting() {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("DB connect error[%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"worksInit": "RDPPortSetting",
+	}).Infof("DB connect success")
+
+	rows, err := db.Query("SELECT * FROM configuration WHERE name LIKE 'rdp.default%'")
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("worksInit RDP port Setting Query Failed[%v]", err)
+	}
+	defer rows.Close()
+
+	result, err := rowsToString(rows)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("Row to String conversion error [%v]", err)
+	}
+
+	jsonUnmarshal := []Configuration{}
+	err = json.Unmarshal([]byte(result), &jsonUnmarshal)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("String to JSON conversion error [%v]", err)
+	}
+
+	clusterValue := map[string]interface{}{}
+	for _, v := range jsonUnmarshal {
+		clusterValue[v.Name] = v.Value
+	}
+	portForRDP := clusterValue["rdp.default.port"].(string)
+
+	log.WithFields(logrus.Fields{
+		"worksInit": "RDPPortSetting",
+	}).Infof("RDP Port [%v]", portForRDP)
+	os.Setenv("PortForRDP", portForRDP)
+}
