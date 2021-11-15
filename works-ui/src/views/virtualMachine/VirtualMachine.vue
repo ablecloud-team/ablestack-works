@@ -9,11 +9,12 @@
               <Apath :paths="[$t('label.vm')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
-                @click="reflesh()"
+                style="margin-left: 20px;"
+                size="small"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -31,7 +32,7 @@
       <a-layout-content>
         <div id="content-body">
           <VirtualMachineList
-            ref="listRefleshCall"
+            ref="listRefreshCall"
             @actionFromChange="actionFromChange"
           />
         </div>
@@ -60,8 +61,8 @@ export default defineComponent({
     };
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall.fetchData();
     },
     actionFromChange(val) {
       //console.log(val);
@@ -84,7 +85,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -92,6 +93,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

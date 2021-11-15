@@ -342,7 +342,7 @@ export default defineComponent({
     putWorkspace() {
       alert("워크스페이스 생성!!!!!!!!!!!!!!!!!!!");
       // worksApi
-      //   .get("/api/v1/workspace", { withCredentials: true })
+      //   .get("/api/v1/workspace")
       //   .then((response) => {
       //     if (response.status == 200) {
       //       this.dataList = response.data.result.list;
@@ -350,14 +350,14 @@ export default defineComponent({
       //       console.log(response.message);
       //     }
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     console.log(error);
       //   });
     },
     putUser() {
       alert("유저 생성!!!!!!!!!!!!!!!!!!!");
       // worksApi
-      //   .get("/api/v1/workspace", { withCredentials: true })
+      //   .get("/api/v1/workspace")
       //   .then((response) => {
       //     if (response.status == 200) {
       //       this.dataList = response.data.result.list;
@@ -365,7 +365,7 @@ export default defineComponent({
       //       console.log(response.message);
       //     }
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     console.log(error);
       //   });
     },

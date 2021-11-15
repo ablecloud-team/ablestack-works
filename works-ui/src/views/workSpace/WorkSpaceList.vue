@@ -47,7 +47,8 @@
     <!-- 검색 필터링 template-->
     <template #nameRender="{ record }">
       <router-link
-      :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }">
+        :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }"
+      >
         {{ record.name }}
       </router-link>
     </template>
@@ -259,6 +260,13 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
+    this.timer = setInterval(() => {
+      //60초 자동 갱신
+      this.fetchData();
+    }, 60000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
     setSelection(selection) {
@@ -285,12 +293,11 @@ export default defineComponent({
             this.dataList = response.data.result.list;
           } else {
             message.error(this.$t("message.response.data.fail"));
-            //console.log(response.message);
           }
         })
-        .catch(function (error) {
-          message.error(error.message);
-          //console.log(error);
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
       setTimeout(() => {
         this.loading = false;

@@ -4,7 +4,7 @@
     type="dashed"
     block
     style="margin-bottom: 14px"
-    :disabled="buttonDisable"
+    :disabled="state.buttonDisable"
     @click="changeModal(state.callTapName, true)"
   >
     <PlusOutlined />
@@ -24,9 +24,12 @@
       <span
         v-if="actionFrom !== undefined && actionFrom === 'VirtualMachineList'"
       >
-        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">{{
-          record.name
-        }}</router-link>
+        <router-link
+          :to="{
+            path: '/virtualMachineDetail/' + record.uuid + '/' + record.name,
+          }"
+          >{{ record.name }}</router-link
+        >
       </span>
       <span v-else>
         {{ record.name }}
@@ -81,15 +84,24 @@
       />
     </template>
     <template #vmReadyStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="record.mold_status == 'Running' && record.checked === true ? 'green' : 'red'"
-        :text="
-          record.mold_status == 'Running' && record.checked === true
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
-        "
-      />
+      <a-tooltip placement="bottom">
+        <template #title>{{ record.handshake_status }}</template>
+        <a-badge
+          class="head-example"
+          :color="
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? 'green'
+              : 'red'
+          "
+          :text="
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
+          "
+        />
+      </a-tooltip>
     </template>
     <template #stateRender="{ record }">
       {{ record.state }}
@@ -206,6 +218,7 @@ export default defineComponent({
       callTapName: ref(props.tapName),
       addButtonBoolean: ref(false),
       addButtontext: ref(""),
+      buttonDisable: ref(true),
       modalConfirm: ref(""),
       modalTitle: ref(""),
       confirmModalView: ref(false),
@@ -236,8 +249,6 @@ export default defineComponent({
       confirmModalView: ref(false),
       deleteUser: ref(""),
       timer: ref(null),
-      buttonDisable: ref(false),
-      workspaceName: ref(""),
     };
   },
   created() {
@@ -245,7 +256,7 @@ export default defineComponent({
     this.timer = setInterval(() => {
       //30초 자동 갱신
       this.fetchData();
-    }, 30000);
+    }, 60000);
   },
   unmounted() {
     clearInterval(this.timer);
@@ -270,21 +281,24 @@ export default defineComponent({
           .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
           .then((response) => {
             if (response.status == 200) {
-              this.workspaceName = response.data.result.workspaceInfo.name;
               if (
-                response.data.result.workspaceInfo.template_ok_check !==
+                response.data.result.workspaceInfo.template_ok_check ===
                 "AgentOK"
               ) {
-                this.buttonDisable = true; //워크스페이스 Agent상태가 OK일때 데스크톱가상머신추가 버튼 활성화
+                this.state.buttonDisable = ref(false); //워크스페이스 Agent상태가 OK일때 데스크톱가상머신추가 활성화
               }
               if (this.state.callTapName === "desktop") {
                 this.fetchDesktop();
               } else if (this.state.callTapName === "user") {
                 this.fetchUser();
               }
+            } else {
+              message.error(this.$t("message.response.data.fail"));
             }
           })
-          .catch(function (error) {
+          .catch((error) => {
+            message.destroy();
+            message.error(this.$t("message.response.data.fail"));
             console.log(error);
           });
       } else if (this.state.callTapName === "policy") {
@@ -376,11 +390,12 @@ export default defineComponent({
           if (response.status == 200) {
             this.dataList = response.data.result.instanceInfo;
           } else {
-            //message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
@@ -409,7 +424,7 @@ export default defineComponent({
 
       //해당 워크스페이스에 추가 된 사용자 목록 조회
       worksApi
-        .get("/api/v1/group/" + this.workspaceName)
+        .get("/api/v1/group/" + this.$route.params.workspaceName)
         .then((response) => {
           if (response.status == 200) {
             //console.log(response.data.result.member);
@@ -421,13 +436,13 @@ export default defineComponent({
               this.dataList.push({ name: str.split(",")[0].split("CN=")[1] });
             }
           } else {
-            //message.error(this.t("message.response.data.fail"));
-            //console.log(response.message);
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
-          message.error(error);
-          //console.log(error);
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
 
       // 워크스페이스에 추가 할 사용자 목록 조회
@@ -437,13 +452,13 @@ export default defineComponent({
           if (response.data.result.status == 200) {
             this.userDataList = response.data.result.result;
           } else {
-            //message.error(this.t("message.response.data.fail"));
-            //console.log(response.message);
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
-          message.error(error);
-          //console.log(error);
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
     },
     fetchPolicy() {
@@ -482,11 +497,12 @@ export default defineComponent({
             //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
             this.dataList = null;
           } else {
-            //message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
@@ -525,11 +541,12 @@ export default defineComponent({
           if (response.status == 200) {
             this.dataList = response.data.result.networkInfo.network;
           } else {
-            //message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
@@ -575,10 +592,12 @@ export default defineComponent({
             this.dataList =
               response.data.result.instanceInstanceVolumeInfo.volume;
           } else {
-            //message.error(this.$t('message.response.data.fail'));
+            message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
@@ -604,8 +623,10 @@ export default defineComponent({
           }
           this.changeModal("desktop", false);
         })
-        .catch(function (error) {
-          message.error(error);
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.workspace.vm.add.fail"));
+          console.log(error);
         });
     },
     putUserToWorksapce() {
@@ -613,7 +634,12 @@ export default defineComponent({
       //console.log(this.selectedUser);
       if (!this.selectedUser) return false;
       worksApi
-        .put("/api/v1/group/" + this.workspaceName + "/" + this.selectedUser)
+        .put(
+          "/api/v1/group/" +
+            this.$route.params.workspaceName +
+            "/" +
+            this.selectedUser
+        )
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.add"), 5);
@@ -626,13 +652,14 @@ export default defineComponent({
           this.changeModal("user", false);
         })
         .catch((error) => {
+          message.destroy();
           message.error(this.$t("message.workspace.user.add.dupl"));
-          //console.log(error);
+          console.log(error);
         });
     },
     onUserDelete(val) {
       worksApi
-        .delete("/api/v1/group/" + this.workspaceName + "/" + val)
+        .delete("/api/v1/group/" + this.$route.params.workspaceName + "/" + val)
         .then((response) => {
           if (response.status === 200) {
             message.success(this.$t("message.workspace.user.delete"), 1);
@@ -643,7 +670,9 @@ export default defineComponent({
             message.error(this.$t("message.workspace.user.delete.fail"));
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.workspace.user.delete.fail"));
           message.error(error);
         });
     },

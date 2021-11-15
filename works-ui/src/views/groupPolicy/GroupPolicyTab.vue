@@ -207,11 +207,11 @@ export default defineComponent({
               });
             }
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           message.error(error);
           //console.log(error);
         });
@@ -227,7 +227,7 @@ export default defineComponent({
       //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
       //     }
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     console.log(error);
       //   });
       setTimeout(() => {
@@ -253,9 +253,9 @@ export default defineComponent({
       //       message.error(response.data.result.createuserresponse.errortext);
       //     }
       //     changeModal('user', false)
-      //     //this.$refs.listRefleshCall.fetchData();
+      //     //this.$refs.listRefreshCall.fetchData();
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     message.error(error.message);
       //   //console.log(error);
       //   });

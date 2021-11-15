@@ -6,12 +6,7 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath
-                :paths="[
-                  { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceName, component: null },
-                ]"
-              />
+              <Apath :paths="[{ name: userName, component: null }]" />
               <a-button
                 shape="round"
                 style="margin-left: 20px"
@@ -23,19 +18,17 @@
                 </template>
               </a-button>
             </a-col>
-            <!-- 우측 액션 -->
+
+            <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions
-                :action-from="actionFrom"
-                :workspace-uuid="workspaceUuid"
-              />
+              <Actions :action-from="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody ref="listRefreshCall" />
+          <UserBody ref="listRefreshCall" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -43,24 +36,25 @@
 </template>
 
 <script>
-import Actions from "@/components/Actions";
-import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
+import Actions from "../../components/Actions";
+import Apath from "../../components/Apath";
+import UserBody from "./UserBody";
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  components: { Apath, Actions, WorkSpaceBody },
+  components: {
+    UserBody,
+    Apath,
+    Actions,
+  },
   props: {},
   setup() {
     return {
-      actionFrom: ref("WorkspaceDetail"),
+      actionFrom: ref("UserDetail"),
     };
   },
   data() {
-    return {
-      workspaceUuid: ref(this.$route.params.workspaceUuid),
-      workspaceName: ref(this.$route.params.workspaceName),
-    };
+    return {};
   },
   created() {},
   methods: {

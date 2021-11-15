@@ -22,7 +22,7 @@
         <router-view />
       </a-layout-content>
       <a-layout-footer class="admin-layout-footer">
-        <AdminFooter />
+        <Footer />
       </a-layout-footer>
     </a-layout>
   </a-layout>
@@ -31,7 +31,7 @@
 <script>
 import AdminSider from "./sider/AdminSider";
 import AdminHeader from "./header/AdminHeader";
-import AdminFooter from "./footer/AdminFooter";
+import Footer from "./footer/Footer";
 import { defineComponent, reactive, ref } from "vue";
 
 export default defineComponent({
@@ -39,7 +39,7 @@ export default defineComponent({
   components: {
     AdminSider,
     AdminHeader,
-    AdminFooter,
+    Footer,
   },
   setup() {
     const state = reactive({
@@ -70,8 +70,10 @@ export default defineComponent({
 
 .admin-layout-content {
   background: #f0f2f5;
-  min-height: 700px;
-  height: 100%;
+}
+
+.ant-layout-content {
+  min-height: fit-content !important;
 }
 
 .admin-layout-footer {

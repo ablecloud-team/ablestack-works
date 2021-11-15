@@ -15,23 +15,32 @@
     <div id="Status" class="CardItem">
       <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
       <div class="Item">
-        <a-badge
-          class="head-example"
-          :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
-          :text="
-            vmDbDataInfo.checked === true
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
+        <a-tooltip placement="bottom">
+          <template #title>{{ vmDbDataInfo.handshake_status }}</template>
+          <a-badge
+            class="head-example"
+          :color="
+            vmDbDataInfo.mold_status == 'Running' &&
+            vmDbDataInfo.handshake_status === 'Ready'
+              ? 'green'
+              : 'red'
           "
-        />
+            :text="
+              vmDbDataInfo.mold_status == 'Running' &&
+              vmDbDataInfo.handshake_status === 'Ready'
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
+            "
+          />
+        </a-tooltip>
       </div>
     </div>
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        <a-button shape="circle" type="dashed">
+        <!-- <a-button shape="circle" type="dashed" >
           <BarcodeOutlined />
-        </a-button>
+        </a-button> -->
         {{ vmDbDataInfo.uuid }}
       </div>
     </div>
@@ -87,9 +96,10 @@
           <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
         >
         <a-tag>
-          <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+          <ArrowDownOutlined /> TX
+          {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
         ><br />
-        {{ vmNetworkInfo.networkname }}
+        {{ vmNetworkInfo.networkname }} ({{ vmNetworkInfo.type }})
       </div>
     </div>
     <div class="CardItem">
@@ -108,14 +118,13 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
-  props: {
-  },
+  props: {},
   setup() {
     return {};
   },
@@ -130,10 +139,10 @@ export default defineComponent({
     };
   },
   created() {
-    this.reflesh();
+    this.refresh();
   },
   methods: {
-    reflesh() {
+    refresh() {
       this.fetchData();
       this.spinning = true;
       setTimeout(() => {
@@ -158,8 +167,9 @@ export default defineComponent({
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           console.log(error);
+          message.error(this.$t("message.response.data.fail"));
         });
     },
   },

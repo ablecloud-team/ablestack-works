@@ -46,9 +46,12 @@
     <!-- 검색 필터링 template-->
 
     <template #nameRender="{ record }">
-      <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid +'/' + record.name}">{{
-        record.name
-      }}</router-link>
+      <router-link
+        :to="{
+          path: '/virtualMachineDetail/' + record.uuid + '/' + record.name,
+        }"
+        >{{ record.name }}</router-link
+      >
     </template>
 
     <template #actionRender="{ record }">
@@ -75,15 +78,24 @@
       />
     </template>
     <template #vmReadyStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="record.mold_status == 'Running' && record.checked === true ? 'green' : 'red'"
-        :text="
-          record.mold_status == 'Running' && record.checked === true
-            ? $t('label.vm.status.ready')
-            : $t('label.vm.status.notready')
-        "
-      />
+      <a-tooltip placement="bottom">
+        <template #title>{{ record.handshake_status }}</template>
+        <a-badge
+          class="head-example"
+          :color="
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? 'green'
+              : 'red'
+          "
+          :text="
+            record.mold_status == 'Running' &&
+            record.handshake_status === 'Ready'
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
+          "
+        />
+      </a-tooltip>
     </template>
     <template #userRender="{ record }">
       <!-- {{
@@ -153,7 +165,7 @@ export default defineComponent({
           title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "20%",
+          width: "22%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -198,7 +210,7 @@ export default defineComponent({
           title: this.$t("label.users"),
           dataIndex: "owner_account_id",
           key: "owner_account_id",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.owner_account_id < b.owner_account_id
               ? -1
@@ -212,7 +224,7 @@ export default defineComponent({
           title: this.$t("label.vm.state"),
           dataIndex: "status",
           key: "status",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -222,17 +234,26 @@ export default defineComponent({
           title: this.$t("label.vm.ready.state"),
           dataIndex: "status",
           key: "status",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "vmReadyStateRender" },
         },
         {
+          title: this.$t("label.vm.network.ip"),
+          dataIndex: "ipaddress",
+          key: "ipaddress",
+          width: "11%",
+          sorter: (a, b) =>
+            a.ipaddress < b.ipaddress ? -1 : a.ipaddress > b.ipaddress ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
           title: this.$t("label.vm.session.count"),
           dataIndex: "connected",
           key: "connected",
-          width: "10%",
+          width: "11%",
           sorter: (a, b) =>
             a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -244,9 +265,9 @@ export default defineComponent({
   created() {
     this.fetchData();
     this.timer = setInterval(() => {
-      //10초 자동 갱신
+      //60초 자동 갱신
       this.fetchData();
-    }, 15000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
@@ -263,10 +284,10 @@ export default defineComponent({
     resetSelection() {
       this.setSelection([]);
     },
-    onSelectChange(selectedRowKeys, selectedRows) {
+    onSelectChange(selectedRowKeys) {
       this.setSelection(selectedRowKeys);
     },
-    fetchData(val) {
+    fetchData() {
       this.loading = true;
       worksApi
         .get("/api/v1/instance/all")
@@ -277,9 +298,9 @@ export default defineComponent({
             message.error(this.$t("message.response.data.fail"));
           }
         })
-        .catch(function (error) {
-          message.error(error);
-          //console.log(error);
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
       setTimeout(() => {
         this.loading = false;

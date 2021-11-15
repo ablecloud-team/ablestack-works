@@ -64,7 +64,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -72,6 +72,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

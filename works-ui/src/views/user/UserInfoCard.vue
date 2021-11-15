@@ -58,7 +58,7 @@ export default defineComponent({
     },
     fetchData() {
       worksApi
-        .get("/api/v1/user/" + this.$route.params.userName)
+        .get("/api/v1/user/" + sessionStorage.getItem("username"))
         .then((response) => {
           if (response.status == 200) {
             this.userDataInfo = response.data.result;
@@ -68,8 +68,8 @@ export default defineComponent({
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
           console.log(error);
+          message.error(this.$t("message.response.data.fail"));
         });
     },
   },

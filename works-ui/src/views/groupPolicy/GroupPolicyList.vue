@@ -152,9 +152,9 @@ export default defineComponent({
             //console.log(response.message);
           }
         })
-        .catch(function (error) {
-          message.error(error.message);
-          //console.log(error);
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
       setTimeout(() => {
         this.loading = false;

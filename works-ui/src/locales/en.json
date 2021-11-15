@@ -37,6 +37,8 @@
     "message.workspace.status.delete": "The workspace has been deleted.",
     "message.workspace.delete.fail": "Failed to delete workspace.",
     "message.workspace.delete.existvm": "A virtual machine exists in that workspace. Please delete the virtual machine and try again.",
+    "message.user.vm.unlock.completed": "User unassigned to desktop.",
+    "message.user.vm.unlock.fail": "Failed to deallocate user to desktop.",
 
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",
@@ -73,7 +75,8 @@
     "tooltip.vmDestroy":"Destroy the desktop virtual machine",
     "tooltip.workspaceDestroy":"Destroy the workspace",
 
-    "label.reflesh": "Reflesh",
+    "label.fetch.latest": "Fetch latest",
+    "label.refresh": "Refresh",
     "label.dashboard": "Dashboard",
     "label.workspace": "Workspaces",
     "label.vm": "Virtual Machines",
@@ -177,6 +180,10 @@
     "label.vm.status.notready": "Unable to Connect",
     "label.enable": "Enable",
     "label.disable": "Disable",
+    "label.configuration": "Setting",
+    "label.value": "Value",
+    "label.action": "Action",
+    "label.go.back": "Go Back",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",

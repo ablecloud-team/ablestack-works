@@ -3,7 +3,7 @@
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-          src="../../assets/ablestack-logo.png"
+          src="@/assets/ablestack-logo.png"
           alt="logo"
           class="user-layout-logo"
         />
@@ -40,32 +40,16 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" block class="login-button" html-type="submit">
+          <a-button
+            type="primary"
+            block
+            class="login-button"
+            html-type="submit"
+          >
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <!-- <a-popover placement="bottom">
-          <template #content>
-            <a-button type="text" @click="setLocale('ko')">
-              한국어
-            </a-button>
-            <br />
-            <a-button type="text" @click="setLocale('en')">
-              English
-            </a-button>
-          </template>
-          <a-button type="text">
-            <template #icon>
-              <font-awesome-icon
-                  :icon="['fas', 'language']"
-                  size="4x"
-                  style="color: #666"
-                  class="login-ico"
-              />
-            </template>
-          </a-button>
-        </a-popover> -->
         <a-dropdown>
           <a-button type="text" shape="circle" class="header-notice-button">
             <a class="ant-dropdown-link" @click.prevent>
@@ -123,7 +107,10 @@ export default defineComponent({
     };
   },
   data() {
-    return {};
+    return {
+      language: ref(""),
+      loadedLanguage: ref[""],
+    };
   },
   computed: {},
   created() {
@@ -157,41 +144,51 @@ export default defineComponent({
           message.loading(this.$t("message.logging"), 10);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
-          // try {
-          //  res = await axiosLogin(params)
+
           worksApi
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
               if (response.status === 200) {
-                if (response.data.result.isAdmin == "false") {
-                  message.error(this.$t("message.login.wrong"));
-                  router.push({ name: "Login" });
-                } else {
+                if (
+                  response.data.result.status === 200 &&
+                  response.data.result.login === true
+                ) {
                   store.dispatch("loginCommit", response.data);
                   sessionStorage.setItem("token", response.data.result.token);
                   sessionStorage.setItem(
                     "username",
                     response.data.result.username
                   );
-                  router.push({ name: "Dashboard" });
+                  sessionStorage.setItem(
+                    "isAdmin",
+                    response.data.result.isAdmin
+                  );
+                  if (
+                    response.data.result.username.toLowerCase() ===
+                    "administrator"
+                  ) {
+                    router.push({ name: "Dashboard" });
+                  } else {
+                    router.push({ name: "Favorite" });
+                  }
                   message.destroy();
                   message.success(this.$t("message.login.completed"));
+                } else {
+                  message.destroy();
+                  message.error(this.$t("message.login.wrong"));
+                  //router.push({ name: "Login" });
                 }
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));
               }
             })
-            .catch(function (error) {
-              console.log(error);
+            .catch((error) => {
+              console.log(error.message);
+              message.destroy();
+              message.error(this.$t("message.login.wrong"));
             });
-          // }catch (error){
-          //   message.destroy();
-          //   //TODO i18n 적용
-          //   console.log(error)
-          //   message.error(this.$t("message.login.wrong"))
-          // }
         })
         .catch((error) => {
           console.log("error", error);

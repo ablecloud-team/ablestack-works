@@ -5,7 +5,7 @@
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
           <VirtualMachineInfoCard 
-            ref="listRefleshCall1"
+            ref="listRefreshCall1"
           />
         </ACard>
       </ACol>
@@ -14,7 +14,7 @@
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
           <VirtualMachineTab 
-            ref="listRefleshCall2"
+            ref="listRefreshCall2"
           />
         </ACard>
       </ACol>
@@ -38,9 +38,9 @@ export default defineComponent({
     };
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      this.$refs.listRefleshCall2.reflesh();
+    refresh() {
+      this.$refs.listRefreshCall1.refresh();
+      this.$refs.listRefreshCall2.refresh();
     },
   },
 });

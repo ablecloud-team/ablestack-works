@@ -37,6 +37,8 @@
     "message.workspace.status.delete": "워크스페이스가 삭제되었습니다.",
     "message.workspace.delete.fail": "워크스페이스 삭제에 실패하였습니다.",
     "message.workspace.delete.existvm": "해당 워크스페이스에 가상머신이 존재합니다. 가상머신을 삭제 후 다시 시도해주세요.",
+    "message.user.vm.unlock.completed": "데스크톱에 사용자 할당이 해제되었습니다.",
+    "message.user.vm.unlock.fail": "데스크톱에 사용자 할당 해제에 실패하였습니다.",
 
     "tooltip.vmStart": "시작",
     "tooltip.vmStop": "정지",
@@ -73,7 +75,8 @@
     "tooltip.vmDestroy":"데스크톱 가상머신 파기",
     "tooltip.workspaceDestroy":"워크스페이스 파기",
 
-    "label.reflesh": "새로 고침",
+    "label.fetch.latest": "최신 정보 가져오기",
+    "label.refresh": "업데이트",
     "label.dashboard": "대시보드",
     "label.workspace": "워크스페이스",
     "label.vm": "가상머신",
@@ -112,7 +115,7 @@
     "label.user.id": "사용자 아이디",
     "label.password": "비밀번호",
     "label.passwordCheck": "비밀번호 확인",
-    "label.profile": "프로파일",
+    "label.profile": "정보",
     "label.logout": "로그아웃",
     "label.workspace.add": "워크스페이스 추가",
     "label.dedicated.shared": "전용/공유",
@@ -177,6 +180,10 @@
     "label.vm.status.notready": "접속 불가",
     "label.enable": "사용가능",
     "label.disable": "사용불가",
+    "label.configuration": "설정",
+    "label.value": "값",
+    "label.action": "작업",
+    "label.go.back": "돌아가기",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
