@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"strconv"
+	//"works-api/workspaces"
 )
 
 // getWorkspaces godoc
@@ -46,44 +48,49 @@ func getWorkspaces(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 func getWorkspacesDetail(c *gin.Context) {
 	workspaceUuid := c.Param("workspaceUuid")
+	returnCode := http.StatusNotFound
 	resultReturn := map[string]interface{}{}
 	workspaceList, _ := selectWorkspaceList(workspaceUuid)
-	workspaceInfo := workspaceList[0]
-	paramsTemplate := []MoldParams{
-		{"templatefilter": "executable"},
-		{"id": workspaceInfo.TemplateUuid},
+	if len(workspaceList) != 0 {
+		workspaceInfo := workspaceList[0]
+		paramsTemplate := []MoldParams{
+			{"templatefilter": "executable"},
+			{"id": workspaceInfo.TemplateUuid},
+		}
+
+		templateResult := getTemplate(paramsTemplate)
+
+		paramsServiceOffering := []MoldParams{
+			{"id": workspaceInfo.ComputeOfferingUuid},
+		}
+
+		serviceOfferingResult := getComputeOffering(paramsServiceOffering)
+
+		paramsNetwork := []MoldParams{
+			{"id": workspaceInfo.NetworkUuid},
+		}
+		networkResult := getNetwork(paramsNetwork)
+
+		instanceList, _ := selectInstanceList(workspaceUuid, WorkspaceString)
+
+		groupDetail, _ := selectGroupDetail(workspaceInfo.Name)
+		var groupData map[string]interface{}
+		err := json.NewDecoder(groupDetail.Body).Decode(&groupData)
+		if err != nil {
+
+		}
+		resultReturn["workspaceInfo"] = workspaceInfo
+		resultReturn["templateInfo"] = templateResult["listtemplatesresponse"]
+		resultReturn["serviceOfferingInfo"] = serviceOfferingResult["listserviceofferingsresponse"]
+		resultReturn["networkInfo"] = networkResult["listnetworksresponse"]
+		resultReturn["instanceList"] = instanceList
+		resultReturn["groupDetail"] = groupData
+		returnCode = http.StatusOK
+	} else {
+		resultReturn["message"] = fmt.Sprintf("There is no workspace for that UUID. [%v]", workspaceUuid)
 	}
 
-	templateResult := getTemplate(paramsTemplate)
-
-	paramsServiceOffering := []MoldParams{
-		{"id": workspaceInfo.ComputeOfferingUuid},
-	}
-
-	serviceOfferingResult := getComputeOffering(paramsServiceOffering)
-
-	paramsNetwork := []MoldParams{
-		{"id": workspaceInfo.NetworkUuid},
-	}
-	networkResult := getNetwork(paramsNetwork)
-
-	instanceList, _ := selectInstanceList(workspaceUuid, WorkspaceString)
-
-	groupDetail, _ := selectGroupDetail(workspaceInfo.Name)
-	var groupData map[string]interface{}
-	err := json.NewDecoder(groupDetail.Body).Decode(&groupData)
-	if err != nil {
-
-	}
-	resultReturn["workspaceInfo"] = workspaceInfo
-	resultReturn["templateInfo"] = templateResult["listtemplatesresponse"]
-	resultReturn["serviceOfferingInfo"] = serviceOfferingResult["listserviceofferingsresponse"]
-	resultReturn["networkInfo"] = networkResult["listnetworksresponse"]
-	resultReturn["instanceList"] = instanceList
-	resultReturn["groupDetail"] = groupData
-	//resultReturn["listVirtualMachinesMetrics"] = listVirtualMachinesMetrics
-
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(returnCode, gin.H{
 		"result": resultReturn,
 	})
 }
@@ -96,22 +103,20 @@ func getWorkspacesDetail(c *gin.Context) {
 // @Router /api/v1/offering [get]
 // @Success 200 {object} map[string]interface{}
 func getOffering(c *gin.Context) {
-	var paramsComputerOffering []MoldParams
-	var paramsTemplate []MoldParams
+	returnCode := http.StatusOK
+	//params1 := []MoldParams{
+	//	{"command": "listServiceOfferings"},
+	//}
+	paramsComputerOffering := []MoldParams{}
+	paramsTemplate := []MoldParams{}
 	//{"templatefilter": "all"},
-	result := map[string]interface{}{
-		"status": http.StatusOK,
-	}
+	result := map[string]interface{}{}
 	templateResult := getListDesktopMasterVersions(paramsTemplate)
 	serviceOfferingResult := getComputeOffering(paramsComputerOffering)
-	//networkResult := getNetwork(params)
-	//diskOfferingResult := getDiskOffering(params)
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(returnCode, gin.H{
 		"result":              result,
 		"templateList":        templateResult,
 		"serviceOfferingList": serviceOfferingResult,
-		//"networkList":         networkResult,
-		//"diskOfferingList":    diskOfferingResult,
 	})
 }
 
@@ -141,6 +146,7 @@ func putWorkspaces(c *gin.Context) {
 	workspace.ComputeOfferingUuid = c.PostForm("computeOfferingUuid")
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
+	workspace.Postfix = 0
 	resultInsertGroup, err := insertGroup(workspace.Name)
 	if resultInsertGroup.Status == Created201 {
 		resultInsertPolicyRemotefx, _ := insertPolicyRemotefx(workspace.Name)
@@ -158,9 +164,9 @@ func putWorkspaces(c *gin.Context) {
 		log.Info(resultInsertWorkspace)
 		result["insertWorkspace"] = resultInsertWorkspace
 		if resultInsertWorkspace["status"] == http.StatusOK {
-			instanceUuid := getUuid()
-			resultDeploy := getDeployVirtualMachine(workspace.Uuid, instanceUuid, WorkspaceString)
-			log.Infof("Mold 통신 결과값 [%v]\n", resultDeploy)
+			//instanceUuid := getUuid()
+			resultDeploy, instanceUuid := getDeployVirtualMachine(workspace, WorkspaceString)
+			log.Infof("Mold 통신 결과값 [%v]", resultDeploy)
 			if resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["errorcode"] != nil {
 				result["resultDeploy"] = resultDeploy
 				result["resultDeploy"].(map[string]interface{})["message"] = MessageSignatureError
@@ -175,18 +181,30 @@ func putWorkspaces(c *gin.Context) {
 
 				workspaceList, _ := selectWorkspaceList(workspace.Uuid)
 				workspaceInfo := workspaceList[0]
-				instance := Instance{}
-				instance.Uuid = instanceUuid
-				instance.MoldUuid = resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
-				instance.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
-				instance.WorkspaceUuid = workspaceInfo.Uuid
-				instance.WorkspaceName = workspaceInfo.Name
-				instance.Ipaddress = listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
-				resultInsertInstance := insertInstance(instance)
+				instanceInfo := Instance{}
+				instanceInfo.Uuid = instanceUuid
+				instanceInfo.MoldUuid = resultDeploy["deployvirtualmachineresponse"].(map[string]interface{})["id"].(string)
+				instanceInfo.Name = listVirtualMachinesMetrics.Virtualmachine[0].Displayname
+				instanceInfo.WorkspaceUuid = workspaceInfo.Uuid
+				instanceInfo.WorkspaceName = workspaceInfo.Name
+				instanceInfo.Ipaddress = listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
+				resultInsertInstance := insertInstance(instanceInfo)
 				if resultInsertInstance["status"] == http.StatusOK {
 					resultCode = http.StatusOK
 					result["resultInsertDeploy"] = resultInsertInstance
-					go handshakeVdi(instance, WorkspaceString)
+					params := []MoldParams{
+						{"resourceids": instanceInfo.MoldUuid},
+						{"resourcetype": UserVm},
+						{"tags[0].key": ServiceDaaS},
+						{"tags[0].value": AblecloudWorks},
+						{"tags[1].key": WorkspaceName},
+						{"tags[1].value": workspaceInfo.Name},
+						{"tags[2].key": ClusterName},
+						{"tags[2].value": os.Getenv("ClusterName")},
+					}
+					resultGetCreateTags := getCreateTags(params)
+					log.Infof("Create Tag Result [%v], params [%v]", resultGetCreateTags, params)
+					go handshakeVdi(instanceInfo, WorkspaceString)
 				}
 			}
 		}
@@ -245,20 +263,20 @@ func putWorkspacesAgent(c *gin.Context) {
 			returnCode = http.StatusNotFound
 			resultReturn["message"] = "There are no instance search results."
 		} else {
-			instanceInfo := instanceList[0]
-			workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, AgentOK)
-
-			if workspaceTemplateCheck["status"] == http.StatusOK {
-				//asyncJob := AsyncJob{}
-				//asyncJob.Id = getUuid()
-				//asyncJob.Name = VMDestroy
-				//asyncJob.ExecUuid = instanceInfo.Uuid
-				//asyncJob.Ready = 1
-				//resultInsertAsyncJob := insertAsyncJob(asyncJob)
-				//log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
-				updateWorkspacePostfix(instanceInfo.WorkspaceUuid, 0)
-				returnCode = http.StatusOK
-			}
+			//instanceInfo := instanceList[0]
+			//workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, AgentOK)
+			//
+			//if workspaceTemplateCheck["status"] == http.StatusOK {
+			//	//asyncJob := AsyncJob{}
+			//	//asyncJob.Id = getUuid()
+			//	//asyncJob.Name = VMDestroy
+			//	//asyncJob.ExecUuid = instanceInfo.Uuid
+			//	//asyncJob.Ready = 1
+			//	//resultInsertAsyncJob := insertAsyncJob(asyncJob)
+			//	//log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
+			//	updateWorkspacePostfix(instanceInfo.WorkspaceUuid, 0)
+			//	returnCode = http.StatusOK
+			//}
 		}
 
 	} else if paramsType == InstanceString {
@@ -280,7 +298,7 @@ func putWorkspacesAgent(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param workspaceUuid path string true "Instance UUID"
-// @Router /api/v1/instance/detail/:instanceUuid [GET]
+// @Router /api/v1/instance/:instanceUuid [GET]
 // @Success 200 {object} map[string]interface{}
 func getInstances(c *gin.Context) {
 	returnCode := http.StatusNotFound
@@ -411,7 +429,7 @@ func putConnection(c *gin.Context) {
 	userName := c.Param("username")
 	resultReturn := map[string]interface{}{}
 	log.WithFields(logrus.Fields{
-		"workspaceController": "postInstances",
+		"workspaceController": "putConnection",
 	}).Infof("instanceUuid [%v], userName [%v]", instanceUuid, userName)
 	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
 	instanceInfo := instanceList[0]
@@ -423,7 +441,7 @@ func putConnection(c *gin.Context) {
 	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
 	virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
 	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
-	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=3389,ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain")
+	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=" + os.Getenv("portForRDP") + ",ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain")
 	resultInstanceAllocatedUser := insertConnection(userName, instanceInfo.Name, parameter)
 	log.Debugf("%v", resultInstanceAllocatedUser)
 	log.Debugf("[%v]", resultInstanceAllocatedUser.Status)
@@ -439,34 +457,28 @@ func putConnection(c *gin.Context) {
 // @Description instance 에 사용자를 할당하는 API 입니다.
 // @Accept  json
 // @Produce  json
-// @Param instanceUuid path string true "Instance UUID"
-// @Param username path string true "Instance 에 할당할 userName"
-// @Router /api/v1//connection/:instanceUuid [DELETE]
+// @Param instanceUuid path string true "Connection 을 삭제할 instance Uuid"
+// @Router /api/v1/connection/:instanceUuid [DELETE]
 // @Success 200 {object} map[string]interface{}
 func deleteConnection(c *gin.Context) {
-	//returnCode := http.StatusNotFound
+	returnCode := http.StatusNotFound
 	instanceUuid := c.Param("instanceUuid")
 	//userName := c.Param("username")
 	resultReturn := map[string]interface{}{}
 	log.WithFields(logrus.Fields{
-		"workspaceController": "postInstances",
+		"workspaceController": "deleteConnection",
 	}).Infof("instanceUuid [%v]", instanceUuid)
 	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
 	instanceInfo := instanceList[0]
-	paramsMold := []MoldParams{
-		{"id": instanceInfo.MoldUuid},
-	}
-	resultMoldInstanceInfo := getListVirtualMachinesMetrics(paramsMold)
-	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
-	virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
-	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+
 	resultDelConnection := delConnection(instanceInfo.Name)
 	log.Debugf("%v", resultDelConnection)
 	if resultDelConnection.Status == OK200 {
 		updateInstanceUser(instanceInfo.Uuid, "")
+		returnCode = http.StatusOK
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(returnCode, gin.H{
 		"result": resultReturn,
 	})
 }

@@ -433,7 +433,6 @@ func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]int
 		resultReturn["status"] = SQLQueryError
 	}
 	n1, _ := result.RowsAffected()
-	log.Debugf("123123123 [%v]", n1)
 	if n1 == 1 {
 		resultReturn["message"] = "workspace template check OK"
 		resultReturn["status"] = http.StatusOK
@@ -468,12 +467,15 @@ func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[s
 	if err2 != nil {
 		return nil
 	}
-	loginTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
+	logInTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
 	logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
 	log.Debugf("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
-	if logOutTime.Before(loginTime) {
+	if logOutTime.Before(logInTime) {
+		connected = 0
+		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
+	} else if !logOutTime.Before(logInTime) {
 		connected = 1
-		log.Debugf("connected [%v]", logOutTime.Before(loginTime))
+		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
 	}
 	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Ready' where uuid=?", connected, uuid)
 	if err != nil {
@@ -583,7 +585,7 @@ func updateInstanceChecked() {
 	}
 }
 
-func updateInstanceHandshakeStatus(handshakeStatus string, instanceUuid string) {
+func updateInstanceHandshakeStatus(instanceUuid string, handshakeStatus string) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
