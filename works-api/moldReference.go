@@ -152,17 +152,15 @@ func getNetwork(params []MoldParams) map[string]interface{} {
 	return res
 }
 
-func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instanceType string) map[string]interface{} {
+func getDeployVirtualMachine(workspaceInfo Workspace, instanceType string) (map[string]interface{}, string) {
 	var baseurl = os.Getenv("MoldUrl")
-	workspaceList, _ := selectWorkspaceList(workspaceUuid)
-	workspaceInfo := workspaceList[0]
 
 	log.WithFields(logrus.Fields{
 		"moldReference.go": "getDeployVirtualMachine",
-	}).Infof("payload workspaceUuid [%v], instanceUuid [%v], instanceType [%v]", workspaceUuid, instanceUuid, instanceType)
+	}).Infof("payload workspaceInfo [%v], instanceType [%v]", workspaceInfo, instanceType)
 
 	var displayName string
-	if workspaceInfo.Postfix == 0 {
+	if instanceType == WorkspaceString {
 		displayName = workspaceInfo.Name + "-TestVM"
 	} else {
 		displayName = workspaceInfo.Name + "-" + postfixFill(workspaceInfo.Postfix)
@@ -172,7 +170,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 	WorksIP := os.Getenv("WorksIp")
 	WorksPort := os.Getenv("WorksPort")
 	VmName := displayName
-	InstanceUuid := instanceUuid
+	instanceUuid := getUuid()
 	Type := instanceType
 	payload := "<powershell>\n" +
 		"date > \"c:\\agent\\installed.txt\"\n" +
@@ -186,7 +184,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		"Rename-Computer -NewName " + VmName + "\n" +
 		"echo Add-Computer >> \"c:\\agent\\installed.txt\"\n" +
 		"echo Add-Computer end>> \"c:\\agent\\installed.txt\"\n" +
-		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + InstanceUuid + "\",\"HostName\": \"" + VmName + "\",\"Domain\": \"" + MyDomain + "\"}'\n" +
+		"$conf = '{\"WorksServer\": \"" + WorksIP + "\", \"WorksPort\": " + WorksPort + ", \"Type\": \"" + Type + "\", \"UUID\": \"" + instanceUuid + "\",\"HostName\": \"" + VmName + "\",\"Domain\": \"" + MyDomain + "\"}'\n" +
 		"echo $conf| Out-File -Encoding ascii \"c:\\agent\\conf.json\"\n" +
 		"echo $conf\n" +
 		"echo $conf >> \"c:\\agent\\installed.txt\"\n" +
@@ -234,7 +232,7 @@ func getDeployVirtualMachine(workspaceUuid string, instanceUuid string, instance
 		err = json.NewDecoder(resp.Body).Decode(&res)
 		res["status"] = http.StatusOK
 	}
-	return res
+	return res, instanceUuid
 }
 
 func getDestroyVirtualMachine(params []MoldParams) map[string]interface{} {
