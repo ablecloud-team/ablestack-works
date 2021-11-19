@@ -56,6 +56,94 @@ var doc = `{
                             "type": "object",
                             "additionalProperties": true
                         }
+                    },
+                    "400": {
+                        "description": "DC 서버와 통신이 안된경우 발생",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "로그인처리는 정상적으로 되었으나 토큰생성에서 에러가 발생한경우",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "DC 서버와 통신이 통신은 정상적이나 계정이나 비밀번호가 일치 하지 않는경우",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/connection/:instanceUuid": {
+            "delete": {
+                "description": "instance 에 사용자를 할당하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 에 사용자를 할당하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "connection을 삭제할 instance Uuid",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/connection/:instanceUuid/:username": {
+            "put": {
+                "description": "instance 에 사용자를 할당하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 에 사용자를 할당하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Instance 에 할당할 userName",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
                     }
                 }
             }
@@ -232,6 +320,43 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/handshake/:instanceUuid/:instanceType": {
+            "patch": {
+                "description": "instance 의 handshake 를 재실행 하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 의 handshake 를 재실행 하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Instance Type InstanceString OR WorkspaceString",
+                        "name": "instanceType",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/instance": {
             "put": {
                 "description": "워크스페이스의 instance 를 추가하는 API 입니다.",
@@ -254,41 +379,6 @@ var doc = `{
                         "type": "string",
                         "description": "워크스페이스에 추가할 Instance 수량",
                         "name": "quantity",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "instance 에 사용자를 할당하는 API 입니다.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "instance 에 사용자를 할당하는 API",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Instance UUID",
-                        "name": "instanceUuid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Instance 에 할당할 userName",
-                        "name": "username",
                         "in": "path",
                         "required": true
                     }
@@ -326,6 +416,36 @@ var doc = `{
                         "type": "string",
                         "description": "Instance UUID",
                         "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/instance/:instanceUuid": {
+            "get": {
+                "description": "워크스페이스의 instance 를 조회하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "워크스페이스의 instance 를 조회하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "workspaceUuid",
                         "in": "path",
                         "required": true
                     }
