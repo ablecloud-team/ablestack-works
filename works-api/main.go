@@ -48,13 +48,13 @@ func main() {
 	GuacamoleSetting()   //guacamole 정보 셋팅
 	ClusterNameSetting() //clusterName 정보 셋팅
 	logSetting()
-	dcBootstrap()
+	//dcBootstrap()
 
 	router := gin.Default()
 	router.Use(SetHeader)
 	//router.LoadHTMLGlob("templates/*")
 	//router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
-	router.Use(static.Serve("/swagger/", static.LocalFile("./swagger", true)))
+	router.Use(static.Serve("/swagger/", static.LocalFile("./docs", true)))
 	api := router.Group("/api")
 	{
 		api.POST("/login", getLogin)
@@ -94,6 +94,7 @@ func main() {
 			v1.GET("/user/:username", getUserDetail)
 			v1.GET("/user", getUser)
 			v1.PUT("/user", putUser)
+			v1.DELETE("/user", deleteUser)
 
 			v1.GET("/group", getGroup)
 			v1.GET("/group/:groupName", getGroupDetail)
@@ -112,7 +113,7 @@ func main() {
 	}).Infof("Starting application")
 	go asyncJobMonitoring()
 	go updateInstanceChecked()
-	url := ginSwagger.URL("/swagger/doc.json")
+	url := ginSwagger.URL("/swagger/swagger.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	err = router.Run("0.0.0.0:8080")
 	fmt.Println(err)
