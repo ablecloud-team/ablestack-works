@@ -365,12 +365,12 @@ func ClusterNameSetting() {
 	for _, v := range jsonUnmarshal {
 		clusterValue[v.Name] = v.Value
 	}
-	clutsterName := clusterValue["cluster.default.name"].(string)
+	clusterName := clusterValue["cluster.default.name"].(string)
 
 	log.WithFields(logrus.Fields{
 		"worksInit": "WorksSetting",
-	}).Infof("clutster Name [%v]", clutsterName)
-	os.Setenv("ClutsterName", clutsterName)
+	}).Infof("clutster Name [%v]", clusterName)
+	os.Setenv("ClusterName", clusterName)
 }
 
 func RDPPortSetting() {
