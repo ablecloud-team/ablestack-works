@@ -155,7 +155,7 @@ export default defineComponent({
           this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
-      dataList: [],
+      wsDataList: ref([]),
       listColumns: [
         {
           title: this.$t("label.name"),
@@ -323,6 +323,8 @@ export default defineComponent({
               this.wsDataList.forEach((value, index, array) => {
                 this.wsDataList[index].key = index;
               });
+            } else {
+              this.wsDataList = ref([]);
             }
           } else {
             message.error(this.$t("message.response.data.fail"));
