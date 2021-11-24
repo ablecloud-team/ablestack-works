@@ -4,14 +4,14 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <AccountInfoCard ref="listRefreshCall1" />
+          <AccountInfoCard ref="listRefreshCall1" :account-info="accountInfo" />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <AccountTab ref="listRefreshCall2" />
+          <AccountTab ref="listRefreshCall2" :account-info="accountInfo" />
         </ACard>
       </ACol>
     </ARow>
@@ -29,14 +29,20 @@ export default defineComponent({
     AccountInfoCard,
     AccountTab,
   },
-  props: {},
+  props: {
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   setup() {
     return {};
   },
   methods: {
-    refresh() {
-      this.$refs.listRefreshCall1.refresh();
-      this.$refs.listRefreshCall2.refresh();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
+      this.$refs.listRefreshCall2.fetchRefresh();
     },
   },
 });

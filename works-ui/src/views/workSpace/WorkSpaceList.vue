@@ -4,14 +4,17 @@
     size="middle"
     class="ant-table-striped"
     :columns="listColumns"
-    :data-source="dataList"
+    :data-source="wsDataList"
     :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
-    :row-key="(record, index) => index"
     :pagination="pagination"
+    :row-selection="{
+      selectedRowKeys: state.selectedRowKeys,
+      onChange: onSelectChange,
+    }"
   >
     <!-- 검색 필터링 template-->
     <template
@@ -46,9 +49,7 @@
     </template>
     <!-- 검색 필터링 template-->
     <template #nameRender="{ record }">
-      <router-link
-        :to="{ path: '/workspaceDetail/' + record.uuid + '/' + record.name }"
-      >
+      <router-link :to="{ path: '/workspaceDetail/' + record.uuid }">
         {{ record.name }}
       </router-link>
     </template>
@@ -57,8 +58,8 @@
         <template #content>
           <Actions
             :action-from="actionFrom"
-            :workspace-uuid="record.uuid"
-            @fetchData="fetchData"
+            :workspace-info="record"
+            @fetchData="fetchRefresh"
           />
         </template>
         <MoreOutlined />
@@ -69,11 +70,33 @@
         <template #title>{{ record.template_ok_check }}</template>
         <a-badge
           class="head-example"
-          :color="record.template_ok_check == 'AgentOK' ? 'green' : 'red'"
+          :color="
+            record.template_ok_check === 'Not Ready' ||
+            record.template_ok_check === 'Pending'
+              ? 'red'
+              : record.template_ok_check === 'Joining' ||
+                record.template_ok_check === 'Joined'
+              ? 'yellow'
+              : record.template_ok_check === 'Ready'
+              ? 'green'
+              : 'red'
+          "
           :text="
-            record.template_ok_check == 'AgentOK'
-              ? $t('label.enable')
-              : $t('label.disable')
+            record.template_ok_check === 'Not Ready' ||
+            record.template_ok_check === 'Pending'
+              ? $t('label.vm.status.initializing') +
+                '(' +
+                record.template_ok_check +
+                ')'
+              : record.template_ok_check === 'Joining' ||
+                record.template_ok_check === 'Joined'
+              ? $t('label.vm.status.configuring') +
+                '(' +
+                record.template_ok_check +
+                ')'
+              : record.template_ok_check === 'Ready'
+              ? $t('label.vm.status.ready')
+              : $t('label.vm.status.notready')
           "
         />
       </a-tooltip>
@@ -90,7 +113,6 @@ import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
-  name: "WorkspaceList",
   components: {
     Actions,
   },
@@ -100,6 +122,8 @@ export default defineComponent({
     const state = reactive({
       searchText: "",
       searchedColumn: "",
+      selectedRowKeys: [],
+      selectedRows: [],
     });
     const searchInput = ref();
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -112,16 +136,8 @@ export default defineComponent({
       state.searchText = "";
     };
     return {
-      //rowSelection,
       loading: ref(false),
       actionFrom: ref("WorkspaceList"),
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
       searchInput,
       state,
       handleSearch,
@@ -130,7 +146,15 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedRowKeys: [],
+      timer: ref(null),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
       dataList: [],
       listColumns: [
         {
@@ -259,38 +283,47 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.fetchRefresh();
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 60000);
+    }, 30000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
-    setSelection(selection) {
-      this.selectedRowKeys = selection;
-      if (this.selectedRowKeys.length == 0) {
-        this.$emit("actionFromChange", "Workspace");
-      } else {
-        this.$emit("actionFromChange", this.actionFrom);
-      }
-    },
-    resetSelection() {
-      this.setSelection([]);
+    fetchRefresh() {
+      this.loading = true;
+      this.state.selectedRowKeys = [];
+      this.state.searchText = "";
+      this.fetchData();
     },
     onSelectChange(selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys);
+      this.state.selectedRowKeys = selectedRowKeys;
+      this.state.selectedRows = selectedRows;
+      if (this.state.selectedRows.length > 0) {
+        this.$emit(
+          "actionFromChange",
+          "WorkspaceList",
+          this.state.selectedRows
+        );
+      } else {
+        this.$emit("actionFromChange", "Workspace", null);
+      }
     },
-    fetchData() {
-      this.state.searchText = "";
-      this.loading = true;
-      worksApi
+    async fetchData() {
+      await worksApi
         .get("/api/v1/workspace")
         .then((response) => {
           if (response.status == 200) {
-            this.dataList = response.data.result.list;
+            if (response.data.result.list !== null) {
+              this.wsDataList = response.data.result.list;
+
+              this.wsDataList.forEach((value, index, array) => {
+                this.wsDataList[index].key = index;
+              });
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
@@ -298,10 +331,10 @@ export default defineComponent({
         .catch((error) => {
           message.error(this.$t("message.response.data.fail"));
           console.log(error);
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      setTimeout(() => {
-        this.loading = false;
-      }, 500);
     },
   },
 });

@@ -9,7 +9,7 @@
               <Apath
                 :paths="[
                   { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceName, component: null },
+                  { name: workspaceInfo.name, component: null },
                 ]"
               />
               <a-button
@@ -26,8 +26,9 @@
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
+                v-if="actionFrom === 'WorkspaceDetail'"
                 :action-from="actionFrom"
-                :workspace-uuid="workspaceUuid"
+                :workspace-info="workspaceInfo"
               />
             </a-col>
           </a-row>
@@ -35,7 +36,16 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody ref="listRefreshCall" />
+          <WorkSpaceBody
+            v-if="actionFrom === 'WorkspaceDetail'"
+            ref="listRefreshCall"
+            :workspace-info="workspaceInfo"
+            :offering-info="offeringDataList"
+            :network-list="networkList"
+            :vm-list="vmList"
+            :group-info="groupInfo"
+            @parentRefresh="refresh"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -47,25 +57,73 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: { Apath, Actions, WorkSpaceBody },
   props: {},
   setup() {
     return {
-      actionFrom: ref("WorkspaceDetail"),
+      actionFrom: ref(""),
     };
   },
   data() {
     return {
-      workspaceUuid: ref(this.$route.params.workspaceUuid),
-      workspaceName: ref(this.$route.params.workspaceName),
+      workspaceInfo: ref([]),
+      offeringDataList: ref([]),
+      networkList: ref([]),
+      vmList: ref([]),
+      groupInfo: ref([]),
+      timer: ref(null),
     };
   },
-  created() {},
+  created() {
+    this.fetchData(true);
+    this.timer = setInterval(() => {
+      //30초 자동 갱신
+      this.fetchData(false);
+    }, 30000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
+  },
   methods: {
+    async fetchData(refreshClick) {
+      await worksApi
+        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
+        .then((response) => {
+          if (response.status == 200) {
+            this.workspaceInfo = response.data.result.workspaceInfo;
+            this.offeringDataList =
+              response.data.result.serviceOfferingInfo.serviceoffering[0];
+            this.networkList = response.data.result.networkInfo.network;
+
+            if (response.data.result.instanceList !== null) {
+              this.vmList = response.data.result.instanceList;
+            } else {
+              this.vmList = ref([]);
+            }
+            if (response.data.result.groupDetail !== null) {
+              this.groupInfo = response.data.result.groupDetail;
+            }
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error(this.$t("message.response.data.fail"));
+        })
+        .finally(() => {
+          this.actionFrom = "WorkspaceDetail";
+        });
+      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
+    },
     refresh() {
-      this.$refs.listRefreshCall.refresh();
+      console.log("오냐????????????");
+      this.fetchData(true);
     },
   },
 });

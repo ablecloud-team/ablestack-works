@@ -346,13 +346,6 @@ export default defineComponent({
       //rowSelection,
       loading: ref(false),
       actionFrom: ref("AccountList"),
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
       searchInput,
       state,
       handleSearch,
@@ -367,6 +360,13 @@ export default defineComponent({
   },
   data() {
     return {
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
       dataList: [],
       columns: [
         {

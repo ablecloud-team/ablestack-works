@@ -1,24 +1,23 @@
+import { message } from "ant-design-vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { worksApi } from "../api";
-import { message } from "ant-design-vue";
-import router from "@/router";
-import Login from "../views/auth/Login.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
-import Dashboard from "../views/dashboard/Dashboard.vue";
-import Workspace from "../views/workspace/WorkSpace.vue";
 import UserBaseLayout from "../components/layouts/UserBaseLayout.vue";
-import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
-import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
-import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
-import Favorite from "../views/favorite/Favorite.vue";
-import UserDesktop from "../views/userDesktop/UserDesktop.vue";
 import Account from "../views/account/Account.vue";
 import AccountDetail from "../views/account/AccountDetail.vue";
+import Login from "../views/auth/Login.vue";
+import Configuration from "../views/configuration/Configuration.vue";
+import Dashboard from "../views/dashboard/Dashboard.vue";
+import Exception404 from "../views/exception/404.vue";
+import Favorite from "../views/favorite/Favorite.vue";
 import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
-import Configuration from "../views/configuration/Configuration.vue";
 import UserDetail from "../views/user/UserDetail.vue";
-import Exception404 from "../views/exception/404.vue";
+import UserDesktop from "../views/userDesktop/UserDesktop.vue";
+import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
+import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
+import Workspace from "../views/workspace/WorkSpace.vue";
+import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
 
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
@@ -119,32 +118,40 @@ const routes = [
       //   name: '403',
       //   hidden: true,
       //   component: () => import('@/views/exception/403'),
-      //   meta: { title: '403' }
+      //   meta: { title: '403' },
       // },
       {
         path: "/exception/404",
         name: "404",
         hidden: true,
         component: () => import("@/views/exception/404"),
-        meta: { title: "404" }
+        meta: { title: "404" },
       },
       // {
       //   path: '/exception/500',
       //   name: '500',
       //   hidden: true,
       //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
-      //   meta: { title: '500' }
+      //   meta: { title: '500' },
       // }
-    ]
+    ],
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
-    path: "/login",
-    name: "Login",
+    path: "/",
+    name: "Root",
+    redirect: "/login",
     component: Login,
+    children: [
+      {
+        path: "/login",
+        name: "Login",
+        component: Login,
+      },
+    ],
   },
   {
     path: "/admin",
-    name: "Home",
+    name: "Admin",
     component: AdminBaseLayout,
     redirect: "/dashboard",
     // beforeEnter: (to, from, failure) => {},
@@ -162,7 +169,7 @@ const routes = [
         beforeEnter: adminAuthCheck,
       },
       {
-        path: "/workspaceDetail/:workspaceUuid/:workspaceName",
+        path: "/workspaceDetail/:workspaceUuid",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
         beforeEnter: adminAuthCheck,
@@ -175,7 +182,7 @@ const routes = [
         beforeEnter: adminAuthCheck,
       },
       {
-        path: "/virtualMachineDetail/:vmUuid/:vmName",
+        path: "/virtualMachineDetail/:vmUuid",
         name: "VirtualMachineDetail",
         component: VirtualMachineDetail,
         beforeEnter: adminAuthCheck,
@@ -188,7 +195,7 @@ const routes = [
         beforeEnter: adminAuthCheck,
       },
       {
-        path: "/accountDetail/:userName",
+        path: "/accountDetail/:accountName",
         name: "AccountDetail",
         component: AccountDetail,
         beforeEnter: adminAuthCheck,

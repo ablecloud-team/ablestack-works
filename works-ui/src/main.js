@@ -65,13 +65,15 @@ import {
   ArrowDownOutlined,
   LoginOutlined,
   WindowsFilled,
-  StarFilled, 
+  StarFilled,
   StarTwoTone,
   CloudDownloadOutlined,
   CodeFilled,
   SettingOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined
+  CloseCircleOutlined,
+  SmileOutlined,
+  FrownOutlined
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -128,5 +130,7 @@ app.component("CodeFilled", CodeFilled);
 app.component("SettingOutlined", SettingOutlined);
 app.component("CheckCircleOutlined", CheckCircleOutlined);
 app.component("CloseCircleOutlined", CloseCircleOutlined);
+app.component("SmileOutlined", SmileOutlined);
+app.component("FrownOutlined", FrownOutlined);
 
 app.use(i18n).use(store).use(router).use(Antd).mount("#app");

@@ -1,30 +1,42 @@
 <template>
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
-      <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent ref="listRefreshCall1" :action-from="'AccountDetail'" />
+      <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
+        <DetailContent
+          ref="listRefreshCall1"
+          :action-from="'AccountDetail'"
+          :account-info="accountInfo"
+        />
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('label.vm.list')">
-        <!-- <TableContent
+      <!-- <a-tab-pane key="2" :tab="$t('label.vm.list')" :forceRender="forceRender">
+        <TableContent
           ref="listRefreshCall2"
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
-        /> -->
+        />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('label.app.list')">
-        <!-- <TableContent
+      <a-tab-pane
+        key="3"
+        :tab="$t('label.app.list')"
+        :forceRender="forceRender"
+      >
+        <TableContent
           ref="listRefreshCall3"
           :tap-name="'app'"
           :action-from="'VirtualMachineList'"
-        /> -->
+        />
       </a-tab-pane>
-      <a-tab-pane key="4" :tab="$t('label.policy.list')">
-        <!-- <TableContent
+      <a-tab-pane
+        key="4"
+        :tab="$t('label.policy.list')"
+        :forceRender="forceRender"
+      >
+        <TableContent
           ref="listRefreshCall4"
           :tap-name="'policy'"
           :action-from="'PolicyGroupList'"
-        /> -->
-      </a-tab-pane>
+        />
+      </a-tab-pane> -->
     </a-tabs>
   </div>
 </template>
@@ -39,24 +51,34 @@ export default defineComponent({
     TableContent,
     DetailContent,
   },
-  props: {},
+  props: {
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   setup() {
-    const tabPosition = ref("top");
-    const activeKey = ref("1");
     return {
-      tabPosition,
-      activeKey,
+      tabPosition: ref("top"),
+      activeKey: ref("1"),
+      forceRender: ref(false),
     };
   },
   data() {
     return {};
   },
+  created() {
+    setTimeout(() => {
+      this.forceRender = true;
+    }, 1000);
+  },
   methods: {
-    refresh() {
-      this.$refs.listRefreshCall1.refresh();
-      // this.$refs.listRefreshCall2.fetchData();
-      // this.$refs.listRefreshCall3.fetchData();
-      // this.$refs.listRefreshCall4.fetchData();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
+      // this.$refs.listRefreshCall2.fetchRefresh();
+      // this.$refs.listRefreshCall3.fetchRefresh();
+      // this.$refs.listRefreshCall4.fetchRefresh();
     },
   },
 });

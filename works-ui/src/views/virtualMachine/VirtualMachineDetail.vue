@@ -9,7 +9,7 @@
               <Apath
                 :paths="[
                   { name: $t('label.vm'), component: 'VirtualMachine' },
-                  { name: vmName, component: null },
+                  { name: vmDbDataInfo.name, component: null },
                 ]"
               />
               <a-button
@@ -25,14 +25,26 @@
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions :action-from="actionFrom" @fetchData="refresh" />
+              <Actions
+                v-if="actionFrom === 'VirtualMachineDetail'"
+                :action-from="actionFrom"
+                :vm-info="vmDbDataInfo"
+                @fetchData="refresh"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody ref="listRefreshCall" />
+          <VirtualMachineBody
+            ref="listRefreshCall"
+            :vmDbDataInfo="vmDbDataInfo"
+            :vmMoldDataInfo="vmMoldDataInfo"
+            :vmNetworkInfo="vmNetworkInfo"
+            :vmDiskInfo="vmDiskInfo"
+            :cpuused="cpuused"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -44,27 +56,60 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import VirtualMachineBody from "./VirtualMachineBody.vue";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: { VirtualMachineBody, Apath, Actions },
   props: {},
   setup() {
     return {
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
-      actionFrom: ref("VirtualMachineDetail"),
+      actionFrom: ref(""),
     };
   },
   data() {
     return {
-      vmUuid: ref(this.$route.params.vmUuid),
-      vmName: ref(this.$route.params.vmName),
+      vmDbDataInfo: ref([]),
+      vmMoldDataInfo: ref([]),
+      vmNetworkInfo: ref([]),
+      vmDiskInfo: ref([]),
+      cpuused: ref(0),
     };
   },
-  created() {},
+  created() {
+    this.fetchData();
+  },
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.refresh();
+      this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
+    },
+    async fetchData() {
+      try {
+        const response = await worksApi.get(
+          "/api/v1/instance/detail/" + this.$route.params.vmUuid
+        );
+
+        if (response.status === 200) {
+          //console.log(response.data.result.instanceDBInfo);
+          this.vmDbDataInfo = response.data.result.instanceDBInfo;
+          this.vmMoldDataInfo =
+            response.data.result.instanceMoldInfo.virtualmachine[0];
+          this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
+          this.vmDiskInfo =
+            response.data.result.instanceInstanceVolumeInfo.volume[0];
+          this.cpuused =
+            response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
+              "%"
+            )[0];
+        } else {
+          message.error(this.$t("message.response.data.fail"));
+        }
+      } catch (error) {
+        console.log(error);
+        message.error(this.$t("message.response.data.fail"));
+      }
+      this.actionFrom = "VirtualMachineDetail";
     },
   },
 });

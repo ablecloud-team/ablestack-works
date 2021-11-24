@@ -11,6 +11,10 @@
     :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
+    :row-selection="{
+      selectedRowKeys: state.selectedRowKeys,
+      onChange: onSelectChange,
+    }"
   >
     <!-- 검색 필터링 template-->
     <template
@@ -48,7 +52,7 @@
     <template #nameRender="{ record }">
       <router-link
         :to="{
-          path: '/virtualMachineDetail/' + record.uuid + '/' + record.name,
+          path: '/virtualMachineDetail/' + record.uuid,
         }"
         >{{ record.name }}</router-link
       >
@@ -58,8 +62,9 @@
       <a-Popover placement="topLeft">
         <template #content>
           <Actions
+            v-if="actionFrom === 'VirtualMachineList'"
             :action-from="actionFrom"
-            :vm-uuid="record.uuid"
+            :vm-info="record"
             @fetchData="fetchData"
           />
         </template>
@@ -69,11 +74,26 @@
     <template #vmStateRender="{ record }">
       <a-badge
         class="head-example"
-        :color="record.mold_status === 'Running' ? 'green' : 'red'"
+        :color="
+          record.mold_status === 'Running'
+            ? 'green'
+            : record.mold_status === 'Stopping' ||
+              record.mold_status === 'Starting'
+            ? 'blue'
+            : record.mold_status === 'Stopped'
+            ? 'red'
+            : ''
+        "
         :text="
           record.mold_status === 'Running'
             ? $t('label.vm.status.running')
-            : $t('label.vm.status.stopped')
+            : record.mold_status === 'Starting'
+            ? $t('label.vm.status.starting')
+            : record.mold_status === 'Stopping'
+            ? $t('label.vm.status.stopping')
+            : record.mold_status === 'Stopped'
+            ? $t('label.vm.status.stopped')
+            : ''
         "
       />
     </template>
@@ -83,14 +103,30 @@
         <a-badge
           class="head-example"
           :color="
-            record.mold_status == 'Running' &&
-            record.handshake_status === 'Ready'
+            record.handshake_status === 'Not Ready' ||
+            record.handshake_status === 'Pending'
+              ? 'red'
+              : record.handshake_status === 'Joining' ||
+                record.handshake_status === 'Joined'
+              ? 'yellow'
+              : record.handshake_status === 'Ready'
               ? 'green'
               : 'red'
           "
           :text="
-            record.mold_status == 'Running' &&
-            record.handshake_status === 'Ready'
+            record.handshake_status === 'Not Ready' ||
+            record.handshake_status === 'Pending'
+              ? $t('label.vm.status.initializing') +
+                '(' +
+                record.handshake_status +
+                ')'
+              : record.handshake_status === 'Joining' ||
+                record.handshake_status === 'Joined'
+              ? $t('label.vm.status.configuring') +
+                '(' +
+                record.handshake_status +
+                ')'
+              : record.handshake_status === 'Ready'
               ? $t('label.vm.status.ready')
               : $t('label.vm.status.notready')
           "
@@ -126,6 +162,8 @@ export default defineComponent({
     const state = reactive({
       searchText: "",
       searchedColumn: "",
+      selectedRowKeys: [],
+      selectedRows: [],
     });
     const searchInput = ref();
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -139,16 +177,8 @@ export default defineComponent({
       state.searchText = "";
     };
     return {
-      // rowSelection,
       loading: ref(false),
-      actionFrom: ref("VirtualMachineList"),
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
+      actionFrom: ref(""),
       searchInput,
       state,
       handleSearch,
@@ -158,7 +188,14 @@ export default defineComponent({
   data() {
     return {
       timer: ref(null),
-      selectedRowKeys: [],
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
       vmDataList: [],
       vmListColumns: [
         {
@@ -196,7 +233,7 @@ export default defineComponent({
           title: this.$t("label.workspace"),
           dataIndex: "workspace_name",
           key: "workspace_name",
-          width: "20%",
+          width: "15%",
           sorter: (a, b) =>
             a.workspace_name < b.workspace_name
               ? -1
@@ -210,7 +247,7 @@ export default defineComponent({
           title: this.$t("label.users"),
           dataIndex: "owner_account_id",
           key: "owner_account_id",
-          width: "11%",
+          width: "10%",
           sorter: (a, b) =>
             a.owner_account_id < b.owner_account_id
               ? -1
@@ -224,7 +261,7 @@ export default defineComponent({
           title: this.$t("label.vm.state"),
           dataIndex: "status",
           key: "status",
-          width: "11%",
+          width: "10%",
           sorter: (a, b) =>
             a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -232,11 +269,15 @@ export default defineComponent({
         },
         {
           title: this.$t("label.vm.ready.state"),
-          dataIndex: "status",
-          key: "status",
-          width: "11%",
+          dataIndex: "handshake_status",
+          key: "handshake_status",
+          width: "20%",
           sorter: (a, b) =>
-            a.status < b.status ? -1 : a.status > b.status ? 1 : 0,
+            a.handshake_status < b.handshake_status
+              ? -1
+              : a.handshake_status > b.handshake_status
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
           slots: { customRender: "vmReadyStateRender" },
         },
@@ -244,7 +285,7 @@ export default defineComponent({
           title: this.$t("label.vm.network.ip"),
           dataIndex: "ipaddress",
           key: "ipaddress",
-          width: "11%",
+          width: "15%",
           sorter: (a, b) =>
             a.ipaddress < b.ipaddress ? -1 : a.ipaddress > b.ipaddress ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -253,7 +294,7 @@ export default defineComponent({
           title: this.$t("label.vm.session.count"),
           dataIndex: "connected",
           key: "connected",
-          width: "11%",
+          width: "10%",
           sorter: (a, b) =>
             a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
@@ -263,37 +304,47 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.fetchRefresh();
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 60000);
+    }, 30000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
-    setSelection(selection) {
-      this.selectedRowKeys = selection;
-      if (this.selectedRowKeys.length == 0) {
-        this.$emit("actionFromChange", "VirtualMachine");
+    fetchRefresh() {
+      this.loading = true;
+      this.state.selectedRowKeys = [];
+      this.state.searchText = "";
+      this.fetchData();
+    },
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.state.selectedRowKeys = selectedRowKeys;
+      this.state.selectedRows = selectedRows;
+      if (this.state.selectedRows.length > 0) {
+        this.$emit(
+          "actionFromChange",
+          "VirtualMachineList",
+          this.state.selectedRows
+        );
       } else {
-        this.$emit("actionFromChange", this.actionFrom);
+        this.$emit("actionFromChange", "VirtualMachine", null);
       }
     },
-    resetSelection() {
-      this.setSelection([]);
-    },
-    onSelectChange(selectedRowKeys) {
-      this.setSelection(selectedRowKeys);
-    },
-    fetchData() {
-      this.loading = true;
-      worksApi
+    async fetchData() {
+      this.actionFrom = "";
+      await worksApi
         .get("/api/v1/instance/all")
         .then((response) => {
           if (response.status == 200) {
-            this.vmDataList = response.data.result.instanceInfo;
+            if (response.data.result.instanceInfo !== null) {
+              this.vmDataList = response.data.result.instanceInfo;
+              this.vmDataList.forEach((value, index, array) => {
+                this.vmDataList[index].key = index;
+              });
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
@@ -301,10 +352,12 @@ export default defineComponent({
         .catch((error) => {
           message.error(this.$t("message.response.data.fail"));
           console.log(error);
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      setTimeout(() => {
-        this.loading = false;
-      }, 500);
+
+      this.actionFrom = "VirtualMachineList";
     },
   },
 });

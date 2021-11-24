@@ -1,8 +1,12 @@
 <template>
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
-      <a-tab-pane key="1" :tab="$t('label.detail')">
-        <DetailContent ref="listRefreshCall1" :action-from="'UserDetail'" />
+      <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
+        <DetailContent
+          ref="listRefreshCall1"
+          :action-from="'UserDetail'"
+          :account-info="accountInfo"
+        />
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -16,21 +20,26 @@ export default defineComponent({
   components: {
     DetailContent,
   },
-  props: {},
+  props: {
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   setup() {
-    const tabPosition = ref("top");
-    const activeKey = ref("1");
     return {
-      tabPosition,
-      activeKey,
+      tabPosition: ref("top"),
+      activeKey: ref("1"),
+      forceRender: ref(false),
     };
   },
   data() {
     return {};
   },
   methods: {
-    refresh() {
-      this.$refs.listRefreshCall1.refresh();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
     },
   },
 });

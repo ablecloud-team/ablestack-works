@@ -8,25 +8,25 @@
           </template>
         </a-avatar>
         <h4 style="margin-left: 20px">
-          {{ userDataInfo.username }}
+          {{ accountInfo.username }}
         </h4>
       </div>
     </div>
     <div id="firstname" class="CardItem">
       <div class="ItemName">{{ $t("label.lastname") }}</div>
-      <div class="Item">{{ userDataInfo.givenName }}</div>
+      <div class="Item">{{ accountInfo.givenName }}</div>
     </div>
     <div id="firstname" class="CardItem">
       <div class="ItemName">{{ $t("label.firstname") }}</div>
-      <div class="Item">{{ userDataInfo.sn }}</div>
+      <div class="Item">{{ accountInfo.sn }}</div>
     </div>
     <div id="email" class="CardItem">
       <div class="ItemName">{{ $t("label.email") }}</div>
-      <div class="Item">{{ userDataInfo.mail }}</div>
+      <div class="Item">{{ accountInfo.mail }}</div>
     </div>
     <div id="phone" class="CardItem">
       <div class="ItemName">{{ $t("label.phone") }}</div>
-      <div class="Item">{{ userDataInfo.telephoneNumber }}</div>
+      <div class="Item">{{ accountInfo.telephoneNumber }}</div>
     </div>
   </a-spin>
 </template>
@@ -38,39 +38,27 @@ import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
-  props: {},
+  props: {
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   data() {
     return {
       spinning: ref(true),
-      userDataInfo: ref([]),
     };
   },
   created() {
-    this.refresh();
+    this.fetchRefresh();
   },
   methods: {
-    refresh() {
-      this.fetchData();
+    fetchRefresh() {
       this.spinning = true;
       setTimeout(() => {
         this.spinning = false;
       }, 500);
-    },
-    fetchData() {
-      worksApi
-        .get("/api/v1/user/" + this.$route.params.userName)
-        .then((response) => {
-          if (response.status == 200) {
-            this.userDataInfo = response.data.result;
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
-          console.log(error);
-        });
     },
   },
 });
