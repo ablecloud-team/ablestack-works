@@ -61,19 +61,18 @@
       </span>
     </template>
 
-    <template #actionRender="{ record }">
+    <template
+      #actionRender="{ record }"
+      v-if="actionRef === 'VirtualMachineList'"
+    >
       <a-Popover placement="bottom">
         <template #content>
           <ASpace direction="horizontal">
             <Actions
-              v-if="
-                actionFrom !== undefined && actionFrom === 'VirtualMachineList'
-              "
               :action-from="actionFrom"
               :vm-info="record"
               @fetchData="parentRefresh"
             />
-            <Actions v-else :action-from="actionFrom" />
           </ASpace>
         </template>
         <MoreOutlined />
@@ -309,6 +308,7 @@ export default defineComponent({
   },
   data(props) {
     return {
+      actionRef: ref(""),
       workspaceInfo: ref(props.workspaceInfo),
       workspaceName: ref(""),
       networkList: ref(props.networkList),
@@ -373,6 +373,7 @@ export default defineComponent({
     fetchRefresh(refreshClick) {
       if (refreshClick) this.loading = true;
       else this.loading = false;
+      this.actionRef = "";
       this.vis = false;
       this.state.selectedRowKeys = [];
       this.state.selectedRows = [];
@@ -495,6 +496,11 @@ export default defineComponent({
           this.dataList[index].key = index;
         });
       }
+
+      // tooltip action버튼 리로드 시 시간차가 필요함.
+      setTimeout(() => {
+        this.actionRef = "VirtualMachineList";
+      }, 100);
 
       // worksApi
       //   .get("/api/v1/instance/" + this.$route.params.workspaceUuid)

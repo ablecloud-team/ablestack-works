@@ -65,7 +65,7 @@
             v-if="actionFrom === 'VirtualMachineList'"
             :action-from="actionFrom"
             :vm-info="record"
-            @fetchData="fetchData"
+            @fetchData="fetchRefresh"
           />
         </template>
         <MoreOutlined />
@@ -316,6 +316,7 @@ export default defineComponent({
   methods: {
     fetchRefresh() {
       this.loading = true;
+      this.actionFrom = "";
       this.state.selectedRowKeys = [];
       this.state.searchText = "";
       this.fetchData();
@@ -334,7 +335,6 @@ export default defineComponent({
       }
     },
     async fetchData() {
-      this.actionFrom = "";
       await worksApi
         .get("/api/v1/instance/all")
         .then((response) => {

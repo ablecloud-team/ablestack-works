@@ -92,12 +92,12 @@ export default defineComponent({
       this.forceRender = true;
       // this.vmActionFrom = "VirtualMachineList";
       // this.userActionFrom = "WorkspaceUserList";
-      setTimeout(() => {
-        this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
-        this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
-        this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
-        this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
-      }, 100);
+      // setTimeout(() => {
+      this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
+      // }, 100);
     },
     parentRefresh() {
       // this.vmActionFrom = "";

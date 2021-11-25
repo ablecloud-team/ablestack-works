@@ -57,6 +57,7 @@
       <a-Popover placement="topLeft">
         <template #content>
           <Actions
+            v-if="actionFrom == 'WorkspaceList'"
             :action-from="actionFrom"
             :workspace-info="record"
             @fetchData="fetchRefresh"
@@ -137,7 +138,7 @@ export default defineComponent({
     };
     return {
       loading: ref(false),
-      actionFrom: ref("WorkspaceList"),
+      actionFrom: ref(""),
       searchInput,
       state,
       handleSearch,
@@ -295,6 +296,7 @@ export default defineComponent({
   methods: {
     fetchRefresh() {
       this.loading = true;
+      this.actionFrom = "";
       this.state.selectedRowKeys = [];
       this.state.searchText = "";
       this.fetchData();
@@ -324,7 +326,7 @@ export default defineComponent({
                 this.wsDataList[index].key = index;
               });
             } else {
-              this.wsDataList = ref([]);
+              this.wsDataList = [];
             }
           } else {
             message.error(this.$t("message.response.data.fail"));
@@ -337,6 +339,7 @@ export default defineComponent({
         .finally(() => {
           this.loading = false;
         });
+      this.actionFrom = "WorkspaceList";
     },
   },
 });

@@ -122,7 +122,6 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh(refreshClick);
     },
     refresh() {
-      console.log("오냐????????????");
       this.fetchData(true);
     },
   },

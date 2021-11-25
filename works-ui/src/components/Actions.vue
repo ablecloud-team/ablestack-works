@@ -467,6 +467,8 @@ export default defineComponent({
       }, 2000);
     },
     async vmUserAllocateAction(actionFrom) {
+      if (this.selectedUser.length == 0) return false;
+
       let sucMessage = "message.user.vm.allocated.ok";
       let failMessage = "message.user.vm.allocated.fail";
       message.loading(this.$t("message.user.vm.allocating"), 100);
@@ -485,9 +487,8 @@ export default defineComponent({
         }
       }
       this.handleCancel();
+      this.$emit("fetchData");
       setTimeout(() => {
-        this.$emit("fetchData");
-
         message.destroy();
         if (this.succCnt > 0) {
           message.success(
@@ -508,7 +509,7 @@ export default defineComponent({
 
         this.failCnt = 0;
         this.succCnt = 0;
-      }, 3000);
+      }, 1000);
     },
     async vmUserUnlockAction() {
       let sucMessage = "message.user.vm.unlock.ok";
@@ -518,7 +519,8 @@ export default defineComponent({
       for (let val of this.eventList) {
         try {
           const res = await worksApi.delete("/api/v1/connection/" + val.uuid);
-          if (res.status == 200) {
+          console.log(res.status);
+          if (res.status == 204) {
             this.succCnt = this.succCnt + 1;
           }
         } catch (error) {
@@ -551,7 +553,7 @@ export default defineComponent({
 
         this.failCnt = 0;
         this.succCnt = 0;
-      }, 3000);
+      }, 1000);
     },
     async vmAction(actionFrom) {
       let worksUrl,
@@ -660,7 +662,7 @@ export default defineComponent({
         }
         this.failCnt = 0;
         this.succCnt = 0;
-      }, 2000);
+      }, 1000);
     },
     async accountDestroyAction(actionFrom) {
       let sucMessage = "message.account.destroy.ok";

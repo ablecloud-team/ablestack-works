@@ -61,9 +61,10 @@
       <a-Popover placement="topLeft">
         <template #content>
           <Actions
+            v-if="actionFrom == 'AccountList'"
             :action-from="actionFrom"
-            :account-name="record.name"
             :account-info="record"
+            @fetchData="fetchRefresh"
           />
         </template>
         <MoreOutlined />
@@ -103,7 +104,7 @@ export default defineComponent({
     };
     return {
       loading: ref(false),
-      actionFrom: ref("AccountList"),
+      actionFrom: ref(""),
       searchInput,
       state,
       handleSearch,
@@ -216,6 +217,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
+      this.actionFrom = "";
       this.loading = true;
       this.state.selectedRowKeys = [];
       this.state.searchText = "";
@@ -235,10 +237,17 @@ export default defineComponent({
         .get("/api/v1/user")
         .then((response) => {
           if (response.status == 200) {
-            this.userDataList = response.data.result;
-            this.userDataList.forEach((value, index, array) => {
-              this.userDataList[index].key = index;
-            });
+            if (
+              response.data.result !== null &&
+              response.data.result !== undefined
+            ) {
+              this.userDataList = response.data.result;
+              this.userDataList.forEach((value, index, array) => {
+                this.userDataList[index].key = index;
+              });
+            } else {
+              this.userDataList = [];
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
@@ -251,6 +260,7 @@ export default defineComponent({
         .finally(() => {
           this.loading = false;
         });
+      this.actionFrom = "AccountList";
     },
   },
 });
