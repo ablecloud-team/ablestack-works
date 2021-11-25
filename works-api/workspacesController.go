@@ -72,6 +72,21 @@ func getWorkspacesDetail(c *gin.Context) {
 		networkResult := getNetwork(paramsNetwork)
 
 		instanceList, _ := selectInstanceList(workspaceUuid, WorkspaceString)
+		paramsInstanceList := []MoldParams{
+			{"domainid": os.Getenv("MoldDomainId")},
+		}
+		virtualMachineList := getListVirtualMachinesMetrics(paramsInstanceList)
+		listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+		virtualMachineInfo, _ := json.Marshal(virtualMachineList["listvirtualmachinesmetricsresponse"])
+		json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+		for i, v := range instanceList {
+			for _, v1 := range listVirtualMachinesMetrics.Virtualmachine {
+				if v.MoldUuid == v1.Id {
+					instanceList[i].MoldStatus = v1.State
+					break
+				}
+			}
+		}
 
 		groupDetail, _ := selectGroupDetail(workspaceInfo.Name)
 		var groupData map[string]interface{}
@@ -441,8 +456,61 @@ func putConnection(c *gin.Context) {
 	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
 	virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
 	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
-	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=" + os.Getenv("portForRDP") + ",ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain")
+	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=" + os.Getenv("portForRDP") +
+		",ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain") + ",resize-method=display-update"
+	//VDI 파라메터
+
+	// APP 파라메터 추가필요
+	//parameter = parameter + ",remote-app=C:\\Users\\dcmic\\AppData\\Local\\SourceTree\\SourceTree...,remote-app-dir=c:\\"
+	//
 	resultInstanceAllocatedUser := insertConnection(userName, instanceInfo.Name, parameter)
+	log.Debugf("%v", resultInstanceAllocatedUser)
+	log.Debugf("[%v]", resultInstanceAllocatedUser.Status)
+	updateInstanceUser(instanceInfo.Uuid, resultUserInfo.UserName)
+
+	c.JSON(http.StatusOK, gin.H{
+		"result": resultReturn,
+	})
+}
+
+// putConnection godoc
+// @Summary instance 에 사용자를 할당하는 API
+// @Description instance 에 사용자를 할당하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Param instanceUuid path string true "Instance UUID"
+// @Param username path string true "Instance 에 할당할 userName"
+// @Router /api/v1/appConnection/:instanceUuid/:username [PUT]
+// @Success 200 {object} map[string]interface{}
+func putAppConnection(c *gin.Context) {
+	//returnCode := http.StatusNotFound
+	instanceUuid := c.Param("instanceUuid")
+	userName := c.Param("username")
+	connectionName := c.Param("connection")
+	resultReturn := map[string]interface{}{}
+	log.WithFields(logrus.Fields{
+		"workspaceController": "putAppConnection",
+	}).Infof("instanceUuid [%v], userName [%v]", instanceUuid, userName)
+	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
+	instanceInfo := instanceList[0]
+	paramsMold := []MoldParams{
+		{"id": instanceInfo.MoldUuid},
+	}
+	resultMoldInstanceInfo := getListVirtualMachinesMetrics(paramsMold)
+	resultUserInfo := selectUserDBDetail(userName)
+	listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+	virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
+	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=" + os.Getenv("portForRDP") +
+		",ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain") + ",resize-method=display-update" +
+		//",remote-app=C:\\NewGen\\Rebirth\\Rebirth.exe,remote-app-dir=c:\\NewGen\\Rebirth\\"
+		",remote-app=C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"
+	//VDI 파라메터
+
+	// APP 파라메터 추가필요
+	//parameter = parameter + ",remote-app=C:\\Users\\dcmic\\AppData\\Local\\SourceTree\\SourceTree...,remote-app-dir=c:\\"
+	//
+	resultInstanceAllocatedUser := insertConnection(userName, connectionName, parameter)
 	log.Debugf("%v", resultInstanceAllocatedUser)
 	log.Debugf("[%v]", resultInstanceAllocatedUser.Status)
 	updateInstanceUser(instanceInfo.Uuid, resultUserInfo.UserName)
@@ -472,10 +540,13 @@ func deleteConnection(c *gin.Context) {
 	instanceInfo := instanceList[0]
 
 	resultDelConnection := delConnection(instanceInfo.Name)
-	log.Debugf("%v", resultDelConnection)
-	if resultDelConnection.Status == OK200 {
+	log.WithFields(logrus.Fields{
+		"workspaceController": "deleteConnection",
+	}).Debugf("resultDelConnection [%v]", resultDelConnection)
+	//log.Debugf("%v", resultDelConnection)
+	if resultDelConnection.StatusCode == http.StatusCreated {
 		updateInstanceUser(instanceInfo.Uuid, "")
-		returnCode = http.StatusOK
+		returnCode = http.StatusNoContent
 	}
 
 	c.JSON(returnCode, gin.H{

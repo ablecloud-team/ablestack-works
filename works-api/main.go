@@ -84,6 +84,7 @@ func main() {
 			//v1.POST("/instance", postInstances) // VDI 에 유저 할당
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
 
+			v1.POST("/connection/:instanceUuid/:username/:connection", putAppConnection)
 			v1.PUT("/connection/:instanceUuid/:username", putConnection)
 			v1.DELETE("/connection/:instanceUuid", deleteConnection)
 
@@ -91,10 +92,10 @@ func main() {
 
 			v1.GET("/logout", getLogout)
 
-			v1.GET("/user/:username", getUserDetail)
 			v1.GET("/user", getUser)
+			v1.GET("/user/:userName", getUserDetail)
 			v1.PUT("/user", putUser)
-			v1.DELETE("/user", deleteUser)
+			v1.DELETE("/user/:userName", deleteUser)
 
 			v1.GET("/group", getGroup)
 			v1.GET("/group/:groupName", getGroupDetail)

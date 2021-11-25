@@ -93,6 +93,8 @@ func asyncJobExec() {
 		resultFailQuantity := 0
 		workspaceList, _ := selectWorkspaceList(asyncJob.ExecUuid)
 		workspaceInfo := workspaceList[0]
+		//var instanceType string
+		//if workspaceInfo.
 		for i := 1; i <= deployQuantity; i++ {
 			log.Infof("resultWorkspaceInfo [%v]", workspaceInfo)
 			resultGetDeployVirtualMachine, instanceUuid := getDeployVirtualMachine(workspaceInfo, InstanceString)

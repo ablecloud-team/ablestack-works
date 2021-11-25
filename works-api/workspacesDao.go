@@ -410,7 +410,7 @@ func selectZoneId() string {
 	return zoneId
 }
 
-func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]interface{} {
+func updateWorkspaceTemplateCheck(uuid string, workspaceStatus string) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -422,10 +422,10 @@ func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]int
 	}
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "updateWorkspaceTemplateCheck",
-	}).Infof("uuid [%v]", uuid)
+	}).Infof("uuid [%v], workspaceStatus [%v]", uuid, workspaceStatus)
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", typeString, Enable, uuid)
+	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", workspaceStatus, Enable, uuid)
 	if err != nil {
 		log.Error(MsgDBConnectError)
 		log.Error(err)

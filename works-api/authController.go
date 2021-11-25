@@ -24,7 +24,7 @@ import (
 func getLogin(c *gin.Context) {
 	userId := c.PostForm("id")
 	userPassword := c.PostForm("password")
-	resultLogin, err := login(userId, userPassword)
+	resultLogin, err := postLogin(userId, userPassword)
 	result := map[string]interface{}{}
 	if err != nil {
 		log.Errorf("result [%v], error [%v]", result, err)
@@ -55,7 +55,7 @@ func getLogin(c *gin.Context) {
 						return
 					}
 				}
-				log.Infof("%v token is %v", userId, token)
+				log.Infof("%v token is [%v]", userId, token)
 				result["token"] = token
 				//c.Header("access-token", token)
 				//log.Info(c.sameSite)
@@ -94,14 +94,14 @@ func getLogout(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param username path string true "사용자 계정"
-// @Router /api/v1/user/:username [get]
+// @Router /api/v1/user/:userName [get]
 // @Success 200 {object} map[string]interface{}
 func getUserDetail(c *gin.Context) {
 	//result := map[string]interface{}{}
-	username := c.Param("username")
+	username := c.Param("userName")
 	var resultCode int
 	//userId := c.Param("userId")
-	result := selectUserDetail(username)
+	result := getUserInfo(username)
 	var res map[string]interface{}
 	json.NewDecoder(result.Body).Decode(&res)
 	log.Info(result.Status)
@@ -134,7 +134,7 @@ func getUserToken(c *gin.Context) {
 	//userId := c.Param("userId")
 	cookieUserId := c.MustGet("cookie-user-id").(string)
 	fmt.Println("cookieUserId = " + cookieUserId)
-	result := selectUserDetail(cookieUserId)
+	result := getUserInfo(cookieUserId)
 	var res map[string]interface{}
 	json.NewDecoder(result.Body).Decode(&res)
 	c.JSON(http.StatusOK, gin.H{
@@ -151,12 +151,23 @@ func getUserToken(c *gin.Context) {
 // @Success 200 {object} map[string]interface{}
 func getUser(c *gin.Context) {
 	result := map[string]interface{}{}
-	result["result"] = selectUserList()
+	userList, err := getUserList()
 	log.Info(result["result"])
-	result["status"] = http.StatusOK
-	c.JSON(http.StatusOK, gin.H{
-		"result": result,
-	})
+	if err != nil {
+		result["message"] = "Communication with the DC server failed."
+		c.JSON(http.StatusBadRequest, gin.H{
+			"result": result,
+		})
+	} else if len(userList) == 0 {
+		result["message"] = "There is no user list."
+		c.JSON(http.StatusNotFound, gin.H{
+			"result": result,
+		})
+	} else {
+		c.JSON(http.StatusOK, gin.H{
+			"result": userList,
+		})
+	}
 }
 
 // deleteUser godoc
@@ -164,15 +175,17 @@ func getUser(c *gin.Context) {
 // @Description 사용자 리스트를 조회를 위한 API 입니다.
 // @Accept  json
 // @Produce  json
-// @Router /api/v1/user [get]
+// @Param userName path string true "사용자 계정"
+// @Router /api/v1/user/:userName [delete]
 // @Success 200 {object} map[string]interface{}
 func deleteUser(c *gin.Context) {
-	result := map[string]interface{}{}
-	result["result"] = selectUserList()
-	log.Info(result["result"])
-	result["status"] = http.StatusOK
-	c.JSON(http.StatusOK, gin.H{
-		"result": result,
+	username := c.Param("userName")
+	//result := map[string]interface{}{}
+	deleteDCUserResult, err := deleteDCUser(username)
+	log.Infof("deleteDCUserResult [%v], err [%v]", deleteDCUserResult, err)
+	//result["status"] = http.StatusOK
+	c.JSON(http.StatusNoContent, gin.H{
+		"result": "deleteDCUserResult",
 	})
 }
 
@@ -196,7 +209,7 @@ func putUser(c *gin.Context) {
 	resultCode := http.StatusUnauthorized
 	userInfo := UserInfo{}
 	if c.PostForm("username") != "" {
-		userInfo.Username = c.PostForm("username")
+		userInfo.Cn = c.PostForm("username")
 	} else {
 		resultValue["msg"] = "There is no username."
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -245,26 +258,27 @@ func putUser(c *gin.Context) {
 		return
 	}
 	if c.PostForm("email") != "" {
-		userInfo.Email = c.PostForm("email")
+		userInfo.Mail = c.PostForm("email")
 	} else {
-		resultValue["msg"] = "There is no email."
-		c.JSON(http.StatusBadRequest, gin.H{
-			"result": resultValue,
-		})
-		c.Abort()
-		return
+		//resultValue["msg"] = "There is no email."
+		//c.JSON(http.StatusBadRequest, gin.H{
+		//	"result": resultValue,
+		//})
+		//c.Abort()
+		//return
+		userInfo.Mail = ""
 	}
 	if c.PostForm("phone") != "" {
-		userInfo.Phone = c.PostForm("phone")
+		userInfo.TelephoneNumber = c.PostForm("phone")
 	} else {
-		userInfo.Phone = "000-0000-0000"
+		userInfo.TelephoneNumber = ""
 	}
 	if c.PostForm("title") != "" {
 		userInfo.Title = c.PostForm("title")
 	} else {
-		userInfo.Title = "OfficeWorker"
+		userInfo.Title = ""
 	}
-	result, errInsertDCUser := insertDCUser(userInfo)
+	result, errInsertDCUser := postDCUser(userInfo)
 	if errInsertDCUser != nil {
 		log.Error(errInsertDCUser)
 		resultValue["insertDCUser"] = errInsertDCUser
@@ -283,7 +297,7 @@ func putUser(c *gin.Context) {
 			resultCode = http.StatusOK
 			resultValue["insertDBResult"] = resultInsertUserDB
 		} else {
-			result, _ := deleteDCUser(userInfo.Username)
+			result, _ := deleteDCUser(userInfo.Cn)
 			log.Errorf("DC 에 유저 생성 후 Works DB에 insert 중 에러가 발생하여 rollback 되었습니다.")
 			resultCode = http.StatusUnauthorized
 			resultValue["message"] = "After creating a user on DC, an error occurred while inserting into the Works DB and it was rolled back."
@@ -371,7 +385,7 @@ func delGroupDetail(c *gin.Context) {
 	result := map[string]interface{}{}
 	groupName := c.Param("groupName")
 	resultCode := http.StatusUnauthorized
-	resultSelectGroupDetail, _ := deleteGroupDetail(groupName)
+	resultSelectGroupDetail, _ := deleteGroup(groupName)
 	log.Debug(resultSelectGroupDetail)
 	log.Debug(resultSelectGroupDetail.Status)
 	if resultSelectGroupDetail.Status == OK200 {

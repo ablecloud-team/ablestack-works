@@ -192,6 +192,7 @@ func getDeployVirtualMachine(workspaceInfo Workspace, instanceType string) (map[
 		"C:\\agent\\nssm.exe restart \"Ablecloud Works Agent\"\n" +
 		"date >> \"c:\\agent\\installed.txt\"\n" +
 		"</powershell>"
+
 	params := []MoldParams{
 		{"command": "deployVirtualMachine"},
 		{"templateid": workspaceInfo.TemplateUuid},

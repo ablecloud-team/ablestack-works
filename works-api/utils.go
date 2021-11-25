@@ -91,10 +91,10 @@ func setLog() {
 func RegexpPassword(payload string) bool {
 	//passwordConvention := "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?/~_+-=|\\]).{8,32}$"
 	sc := 0
-	fmt.Println(payload)
+	//fmt.Println(payload)
 	re1, _ := regexp.Compile("[0-9a-zA-Z!@#$%^&+=]{8,15}")
 	if !re1.MatchString(payload) {
-		fmt.Println("re1")
+		//fmt.Println("re1")
 		return false
 	}
 	re2, err := regexp.Compile("[0-9]")
@@ -102,7 +102,7 @@ func RegexpPassword(payload string) bool {
 		fmt.Println(err)
 	}
 	if re2.MatchString(payload) {
-		fmt.Println("re2")
+		//fmt.Println("re2")
 		sc = sc + 1
 	}
 	re3, err := regexp.Compile("[a-zA-Z]")
@@ -110,7 +110,7 @@ func RegexpPassword(payload string) bool {
 		fmt.Println(err)
 	}
 	if re3.MatchString(payload) {
-		fmt.Println("re3")
+		//fmt.Println("re3")
 		sc = sc + 1
 	}
 	re5, err := regexp.Compile("[!@#$%^&+=]")
@@ -118,7 +118,7 @@ func RegexpPassword(payload string) bool {
 		fmt.Println(err)
 	}
 	if re5.MatchString(payload) {
-		fmt.Println("re5")
+		//fmt.Println("re5")
 		sc = sc + 1
 	}
 	return sc == 3

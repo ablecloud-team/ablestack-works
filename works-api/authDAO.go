@@ -12,12 +12,25 @@ import (
 )
 
 type UserInfo struct {
-	Username, Password, Phone, Email string
-	GivenName, Sn, Title             string
+	C                 string `json:"c"`                 // 국가코드 영문
+	Cn                string `json:"cn"`                // 유저아이디
+	Co                string `json:"co"`                // 국가코드 영문
+	CountryCode       string `json:"countryCode"`       // 국가코드 숫자
+	DistinguishedName string `json:"distinguishedName"` // 고유이름
+	GivenName         string `json:"givenName"`         // 사용자 이름
+	Mail              string `json:"mail"`              // e-mail
+	MemberOf          string `json:"memberOf"`          // 소속 그룹
+	Name              string `json:"name"`              // 사용자 계정
+	SAMAccountName    string `json:"sAMAccountName"`    // 사용자 계정
+	Sn                string `json:"sn"`                // 사용자 성
+	TelephoneNumber   string `json:"telephoneNumber"`   // 전화번호
+	Title             string `json:"title"`             // 직책
+	UserPrincipalName string `json:"userPrincipalName"` // 사용자 도메인 계정정보
+	Password          string `json:"password"`          // 사용자 비밀번호
 }
 
 //login
-func login(id string, password string) (*http.Response, error) {
+func postLogin(id string, password string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	params := url.Values{
 		"username": {id},
@@ -35,10 +48,61 @@ func login(id string, password string) (*http.Response, error) {
 	return resp, err
 }
 
-func selectUserDetail(id string) *http.Response {
+//************************** User 관련 시작 **************************
+//유저를 DC 에 추가하는 func
+func postDCUser(userInfo UserInfo) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+	params := url.Values{
+		"username":  {userInfo.Cn},
+		"password":  {userInfo.Password},
+		"sn":        {userInfo.Sn},
+		"givenName": {userInfo.GivenName},
+		"email":     {userInfo.Mail},
+		"phone":     {userInfo.TelephoneNumber},
+		"title":     {userInfo.Title},
+	}
+	log.Infof("paramsInfo = [%v]", params)
+	log.Infof("userInfo = [%v]", userInfo)
+	client := http.Client{
+		Timeout: 60 * time.Second,
+	}
+	resp, err := client.PostForm(DCInfo+"/v1/user", params)
+
+	return resp, err
+}
+
+// 유저 리스트를 DC 에서 조회하는 func
+func getUserList() ([]UserInfo, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 60 * time.Second,
+	}
+	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
+	resp, err := client.Get(DCInfo + "/v1/user/")
+	var res []map[string]interface{}
+	var userInfoList []UserInfo
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"authDAO": "getUserList",
+		}).Errorf("DC communication failed. [%v], error [%v]", resp, err)
+	} else {
+		json.NewDecoder(resp.Body).Decode(&res)
+		jsonMarshal, _ := json.Marshal(res)
+		json.Unmarshal([]byte(jsonMarshal), &userInfoList)
+		log.WithFields(logrus.Fields{
+			"authDAO": "getUserList",
+		}).Infof("DC communication result. resp.StatusCode [%v], userInfoList [%v]", resp.StatusCode, userInfoList)
+		//json.NewDecoder(resp.Body).Decode(&res)
+	}
+
+	return userInfoList, err
+}
+
+// 유저 정보를 DC 에서 조회하는 func
+func getUserInfo(id string) *http.Response {
+	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 60 * time.Second,
 	}
 	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
 	resp, err := client.Get(DCInfo + "/v1/user/" + id)
@@ -50,58 +114,20 @@ func selectUserDetail(id string) *http.Response {
 	return resp
 }
 
-func selectUserList() []map[string]interface{} {
+func deleteDCUser(userName string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 60 * time.Second,
 	}
-	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
-	resp, err := client.Get(DCInfo + "/v1/user/")
-	var res []map[string]interface{}
-
-	if err != nil {
-		log.Error(err)
-		log.Error(resp)
-	} else {
-		json.NewDecoder(resp.Body).Decode(&res)
-	}
-
-	return res
-}
-
-func insertDCUser(userInfo UserInfo) (*http.Response, error) {
-	var DCInfo = os.Getenv("DCUrl")
-	params := url.Values{
-		"username":  {userInfo.Username},
-		"password":  {userInfo.Password},
-		"email":     {userInfo.Email},
-		"sn":        {userInfo.Sn},
-		"givenName": {userInfo.GivenName},
-		"phone":     {userInfo.Phone},
-		"title":     {userInfo.Title},
-	}
-	log.Infof("paramsInfo = [%v]", params)
-	log.Infof("userInfo = [%v]", userInfo)
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	resp, err := client.PostForm(DCInfo+"/v1/user", params)
-
-	return resp, err
-}
-
-func deleteDCUser(username string) (*http.Response, error) {
-	var DCInfo = os.Getenv("DCUrl")
-	client := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/user/%v", DCInfo, username), nil)
+	req, _ := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/user/%v", DCInfo, userName), nil)
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Errorf("유저 삭제중 에러가 발생했습니다. [%v]", err)
 	}
-	resp, err1 := client.Do(req)
-	return resp, err1
+	return resp, err
 }
+
+//************************** User 관련 끝 **************************
 
 func insertGroup(groupName string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
@@ -151,20 +177,26 @@ func selectGroupDetail(groupName string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 60 * time.Second,
 	}
 	resp, err := client.Get(DCInfo + "/v1/group/" + groupName)
 
 	return resp, err
 }
 
-func deleteGroupDetail(groupName string) (*http.Response, error) {
+func deleteGroup(groupName string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 30 * time.Second,
 	}
-	resp, err := client.Get(DCInfo + "/v1/group/" + groupName)
+	//resp, err := client.Get(DCInfo + "/v1/group/" + groupName)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/group/%v", DCInfo, groupName), nil)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	log.WithFields(logrus.Fields{
+		"authDAO": "deleteGroup",
+	}).Infof("workspace group delete status. resp [%v], err [%v]", resp, err)
 
 	return resp, err
 }
@@ -206,7 +238,7 @@ func insertUserDB(userInfo UserInfo) map[string]interface{} {
 		resultReturn["message"] = "DB connect error"
 	}
 	defer db.Close()
-	result, err := db.Exec("INSERT INTO users(uuid, user_name, password, create_date) VALUES (?, ?, ?, now())", getUuid(), userInfo.Username, userInfo.Password)
+	result, err := db.Exec("INSERT INTO users(uuid, user_name, password, create_date) VALUES (?, ?, ?, now())", getUuid(), userInfo.Cn, userInfo.Password)
 	if err != nil {
 		log.Errorf("유저를 DB 등록중에러가 발생했습니다. [%v]", err)
 		resultReturn["message"] = "An error occurred while registering Async Job."

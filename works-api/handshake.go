@@ -30,14 +30,15 @@ func handshakeVdi(instanceInfo Instance, vdiType string) {
 		Timeout: 300 * time.Second,
 	}
 	for i := 0; i <= 120; i++ {
-		// 중간에 인터벌을 안두면 for 문이 120번이 순간적으로 돌면서 handshake 가 종료됨
-		time.Sleep(time.Second * 30)
+
 		statusString, err := getVdiAdStatus(vdiUrl)
 
 		if statusString == Failed {
 			log.WithFields(logrus.Fields{
 				"VDI_IP": vdiUrl,
 			}).Errorf("VDI communication failed. [%v], status [%v]", err, statusString)
+			// 중간에 인터벌을 안두면 for 문이 120번이 순간적으로 돌면서 handshake 가 종료됨
+			time.Sleep(time.Second * 30)
 
 		} else if statusString == Pending {
 			updateInstanceHandshakeStatus(instanceInfo.Uuid, statusString)
