@@ -24,6 +24,8 @@
                 <Actions
                   v-if="actionFrom === 'WorkspaceList'"
                   :action-from="actionFrom"
+                  :multi-select-list="multiSelectList"
+                  @fetchData="refresh"
                 />
                 <a-button
                   type="primary"
@@ -128,12 +130,6 @@
           name="dedicatedOrSharedBoolean"
           :label="$t('label.dedicated.shared')"
         >
-          <!-- {{ $t(switchLabel) }}
-            <a-switch
-              v-model:checked="formState.dedicatedOrSharedBoolean"
-              @change="dedicatedChange"
-            /> -->
-
           <a-radio-group
             v-model:value="formState.dedicatedOrSharedBoolean"
             button-style="solid"
@@ -272,7 +268,6 @@ export default defineComponent({
       formRef,
       formState,
       rules,
-      switchLabel: ref("label.dedicated"),
       visible,
       showModal,
     };
@@ -281,6 +276,7 @@ export default defineComponent({
     return {
       addModalTitle: this.$t("label.workspace.add"),
       actionFrom: ref("Workspace"),
+      multiSelectList: ref([]),
     };
   },
   created() {
@@ -297,28 +293,23 @@ export default defineComponent({
   },
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
     },
-    actionFromChange(val) {
-      this.actionFrom = ref(val);
-    },
-    dedicatedChange(value) {
-      this.dedicatedOrSharedBoolean = value;
-      if (this.dedicatedOrSharedBoolean) {
-        this.switchLabel = ref("label.shared");
-        //console.log("true");
-      } else {
-        this.switchLabel = ref("label.dedicated");
-        //console.log("false");
-      }
+    actionFromChange(val, obj) {
+      // console.log(val, obj);
+      this.actionFrom = "Workspace";
+      setTimeout(() => {
+        this.actionFrom = val;
+        this.multiSelectList = obj;
+      }, 100);
     },
     workspaceTypeChange(value) {
       this.formState.selectedMasterTemplateId = ref("");
       if (value.target.value === "application") {
-        this.formState.desktopBoolean = ref(false);
+        this.formState.desktopBoolean = false;
         this.templates = this.applicationTemplates;
       } else {
-        this.formState.desktopBoolean = ref(true);
+        this.formState.desktopBoolean = true;
         this.templates = this.desktopTemplates;
       }
     },
@@ -368,26 +359,29 @@ export default defineComponent({
             })
             .catch((error) => {
               //이름 중복이 아닐때(status code = 401)
-              message.loading(this.$t("message.workspace.createing"), 1);
+              message.loading(this.$t("message.workspace.createing"));
               worksApi
                 .put("/api/v1/workspace", params)
                 .then((response) => {
+                  message.destroy();
                   if (response.status === 200) {
-                    message.loading(
+                    message.success(
                       this.$t("message.workspace.create.success"),
-                      1
+                      10
                     );
                   } else {
                     message.error(this.$t("message.workspace.create.fail"));
                   }
                   this.showModal(false);
-                  setTimeout(() => {
-                    this.$refs.listRefreshCall.fetchData();
-                  }, 1500);
                 })
                 .catch((error) => {
+                  message.destroy();
                   message.error(this.$t("message.workspace.create.fail"));
                   console.log(error);
+                })
+                .finally(() => {
+                  this.showModal(false);
+                  this.$refs.listRefreshCall.fetchRefresh();
                 });
             });
         })

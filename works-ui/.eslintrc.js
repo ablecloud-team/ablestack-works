@@ -4,9 +4,10 @@ module.exports = {
     node: true,
   },
   extends: ["eslint:recommended", "@vue/prettier"],
+  parser: "vue-eslint-parser",
   parserOptions: {
-    ecmaVersion: 2020,
-    parser: "babel-eslint",
+    parser: "@typescript-eslint/parser",
+    ecmaVersion: "latest",
     sourceType: "module",
   },
   rules: {
@@ -15,5 +16,6 @@ module.exports = {
   },
   globals: {
     localStorage: true,
+    sessionStorage: true,
   },
 };

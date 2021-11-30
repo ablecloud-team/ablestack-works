@@ -12,6 +12,40 @@
         </h4>
       </div>
     </div>
+
+    <div id="Status" class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.state") }}</div>
+      <div class="Item">
+        <a-tooltip placement="bottom">
+          <template #title>{{ vmDbDataInfo.mold_status }}</template>
+          <a-badge
+            class="head-example"
+            :color="
+              vmDbDataInfo.mold_status === 'Running'
+                ? 'green'
+                : vmDbDataInfo.mold_status === 'Stopping' ||
+                  vmDbDataInfo.mold_status === 'Starting'
+                ? 'blue'
+                : vmDbDataInfo.mold_status === 'Stopped'
+                ? 'red'
+                : ''
+            "
+            :text="
+              vmDbDataInfo.mold_status === 'Running'
+                ? $t('label.vm.status.running')
+                : vmDbDataInfo.mold_status === 'Starting'
+                ? $t('label.vm.status.starting')
+                : vmDbDataInfo.mold_status === 'Stopping'
+                ? $t('label.vm.status.stopping')
+                : vmDbDataInfo.mold_status === 'Stopped'
+                ? $t('label.vm.status.stopped')
+                : ''
+            "
+          />
+        </a-tooltip>
+      </div>
+    </div>
+
     <div id="Status" class="CardItem">
       <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
       <div class="Item">
@@ -19,15 +53,15 @@
           <template #title>{{ vmDbDataInfo.handshake_status }}</template>
           <a-badge
             class="head-example"
-          :color="
-            vmDbDataInfo.mold_status == 'Running' &&
-            vmDbDataInfo.handshake_status === 'Ready'
-              ? 'green'
-              : 'red'
-          "
+            :color="vmDbDataInfo.handshake_status === 'Ready' ? 'green' : 'red'"
             :text="
-              vmDbDataInfo.mold_status == 'Running' &&
-              vmDbDataInfo.handshake_status === 'Ready'
+              vmDbDataInfo.handshake_status === 'Not Ready' ||
+              vmDbDataInfo.handshake_status === 'Pending'
+                ? $t('label.vm.status.initializing')
+                : vmDbDataInfo.handshake_status === 'Joining' ||
+                  vmDbDataInfo.handshake_status === 'Joined'
+                ? $t('label.vm.status.configuring')
+                : vmDbDataInfo.handshake_status === 'Ready'
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "
@@ -38,9 +72,6 @@
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        <!-- <a-button shape="circle" type="dashed" >
-          <BarcodeOutlined />
-        </a-button> -->
         {{ vmDbDataInfo.uuid }}
       </div>
     </div>
@@ -124,53 +155,50 @@ import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
-  props: {},
+  props: {
+    vmDbDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmMoldDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmNetworkInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmDiskInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    cpuused: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+  },
   setup() {
     return {};
   },
-  data() {
+  data(props) {
     return {
       spinning: ref(true),
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
-      vmNetworkInfo: ref([]),
-      vmDiskInfo: ref([]),
-      cpuused: ref(0),
     };
   },
   created() {
-    this.refresh();
+    this.fetchRefresh();
   },
   methods: {
-    refresh() {
-      this.fetchData();
+    fetchRefresh() {
       this.spinning = true;
       setTimeout(() => {
         this.spinning = false;
       }, 500);
-    },
-    fetchData() {
-      worksApi
-        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-        .then((response) => {
-          if (response.status === 200) {
-            //console.log(response.data.result.instanceDBInfo);
-            this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo =
-              response.data.result.instanceMoldInfo.virtualmachine[0];
-            this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
-            this.vmDiskInfo =
-              response.data.result.instanceInstanceVolumeInfo.volume[0];
-            this.cpuused = this.vmMoldDataInfo.cpuused.split("%")[0];
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          message.error(this.$t("message.response.data.fail"));
-        });
     },
   },
 });

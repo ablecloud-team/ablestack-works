@@ -9,7 +9,7 @@
               <Apath
                 :paths="[
                   { name: $t('label.users'), component: 'Account' },
-                  { name: userName, component: null },
+                  { name: accountInfo.name, component: null },
                 ]"
               />
               <a-button
@@ -26,14 +26,18 @@
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions :action-from="actionFrom" />
+              <Actions
+                v-if="actionFrom === 'AccountDetail'"
+                :action-from="actionFrom"
+                :account-info="accountInfo"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody ref="listRefreshCall" />
+          <AccountBody ref="listRefreshCall" :account-info="accountInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -45,6 +49,8 @@ import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
 import AccountBody from "./AccountBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
   components: {
     AccountBody,
@@ -54,18 +60,37 @@ export default defineComponent({
   props: {},
   setup() {
     return {
-      actionFrom: ref("AccountDetail"),
+      actionFrom: ref(""),
     };
   },
   data() {
     return {
-      userName: ref(this.$route.params.userName),
+      accountInfo: ref([]),
     };
   },
-  created() {},
+  created() {
+    this.fetchData();
+  },
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.refresh();
+      this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
+    },
+    async fetchData() {
+      await worksApi
+        .get("/api/v1/user/" + this.$route.params.accountName)
+        .then((response) => {
+          if (response.status == 200) {
+            this.accountInfo = response.data.result;
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+          }
+        })
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
+        });
+      this.actionFrom = "AccountDetail";
     },
   },
 });

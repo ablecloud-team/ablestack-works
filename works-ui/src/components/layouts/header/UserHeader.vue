@@ -8,10 +8,7 @@
       />
       <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
-    <a-col
-      :span="12"
-      style="float: right; text-align: right; padding-right: 40px"
-    >
+    <a-col :span="12" style="float: right; text-align: right; padding-right: 5px">
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>

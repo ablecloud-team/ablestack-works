@@ -9,7 +9,7 @@
               <Apath :paths="[$t('label.vm')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px;"
+                style="margin-left: 20px"
                 size="small"
                 @click="refresh()"
               >
@@ -21,9 +21,11 @@
 
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions
+              <Actions
                 v-if="actionFrom === 'VirtualMachineList'"
                 :action-from="actionFrom"
+                :multi-select-list="multiSelectList"
+                @fetchData="refresh"
               />
             </a-col>
           </a-row>
@@ -57,16 +59,20 @@ export default defineComponent({
   props: {},
   data() {
     return {
-      actionFrom: ref("VirtualMachine"),
+      actionFrom: ref(""),
+      multiSelectList: ref([]),
     };
   },
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
     },
-    actionFromChange(val) {
-      //console.log(val);
-      this.actionFrom = ref(val);
+    actionFromChange(val, obj) {
+      this.actionFrom = "";
+      setTimeout(() => {
+        this.actionFrom = val;
+        this.multiSelectList = obj;
+      }, 100);
     },
   },
 });

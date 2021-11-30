@@ -1,5 +1,23 @@
 <template>
+  <!-- <a-spin :spinning="spinning" size="large" :tip="tip"> -->
   <div class="user-layout desktop">
+    <span>
+      <a-alert
+        v-if="serverStatus"
+        :message="statusMessage"
+        :description="statusDescription"
+        :type="statusType"
+        banner
+        show-icon
+      >
+        <!-- <template #icon>
+          <smile-outlined />
+          <smile-outlined v-if="statusType == 'success'" />
+          <frown-outlined v-else /> -->
+        <!-- </template> -->
+      </a-alert>
+    </span>
+
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
@@ -7,7 +25,11 @@
           alt="logo"
           class="user-layout-logo"
         />
+        <div v-if="disabled" style="text-align: center">
+          <a-spin />
+        </div>
       </div>
+
       <a-form
         ref="formRef"
         layout="horizontal"
@@ -18,6 +40,7 @@
       >
         <a-form-item has-feedback name="id">
           <a-input
+            :disabled="disabled"
             v-model:value="formState.id"
             :placeholder="$t('label.user.id')"
             size="large"
@@ -27,8 +50,10 @@
             </template>
           </a-input>
         </a-form-item>
+
         <a-form-item has-feedback name="password">
           <a-input-password
+            :disabled="disabled"
             v-model:value="formState.password"
             type="password"
             :placeholder="$t('label.password')"
@@ -41,6 +66,7 @@
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
           <a-button
+            :disabled="disabled"
             type="primary"
             block
             class="login-button"
@@ -73,9 +99,11 @@
       </a-form>
     </div>
   </div>
+  <!-- </a-spin> -->
 </template>
 
 <script>
+import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { worksApi } from "@/api/index";
@@ -84,6 +112,7 @@ import router from "@/router";
 
 export default defineComponent({
   name: "Login",
+  components: { SmileOutlined, FrownOutlined },
   setup() {
     const formRef = ref();
     const formState = reactive({
@@ -108,15 +137,68 @@ export default defineComponent({
   },
   data() {
     return {
+      timer: ref(null),
+      spinning: ref(true),
+      tip: ref("서버 체크중..."),
       language: ref(""),
       loadedLanguage: ref[""],
+      disabled: ref(true),
+      serverStatus: ref(true),
+      statusMessage: ref("서버 체크중입니다."),
+      statusDescription: ref(
+        "DC서버와 정상적인 통신이 가능한지 확인하는 작업이 진행중입니다. 잠시만 기다려주세요."
+      ),
+      statusType: ref("error"),
     };
   },
-  computed: {},
   created() {
+    this.serverStatus = true;
+
+    this.timer = setInterval(() => {
+      //임시 테스터 api임 , 해당 api 개발 후 재테스트 예정
+      worksApi
+        .get("/api/version")
+        .then((response) => {
+          if (response.status == 200) {
+            //정상일 경우
+            this.statusMessage = "서버 체크가 완료되었습니다.";
+            this.statusDescription =
+              "데스크톱 서비스 환경구성이 완료되었습니다. Works Portal에 로그인을 진행해주세요.";
+            this.statusType = "success";
+            this.disabled = false;
+            // this.tip = "DC서버 구성이 완료되었습니다. 로그인 해주세요.";
+            // this.spinning = false;
+
+            clearInterval(this.timer);
+            setTimeout(() => {
+              //this.serverStatus = false;
+            }, 3000);
+          } else {
+            // DC 서버가 구성중일 경우
+            this.statusMessage = "DC서버 구성중입니다.";
+            this.statusDescription = "1단계: xXx";
+            this.tip = "DC서버 구성중입니다. (1단계: xXx)";
+            //this.spinning = false;
+            // clearInterval(this.timer);
+          }
+        })
+        .catch((error) => {
+          this.statusMessage = "API 서버 통신불가";
+          this.statusDescription =
+            "Works API 서버와 통신이 원활하지 않습니다. 관리자에 문의하세요.";
+          this.tip = "Works API 서버와 통신이 원활하지 않습니다.";
+          // message.error(this.$t("message.response.data.fail"));
+          console.log(error.message);
+        })
+        .finally(() => {});
+    }, 3000);
+
     this.rules.id.message = this.$t("message.please.enter.your.id");
     this.rules.password.message = this.$t("message.please.enter.your.password");
     this.onClear();
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
     setLocaleClick(e) {
@@ -141,7 +223,7 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.logging"), 10);
+          message.loading(this.$t("message.logging"), 60);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
 
@@ -149,45 +231,41 @@ export default defineComponent({
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
-              if (response.status === 200) {
+              if (
+                response.status === 200 &&
+                response.data.result.login === true
+              ) {
+                store.dispatch("loginCommit", response.data);
+                sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem(
+                  "username",
+                  response.data.result.username
+                );
+                sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
                 if (
-                  response.data.result.status === 200 &&
-                  response.data.result.login === true
+                  response.data.result.username.toLowerCase() ===
+                  "administrator"
                 ) {
-                  store.dispatch("loginCommit", response.data);
-                  sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem(
-                    "username",
-                    response.data.result.username
-                  );
-                  sessionStorage.setItem(
-                    "isAdmin",
-                    response.data.result.isAdmin
-                  );
-                  if (
-                    response.data.result.username.toLowerCase() ===
-                    "administrator"
-                  ) {
-                    router.push({ name: "Dashboard" });
-                  } else {
-                    router.push({ name: "Favorite" });
-                  }
-                  message.destroy();
-                  message.success(this.$t("message.login.completed"));
+                  router.push({ name: "Dashboard" });
                 } else {
-                  message.destroy();
-                  message.error(this.$t("message.login.wrong"));
-                  //router.push({ name: "Login" });
+                  router.push({ name: "Favorite" });
                 }
+                message.destroy();
+                message.success(this.$t("message.login.completed"));
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));
               }
             })
             .catch((error) => {
-              console.log(error.message);
               message.destroy();
-              message.error(this.$t("message.login.wrong"));
+              if (error.response.status === 400) {
+                message.error(this.$t("message.login.wrong.400"));
+              } else if (error.response.status === 401) {
+                message.error(this.$t("message.login.wrong.401"));
+              } else {
+                message.error(this.$t("message.login.wrong"));
+              }
             });
         })
         .catch((error) => {

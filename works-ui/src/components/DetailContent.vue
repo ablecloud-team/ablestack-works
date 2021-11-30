@@ -19,9 +19,15 @@
         <br />{{ vmDbDataInfo.state }}
 
         {{
-          vmMoldDataInfo.state == "Running"
+          vmDbDataInfo.mold_status === "Running"
             ? $t("label.vm.status.running")
-            : $t("label.vm.status.stopped")
+            : vmDbDataInfo.mold_status === "Starting"
+            ? $t("label.vm.status.starting")
+            : vmDbDataInfo.mold_status === "Stopping"
+            ? $t("label.vm.status.stopping")
+            : vmDbDataInfo.mold_status === "Stopped"
+            ? $t("label.vm.status.stopped")
+            : ""
         }}
       </a-list-item>
       <a-list-item>
@@ -61,54 +67,54 @@
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ userDataInfo.username }}
+        {{ accountInfo.username }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.country") }}</strong
         ><br />
-        {{ userDataInfo.co }}
+        {{ accountInfo.co }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.countryCode") }}</strong
         ><br />
-        {{ userDataInfo.countryCode }}
+        {{ accountInfo.countryCode }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.title") }}</strong
         ><br />
-        {{ userDataInfo.title }}
+        {{ accountInfo.title }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.email") }}</strong
         ><br />
-        {{ userDataInfo.mail }}
+        {{ accountInfo.mail }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.isAdmin") }}</strong
         ><br />
-        {{ userDataInfo.isAdmin }}
+        {{ accountInfo.isAdmin }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.telephoneNumber") }}</strong
         ><br />
-        {{ userDataInfo.telephoneNumber }}
+        {{ accountInfo.telephoneNumber }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.userPrincipalName") }}</strong
         ><br />
-        {{ userDataInfo.userPrincipalName }}
+        {{ accountInfo.userPrincipalName }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.distinguishedName") }}</strong
         ><br />
-        {{ userDataInfo.distinguishedName }}
+        {{ accountInfo.distinguishedName }}
       </a-list-item>
     </a-list>
     <a-list v-if="actionFrom === 'GroupPolicyDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ userDataInfo.username }}
+        {{ accountInfo.username }}
       </a-list-item>
     </a-list>
   </a-spin>
@@ -127,79 +133,95 @@ export default defineComponent({
       required: true,
       default: null,
     },
+    vmDbDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmMoldDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   setup(props) {
-    const state = reactive({
-      actionFrom: ref(props.actionFrom),
-    });
     return {
-      state,
+      actionFrom: ref(props.actionFrom),
     };
   },
   data() {
     return {
       spinning: ref(true),
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
       userDataInfo: ref([]),
     };
   },
   created() {
-    this.refresh();
+    this.fetchRefresh();
   },
   methods: {
-    refresh() {
+    fetchRefresh() {
       this.fetchData();
       this.spinning = true;
-      setTimeout(() => {
-        this.spinning = false;
-      }, 500);
     },
     fetchData() {
       // 가상머신 상세조회
-      if (this.state.actionFrom == "VirtualMachineDetail") {
-        worksApi
-          .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-          .then((response) => {
-            if (response.status === 200) {
-              this.vmDbDataInfo = response.data.result.instanceDBInfo;
-              this.vmMoldDataInfo =
-                response.data.result.instanceMoldInfo.virtualmachine[0];
-            } else {
-              message.error(this.$t("message.response.data.fail"));
-              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            message.error(this.$t("message.response.data.fail"));
-          });
-      } else if (
-        this.state.actionFrom === "UserDetail" ||
-        this.state.actionFrom === "AccountDetail"
-      ) {
-        let apiUrl =
-          this.state.actionFrom === "AccountDetail"
-            ? "/api/v1/user/" + this.$route.params.userName
-            : this.state.actionFrom === "UserDetail"
-            ? "/api/v1/user/" + sessionStorage.getItem("username")
-            : "";
+      // if (this.state.actionFrom == "VirtualMachineDetail") {
+      //   worksApi
+      //     .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
+      //     .then((response) => {
+      //       if (response.status === 200) {
+      //         this.vmDbDataInfo = response.data.result.instanceDBInfo;
+      //         this.vmMoldDataInfo =
+      //           response.data.result.instanceMoldInfo.virtualmachine[0];
+      //       } else {
+      //         message.error(this.$t("message.response.data.fail"));
+      //         //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.log(error);
+      //       message.error(this.$t("message.response.data.fail"));
+      //     })
+      //     .finally(() => {
+      //       this.spinning = false;
+      //     });
+      // } else
+      // if (
+      //   this.actionFrom === "UserDetail"
+      // ) {
+      //   let apiUrl =
+      //     this.actionFrom === "AccountDetail"
+      //       ? "/api/v1/user/" + this.$route.params.accountName
+      //       : this.actionFrom === "UserDetail"
+      //       ? "/api/v1/user/" + sessionStorage.getItem("username")
+      //       : "";
 
-        worksApi
-          .get(apiUrl)
-          .then((response) => {
-            if (response.status == 200) {
-              this.userDataInfo = response.data.result;
-            } else {
-              message.error(this.$t("message.response.data.fail"));
-              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            message.error(this.$t("message.response.data.fail"));
-          });
-      }
+      //   worksApi
+      //     .get(apiUrl)
+      //     .then((response) => {
+      //       if (response.status == 200) {
+      //         this.userDataInfo = response.data.result;
+      //       } else {
+      //         message.error(this.$t("message.response.data.fail"));
+      //         //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.log(error);
+      //       message.error(this.$t("message.response.data.fail"));
+      //     })
+      //     .finally(() => {
+      //       this.spinning = false;
+      //     });
+      // }
+      setTimeout(() => {
+        this.spinning = false;
+      }, 500);
     },
   },
 });

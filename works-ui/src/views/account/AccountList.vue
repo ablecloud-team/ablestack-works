@@ -10,8 +10,11 @@
     "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
-    :row-key="(record, index) => index"
     :pagination="pagination"
+    :row-selection="{
+      selectedRowKeys: state.selectedRowKeys,
+      onChange: onSelectChange,
+    }"
   >
     <!-- 검색 필터링 template-->
     <template
@@ -51,10 +54,18 @@
         record.name
       }}</router-link>
     </template>
-    <template #actionRender>
+    <template #lastnameRender="{ record }">
+      {{ record.lastname }}
+    </template>
+    <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
         <template #content>
-          <Actions :action-from="actionFrom" />
+          <Actions
+            v-if="actionFrom == 'AccountList'"
+            :action-from="actionFrom"
+            :account-info="record"
+            @fetchData="fetchRefresh"
+          />
         </template>
         <MoreOutlined />
       </a-Popover>
@@ -67,22 +78,6 @@ import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
-// const rowSelection = {
-//   onChange: (selectedRowKeys, selectedRows) => {
-//     console.log(
-//       `selectedRowKeys: ${selectedRowKeys}`,
-//       "selectedRows: ",
-//       selectedRows
-//     );
-//   },
-//   onSelect: (record, selected, selectedRows) => {
-//     console.log(record, selected, selectedRows);
-//   },
-//   onSelectAll: (selected, selectedRows, changeRows) => {
-//     console.log(selected, selectedRows, changeRows);
-//   },
-// };
 export default defineComponent({
   components: {
     Actions,
@@ -93,6 +88,8 @@ export default defineComponent({
     const state = reactive({
       searchText: "",
       searchedColumn: "",
+      selectedRowKeys: [],
+      selectedRows: [],
     });
     const searchInput = ref();
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
@@ -106,16 +103,8 @@ export default defineComponent({
       state.searchText = "";
     };
     return {
-      //rowSelection,
       loading: ref(false),
-      actionFrom: ref("AccountList"),
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "50", "100"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
+      actionFrom: ref(""),
       searchInput,
       state,
       handleSearch,
@@ -124,8 +113,16 @@ export default defineComponent({
   },
   data() {
     return {
-      selectedRowKeys: [],
-      userDataList: [],
+      timer: ref(null),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
+      userDataList: ref([]),
       UserListColumns: [
         {
           title: this.$t("label.account"),
@@ -209,30 +206,48 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.fetchRefresh();
+    this.timer = setInterval(() => {
+      //60초 자동 갱신
+      this.fetchData();
+    }, 30000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
-    setSelection(selection) {
-      this.selectedRowKeys = selection;
-      if (this.selectedRowKeys.length == 0) {
-        this.$emit("actionFromChange", "User");
-      } else {
-        this.$emit("actionFromChange", this.actionFrom);
-      }
-    },
-    resetSelection() {
-      this.setSelection([]);
+    fetchRefresh() {
+      this.actionFrom = "";
+      this.loading = true;
+      this.state.selectedRowKeys = [];
+      this.state.searchText = "";
+      this.fetchData();
     },
     onSelectChange(selectedRowKeys, selectedRows) {
-      this.setSelection(selectedRowKeys);
+      this.state.selectedRowKeys = selectedRowKeys;
+      this.state.selectedRows = selectedRows;
+      if (this.state.selectedRows.length > 0) {
+        this.$emit("actionFromChange", "AccountList", this.state.selectedRows);
+      } else {
+        this.$emit("actionFromChange", "Account", null);
+      }
     },
-    fetchData() {
-      this.loading = true;
-      worksApi
+    async fetchData() {
+      await worksApi
         .get("/api/v1/user")
         .then((response) => {
-          if (response.data.result.status == 200) {
-            this.userDataList = response.data.result.result;
+          if (response.status == 200) {
+            if (
+              response.data.result !== null &&
+              response.data.result !== undefined
+            ) {
+              this.userDataList = response.data.result;
+              this.userDataList.forEach((value, index, array) => {
+                this.userDataList[index].key = index;
+              });
+            } else {
+              this.userDataList = [];
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
@@ -241,10 +256,11 @@ export default defineComponent({
         .catch((error) => {
           console.log(error);
           message.error(this.$t("message.response.data.fail"));
+        })
+        .finally(() => {
+          this.loading = false;
         });
-      setTimeout(() => {
-        this.loading = false;
-      }, 500);
+      this.actionFrom = "AccountList";
     },
   },
 });

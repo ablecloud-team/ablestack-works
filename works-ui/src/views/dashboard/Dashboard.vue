@@ -135,6 +135,7 @@ export default defineComponent({
   },
   data() {
     return {
+      timer: ref(null),
       spinning: ref(false),
       workspaceCount: ref("0"),
       instanceCount: ref("0"),
@@ -143,11 +144,11 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData();
+    this.refresh();
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 60000);
+    }, 30000);
   },
   unmounted() {
     clearInterval(this.timer);
@@ -155,10 +156,7 @@ export default defineComponent({
   methods: {
     refresh() {
       this.spinning = true;
-      setTimeout(() => {
-        this.fetchData();
-        this.spinning = false;
-      }, 1000);
+      this.fetchData();
     },
     fetchData() {
       worksApi
@@ -174,6 +172,9 @@ export default defineComponent({
         .catch((error) => {
           message.error(this.$t("message.response.data.fail"));
           console.log(error.message);
+        })
+        .finally(() => {
+          this.spinning = false;
         });
     },
   },

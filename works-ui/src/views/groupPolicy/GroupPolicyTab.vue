@@ -122,13 +122,6 @@ export default defineComponent({
       rowSelection,
       state,
       addDesktopQuantity,
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "30", "50"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
       //actionFrom: ref(props.actionFrom),
     };
   },
@@ -143,6 +136,14 @@ export default defineComponent({
       userDataList: [],
       selectedUser: ref(""),
       selectedVmQuantity: ref(1),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
       columns: [
         {
           dataIndex: "name",
