@@ -17,6 +17,7 @@ type APPVAL struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
 	Desc string `json:"desc"`
+	WorkingDirectory string `json:"WorkingDirectory"`
 }
 
 func setupShell() (shell *powershell.Shell, err error) {
@@ -67,14 +68,20 @@ func getApps(shell *powershell.Shell) (apps []*APPVAL) {
 	if err != nil {
 		panic(err)
 	}
-	stdout, err = shell.Exec("Get-ChildItem -Path \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\**\\*.lnk\" | ForEach-Object {$WScript.CreateShortcut($_.FullName).TargetPath} | select-string -pattern exe | sort-object -unique")
+	stdout, err = shell.Exec("((Get-ChildItem -Path \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\*.lnk\") + (Get-ChildItem -Path \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\**\\*.lnk\") + (Get-ChildItem -Path \"C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\**\\**\\*.lnk\")) | ForEach-Object {$WScript.CreateShortcut($_.FullName).TargetPath+\"&&\"+ $WScript.CreateShortcut($_.FullName).WorkingDirectory} | select-string -pattern exe | sort-object -unique")
 	if err != nil {
 		panic(err)
 	}
 
 	applist := strings.Split(stdout, "\r\n")
-	for _, app := range applist {
+	for _, appl := range applist {
+		appsplit :=strings.Split(appl, "&&")
+		app := appsplit[0]
 
+		wd := ""
+		if len(appsplit)==2 {
+			wd = strings.Split(appl, "&&")[1]
+		}
 		if _, err := os.Stat(app); err == nil {
 			cmd := fmt.Sprintf("Get-ItemPropertyValue \"%v\" -Name versionInfo | format-list", app)
 			stdout, err = shell.Exec(cmd)
@@ -110,6 +117,7 @@ func getApps(shell *powershell.Shell) (apps []*APPVAL) {
 				Name: name,
 				Path: app,
 				Desc: desc,
+				WorkingDirectory: wd,
 			}
 			apps = append(apps, a)
 
