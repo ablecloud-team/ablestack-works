@@ -164,11 +164,12 @@ func loginHandler(c *gin.Context) {
 // @Produce  json
 // @Param username formData string true "사용자 이름"
 // @Param password formData string true "사용자 암호"
-// @Param phone formData string true "전화번호"
-// @Param email formData string true "이메일"
+// @Param phone formData string false "전화번호"
+// @Param email formData string false "이메일"
 // @Param givenName formData string true "이름"
 // @Param sn formData string true "성"
-// @Param title formData string true "직급"
+// @Param title formData string false "직급"
+// @Param department formData string false "부서"
 // @Success 200 {object} userModel "사용자 생성 성공"
 // @Failure 401 {object} userModel "사용자 생성 실패"
 // @Failure default {objects} string
@@ -189,7 +190,7 @@ func addUserHandler(c *gin.Context) {
 	userPW := c.PostForm("password")
 	userPhone := c.PostForm("phone")
 	userMail := c.PostForm("email")
-
+	department := c.PostForm("department")
 	givenName := c.PostForm("givenName")
 	title := c.PostForm("title")
 	sn := c.PostForm("sn")
@@ -213,6 +214,7 @@ func addUserHandler(c *gin.Context) {
 		"givenName":       givenName,
 		"title":           title,
 		"sn":              sn,
+		"department":	   department,
 	}
 	err = addUser(l, user)
 	if err != nil {
