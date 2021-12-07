@@ -23,168 +23,9 @@
       </a-layout-header>
       <a-layout-content>
         <a-spin :spinning="spinning" size="large">
-          <div
-            id="content-body"
-            v-for="workspace in dataList"
-            style="width: 100%; padding: 5px"
-          >
-            <a-card
-              :title="'WORKSPACE : ' + workspace.workspace"
-              bodyStyle="margin: 1px; fontSize: 100px;"
-            >
-              <a-row>
-                <a-col flex="100%">
-                  <a-row :gutter="12" type="flex">
-                    <a-col
-                      v-for="vm in workspace.instanceList"
-                      flex="10%"
-                      class="dashboard-a-col"
-                    >
-                      <a-card
-                        hoverable
-                        style="width: 200px; text-align: center"
-                        :title="vm.name"
-                      >
-                        <DesktopOutlined
-                          :style="{
-                            fontSize: '40px',
-                            color: vm.state == 'Running' ? 'black' : 'pink',
-                          }"
-                        />
-
-                        <template class="ant-card-actions" #actions>
-                          <a-popconfirm
-                            :title="
-                              vm.favorite == true
-                                ? '즐겨찾기 해제하시겠습니까?'
-                                : '즐겨찾기에 추가하시겠습니까?'
-                            "
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="favorite(vm.id, vm.favorite)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("즐겨찾기 해제")
-                              }}</template>
-
-                              <StarFilled
-                                v-if="vm.favorite"
-                                :id="vm.id + '-TRUE'"
-                                :style="{ color: '#ffd700' }"
-                              />
-                            </a-tooltip>
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("즐겨찾기 추가")
-                              }}</template>
-                              <StarOutlined
-                                v-if="!vm.favorite"
-                                :id="vm.id + '-FALSE'"
-                                :style="{ color: '#d9dbdf' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="'RDP 파일을 다운로드 하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="downloadRDP(vm.name)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("RDP 다운로드")
-                              }}</template>
-                              <CloudDownloadOutlined
-                                :style="{ color: '#292929' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="'데스크톱에 접속하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="connectConsole(vm.id)"
-                            :disabled="
-                              vm.handshake_status == 'Ready' ? false : true
-                            "
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                vm.handshake_status === "Ready"
-                                  ? $t("데스크톱 접속")
-                                  : $t("데스크톱 접속 불가")
-                              }}</template>
-                              <CodeFilled
-                                :style="{
-                                  color:
-                                    vm.handshake_status == 'Ready'
-                                      ? '#333'
-                                      : '#d9dbdf',
-                                }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="
-                              vm.state == 'Running'
-                                ? '가상머신을 종료하시겠습니까?'
-                                : '가상머신을 시작하시겠습니까?'
-                            "
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="vmState(vm.id, vm.state)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                vm.state === "Running"
-                                  ? $t("가상머신 종료")
-                                  : $t("가상머신 시작")
-                              }}</template>
-                              <PoweroffOutlined
-                                v-if="vm.state == 'Running'"
-                                :style="{ color: '#333' }"
-                              />
-                              <CaretRightOutlined
-                                v-else
-                                :style="{ color: '#333' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-                        </template>
-                        <br /><br />
-
-                        <a-tooltip placement="bottom">
-                          <template #title>{{ vm.handshake_status }}</template>
-                          <a-badge
-                            class="head-example"
-                            :color="
-                              vm.handshake_status == 'Ready' ? 'green' : 'red'
-                            "
-                            :text="
-                              vm.handshake_status == 'Ready'
-                                ? $t('label.vm.status.ready')
-                                : $t('label.vm.status.notready')
-                            "
-                          />({{ vm.state }})
-                        </a-tooltip>
-
-                        <br />
-                        <WindowsFilled /> {{ vm.ostype }}
-                      </a-card>
-                    </a-col>
-                  </a-row>
-                </a-col>
-              </a-row>
-            </a-card>
-          </div>
-
-          <!-- <a-card bodyStyle="margin: 1px; fontSize: 100px;">
+          <a-card bodyStyle="">
             <a-list
-              :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 6, xxl: 10 }"
+              :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 5, xxl: 10 }"
               :pagination="pagination"
               :data-source="instanceList"
             >
@@ -192,7 +33,7 @@
                 <a-list-item>
                   <a-card
                     hoverable
-                    style="width: 200px; text-align: center"
+                    style="width: 100%; text-align: center"
                     :title="item.name"
                   >
                     <DesktopOutlined
@@ -213,19 +54,16 @@
                         :cancel-text="$t('label.cancel')"
                         @confirm="favorite(item.id, item.favorite)"
                       >
-                        <a-tooltip placement="bottom">
+                        <a-tooltip v-if="item.favorite" placement="bottom">
                           <template #title>{{ $t("즐겨찾기 해제") }}</template>
-
                           <StarFilled
-                            v-if="item.favorite"
                             :id="item.id + '-TRUE'"
                             :style="{ color: '#ffd700' }"
                           />
                         </a-tooltip>
-                        <a-tooltip placement="bottom">
+                        <a-tooltip v-else placement="bottom">
                           <template #title>{{ $t("즐겨찾기 추가") }}</template>
                           <StarOutlined
-                            v-if="!item.favorite"
                             :id="item.id + '-FALSE'"
                             :style="{ color: '#d9dbdf' }"
                           />
@@ -247,60 +85,91 @@
                       </a-popconfirm>
 
                       <a-popconfirm
+                        v-if="item.handshake_status == 'Ready'"
                         :title="'데스크톱에 접속하시겠습니까?'"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="connectConsole(item.id)"
-                        :disabled="
-                          item.handshake_status == 'Ready' ? false : true
-                        "
                       >
                         <a-tooltip placement="bottom">
-                          <template #title>{{
-                            item.handshake_status === "Ready"
-                              ? $t("데스크톱 접속")
-                              : $t("데스크톱 접속 불가")
-                          }}</template>
-                          <CodeFilled
+                          <template #title>{{ $t("데스크톱 접속") }}</template>
+                          <Html5Outlined
                             :style="{
-                              color:
-                                item.handshake_status == 'Ready'
-                                  ? '#333'
-                                  : '#d9dbdf',
+                              color: '#333',
                             }"
                           />
                         </a-tooltip>
                       </a-popconfirm>
-
-                      <a-popconfirm
-                        :title="
-                          item.state == 'Running'
-                            ? '가상머신을 종료하시겠습니까?'
-                            : '가상머신을 시작하시겠습니까?'
-                        "
-                        :ok-text="$t('label.ok')"
-                        :cancel-text="$t('label.cancel')"
-                        @confirm="vmState(item.id, item.state)"
-                      >
-                        <a-tooltip placement="bottom">
-                          <template #title>{{
-                            item.state === "Running"
-                              ? $t("가상머신 종료")
-                              : $t("가상머신 시작")
-                          }}</template>
-                          <PoweroffOutlined
+                      <a-Popover placement="topLeft">
+                        <template #content>
+                          <a-popconfirm
                             v-if="item.state == 'Running'"
-                            :style="{ color: '#333' }"
-                          />
-                          <CaretRightOutlined
-                            v-else
-                            :style="{ color: '#333' }"
-                          />
-                        </a-tooltip>
-                      </a-popconfirm>
-                    </template>
-                    <br /><br />
+                            :title="'가상머신을 종료하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip
+                              placement="bottom"
+                              style="padding-right: 40px"
+                            >
+                              <template #title>{{
+                                $t("가상머신 종료")
+                              }}</template>
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <PoweroffOutlined
+                                    :style="{ color: '#333' }"
+                                  />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                          <a-popconfirm
+                            v-if="item.state == 'Running'"
+                            :title="'가상머신을 재시작하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip placement="bottom">
+                              <template #title>{{
+                                $t("가상머신 재시작")
+                              }}</template>
 
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <ReloadOutlined :style="{ color: '#333' }" />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                          <a-popconfirm
+                            v-if="item.state == 'Stopped'"
+                            :title="'가상머신을 시작하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip placement="bottom">
+                              <template #title>{{
+                                $t("가상머신 시작")
+                              }}</template>
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <CaretRightOutlined
+                                    :style="{ color: '#333' }"
+                                  />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                        </template>
+                        <MoreOutlined :style="{ color: '#333' }" />
+                      </a-Popover>
+                    </template>
+
+                    <br /><br />
                     <a-tooltip placement="bottom">
                       <template #title>{{ item.handshake_status }}</template>
                       <a-badge
@@ -322,7 +191,7 @@
                 </a-list-item>
               </template>
             </a-list>
-          </a-card> -->
+          </a-card>
         </a-spin>
       </a-layout-content>
     </a-layout>
@@ -345,7 +214,7 @@ export default defineComponent({
       onChange: (page) => {
         console.log(page);
       },
-      pageSize: 10,
+      pageSize: 20,
     };
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
@@ -410,6 +279,102 @@ export default defineComponent({
           handshake_status: "Ready",
           ostype: "Windows 10 (64bit)",
           favorite: true,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
         },
         {
           id: "11111111-111111-1111111-1-8888",
@@ -698,5 +663,9 @@ export default defineComponent({
 
 #content-action {
   text-align: right;
+}
+
+.ant-btn {
+  margin-right: 8px;
 }
 </style>
