@@ -16,7 +16,7 @@
                 shape="round"
                 style="margin-left: 20px"
                 size="small"
-                @click="refresh()"
+                @click="refresh(true)"
               >
                 <template #icon>
                   <ReloadOutlined /> {{ $t("label.refresh") }}
@@ -79,17 +79,17 @@ export default defineComponent({
     };
   },
   created() {
-    this.fetchData(true);
-    this.timer = setInterval(() => {
-      //30초 자동 갱신
-      this.fetchData(false);
-    }, 30000);
+    this.fetchData();
+    // this.timer = setInterval(() => {
+    //   //30초 자동 갱신
+    //   this.fetchData(false);
+    // }, 60000);
   },
   beforeUnmount() {
-    clearInterval(this.timer);
+    //clearInterval(this.timer);
   },
   methods: {
-    async fetchData(refreshClick) {
+    async fetchData() {
       await worksApi
         .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
         .then((response) => {
@@ -109,7 +109,6 @@ export default defineComponent({
             }
           } else {
             message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
         .catch((error) => {
@@ -119,10 +118,10 @@ export default defineComponent({
         .finally(() => {
           this.actionFrom = "WorkspaceDetail";
         });
-      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
     },
-    refresh() {
-      this.fetchData(true);
+    async refresh(refreshClick) {
+      await this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
     },
   },
 });

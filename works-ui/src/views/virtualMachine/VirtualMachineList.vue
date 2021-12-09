@@ -57,6 +57,14 @@
         >{{ record.name }}</router-link
       >
     </template>
+    <template #workspaceRender="{ record }">
+      <router-link
+        :to="{
+          path: '/workspaceDetail/' + record.workspace_uuid,
+        }"
+        >{{ record.workspace_name }}</router-link
+      >
+    </template>
 
     <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
@@ -134,12 +142,10 @@
       </a-tooltip>
     </template>
     <template #userRender="{ record }">
-      <!-- {{
-        record.owner_account_id === ""
-          ? $t("label.owner.account.false")
-          : record.owner_account_id
-      }} -->
-      {{ record.owner_account_id }}
+      <router-link
+        :to="{ path: '/accountDetail/' + record.owner_account_id }"
+        >{{ record.owner_account_id }}</router-link
+      >
     </template>
     <template #sessionRender="{ record }">
       {{ record.connected }}
@@ -242,6 +248,7 @@ export default defineComponent({
               : 0,
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
+          slots: { customRender: "workspaceRender" },
         },
         {
           title: this.$t("label.users"),
@@ -315,6 +322,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
+      this.$emit("actionFromChange", "VirtualMachine", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];
