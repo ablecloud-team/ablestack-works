@@ -201,6 +201,7 @@ func deleteUser(c *gin.Context) {
 // @Param firstName path string true "사용자 성"
 // @Param lastName path string true "사용자 이름"
 // @Param title path string false "사용자 직급"
+// @Param department path string false "사용자 부서"
 // @Router /api/v1/user [put]
 // @Success 200 {object} map[string]interface{}
 func putUser(c *gin.Context) {
@@ -277,6 +278,11 @@ func putUser(c *gin.Context) {
 		userInfo.Title = c.PostForm("title")
 	} else {
 		userInfo.Title = ""
+	}
+	if c.PostForm("department") != "" {
+		userInfo.Department = c.PostForm("department")
+	} else {
+		userInfo.Department = ""
 	}
 	result, errInsertDCUser := postDCUser(userInfo)
 	if errInsertDCUser != nil {

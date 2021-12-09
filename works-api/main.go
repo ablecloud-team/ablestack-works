@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	swaggerFiles "github.com/swaggo/gin-swagger/swaggerFiles"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
 	"os"
 	"os/exec"
@@ -48,6 +48,7 @@ func main() {
 	GuacamoleSetting()   //guacamole 정보 셋팅
 	ClusterNameSetting() //clusterName 정보 셋팅
 	logSetting()
+	RDPPortSetting()
 	//dcBootstrap()
 
 	router := gin.Default()

@@ -7,13 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 	"os"
-	"time"
 )
-
-type Configuration struct {
-	Id, Name, Category, Value, DefaultValue, Description string
-	UpdateDate                                           time.Time
-}
 
 func DBSetting() {
 	os.Setenv("MysqlType", getWorksInfo().Database.TYPE)

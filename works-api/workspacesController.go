@@ -503,8 +503,8 @@ func putAppConnection(c *gin.Context) {
 	json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
 	parameter := "hostname=" + listVirtualMachinesMetrics.Virtualmachine[0].Nic[0].Ipaddress + ",port=" + os.Getenv("portForRDP") +
 		",ignore-cert=true,username=" + resultUserInfo.UserName + ",password=" + resultUserInfo.Password + ",domain=" + os.Getenv("SambaDomain") + ",resize-method=display-update" +
-		//",remote-app=C:\\NewGen\\Rebirth\\Rebirth.exe,remote-app-dir=c:\\NewGen\\Rebirth\\"
-		",remote-app=C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"
+		",remote-app=C:\\NewGen\\Rebirth\\Rebirth.exe,remote-app-dir=c:\\NewGen\\Rebirth\\"
+		//",remote-app=C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"
 	//VDI 파라메터
 
 	// APP 파라메터 추가필요

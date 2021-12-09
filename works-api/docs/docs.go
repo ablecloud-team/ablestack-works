@@ -81,6 +81,43 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/appConnection/:instanceUuid/:username": {
+            "put": {
+                "description": "instance 에 사용자를 할당하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "instance 에 사용자를 할당하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Instance UUID",
+                        "name": "instanceUuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Instance 에 할당할 userName",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/connection/:instanceUuid": {
             "delete": {
                 "description": "instance 에 사용자를 할당하는 API 입니다.",
@@ -94,7 +131,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "connection을 삭제할 instance Uuid",
+                        "description": "Connection 을 삭제할 instance Uuid",
                         "name": "instanceUuid",
                         "in": "path",
                         "required": true
@@ -630,6 +667,12 @@ var doc = `{
                         "description": "사용자 직급",
                         "name": "title",
                         "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "사용자 부서",
+                        "name": "department",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -643,7 +686,7 @@ var doc = `{
                 }
             }
         },
-        "/api/v1/user/:username": {
+        "/api/v1/user/:userName": {
             "get": {
                 "description": "사용자 상세 조회를 위한 API 입니다.\n해더에 로그인시 생성된 토큰값을 \"Authorization\" 키값에 넣어주시면 됩니다.",
                 "consumes": [
@@ -658,6 +701,34 @@ var doc = `{
                         "type": "string",
                         "description": "사용자 계정",
                         "name": "username",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "사용자 리스트를 조회를 위한 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 리스트를 조회 하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 계정",
+                        "name": "userName",
                         "in": "path",
                         "required": true
                     }
@@ -913,5 +984,5 @@ func (s *s) ReadDoc() string {
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register("swagger", &s{})
 }

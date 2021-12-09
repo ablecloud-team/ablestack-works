@@ -27,6 +27,7 @@ type UserInfo struct {
 	Title             string `json:"title"`             // 직책
 	UserPrincipalName string `json:"userPrincipalName"` // 사용자 도메인 계정정보
 	Password          string `json:"password"`          // 사용자 비밀번호
+	Department		  string `json:"department"`		// 사용자 부서
 }
 
 //login
@@ -314,7 +315,7 @@ func delConnection(connectName string) *http.Response {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"moldReference.go": "delConnection",
+			"communicationMold.go": "delConnection",
 		}).Errorf("An error occurred while deleting the connection. resp [%v], err [%v]", resp, err)
 	}
 

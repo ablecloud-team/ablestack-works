@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	"github.com/sirupsen/logrus"
@@ -11,50 +13,46 @@ import (
 )
 import b64 "encoding/base64"
 
-const (
-	WorkspaceString = "workspace"
-	InstanceString  = "instance"
-	ServiceDaaS     = "ServiceDaaS"
-	ServiceWorks    = "ServiceWorks"
-	WorkspaceName   = "WorkspaceName"
-	AblecloudWorks  = "Ablecloud.Works"
-	ClusterName     = "ClusterName"
-	AgentOK         = "AgentOK"
-	AgentCheck      = "AgentCheck"
-	Enable          = "Enable"
-	Disable         = "Disable"
-	UserVm          = "UserVm"
-	ALL             = "all"
+func rowsToString(rows *sql.Rows) (string, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return "", err
+	}
 
-	Trace = "Trace"
-	Debug = "Debug"
-	Info  = "Info"
-	Warn  = "Warn"
-	Error = "Error"
+	tableData := make([]map[string]interface{}, 0)
 
-	VMStart   = "VMStart"
-	VMStop    = "VMStop"
-	VMsDeploy = "VMsDeploy"
-	VMDestroy = "VMDestroy"
+	count := len(columns)
+	values := make([]interface{}, count)
+	scanArgs := make([]interface{}, count)
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
 
-	MsgDBConnectError      = "DB connect error"
-	MsgDBConnectOK         = "DB connect success"
-	MsgDBNoRows            = "sql: no rows in result set"
-	BaseErrorCode          = 9000
-	SignatureErrorCode     = 9001
-	SQLConnectError        = 9100
-	SQLQueryError          = 9101
-	NotFound404            = "404 Not Found"
-	Conflict409            = "409 Conflict"
-	Gone410                = "410 Gone"
-	OK200                  = "200 OK"
-	Created201             = "201 Created"
-	Accepted202            = "202 Accepted"
-	NotFound               = "Not Found"
-	MessageAccountNotFound = "message.account.not.found"
-	MessageSignatureError  = "message.Signature.error"
-	MessageAgentUpdateOK   = "message.Agent.update.ok"
-)
+	for rows.Next() {
+		err := rows.Scan(scanArgs...)
+		if err != nil {
+			return "", err
+		}
+
+		entry := make(map[string]interface{})
+		for i, col := range columns {
+			v := values[i]
+
+			b, ok := v.([]byte)
+			if ok {
+				entry[col] = string(b)
+			} else {
+				entry[col] = v
+			}
+		}
+
+		tableData = append(tableData, entry)
+	}
+
+	jsonData, _ := json.Marshal(tableData)
+
+	return string(jsonData), nil
+}
 
 func setLog() {
 	startlogger := logrus.New()

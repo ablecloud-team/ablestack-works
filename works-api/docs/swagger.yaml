@@ -41,13 +41,38 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 로그인 하는 API
+  /api/v1/appConnection/:instanceUuid/:username:
+    put:
+      consumes:
+      - application/json
+      description: instance 에 사용자를 할당하는 API 입니다.
+      parameters:
+      - description: Instance UUID
+        in: path
+        name: instanceUuid
+        required: true
+        type: string
+      - description: Instance 에 할당할 userName
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: instance 에 사용자를 할당하는 API
   /api/v1/connection/:instanceUuid:
     delete:
       consumes:
       - application/json
       description: instance 에 사용자를 할당하는 API 입니다.
       parameters:
-      - description: connection을 삭제할 instance Uuid
+      - description: Connection 을 삭제할 instance Uuid
         in: path
         name: instanceUuid
         required: true
@@ -413,6 +438,10 @@ paths:
         in: path
         name: title
         type: string
+      - description: 사용자 부서
+        in: path
+        name: department
+        type: string
       produces:
       - application/json
       responses:
@@ -422,7 +451,26 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 생성하는 하는 API
-  /api/v1/user/:username:
+  /api/v1/user/:userName:
+    delete:
+      consumes:
+      - application/json
+      description: 사용자 리스트를 조회를 위한 API 입니다.
+      parameters:
+      - description: 사용자 계정
+        in: path
+        name: userName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 사용자 리스트를 조회 하는 API
     get:
       consumes:
       - application/json
