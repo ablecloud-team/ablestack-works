@@ -79,6 +79,9 @@
         <MoreOutlined />
       </a-Popover>
     </template>
+    <template #typeRender="{ record }">
+      {{ record.workspace_type.toUpperCase() }}
+    </template>
     <template #vmStateRender="{ record }">
       <a-badge
         class="head-example"
@@ -249,6 +252,48 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
           slots: { customRender: "workspaceRender" },
+        },
+        {
+          title: this.$t("label.workspacetype"),
+          dataIndex: "workspace_type",
+          key: "workspace_type",
+          width: "20%",
+          slots: {
+            customRender: "typeRender",
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
+          sorter: (a, b) =>
+            a.workspace_type < b.workspace_type
+              ? -1
+              : a.workspace_type > b.workspace_type
+              ? 1
+              : 0,
+          sortDirections: ["descend", "ascend"],
+          //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
+          //filterMultiple: false,
+          // filters: [
+          //   {
+          //     text: 'DESKTOP',
+          //     value: 'DESKTOP',
+          //   },
+          //   {
+          //     text: 'APP',
+          //     value: 'APP',
+          //   },
+          // ]
+          onFilter: (value, record) =>
+            record.workspace_type
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: this.$t("label.users"),
