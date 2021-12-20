@@ -35,11 +35,11 @@
           </a-menu>
         </template>
       </a-dropdown>
-      <a-button type="text" shape="circle" class="header-notice-button">
+      <!-- <a-button type="text" shape="circle" class="header-notice-button">
         <a class="ant-dropdown-link" @click.prevent>
           <BellOutlined class="header-notice-icon" />
         </a>
-      </a-button>
+      </a-button> -->
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
