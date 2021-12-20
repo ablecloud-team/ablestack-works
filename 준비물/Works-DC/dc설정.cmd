@@ -28,7 +28,7 @@ Add-WindowsCapability -Online -Name Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0
 Add-WindowsCapability -Online -Name Rsat.Dns.Tools~~~~0.0.1.0
 Add-WindowsCapability -Online -Name Rsat.GroupPolicy.Management.Tools~~~~0.0.1.0
 
-netsh advfirewall firewall add rule name=”Ablecloud Works DC” protocol=TCP dir=in localport=8083 action=allow  edge=yes
+netsh advfirewall firewall add rule name="Ablecloud Works DC" protocol=TCP dir=in localport=8083 action=allow  edge=yes
 C:\Works-DC\nssm.exe install Works-DC C:\Works-DC\Abledc.exe
 C:\Works-DC\nssm.exe set Works-DC AppDirectory C:\Works-DC
 C:\Works-DC\nssm.exe set Works-DC AppExit Default Restart

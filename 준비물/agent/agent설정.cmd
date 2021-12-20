@@ -1,4 +1,4 @@
-netsh advfirewall firewall add rule name=”Ablecloud Works Agent” protocol=TCP dir=in localport=8083 action=allow  edge=yes
+netsh advfirewall firewall add rule name="Ablecloud Works Agent" protocol=TCP dir=in localport=8083 action=allow  edge=yes
 
 C:\agent\nssm.exe install "Ablecloud Works Agent" C:\agent\windows-agent.exe
 C:\agent\nssm.exe set "Ablecloud Works Agent" AppDirectory C:\agent
