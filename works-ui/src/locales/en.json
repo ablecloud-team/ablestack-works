@@ -51,6 +51,7 @@
     "message.account.destroy.ok": "[{count}] user deletion complete.",
     "message.account.destroy.fail": "Failed to delete [{count}] users.",
     "message.account.destroying": "Destroying user.",
+    "message.response.data.update.success": "Settings have been successfully changed.",
 
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",
@@ -115,6 +116,7 @@
     "label.state": "State",
     "label.description": "Description",
     "label.type": "Type",
+    "label.workspacetype": "Workspace Type",
     "label.vm.ostype": "OS Type",
     "label.desktop.quantity": "Number of VM",
     "label.desktop.connection.quantity": "Number of Connection",
@@ -246,5 +248,6 @@
     "modal.confirm.userUnlock": "Are you sure you want to unlock the user on the selected [{count}] desktop virtual machines?",
     "modal.confirm.workspace.add.user": "Please select a user to add to workspace [{name}].",
     "modal.confirm.workspace.add.vm": "Please select the number of desktop VMs to add to the workspace [{name}].",
-    "modal.confirm.workspace.allocate.vm.user": "Please select a user to assign to the selected [{count}] virtual machines."
+    "modal.confirm.workspace.allocate.vm.user": "Please select a user to assign to the selected [{count}] virtual machines.",
+    "modal.confirm.workspaceAccountDestroy": "Are you sure you want to delete [{count}] selected user accounts from your workspace?"
 }
