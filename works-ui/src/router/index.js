@@ -18,6 +18,7 @@ import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
 import Workspace from "../views/workspace/WorkSpace.vue";
 import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
+import GuacClient from '@/components/GuacClient'
 
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
@@ -136,6 +137,11 @@ const routes = [
       // }
     ],
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
+  {
+    path: '/client',
+    name: 'Client',
+    component: GuacClient
+  },
   {
     path: "/",
     name: "Root",

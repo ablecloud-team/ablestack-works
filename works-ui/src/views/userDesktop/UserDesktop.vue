@@ -496,7 +496,7 @@ export default defineComponent({
 
       window.open(
         // window.location.hostname +
-          "http://10.10.1.24:8088/#/?" +
+        "http://10.10.1.24:8088/#/?" +
           new URLSearchParams(selArr[0]).toString(),
         "_blank"
       );
