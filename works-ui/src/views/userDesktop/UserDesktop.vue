@@ -258,51 +258,6 @@ export default defineComponent({
       pagination,
       instanceList: [
         {
-          id: "11111111-111111-1111111-1-1111",
-          name: "vm18898",
-          state: "Running",
-          handshake_status: "Pending",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-          hostname: "10.1.1.150",
-          port: 3389,
-          username: "user1",
-          password: "Ablecloud1!",
-          domain: "cjs",
-        },
-        {
-          id: "11111111-111111-1111111-1-2222",
-          name: "vm62",
-          state: "Stopped",
-          handshake_status: "Joining",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-3333",
-          name: "vm36",
-          state: "Stopped",
-          handshake_status: "Joining",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
-          id: "11111111-111111-1111111-1-4444",
-          name: "vm46",
-          state: "Running",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
-          id: "11111111-111111-1111111-1-5555",
-          name: "vm55",
-          state: "Stopped",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
           id: "11111111-111111-1111111-1-6666",
           name: "vm645",
           state: "Running",
@@ -496,7 +451,7 @@ export default defineComponent({
 
       window.open(
         // window.location.hostname +
-        "http://10.10.1.24:8088/#/?" +
+        "/client/?" +
           new URLSearchParams(selArr[0]).toString(),
         "_blank"
       );
