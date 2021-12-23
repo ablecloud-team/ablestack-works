@@ -251,6 +251,7 @@ export default defineComponent({
     };
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
+      cryptKey: "ikAkd39aszkdEghj",
       spinning: ref(false),
       favPopTitle: ref(""),
       actionFrom: "VirtualMachineList",
@@ -269,6 +270,11 @@ export default defineComponent({
           username: "user1",
           password: "Ablecloud1!",
           domain: "cjs",
+          "enable-wallpaper": true,
+          "enable-font-smoothing": true,
+          "enable-theming": true,
+          "enable-menu-animations": true,
+          "resize-method": "display-update",
         },
         {
           id: "11111111-111111-1111111-1-7777",
@@ -413,7 +419,7 @@ export default defineComponent({
       }, 1000);
     },
     fetchData() {
-      console.log("fetchData!!");
+      // console.log("fetchData!!");
     },
     favorite(uuid, bool) {
       console.log(uuid + " :: " + bool);
@@ -445,14 +451,21 @@ export default defineComponent({
 
       document.body.removeChild(element);
     },
-    connectConsole(uuid, bool) {
+    connectConsole(uuid) {
       const selArr = this.instanceList.filter((it) => it.id === uuid);
-      console.log(new URLSearchParams(selArr[0]).toString());
+      // console.log(new URLSearchParams(selArr[0]).toString());
 
+      const encrypted = btoa(
+        this.$CryptoJS.AES.encrypt(
+          JSON.stringify(selArr[0]),
+          this.cryptKey
+        ).toString()
+      );
+
+      console.log(encrypted);
       window.open(
         // window.location.hostname +
-        "/client/?" +
-          new URLSearchParams(selArr[0]).toString(),
+        "/client/?enc=" + encrypted,
         "_blank"
       );
     },

@@ -196,6 +196,7 @@ export default {
   props: {},
   data() {
     return {
+      cryptKey: "ikAkd39aszkdEghj",
       connected: false,
       guacMenu: false,
       display: null,
@@ -265,7 +266,7 @@ export default {
     },
     connect() {
       let tunnel = new Guacamole.WebSocketTunnel(wsUrl);
-      console.log(tunnel);
+      // console.log(tunnel);
       //reconnect 경우 초기화
       if (this.client) {
         this.display.scale(0);
@@ -273,16 +274,16 @@ export default {
       }
 
       this.client = new Guacamole.Client(tunnel);
-      console.log(this.client);
+      // console.log(this.client);
       clipboard.install(this.client);
 
       tunnel.onerror = (status) => {
-        console.log(status);
+        // console.log(status);
         this.connectionState = states.TUNNEL_ERROR;
       };
 
       tunnel.onstatechange = (state) => {
-        console.log(state);
+        // console.log(state);
         switch (state) {
           case Guacamole.Tunnel.State.CONNECTING:
             this.connectionState = states.CONNECTING;
@@ -299,7 +300,7 @@ export default {
       };
 
       this.client.onstatechange = (clientState) => {
-        console.log(clientState);
+        // console.log(clientState);
         switch (clientState) {
           case 0:
             this.connectionState = states.IDLE;
@@ -353,10 +354,10 @@ export default {
 
       this.client.onclipboard = clipboard.onClipboard;
       this.display = this.client.getDisplay();
-      console.log(this.display);
+      //console.log(this.display);
       const displayElm = this.$refs.display;
-      console.log(displayElm);
-      console.log(this.display.getElement());
+      //console.log(displayElm);
+      //console.log(this.display.getElement());
       displayElm.appendChild(this.display.getElement());
       displayElm.addEventListener("contextmenu", (e) => {
         e.stopPropagation();
@@ -371,18 +372,31 @@ export default {
       token.connection.settings.width = dis_chg[0];
       token.connection.settings.height = dis_chg[1];
       token.connection.settings.dpi = dis_chg[2];
-      token.connection.settings.port = this.$route.query.port;
-      token.connection.settings.hostname = this.$route.query.hostname;
-      token.connection.settings.domain = this.$route.query.domain;
-      token.connection.settings.password = this.$route.query.password;
-      token.connection.settings.username = this.$route.query.username;
+
+      //파라미터로 넘어온 값 파라미터값 복호화
+      const decrypted = this.$CryptoJS.AES.decrypt(
+        atob(this.$route.query.enc),
+        this.cryptKey
+      ).toString(this.$CryptoJS.enc.Utf8);
+      //console.log(JSON.parse(decrypted));
+
+      //복호화 한 값 JSON 형식으로 변경 후 키,값 구분하여 token에 세팅
+      const query = JSON.parse(decrypted);
+      for (const key in query) {
+        token.connection.settings[key] = query[key];
+      }
+      // token.connection.settings.port = this.$route.query.port;
+      // token.connection.settings.hostname = this.$route.query.hostname;
+      // token.connection.settings.domain = this.$route.query.domain;
+      // token.connection.settings.password = this.$route.query.password;
+      // token.connection.settings.username = this.$route.query.username;
 
       const encrypt_token = encrypt(token);
       this.client.connect("token=" + encrypt_token);
 
       //데스크탑 마우스 설정
       this.mouse = new Guacamole.Mouse(displayElm);
-      console.log(this.mouse);
+      // console.log(this.mouse);
       this.mouse.onmouseout = () => {
         if (!this.display) return;
         this.display.showCursor(false);
@@ -421,7 +435,7 @@ export default {
         this.client.sendKeyEvent(0, keysym);
       };
 
-      console.log(this.mouse);
+      // console.log(this.mouse);
       this.mouse.onmousedown =
         this.mouse.onmouseup =
         this.mouse.onmousemove =
