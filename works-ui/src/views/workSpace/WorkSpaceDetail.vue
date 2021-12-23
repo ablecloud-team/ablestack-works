@@ -44,6 +44,7 @@
             :network-list="networkList"
             :vm-list="vmList"
             :group-info="groupInfo"
+            :workspace-policy-list="workspacePolicyList"
             @parentRefresh="refresh"
           />
         </div>
@@ -74,21 +75,26 @@ export default defineComponent({
       offeringDataList: ref([]),
       networkList: ref([]),
       vmList: ref([]),
+      workspacePolicyList: ref([]),
       groupInfo: ref([]),
       timer: ref(null),
     };
   },
   created() {
     this.fetchData();
-    // this.timer = setInterval(() => {
-    //   //30초 자동 갱신
-    //   this.fetchData(false);
-    // }, 60000);
+    this.timer = setInterval(() => {
+      //90초 자동 갱신
+      this.refresh(false);
+    }, 90000);
   },
   beforeUnmount() {
-    //clearInterval(this.timer);
+    clearInterval(this.timer);
   },
   methods: {
+    async refresh(refreshClick) {
+      await this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
+    },
     async fetchData() {
       await worksApi
         .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
@@ -107,6 +113,9 @@ export default defineComponent({
             if (response.data.result.groupDetail !== null) {
               this.groupInfo = response.data.result.groupDetail;
             }
+            if (response.data.result.workspacePolicy !== null) {
+              this.workspacePolicyList = response.data.result.workspacePolicy;
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
@@ -118,10 +127,6 @@ export default defineComponent({
         .finally(() => {
           this.actionFrom = "WorkspaceDetail";
         });
-    },
-    async refresh(refreshClick) {
-      await this.fetchData();
-      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
     },
   },
 });

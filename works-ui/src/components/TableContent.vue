@@ -13,7 +13,9 @@
 
   <a-alert
     v-if="state.statusReadyBool"
-    :message="'현재 테스트 상태 : ' + state.statusReadyMessage"
+    :message="
+      $t('message.workspace.test.status') + ' : ' + state.statusReadyMessage
+    "
     :description="state.statusReadyDescription"
     type="info"
     show-icon
@@ -292,6 +294,11 @@ export default defineComponent({
       required: false,
       default: null,
     },
+    workspacePolicyList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   emits: ["parentRefresh"],
   setup(props) {
@@ -399,14 +406,19 @@ export default defineComponent({
         } else {
           this.state.statusReadyBool = true;
           if (stat === "Not Ready") {
-            this.state.statusReadyMessage = "Test VM 생성";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.vmcreate"
+            );
           } else if (stat === "Pending") {
-            this.state.statusReadyMessage = "초기화중";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.initializing"
+            );
           } else if (stat === "Joining" || stat === "Joined") {
-            this.state.statusReadyMessage = "구성중";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.configuring"
+            );
           }
-          this.state.statusReadyDescription =
-            "현재 Test VM을 생성하여 DC서버, AD서버와 정상적인 통신을 수행하는지 확인하는 작업을 진행중입니다. 약 10분 ~ 15분 간 테스트 작업을 수행하며 최종 확인 작업이 정상일 경우 TestVM은 자동으로 삭제됩니다. 잠시만 기다려주세요.";
+          this.state.statusReadyDescription = this.$t("message.workspace.test");
         }
       } else if (this.state.callTapName === "user") {
         this.state.addButtonBoolean = ref(true);
@@ -655,43 +667,29 @@ export default defineComponent({
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
-        // {
-        //   title: "",
-        //   key: "action",
-        //   dataIndex: "action",
-        //   align: "right",
-        //   width: "5px",
-        //   slots: { customRender: "actionRender" },
-        // },
         {
-          title: this.$t("label.state"),
-          dataIndex: "state",
-          key: "state",
+          title: this.$t("label.description"),
+          dataIndex: "description",
+          key: "description",
+          width: "60%",
           sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
+            a.description < b.description
+              ? -1
+              : a.description > b.description
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "stateRender" },
         },
       ];
-      // 워크스페이스 정책 리스트 조회
-      // worksApi
-      //   .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
-      //   .then((response) => {
-      //     if (response.status == 200) {
-      //       //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
-      //       this.dataList = null;
-      //     } else {
-      //       message.error(this.$t("message.response.data.fail"));
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     message.destroy();
-      //     message.error(this.$t("message.response.data.fail"));
-      //     console.log(error);
-      //   })
-      //   .finally(() => {
-      //     this.loading = false;
-      //   });
+      if (
+        this.workspacePolicyList !== undefined &&
+        this.workspacePolicyList !== null
+      ) {
+        this.dataList = this.workspacePolicyList;
+        this.dataList.forEach((value, index, array) => {
+          this.dataList[index].key = index;
+        });
+      }
     },
     fetchNetwork() {
       this.columns = [
@@ -763,7 +761,6 @@ export default defineComponent({
       if (this.vmDiskInfo !== undefined && this.vmDiskInfo !== null)
         this.dataList = [this.vmDiskInfo];
 
-      this.loading = false;
       // worksApi
       //   .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
       //   .then((response) => {

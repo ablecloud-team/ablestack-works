@@ -361,7 +361,7 @@ export default defineComponent({
               //이름 중복이 아닐때(status code = 401)
               message.loading(this.$t("message.workspace.createing"));
               worksApi
-                .put("/api/v1/workspace", params)
+                .post("/api/v1/workspace", params)
                 .then((response) => {
                   message.destroy();
                   if (response.status === 200) {
