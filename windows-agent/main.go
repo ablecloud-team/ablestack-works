@@ -118,10 +118,14 @@ func main() {
 	}
 	time.Sleep(10*time.Second)
 	interval := Agentconfig.Interval
+
+
+	//logincheckfnc2()
+	//return
 	c1 := make(chan string, 1)
-	loginchan := make(chan map[string]string, 1)
-	logoutchan := make(chan map[string]string, 1)
-	go healthCheck(loginchan, logoutchan, c1, interval)
+	//loginchan := make(chan map[string]string, 1)
+	//logoutchan := make(chan map[string]string, 1)
+	go healthCheck(c1, interval)
 	log.Infof("healthCehck thread started")
 
 	router := gin.Default()
@@ -296,7 +300,23 @@ func logoutcheck(c chan map[string]string, c1 chan string, interval int) {
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
-
+func logincheckfnc2() []map[string]string {
+	shell, err:= setupShell()
+	stdout, err := shell.Exec("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser")
+	stdout, err = shell.Exec("./get-session.ps1")
+	//log.Infof("stdout: %v", stdout)
+	if err != nil {
+		log.Errorf("stderr: %v", err)
+	}
+	var ret []map[string]string
+	err = json.Unmarshal([]byte(stdout), &ret)
+	if err != nil {
+		log.Errorf("stderr: %v", err)
+	}
+	//log.Errorf("stderr: %v",err)
+	//log.Infof("ret: %v", ret)
+	return ret
+}
 func logincheckfnc() map[string]string {
 	shell, err := setupShell()
 	stdout, err := shell.Exec("$elog=(Get-EventLog security -source microsoft-windows-security-auditing  | where {($_.instanceID -eq 4624)} | select TimeGenerated,ReplacementStrings,Message -First 1)")
@@ -354,15 +374,15 @@ func logincheckfnc() map[string]string {
 	return ret
 }
 
-func logincheck(c chan map[string]string, c1 chan string, interval int) {
+func logincheck(c chan []map[string]string, c1 chan string, interval int) {
 	for true{
-		ret := logincheckfnc()
+		ret := logincheckfnc2()
 		c<-ret
 		time.Sleep(time.Duration(interval) * time.Second)
 
 	}
 }
-func healthCheck(login chan map[string]string, logout chan map[string]string, c1 chan string, interval int) {
+func healthCheck(c1 chan string, interval int) {
 	//var (
 	//	li map[string]string
 	//	lo map[string]string
@@ -374,12 +394,12 @@ func healthCheck(login chan map[string]string, logout chan map[string]string, c1
 	ips := ipcheck()
 	for true {
 		//li := <- login
-		li := logincheckfnc()
+		li := logincheckfnc2()
 		log.Infof("login chan %v", li)
 		//lo := <- logout
-		lo := logoutcheckfnc()
-		log.Infof("logout chan %v", lo)
-		err := httpReq(li, lo, ips[0])
+		//lo := logoutcheckfnc()
+		//log.Infof("logout chan %v", lo)
+		err := httpReq(li, ips)
 		if err != nil {
 			log.Errorf("httpReq: %v", err)
 			c1 <- err.Error()
@@ -428,7 +448,7 @@ func AgentInit() (err error) {
 
 
 func AgentSave() (err error) {
-	data, err := os.OpenFile("conf.json", os.O_RDWR, 0777)
+	data, err := os.OpenFile("conf.json", os.O_WRONLY, 0777)
 	if err != nil {
 		log.Fatalf("agentsave: %s", err)
 		return err
@@ -438,6 +458,7 @@ func AgentSave() (err error) {
 		log.Fatalf("ADinit: %s", err)
 		return err
 	}
+	log.Errorf("Save %s", byteValue)
 	_, err = data.Write(byteValue)
 	if err != nil {
 		log.Fatalf("ADinit: %s", err)
@@ -447,7 +468,7 @@ func AgentSave() (err error) {
 
 }
 //user password change
-func httpReq(li map[string]string, lo map[string]string, ip string) error {
+func httpReq(li []map[string]string, ips []string) error {
 	setLog()
 	client := &http.Client{}
 	data := url.Values{}
@@ -455,10 +476,11 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 	data.Set("type", Agentconfig.Type)
 
 	logindata, _ := json.Marshal(li)
-	logoutdata, _ := json.Marshal(lo)
+	ip, _ := json.Marshal(ips)
+	//logoutdata, _ := json.Marshal(lo)
 
 	data.Set("login", string(logindata))
-	data.Set("logout", string(logoutdata))
+	//data.Set("logout", string(logoutdata))
 	data.Set("ip", string(ip))
 
 
@@ -469,6 +491,18 @@ func httpReq(li map[string]string, lo map[string]string, ip string) error {
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	log.Infof("req: %v", req)
+	log.Infof("Body: %v", req.Body)
+	log.Infof("Header: %v", req.Header)
+	log.Infof("URL: %v", req.URL)
+	log.Infof("Form: %v", req.Form)
+	log.Infof("PostForm: %v", req.PostForm)
+	log.Infof("RequestURI: %v", req.RequestURI)
+	br, _ :=req.GetBody()
+	insert := make([]byte, 2048)
+	_, _ = br.Read(insert)
+	log.Infof("BodyRead: %v", string(insert))
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Errorln(err)
