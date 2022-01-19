@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import WorkSpaceTab from "./WorkSpaceTab";
 import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 

@@ -51,6 +51,7 @@
                             ? '즐겨찾기 해제하시겠습니까?'
                             : '즐겨찾기에 추가하시겠습니까?'
                         "
+                        placement="topRight"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="favorite(item.id, item.favorite)"
@@ -73,6 +74,7 @@
 
                       <a-popconfirm
                         :title="'RDP 파일을 다운로드 하시겠습니까?'"
+                        placement="topRight"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="downloadRDP(item.name)"
@@ -87,6 +89,7 @@
 
                       <a-popconfirm
                         v-if="item.handshake_status == 'Ready'"
+                        placement="topRight"
                         :title="'데스크톱에 접속하시겠습니까?'"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
@@ -102,7 +105,7 @@
                           />
                         </a-tooltip>
                       </a-popconfirm>
-                      <a-Popover placement="topLeft">
+                      <a-Popover placement="topLeft" trigger="click">
                         <template #content>
                           <a-popconfirm
                             v-if="item.state == 'Running'"
