@@ -7,7 +7,7 @@
           ghost
           shape="round"
           size="medium"
-          @click="refresh()"
+          @click="refresh(true)"
         >
           <template #icon>
             <ReloadOutlined /> {{ $t("label.fetch.latest") }}
@@ -22,8 +22,8 @@
         <a-col flex="100%">
           <a-row :gutter="24" type="flex">
             <a-col flex="100%" class="dashboard-a-col">
-              <a-card :title="$t('label.status.server')">
-                <a-steps :current="currentStep" :status="stepStatus">
+              <a-card :loading="loading" :title="$t('label.status.server')">
+                <a-steps :current="dashboardStep" :status="stepStatus">
                   <a-step
                     :title="$t('label.status.worksapi')"
                     :description="descStep1"
@@ -116,17 +116,19 @@
       <a-row>
         <a-col flex="100%">
           <a-row :gutter="8" type="flex">
-            <a-col flex="33%" class="dashboard-a-col">
+            <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.workspace.count')"
                 class="dashboard-a-card-cl"
                 hoverable
                 @click="$router.push({ name: 'Workspace' })"
               >
-                <span style="font-size: 80px">{{ workspaceCount }}</span>
+                <span style="font-size: 80px; align: middle">{{
+                  workspaceCount
+                }}</span>
               </a-card>
             </a-col>
-            <a-col flex="33%" class="dashboard-a-col">
+            <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.desktop.count')"
                 class="dashboard-a-card-cl"
@@ -136,7 +138,7 @@
                 <span style="font-size: 80px">{{ desktopVmCount }}</span>
               </a-card>
             </a-col>
-            <a-col flex="34%" class="dashboard-a-col">
+            <!-- <a-col flex="34%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.app.count')"
                 class="dashboard-a-card-cl"
@@ -145,10 +147,10 @@
               >
                 <span style="font-size: 80px">{{ appVmCount }}</span>
               </a-card>
-            </a-col>
+            </a-col> -->
           </a-row>
           <a-row :gutter="8" type="flex">
-            <a-col flex="33%" class="dashboard-a-col">
+            <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.account.count')"
                 class="dashboard-a-card-cl"
@@ -157,7 +159,7 @@
                 <span style="font-size: 80px">{{ accountCount }}</span>
               </a-card>
             </a-col>
-            <a-col flex="33%" class="dashboard-a-col">
+            <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.desktop.connected.count')"
                 class="dashboard-a-card-cl"
@@ -166,7 +168,7 @@
                 <span style="font-size: 80px">{{ desktopConCount }}</span>
               </a-card>
             </a-col>
-            <a-col flex="34%" class="dashboard-a-col">
+            <!-- <a-col flex="34%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.app.connected.count')"
                 class="dashboard-a-card-cl"
@@ -174,7 +176,7 @@
               >
                 <span style="font-size: 80px">{{ appConCount }}</span>
               </a-card>
-            </a-col>
+            </a-col> -->
           </a-row>
         </a-col>
         <!-- <a-col flex="30%" class="dashboard-a-col">
@@ -230,6 +232,7 @@ export default defineComponent({
   data() {
     return {
       timer: ref(null),
+      loading: ref(false),
       spinning: ref(false),
       workspaceCount: ref("0"),
       desktopVmCount: ref("0"),
@@ -238,7 +241,7 @@ export default defineComponent({
       desktopConCount: ref("0"),
       appConCount: ref("0"),
       stepStatus: ref("error"),
-      currentStep: ref(0),
+      dashboardStep: ref(0),
       descStep1: ref(this.$t("message.status.checking")),
       descStep2: ref(this.$t("message.status.checking")),
       descStep3: ref(this.$t("message.status.checking")),
@@ -246,23 +249,21 @@ export default defineComponent({
     };
   },
   created() {
-    this.refresh();
+    this.refresh(false);
+
     this.timer = setInterval(() => {
       //60초 자동 갱신
-      this.fetchData();
+      this.refresh(false);
     }, 30000);
   },
   unmounted() {
     clearInterval(this.timer);
   },
   methods: {
-    refresh() {
-      this.spinning = true;
-      this.currentStep = 0;
-      this.descStep1 = this.$t("message.status.checking");
-      this.descStep2 = this.$t("message.status.checking");
-      this.descStep3 = this.$t("message.status.checking");
-      this.descStep4 = this.$t("message.status.checking");
+    refresh(buttonClick) {
+      if (buttonClick || sessionStorage.getItem("dashboardStep") === null) {
+        this.spinning = true;
+      }
       this.fetchData();
     },
     async fetchData() {
@@ -271,34 +272,43 @@ export default defineComponent({
         .then((response) => {
           if (response.status == 200) {
             this.descStep1 = this.$t("message.status.check.ok");
-            this.currentStep = 1;
+            this.dashboardStep = 1;
             if (response.data.result["Mold"] === 200) {
               this.descStep2 = this.$t("message.status.check.ok");
-              this.currentStep = 2;
+              this.dashboardStep = 2;
               if (response.data.result["Works-DC"] === 200) {
                 this.descStep3 = this.$t("message.status.check.ok");
-                this.currentStep = 3;
+                this.dashboardStep = 3;
                 if (response.data.result["Works-Samba"] === 200) {
                   this.descStep4 = this.$t("message.status.check.ok");
-                  this.currentStep = 4;
+                  this.dashboardStep = 4;
                 } else {
                   this.descStep4 = this.$t("message.status.check.nosignal");
                 }
               } else {
                 this.descStep3 = this.$t("message.status.check.nosignal");
+                this.descStep4 = this.$t("message.status.check.nosignal");
               }
             } else {
               this.descStep2 = this.$t("message.status.check.nosignal");
+              this.descStep3 = this.$t("message.status.check.nosignal");
+              this.descStep4 = this.$t("message.status.check.nosignal");
             }
           } else {
+            this.dashboardStep = 0;
             this.descStep1 = this.$t("message.status.check.nosignal");
+            this.descStep2 = this.$t("message.status.check.nosignal");
+            this.descStep3 = this.$t("message.status.check.nosignal");
+            this.descStep4 = this.$t("message.status.check.nosignal");
           }
         })
         .catch((error) => {
           // message.error(this.$t("message.response.data.fail"));
           console.log(error.message);
         })
-        .finally(() => {});
+        .finally(() => {
+          sessionStorage.setItem("dashboardStep", this.dashboardStep);
+        });
 
       await worksApi
         .get("/api/v1/dashboard")
