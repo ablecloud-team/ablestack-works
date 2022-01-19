@@ -222,8 +222,8 @@ export default defineComponent({
     const formState = reactive({
       name: ref(""),
       description: ref(""),
-      selectedMasterTemplateId: ref(""),
-      selectedOfferingId: ref(""),
+      selectedMasterTemplateId: undefined,
+      selectedOfferingId: undefined,
       workspaceType: ref("desktop"),
       dedicatedOrSharedBoolean: ref(false),
       desktopBoolean: ref(true),

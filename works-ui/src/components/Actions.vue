@@ -181,6 +181,7 @@
         style="width: 100%; margin-top: 7px"
         option-filter-prop="label"
         class="addmodal-aform-item-div"
+        :placeholder="$t('tooltip.vm.account.select')"
       >
         <a-select-option
           v-for="option in workspaceUserDataList"
@@ -277,7 +278,7 @@ export default defineComponent({
   },
   data(props) {
     return {
-      selectedUser: ref(""),
+      selectedUser: ref(undefined),
       callComponent: ref(props.actionFrom),
       multiSelectList: props.multiSelectList,
       vmInfo: ref(props.vmInfo),
