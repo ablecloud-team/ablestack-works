@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import VueCryptojs from 'vue-cryptojs'
+import VueCryptojs from "vue-cryptojs"
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import App from "./App.vue";
@@ -73,7 +73,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SmileOutlined,
-  FrownOutlined
+  FrownOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
