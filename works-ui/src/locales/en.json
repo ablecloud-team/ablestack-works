@@ -117,6 +117,7 @@
     "tooltip.multiDestroy":"Delete virtual machines in bulk",
     "tooltip.multiUserAllocate": "Allocate users in bulk",
     "tooltip.multiUserUnlock": "Batch Unlock Users",
+    "tooltip.vm.account.select":"Select desktop users",
 
     "label.fetch.latest": "Fetch latest",
     "label.refresh": "Refresh",
