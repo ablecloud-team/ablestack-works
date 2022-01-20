@@ -96,12 +96,22 @@ func getWorkspacesDetail(c *gin.Context) {
 		if err != nil {
 
 		}
+
+		workspacePolicy, err := selectWorkspacePolicyList(workspaceInfo)
+		log.Warnf("[%v] [%v]", workspacePolicy, workspacePolicy.Body)
+		var workspacePolicyData []map[string]interface{}
+		err = json.NewDecoder(workspacePolicy.Body).Decode(&workspacePolicyData)
+		if err != nil {
+			log.Errorf("workspacePolicy error [%v]", err)
+		}
+
 		resultReturn["workspaceInfo"] = workspaceInfo
 		resultReturn["templateInfo"] = templateResult["listtemplatesresponse"]
 		resultReturn["serviceOfferingInfo"] = serviceOfferingResult["listserviceofferingsresponse"]
 		resultReturn["networkInfo"] = networkResult["listnetworksresponse"]
 		resultReturn["instanceList"] = instanceList
 		resultReturn["groupDetail"] = groupData
+		resultReturn["workspacePolicy"] = workspacePolicyData
 		returnCode = http.StatusOK
 	} else {
 		resultReturn["message"] = fmt.Sprintf("There is no workspace for that UUID. [%v]", workspaceUuid)

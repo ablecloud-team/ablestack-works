@@ -163,6 +163,17 @@ func insertPolicyRemotefx(groupName string) (*http.Response, error) {
 	return resp, err
 }
 
+func selectWorkspacePolicyList(workspace Workspace) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+	resp, err := client.Get(DCInfo + "/v1/group/" + workspace.Name + "/policy")
+
+	return resp, err
+}
+
 func selectGroupList() (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 
