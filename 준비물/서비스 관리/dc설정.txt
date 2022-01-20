@@ -1,0 +1,13 @@
+rsat 설치
+설정 -> 앱 -> 선택적 기능 -> 기능 추가 -> rsat: dns 서버 도구, rsat: 그룹 정책 관리 도구
+netsh advfirewall firewall add rule name=”Ablecloud Works DC” protocol=TCP dir=in localport=8083 action=allow  edge=yes
+C:\Works-DC\nssm.exe install Works-DC C:\Works-DC\Abledc.exe
+C:\Works-DC\nssm.exe set Works-DC AppDirectory C:\Works-DC
+C:\Works-DC\nssm.exe set Works-DC AppExit Default Restart
+C:\Works-DC\nssm.exe set Works-DC AppStdout C:\Works-DC\stdout.txt
+C:\Works-DC\nssm.exe set Works-DC AppStderr C:\Works-DC\stderr.txt
+C:\Works-DC\nssm.exe set Works-DC Description "Ablestask의 DC api server입니다."
+C:\Works-DC\nssm.exe set Works-DC DisplayName Works-DC
+C:\Works-DC\nssm.exe set Works-DC ObjectName LocalSystem
+C:\Works-DC\nssm.exe set Works-DC Start SERVICE_DELAYED_AUTO_START
+C:\Works-DC\nssm.exe set Works-DC Type SERVICE_WIN32_OWN_PROCESS

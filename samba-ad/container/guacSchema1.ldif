@@ -1,0 +1,22 @@
+#Attribute definitions
+
+dn: CN=guacConfigParameter,CN=Schema,CN=Configuration,DC=DOMAINNAME,DC=local
+changetype: add
+objectClass: top
+objectClass: attributeSchema
+cn: guacConfigParameter
+attributeID: 1.3.6.1.4.1.38971.1.1.2
+attributeSyntax: 2.5.5.12
+isSingleValued: FALSE
+adminDisplayName: guacConfigParameter
+adminDescription: guacConfigParameter
+oMSyntax: 64
+searchFlags: 1
+lDAPDisplayName: guacConfigParameter
+systemOnly: FALSE
+
+dn:
+changetype: modify
+add: schemaUpdateNow
+schemaUpdateNow: 1
+-
