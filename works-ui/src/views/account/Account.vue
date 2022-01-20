@@ -258,7 +258,7 @@ export default defineComponent({
         pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
       },
       title: [{ required: false }, { max: 32 }],
-      //department: [{ required: false }, { max: 32 }],
+      department: [{ required: false }, { max: 32 }],
     };
     return {
       labelCol: { span: 10 },
@@ -287,13 +287,13 @@ export default defineComponent({
     this.rules.email.message = this.$t("input.user.email");
     this.rules.phone.message = this.$t("input.user.phone");
     this.rules.title[0].message = this.$t("input.user.title");
-    //this.rules.department[0].message = this.$t("input.user.department");
+    this.rules.department[0].message = this.$t("input.user.department");
 
     this.rules.account[1].message = this.$t("input.max.32");
     this.rules.title[1].message = this.$t("input.max.32");
     this.rules.firstName[1].message = this.$t("input.max.32");
     this.rules.lastName[1].message = this.$t("input.max.32");
-    //this.rules.department[1].message = this.$t("input.user.department");
+    this.rules.department[1].message = this.$t("input.max.32");
   },
   methods: {
     refresh() {
@@ -315,7 +315,7 @@ export default defineComponent({
       params.append("email", this.formState.email);
       params.append("phone", this.formState.phone);
       params.append("title", this.formState.title);
-      //params.append("department", this.formState.department);
+      params.append("department", this.formState.department);
 
       //console.log(params);
       this.formRef

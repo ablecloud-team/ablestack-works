@@ -30,7 +30,7 @@
           ref="listRefreshCall3"
           :tap-name="'policy'"
           :action-from="'policyList'"
-          :workspace-info="workspaceInfo"
+          :workspace-policy-list="workspacePolicyList"
         />
       </a-tab-pane>
       <a-tab-pane
@@ -71,6 +71,11 @@ export default defineComponent({
       default: null,
     },
     groupInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    workspacePolicyList: {
       type: Object,
       required: false,
       default: null,

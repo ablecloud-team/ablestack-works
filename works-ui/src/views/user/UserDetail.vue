@@ -6,7 +6,9 @@
           <a-row>
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath :paths="[{ name: accountInfo.username, component: null }]" />
+              <Apath
+                :paths="[{ name: accountInfo.username, component: null }]"
+              />
               <a-button
                 shape="round"
                 style="margin-left: 20px"
@@ -28,7 +30,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody ref="listRefreshCall" :account-info="accountInfo" />
+          <UserBody ref="refreshCall" :account-info="accountInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -65,7 +67,7 @@ export default defineComponent({
   methods: {
     refresh() {
       this.fetchData();
-      this.$refs.listRefreshCall.fetchRefresh();
+      this.$refs.refreshCall.fetchRefresh();
     },
     async fetchData() {
       await worksApi

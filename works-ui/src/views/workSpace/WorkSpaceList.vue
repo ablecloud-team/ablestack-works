@@ -295,6 +295,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
+      this.$emit("actionFromChange", "Workspace", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];

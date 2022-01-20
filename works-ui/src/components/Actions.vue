@@ -1,20 +1,18 @@
 <template class="able-action">
   <a-space :size="8">
-    <!--Start-->
+    <!-- 단일 Select 일때 버튼 표시 -->
     <a-tooltip v-if="state.buttonBoolean.vmStart" placement="bottom">
       <template #title>{{ $t("tooltip.vmStart") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('vmStart')">
         <CaretRightOutlined />
       </a-button>
     </a-tooltip>
-    <!--Stop-->
     <a-tooltip v-if="state.buttonBoolean.vmStop" placement="bottom">
       <template #title>{{ $t("tooltip.vmStop") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('vmStop')">
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
-    <!--reset -->
     <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.userAllocate") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userAllocate')">
@@ -27,19 +25,6 @@
         <UserDeleteOutlined />
       </a-button>
     </a-tooltip>
-    <!--workspaceDestroy-->
-    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="bottom">
-      <template #title>{{ $t("tooltip.destroy") }}</template>
-      <a-button
-        type="primary"
-        shape="circle"
-        danger
-        @click="setCircleButtonModal('workspaceDestroy')"
-      >
-        <DeleteFilled />
-      </a-button>
-    </a-tooltip>
-    <!--vmDestroy-->
     <a-tooltip v-if="state.buttonBoolean.vmDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
@@ -51,7 +36,17 @@
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <!--accountDestroy-->
+    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="bottom">
+      <template #title>{{ $t("tooltip.destroy") }}</template>
+      <a-button
+        type="primary"
+        shape="circle"
+        danger
+        @click="setCircleButtonModal('workspaceDestroy')"
+      >
+        <DeleteFilled />
+      </a-button>
+    </a-tooltip>
     <a-tooltip v-if="state.buttonBoolean.accountDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
@@ -77,7 +72,81 @@
         <DeleteFilled />
       </a-button>
     </a-tooltip>
+    <!-- 단일 Select 일때 버튼 표시 -->
 
+    <!-- Multi Select 일때 일괄 버튼 표시 -->
+    <a-tooltip v-if="state.buttonBoolean.multiVmStart" placement="bottom">
+      <template #title>{{ $t("tooltip.multiVmStart") }}</template>
+      <a-button shape="round" @click="setCircleButtonModal('vmStart')">
+        <CaretRightOutlined /> {{ $t("tooltip.multiVmStart") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip v-if="state.buttonBoolean.multiVmStop" placement="bottom">
+      <template #title>{{ $t("tooltip.multiVmStop") }}</template>
+      <a-button shape="round" @click="setCircleButtonModal('vmStop')">
+        <PoweroffOutlined /> {{ $t("tooltip.multiVmStop") }}
+      </a-button>
+    </a-tooltip>
+
+    <a-tooltip v-if="state.buttonBoolean.multiUserAllocate" placement="bottom">
+      <template #title>{{ $t("tooltip.multiUserAllocate") }}</template>
+      <a-button shape="round" @click="setCircleButtonModal('userAllocate')">
+        <UserAddOutlined /> {{ $t("tooltip.multiUserAllocate") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip v-if="state.buttonBoolean.multiUserUnlock" placement="bottom">
+      <template #title>{{ $t("tooltip.multiUserUnlock") }}</template>
+      <a-button shape="round" @click="setCircleButtonModal('userUnlock')">
+        <UserDeleteOutlined /> {{ $t("tooltip.multiUserUnlock") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip v-if="state.buttonBoolean.multiVmDestroy" placement="bottom">
+      <template #title>{{ $t("tooltip.multiDestroy") }}</template>
+      <a-button shape="round" danger @click="setCircleButtonModal('vmDestroy')">
+        <DeleteFilled /> {{ $t("tooltip.multiDestroy") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip
+      v-if="state.buttonBoolean.multiWorkspaceDestroy"
+      placement="bottom"
+    >
+      <template #title>{{ $t("tooltip.multiDestroy") }}</template>
+      <a-button
+        shape="round"
+        danger
+        @click="setCircleButtonModal('workspaceDestroy')"
+      >
+        <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip
+      v-if="state.buttonBoolean.multiAccountDestroy"
+      placement="bottom"
+    >
+      <template #title>{{ $t("tooltip.multiDestroy") }}</template>
+      <a-button
+        shape="round"
+        danger
+        @click="setCircleButtonModal('accountDestroy')"
+      >
+        <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
+      </a-button>
+    </a-tooltip>
+    <a-tooltip
+      v-if="state.buttonBoolean.multiWorkspaceAccountDestroy"
+      placement="bottom"
+    >
+      <template #title>{{ $t("tooltip.multiDestroy") }}</template>
+      <a-button
+        shape="round"
+        danger
+        @click="setCircleButtonModal('workspaceAccountDestroy')"
+      >
+        <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
+      </a-button>
+    </a-tooltip>
+
+    <!-- Multi Select 일때 일괄 버튼 표시 -->
     <a-modal
       v-model:visible="commonModalView"
       :title="$t('tooltip.' + modalTitle)"
@@ -112,6 +181,7 @@
         style="width: 100%; margin-top: 7px"
         option-filter-prop="label"
         class="addmodal-aform-item-div"
+        :placeholder="$t('tooltip.vm.account.select')"
       >
         <a-select-option
           v-for="option in workspaceUserDataList"
@@ -181,18 +251,20 @@ export default defineComponent({
         showModal: ref(false),
         vmStart: ref(false),
         vmStop: ref(false),
+        vmDestroy: ref(false),
         userAllocate: ref(false),
         userUnlock: ref(false),
-        reinstall: ref(false),
-        snapshot: ref(false),
-        volsnapshot: ref(false),
-        iso: ref(false),
         workspaceDestroy: ref(false),
         workspaceAccountDestroy: ref(false),
-        vmDestroy: ref(false),
         accountDestroy: ref(false),
-        edit: ref(false),
-        pause: ref(false),
+        multiVmStart: ref(false),
+        multiVmStop: ref(false),
+        multiVmDestroy: ref(false),
+        multiUserAllocate: ref(false),
+        multiUserUnlock: ref(false),
+        multiWorkspaceDestroy: ref(false),
+        multiWorkspaceAccountDestroy: ref(false),
+        multiAccountDestroy: ref(false),
       },
     });
     return {
@@ -206,7 +278,7 @@ export default defineComponent({
   },
   data(props) {
     return {
-      selectedUser: ref(""),
+      selectedUser: ref(undefined),
       callComponent: ref(props.actionFrom),
       multiSelectList: props.multiSelectList,
       vmInfo: ref(props.vmInfo),
@@ -233,58 +305,62 @@ export default defineComponent({
   methods: {
     fetchData() {
       if (this.callComponent.includes("Workspace")) {
-        if (this.callComponent === "WorkspaceUserList") {
-          this.state.buttonBoolean.workspaceAccountDestroy = true;
-        } else {
-          this.state.buttonBoolean.workspaceDestroy = true;
-        }
         if (this.workspaceInfo) {
           this.eventList = [this.workspaceInfo];
+          if (this.callComponent === "WorkspaceUserList")
+            this.state.buttonBoolean.workspaceAccountDestroy = true;
+          else this.state.buttonBoolean.workspaceDestroy = true;
         } else {
           this.eventList = this.multiSelectList;
+          if (this.callComponent === "WorkspaceUserList")
+            this.state.buttonBoolean.multiWorkspaceAccountDestroy = true;
+          else this.state.buttonBoolean.multiWorkspaceDestroy = true;
         }
       } else if (this.callComponent.includes("Account")) {
-        this.state.buttonBoolean.accountDestroy = true;
-
         if (this.accountInfo) {
           this.eventList = [this.accountInfo];
+          this.state.buttonBoolean.accountDestroy = true;
         } else {
           this.eventList = this.multiSelectList;
+          this.state.buttonBoolean.multiAccountDestroy = true;
         }
       } else if (this.callComponent.includes("GroupPolicy")) {
         this.state.buttonBoolean.destroy = true;
       }
       if (this.callComponent.includes("VirtualMachine")) {
-        this.state.buttonBoolean.vmDestroy = true;
-
-        if (this.vmInfo) {
-          this.eventList = [this.vmInfo];
-        } else {
-          this.eventList = this.multiSelectList;
-        }
+        if (this.vmInfo) this.eventList = [this.vmInfo];
+        else this.eventList = this.multiSelectList;
 
         // console.log(this.eventList);
 
+        //시작 버튼 체크
         let res = null;
-        res = this.eventList.filter(
-          (it) => it.mold_status === "Running" || it.mold_status === ""
-        ); //시작 버튼 체크
-        // console.log(res.length);
-        if (res.length === 0) this.state.buttonBoolean.vmStart = true;
+        res = this.eventList.filter((it) => it.mold_status === "Running");
+        if (this.eventList.length === res.length) {
+          if (this.vmInfo) this.state.buttonBoolean.vmStop = true;
+          else this.state.buttonBoolean.multiVmStop = true;
+        }
 
-        res = this.eventList.filter(
-          (it) => it.mold_status === "Stopped" || it.mold_status === ""
-        ); //정지 버튼 체크
-        // console.log(res.length);
-        if (res.length === 0) this.state.buttonBoolean.vmStop = true;
+        //정지 버튼 체크
+        res = this.eventList.filter((it) => it.mold_status === "Stopped");
+        if (this.eventList.length === res.length) {
+          if (this.vmInfo) this.state.buttonBoolean.vmStart = true;
+          else this.state.buttonBoolean.multiVmStart = true;
+        }
+        //사용자 할당 해제 버튼 체크
+        res = this.eventList.filter((it) => it.owner_account_id !== "");
+        if (res.length > 0) {
+          if (this.vmInfo) this.state.buttonBoolean.userUnlock = true;
+          else this.state.buttonBoolean.multiUserUnlock = true;
+        }
 
-        res = this.eventList.filter((it) => it.owner_account_id === ""); //사용자 할당 해지 버튼 체크
-        // console.log(res.length);
-        if (res.length === 0) this.state.buttonBoolean.userUnlock = true;
+        //가상머신 삭제버튼 세팅
+        if (this.vmInfo) this.state.buttonBoolean.vmDestroy = true;
+        else this.state.buttonBoolean.multiVmDestroy = true;
 
-        res = this.eventList.filter((it) => it.owner_account_id !== ""); //사용자 할당 버튼 체크
-        // console.log(res.length);
-        if (res.length === 0) {
+        //사용자 할당 버튼 체크
+        res = this.eventList.filter((it) => it.owner_account_id === "");
+        if (this.eventList.length === res.length) {
           //같은 워크스페이스면 할당 버튼 활성화, 아니면 비활성화
           res = this.eventList.filter(function (obj, i, s) {
             return (
@@ -294,9 +370,11 @@ export default defineComponent({
               })
             );
           });
-
+          //사용자 할당 버튼
           if (res.length === 1) {
-            this.state.buttonBoolean.userAllocate = true; //사용자 할당 버튼
+            //사용자 할당 버튼
+            if (this.vmInfo) this.state.buttonBoolean.userAllocate = true;
+            else this.state.buttonBoolean.multiUserAllocate = true;
 
             worksApi
               .get("/api/v1/group/" + res[0].workspace_name)
@@ -439,13 +517,12 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-      console.log(this.succCnt, this.failCnt);
-      this.handleCancel();
+
       setTimeout(() => {
+        this.handleCancel();
         this.$emit("fetchData");
 
         message.destroy();
-
         if (this.succCnt > 0) {
           message.success(
             this.$t(sucMessage, {
@@ -486,9 +563,11 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-      this.handleCancel();
-      this.$emit("fetchData");
+
       setTimeout(() => {
+        this.handleCancel();
+        this.$emit("fetchData");
+
         message.destroy();
         if (this.succCnt > 0) {
           message.success(
@@ -506,7 +585,6 @@ export default defineComponent({
             5
           );
         }
-
         this.failCnt = 0;
         this.succCnt = 0;
       }, 1000);
@@ -529,10 +607,10 @@ export default defineComponent({
         }
       }
 
-      this.handleCancel();
-      this.$emit("fetchData");
-
       setTimeout(() => {
+        this.handleCancel();
+        this.$emit("fetchData");
+
         message.destroy();
         if (this.succCnt > 0) {
           message.success(
@@ -542,14 +620,14 @@ export default defineComponent({
             5
           );
         }
-        if (this.failCnt > 0) {
-          message.error(
-            this.$t(failMessage, {
-              count: this.failCnt,
-            }),
-            5
-          );
-        }
+        // if (this.failCnt > 0) {
+        //   message.error(
+        //     this.$t(failMessage, {
+        //       count: this.failCnt,
+        //     }),
+        //     5
+        //   );
+        // }
 
         this.failCnt = 0;
         this.succCnt = 0;
@@ -636,13 +714,14 @@ export default defineComponent({
         }
       }
 
-      this.handleCancel();
-      if (actionFrom == "WorkspaceDetail") {
-        router.push({ name: "Workspace" });
-      } else {
-        this.$emit("fetchData");
-      }
       setTimeout(() => {
+        this.handleCancel();
+        if (actionFrom == "WorkspaceDetail") {
+          router.push({ name: "Workspace" });
+        } else {
+          this.$emit("fetchData");
+        }
+
         message.destroy();
         if (this.succCnt > 0) {
           message.success(

@@ -7,7 +7,7 @@
           ghost
           shape="round"
           size="medium"
-          @click="refresh()"
+          @click="refresh(true)"
         >
           <template #icon>
             <ReloadOutlined /> {{ $t("label.fetch.latest") }}
@@ -20,7 +20,102 @@
     <a-spin :spinning="spinning" size="large">
       <a-row>
         <a-col flex="100%">
+          <a-row :gutter="24" type="flex">
+            <a-col flex="100%" class="dashboard-a-col">
+              <a-card :loading="loading" :title="$t('label.status.server')">
+                <a-steps :current="dashboardStep" :status="stepStatus">
+                  <a-step
+                    :title="$t('label.status.worksapi')"
+                    :description="descStep1"
+                  />
+                  <a-step
+                    :title="$t('label.status.mold')"
+                    :description="descStep2"
+                  />
+                  <a-step
+                    :title="$t('label.status.dc')"
+                    :description="descStep3"
+                  />
+                  <a-step
+                    :title="$t('label.status.ad')"
+                    :description="descStep4"
+                  />
+                </a-steps>
+              </a-card>
+            </a-col>
+          </a-row>
+        </a-col>
+      </a-row>
+
+      <!-- <a-row>
+        <a-col flex="100%">
           <a-row :gutter="12" type="flex">
+            <a-col flex="25%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.status.dc')"
+                class="dashboard-a-card-cl"
+                hoverable
+              >
+                <a-progress
+                  :stroke-color="{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }"
+                  type="circle"
+                  :percent="100"
+                  :format="() => 'OK'"
+                />
+              </a-card>
+            </a-col>
+            <a-col flex="25%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.status.ad')"
+                class="dashboard-a-card-cl"
+                hoverable
+              >
+                <a-progress
+                  :stroke-color="{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }"
+                  type="circle"
+                  :percent="100"
+                  :format="() => 'OK'"
+                />
+              </a-card>
+            </a-col>
+            <a-col flex="25%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.status.worksapi')"
+                class="dashboard-a-card-cl"
+                hoverable
+              >
+                <a-progress
+                  :stroke-color="{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }"
+                  type="circle"
+                  :percent="100"
+                  :format="() => 'OK'"
+                />
+              </a-card>
+            </a-col>
+            <a-col flex="25%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.status.mold')"
+                class="dashboard-a-card-cl"
+                hoverable
+              >
+                <a-progress type="circle" :percent="100" status="exception" />
+              </a-card>
+            </a-col>
+          </a-row>
+        </a-col>
+      </a-row> -->
+      <a-row>
+        <a-col flex="100%">
+          <a-row :gutter="8" type="flex">
             <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.workspace.count')"
@@ -28,7 +123,9 @@
                 hoverable
                 @click="$router.push({ name: 'Workspace' })"
               >
-                <span style="font-size: 80px">{{ workspaceCount }}</span>
+                <span style="font-size: 80px; align: middle">{{
+                  workspaceCount
+                }}</span>
               </a-card>
             </a-col>
             <a-col flex="50%" class="dashboard-a-col">
@@ -38,31 +135,30 @@
                 hoverable
                 @click="$router.push({ name: 'VirtualMachine' })"
               >
-                <span style="font-size: 80px">{{ instanceCount }}</span>
+                <span style="font-size: 80px">{{ desktopVmCount }}</span>
               </a-card>
             </a-col>
-            <!-- <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.allocated.cpu.count')" class="dashboard-a-card-cl" hoverable>
-              <a-progress type="dashboard" :percent="33"/>
-            </a-card>
-          </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.allocated.memory.count')" class="dashboard-a-card-cl" hoverable>
-              <a-progress type="dashboard" :percent="22"/>
-            </a-card>
-          </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.allocated.disk.count')" class="dashboard-a-card-cl" hoverable>
-              <a-progress type="dashboard" :percent="70" />
-            </a-card>
-          </a-col>
-          <a-col flex="25%" class="dashboard-a-col">
-            <a-card :title="$t('label.allocated.IP.count')" class="dashboard-a-card-cl" hoverable>
-              <a-progress type="dashboard" :percent="70" />
-            </a-card>
-          </a-col> -->
+            <!-- <a-col flex="34%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.app.count')"
+                class="dashboard-a-card-cl"
+                hoverable
+                @click="$router.push({ name: 'VirtualMachine' })"
+              >
+                <span style="font-size: 80px">{{ appVmCount }}</span>
+              </a-card>
+            </a-col> -->
           </a-row>
-          <a-row :gutter="12" type="flex">
+          <a-row :gutter="8" type="flex">
+            <a-col flex="50%" class="dashboard-a-col">
+              <a-card
+                :title="$t('label.account.count')"
+                class="dashboard-a-card-cl"
+                hoverable
+              >
+                <span style="font-size: 80px">{{ accountCount }}</span>
+              </a-card>
+            </a-col>
             <a-col flex="50%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.desktop.connected.count')"
@@ -72,7 +168,7 @@
                 <span style="font-size: 80px">{{ desktopConCount }}</span>
               </a-card>
             </a-col>
-            <a-col flex="50%" class="dashboard-a-col">
+            <!-- <a-col flex="34%" class="dashboard-a-col">
               <a-card
                 :title="$t('label.app.connected.count')"
                 class="dashboard-a-card-cl"
@@ -80,7 +176,7 @@
               >
                 <span style="font-size: 80px">{{ appConCount }}</span>
               </a-card>
-            </a-col>
+            </a-col> -->
           </a-row>
         </a-col>
         <!-- <a-col flex="30%" class="dashboard-a-col">
@@ -136,35 +232,92 @@ export default defineComponent({
   data() {
     return {
       timer: ref(null),
+      loading: ref(false),
       spinning: ref(false),
       workspaceCount: ref("0"),
-      instanceCount: ref("0"),
+      desktopVmCount: ref("0"),
+      appVmCount: ref("0"),
+      accountCount: ref("0"),
       desktopConCount: ref("0"),
       appConCount: ref("0"),
+      stepStatus: ref("error"),
+      dashboardStep: ref(0),
+      descStep1: ref(this.$t("message.status.checking")),
+      descStep2: ref(this.$t("message.status.checking")),
+      descStep3: ref(this.$t("message.status.checking")),
+      descStep4: ref(this.$t("message.status.checking")),
     };
   },
   created() {
-    this.refresh();
+    this.refresh(false);
+
     this.timer = setInterval(() => {
       //60초 자동 갱신
-      this.fetchData();
+      this.refresh(false);
     }, 30000);
   },
   unmounted() {
     clearInterval(this.timer);
   },
   methods: {
-    refresh() {
-      this.spinning = true;
+    refresh(buttonClick) {
+      if (buttonClick || sessionStorage.getItem("dashboardStep") === null) {
+        this.spinning = true;
+      }
       this.fetchData();
     },
-    fetchData() {
-      worksApi
+    async fetchData() {
+      await worksApi
+        .get("/api/serverCheck")
+        .then((response) => {
+          if (response.status == 200) {
+            this.descStep1 = this.$t("message.status.check.ok");
+            this.dashboardStep = 1;
+            if (response.data.result["Mold"] === 200) {
+              this.descStep2 = this.$t("message.status.check.ok");
+              this.dashboardStep = 2;
+              if (response.data.result["Works-DC"] === 200) {
+                this.descStep3 = this.$t("message.status.check.ok");
+                this.dashboardStep = 3;
+                if (response.data.result["Works-Samba"] === 200) {
+                  this.descStep4 = this.$t("message.status.check.ok");
+                  this.dashboardStep = 4;
+                } else {
+                  this.descStep4 = this.$t("message.status.check.nosignal");
+                }
+              } else {
+                this.descStep3 = this.$t("message.status.check.nosignal");
+                this.descStep4 = this.$t("message.status.check.nosignal");
+              }
+            } else {
+              this.descStep2 = this.$t("message.status.check.nosignal");
+              this.descStep3 = this.$t("message.status.check.nosignal");
+              this.descStep4 = this.$t("message.status.check.nosignal");
+            }
+          } else {
+            this.dashboardStep = 0;
+            this.descStep1 = this.$t("message.status.check.nosignal");
+            this.descStep2 = this.$t("message.status.check.nosignal");
+            this.descStep3 = this.$t("message.status.check.nosignal");
+            this.descStep4 = this.$t("message.status.check.nosignal");
+          }
+        })
+        .catch((error) => {
+          // message.error(this.$t("message.response.data.fail"));
+          console.log(error.message);
+        })
+        .finally(() => {
+          sessionStorage.setItem("dashboardStep", this.dashboardStep);
+        });
+
+      await worksApi
         .get("/api/v1/dashboard")
         .then((response) => {
           if (response.status == 200) {
             this.workspaceCount = response.data.result.workspaceCount;
-            this.instanceCount = response.data.result.instanceCount;
+            this.desktopVmCount = response.data.result.instanceCount;
+            this.appVmCount = "0";
+            this.accountCount = "0";
             this.desktopConCount = "0";
             this.appConCount = "0";
           }

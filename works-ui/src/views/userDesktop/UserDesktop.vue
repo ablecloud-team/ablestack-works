@@ -9,7 +9,7 @@
               <Apath :paths="[$t('label.desktop')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px"
+                style="margin-left: 18px"
                 size="small"
                 @click="refresh()"
               >
@@ -23,168 +23,9 @@
       </a-layout-header>
       <a-layout-content>
         <a-spin :spinning="spinning" size="large">
-          <div
-            id="content-body"
-            v-for="workspace in dataList"
-            style="width: 100%; padding: 5px"
-          >
-            <a-card
-              :title="'WORKSPACE : ' + workspace.workspace"
-              bodyStyle="margin: 1px; fontSize: 100px;"
-            >
-              <a-row>
-                <a-col flex="100%">
-                  <a-row :gutter="12" type="flex">
-                    <a-col
-                      v-for="vm in workspace.instanceList"
-                      flex="10%"
-                      class="dashboard-a-col"
-                    >
-                      <a-card
-                        hoverable
-                        style="width: 200px; text-align: center"
-                        :title="vm.name"
-                      >
-                        <DesktopOutlined
-                          :style="{
-                            fontSize: '40px',
-                            color: vm.state == 'Running' ? 'black' : 'pink',
-                          }"
-                        />
-
-                        <template class="ant-card-actions" #actions>
-                          <a-popconfirm
-                            :title="
-                              vm.favorite == true
-                                ? '즐겨찾기 해제하시겠습니까?'
-                                : '즐겨찾기에 추가하시겠습니까?'
-                            "
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="favorite(vm.id, vm.favorite)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("즐겨찾기 해제")
-                              }}</template>
-
-                              <StarFilled
-                                v-if="vm.favorite"
-                                :id="vm.id + '-TRUE'"
-                                :style="{ color: '#ffd700' }"
-                              />
-                            </a-tooltip>
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("즐겨찾기 추가")
-                              }}</template>
-                              <StarOutlined
-                                v-if="!vm.favorite"
-                                :id="vm.id + '-FALSE'"
-                                :style="{ color: '#d9dbdf' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="'RDP 파일을 다운로드 하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="downloadRDP(vm.name)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("RDP 다운로드")
-                              }}</template>
-                              <CloudDownloadOutlined
-                                :style="{ color: '#292929' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="'데스크톱에 접속하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="connectConsole(vm.id)"
-                            :disabled="
-                              vm.handshake_status == 'Ready' ? false : true
-                            "
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                vm.handshake_status === "Ready"
-                                  ? $t("데스크톱 접속")
-                                  : $t("데스크톱 접속 불가")
-                              }}</template>
-                              <CodeFilled
-                                :style="{
-                                  color:
-                                    vm.handshake_status == 'Ready'
-                                      ? '#333'
-                                      : '#d9dbdf',
-                                }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-
-                          <a-popconfirm
-                            :title="
-                              vm.state == 'Running'
-                                ? '가상머신을 종료하시겠습니까?'
-                                : '가상머신을 시작하시겠습니까?'
-                            "
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="vmState(vm.id, vm.state)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                vm.state === "Running"
-                                  ? $t("가상머신 종료")
-                                  : $t("가상머신 시작")
-                              }}</template>
-                              <PoweroffOutlined
-                                v-if="vm.state == 'Running'"
-                                :style="{ color: '#333' }"
-                              />
-                              <CaretRightOutlined
-                                v-else
-                                :style="{ color: '#333' }"
-                              />
-                            </a-tooltip>
-                          </a-popconfirm>
-                        </template>
-                        <br /><br />
-
-                        <a-tooltip placement="bottom">
-                          <template #title>{{ vm.handshake_status }}</template>
-                          <a-badge
-                            class="head-example"
-                            :color="
-                              vm.handshake_status == 'Ready' ? 'green' : 'red'
-                            "
-                            :text="
-                              vm.handshake_status == 'Ready'
-                                ? $t('label.vm.status.ready')
-                                : $t('label.vm.status.notready')
-                            "
-                          />({{ vm.state }})
-                        </a-tooltip>
-
-                        <br />
-                        <WindowsFilled /> {{ vm.ostype }}
-                      </a-card>
-                    </a-col>
-                  </a-row>
-                </a-col>
-              </a-row>
-            </a-card>
-          </div>
-
-          <!-- <a-card bodyStyle="margin: 1px; fontSize: 100px;">
+          <a-card bodyStyle="">
             <a-list
-              :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 6, xxl: 10 }"
+              :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 5, xxl: 10 }"
               :pagination="pagination"
               :data-source="instanceList"
             >
@@ -192,13 +33,14 @@
                 <a-list-item>
                   <a-card
                     hoverable
-                    style="width: 200px; text-align: center"
+                    style="width: 100%; text-align: center"
                     :title="item.name"
                   >
                     <DesktopOutlined
                       :style="{
                         fontSize: '40px',
-                        color: item.state == 'Running' ? 'black' : 'pink',
+                        color:
+                          item.handshake_status === 'Ready' ? 'black' : 'pink',
                       }"
                     />
 
@@ -209,31 +51,30 @@
                             ? '즐겨찾기 해제하시겠습니까?'
                             : '즐겨찾기에 추가하시겠습니까?'
                         "
+                        placement="topRight"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="favorite(item.id, item.favorite)"
                       >
-                        <a-tooltip placement="bottom">
+                        <a-tooltip v-if="item.favorite" placement="bottom">
                           <template #title>{{ $t("즐겨찾기 해제") }}</template>
-
                           <StarFilled
-                            v-if="item.favorite"
                             :id="item.id + '-TRUE'"
-                            :style="{ color: '#ffd700' }"
+                            :style="{ color: '#ffd700', fontSize: '18px' }"
                           />
                         </a-tooltip>
-                        <a-tooltip placement="bottom">
+                        <a-tooltip v-else placement="bottom">
                           <template #title>{{ $t("즐겨찾기 추가") }}</template>
                           <StarOutlined
-                            v-if="!item.favorite"
                             :id="item.id + '-FALSE'"
-                            :style="{ color: '#d9dbdf' }"
+                            :style="{ color: '#d9dbdf', fontSize: '18px' }"
                           />
                         </a-tooltip>
                       </a-popconfirm>
 
                       <a-popconfirm
                         :title="'RDP 파일을 다운로드 하시겠습니까?'"
+                        placement="topRight"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="downloadRDP(item.name)"
@@ -241,79 +82,143 @@
                         <a-tooltip placement="bottom">
                           <template #title>{{ $t("RDP 다운로드") }}</template>
                           <CloudDownloadOutlined
-                            :style="{ color: '#292929' }"
+                            :style="{ color: '#292929', fontSize: '18px' }"
                           />
                         </a-tooltip>
                       </a-popconfirm>
 
                       <a-popconfirm
+                        v-if="item.handshake_status == 'Ready'"
+                        placement="topRight"
                         :title="'데스크톱에 접속하시겠습니까?'"
                         :ok-text="$t('label.ok')"
                         :cancel-text="$t('label.cancel')"
                         @confirm="connectConsole(item.id)"
-                        :disabled="
-                          item.handshake_status == 'Ready' ? false : true
-                        "
                       >
                         <a-tooltip placement="bottom">
-                          <template #title>{{
-                            item.handshake_status === "Ready"
-                              ? $t("데스크톱 접속")
-                              : $t("데스크톱 접속 불가")
-                          }}</template>
-                          <CodeFilled
+                          <template #title>{{ $t("데스크톱 접속") }}</template>
+                          <Html5Outlined
                             :style="{
-                              color:
-                                item.handshake_status == 'Ready'
-                                  ? '#333'
-                                  : '#d9dbdf',
+                              color: '#333',
+                              fontSize: '18px',
                             }"
                           />
                         </a-tooltip>
                       </a-popconfirm>
-
-                      <a-popconfirm
-                        :title="
-                          item.state == 'Running'
-                            ? '가상머신을 종료하시겠습니까?'
-                            : '가상머신을 시작하시겠습니까?'
-                        "
-                        :ok-text="$t('label.ok')"
-                        :cancel-text="$t('label.cancel')"
-                        @confirm="vmState(item.id, item.state)"
-                      >
-                        <a-tooltip placement="bottom">
-                          <template #title>{{
-                            item.state === "Running"
-                              ? $t("가상머신 종료")
-                              : $t("가상머신 시작")
-                          }}</template>
-                          <PoweroffOutlined
+                      <a-Popover placement="topLeft" trigger="click">
+                        <template #content>
+                          <a-popconfirm
                             v-if="item.state == 'Running'"
-                            :style="{ color: '#333' }"
-                          />
-                          <CaretRightOutlined
-                            v-else
-                            :style="{ color: '#333' }"
-                          />
-                        </a-tooltip>
-                      </a-popconfirm>
-                    </template>
-                    <br /><br />
+                            :title="'가상머신을 종료하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip
+                              placement="bottom"
+                              style="padding-right: 40px"
+                            >
+                              <template #title>{{
+                                $t("가상머신 종료")
+                              }}</template>
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <PoweroffOutlined
+                                    :style="{
+                                      color: '#333',
+                                      fontSize: '18px',
+                                      marginTop: '3px',
+                                    }"
+                                  />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                          <a-popconfirm
+                            v-if="item.state == 'Running'"
+                            :title="'가상머신을 재시작하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip placement="bottom">
+                              <template #title>{{
+                                $t("가상머신 재시작")
+                              }}</template>
 
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <ReloadOutlined
+                                    :style="{
+                                      color: '#333',
+                                      fontSize: '18px',
+                                      marginTop: '3px',
+                                    }"
+                                  />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                          <a-popconfirm
+                            v-if="item.state == 'Stopped'"
+                            :title="'가상머신을 시작하시겠습니까?'"
+                            :ok-text="$t('label.ok')"
+                            :cancel-text="$t('label.cancel')"
+                            @confirm="vmState(item.id, item.state)"
+                          >
+                            <a-tooltip placement="bottom">
+                              <template #title>{{
+                                $t("가상머신 시작")
+                              }}</template>
+                              <a-button shape="circle">
+                                <template #icon>
+                                  <CaretRightOutlined
+                                    :style="{
+                                      color: '#333',
+                                      fontSize: '18px',
+                                      marginTop: '3px',
+                                    }"
+                                  />
+                                </template>
+                              </a-button>
+                            </a-tooltip>
+                          </a-popconfirm>
+                        </template>
+                        <MoreOutlined
+                          :style="{ color: '#333', fontSize: '18px' }"
+                        />
+                      </a-Popover>
+                    </template>
+
+                    <br /><br />
                     <a-tooltip placement="bottom">
                       <template #title>{{ item.handshake_status }}</template>
                       <a-badge
                         class="head-example"
                         :color="
-                          item.handshake_status == 'Ready' ? 'green' : 'red'
+                          item.handshake_status === 'Not Ready' ||
+                          item.handshake_status === 'Pending'
+                            ? 'red'
+                            : item.handshake_status === 'Joining' ||
+                              item.handshake_status === 'Joined'
+                            ? 'yellow'
+                            : item.handshake_status === 'Ready'
+                            ? 'green'
+                            : 'red'
                         "
                         :text="
-                          item.handshake_status == 'Ready'
+                          item.handshake_status === 'Not Ready' ||
+                          item.handshake_status === 'Pending'
+                            ? $t('label.vm.status.initializing')
+                            : item.handshake_status === 'Joining' ||
+                              item.handshake_status === 'Joined'
+                            ? $t('label.vm.status.configuring')
+                            : item.handshake_status === 'Ready'
                             ? $t('label.vm.status.ready')
                             : $t('label.vm.status.notready')
                         "
-                      />({{ item.state }})
+                      />
+                      ({{ item.state }})
                     </a-tooltip>
 
                     <br />
@@ -322,7 +227,7 @@
                 </a-list-item>
               </template>
             </a-list>
-          </a-card> -->
+          </a-card>
         </a-spin>
       </a-layout-content>
     </a-layout>
@@ -345,10 +250,11 @@ export default defineComponent({
       onChange: (page) => {
         console.log(page);
       },
-      pageSize: 10,
+      pageSize: 20,
     };
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
+      cryptKey: "ikAkd39aszkdEghj",
       spinning: ref(false),
       favPopTitle: ref(""),
       actionFrom: "VirtualMachineList",
@@ -356,52 +262,22 @@ export default defineComponent({
       pagination,
       instanceList: [
         {
-          id: "11111111-111111-1111111-1-1111",
-          name: "vm18898",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
-          id: "11111111-111111-1111111-1-2222",
-          name: "vm62",
-          state: "Stopped",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-3333",
-          name: "vm36",
-          state: "Stopped",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
-          id: "11111111-111111-1111111-1-4444",
-          name: "vm46",
-          state: "Running",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
-          id: "11111111-111111-1111111-1-5555",
-          name: "vm55",
-          state: "Stopped",
-          handshake_status: "Not Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: true,
-        },
-        {
           id: "11111111-111111-1111111-1-6666",
           name: "vm645",
           state: "Running",
           handshake_status: "Ready",
           ostype: "Windows 10 (64bit)",
           favorite: false,
+          hostname: "10.1.1.150",
+          port: 3389,
+          username: "user1",
+          password: "Ablecloud1!",
+          domain: "cjs",
+          "enable-wallpaper": true,
+          "enable-font-smoothing": true,
+          "enable-theming": true,
+          "enable-menu-animations": true,
+          "resize-method": "display-update",
         },
         {
           id: "11111111-111111-1111111-1-7777",
@@ -435,179 +311,101 @@ export default defineComponent({
           ostype: "Windows 10 (64bit)",
           favorite: false,
         },
-      ],
-      dataList: [
         {
-          workspace: "workspace 1",
-          instanceList: [
-            {
-              id: "11111111-111111-1111111-1-1111",
-              name: "vm18898",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-2222",
-              name: "vm62",
-              state: "Stopped",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-3333",
-              name: "vm36",
-              state: "Stopped",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-4444",
-              name: "vm46",
-              state: "Running",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-5555",
-              name: "vm55",
-              state: "Stopped",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-6666",
-              name: "vm645",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-7777",
-              name: "vm27",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-8888",
-              name: "vm822",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-9999",
-              name: "vm9",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
         },
         {
-          workspace: "workspace 2",
-          instanceList: [
-            {
-              id: "11111111-111441-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-666666-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "777777-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
         },
         {
-          workspace: "workspace 3",
-          instanceList: [
-            {
-              id: "11111111-111441-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-666666-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "777777-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
         },
         {
-          workspace: "workspace 4",
-          instanceList: [
-            {
-              id: "11111111-111441-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-666666-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "777777-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-8888",
+          name: "vm822",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-9999",
+          name: "vm9",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+        },
+        {
+          id: "11111111-111111-1111111-1-1231",
+          name: "vm10",
+          state: "Stopped",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
         },
       ],
     };
@@ -624,7 +422,7 @@ export default defineComponent({
       }, 1000);
     },
     fetchData() {
-      console.log("fetchData!!");
+      // console.log("fetchData!!");
     },
     favorite(uuid, bool) {
       console.log(uuid + " :: " + bool);
@@ -656,8 +454,23 @@ export default defineComponent({
 
       document.body.removeChild(element);
     },
-    connectConsole(uuid, bool) {
-      console.log(uuid + " :: " + bool);
+    connectConsole(uuid) {
+      const selArr = this.instanceList.filter((it) => it.id === uuid);
+      // console.log(new URLSearchParams(selArr[0]).toString());
+
+      const encrypted = btoa(
+        this.$CryptoJS.AES.encrypt(
+          JSON.stringify(selArr[0]),
+          this.cryptKey
+        ).toString()
+      );
+
+      console.log(encrypted);
+      window.open(
+        // window.location.hostname +
+        "/client/?enc=" + encrypted,
+        "_blank"
+      );
     },
     vmState(uuid, bool) {
       console.log(uuid + " :: " + bool);
@@ -685,7 +498,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 20px;
+  padding: 18px;
   height: auto;
 }
 
@@ -698,5 +511,9 @@ export default defineComponent({
 
 #content-action {
   text-align: right;
+}
+
+.ant-btn {
+  margin-right: 8px;
 }
 </style>

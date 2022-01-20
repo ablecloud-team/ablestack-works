@@ -21,6 +21,7 @@
             :network-list="networkList"
             :vm-list="vmList"
             :group-info="groupInfo"
+            :workspace-policy-list="workspacePolicyList"
             @parentRefresh="parentRefresh"
           />
         </a-card>
@@ -30,7 +31,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import WorkSpaceTab from "./WorkSpaceTab";
 import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
@@ -58,6 +59,11 @@ export default defineComponent({
       default: null,
     },
     groupInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    workspacePolicyList: {
       type: Object,
       required: false,
       default: null,

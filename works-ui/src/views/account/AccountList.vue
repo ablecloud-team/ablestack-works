@@ -54,9 +54,6 @@
         record.name
       }}</router-link>
     </template>
-    <template #lastnameRender="{ record }">
-      {{ record.lastname }}
-    </template>
     <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
         <template #content>
@@ -128,7 +125,7 @@ export default defineComponent({
           title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
-          width: "32%",
+          width: "22%",
           slots: {
             customRender: "nameRender",
             filterDropdown: "filterDropdown",
@@ -157,14 +154,6 @@ export default defineComponent({
         },
         {
           title: this.$t("label.lastname"),
-          dataIndex: "sn",
-          key: "sn",
-          width: "10%",
-          sorter: (a, b) => (a.sn < b.sn ? -1 : a.sn > b.sn ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
-        },
-        {
-          title: this.$t("label.firstname"),
           dataIndex: "givenName",
           key: "givenName",
           width: "10%",
@@ -173,12 +162,33 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
+          title: this.$t("label.firstname"),
+          dataIndex: "sn",
+          key: "sn",
+          width: "10%",
+          sorter: (a, b) => (a.sn < b.sn ? -1 : a.sn > b.sn ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
           title: this.$t("label.title"),
           dataIndex: "title",
           key: "title",
-          width: "15%",
+          width: "10%",
           sorter: (a, b) =>
             a.title < b.title ? -1 : a.title > b.title ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.department"),
+          dataIndex: "department",
+          key: "department",
+          width: "10%",
+          sorter: (a, b) =>
+            a.department < b.department
+              ? -1
+              : a.department > b.department
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -217,6 +227,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
+      this.$emit("actionFromChange", "Account", null);
       this.actionFrom = "";
       this.loading = true;
       this.state.selectedRowKeys = [];
