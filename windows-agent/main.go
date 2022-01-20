@@ -475,24 +475,24 @@ func httpReq(li []map[string]string, ips []string) error {
 	//data.Set("logout", string(logoutdata))
 	data.Set("ip", string(ip))
 
-	log.Infof("data: %v", data.Encode())
+	//log.Infof("data: %v", data.Encode())
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))
 	if err != nil {
 		panic(err)
 	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	log.Infof("req: %v", req)
-	log.Infof("Body: %v", req.Body)
-	log.Infof("Header: %v", req.Header)
-	log.Infof("URL: %v", req.URL)
-	log.Infof("Form: %v", req.Form)
-	log.Infof("PostForm: %v", req.PostForm)
-	log.Infof("RequestURI: %v", req.RequestURI)
+	//log.Infof("req: %v", req)
+	//log.Infof("Body: %v", req.Body)
+	//log.Infof("Header: %v", req.Header)
+	//log.Infof("URL: %v", req.URL)
+	//log.Infof("Form: %v", req.Form)
+	//log.Infof("PostForm: %v", req.PostForm)
+	//log.Infof("RequestURI: %v", req.RequestURI)
 	br, _ := req.GetBody()
 	insert := make([]byte, 2048)
 	_, _ = br.Read(insert)
-	log.Infof("BodyRead: %v", string(insert))
+	//log.Infof("BodyRead: %v", string(insert))
 
 	resp, err := client.Do(req)
 	if err != nil {
