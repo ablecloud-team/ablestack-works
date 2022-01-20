@@ -4,14 +4,16 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
+          <GroupPolicyInfoCard
+          :groupDataInfo="groupDataInfo" />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <DetailContent />
+          <GroupPolicyTab
+          :groupDataInfo="groupDataInfo"/>
         </ACard>
       </ACol>
     </ARow>
@@ -20,15 +22,25 @@
 
 <script>
 // import TabbedContent from "@/components/TabbedContent";
-import InfoCard from "@/components/InfoCard";
-import DetailContent from "@/components/DetailContent";
-import { defineComponent } from "vue";
+import GroupPolicyInfoCard from "./GroupPolicyInfoCard";
+import GroupPolicyTab from "./GroupPolicyTab.vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  components: { DetailContent, InfoCard },
+  components: {
+    GroupPolicyInfoCard,
+    GroupPolicyTab,
+  },
   props: {
-    name: String,
-    info: Object,
+    groupDataInfo:{
+      type: Object,
+      required: true,
+      default: null,
+    },
+ },
+  setup() {
+    return {
+    };
   },
 });
 </script>

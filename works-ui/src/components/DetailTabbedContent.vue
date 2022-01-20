@@ -8,7 +8,7 @@
             <a-col id="content-path" :span="12">
               <Apath
                 v-bind:paths="[
-                  { name: $t('label.workspace'), component: 'Workspaces' },
+                  { name: $t('label.workspace'), component: 'Workspace' },
                   { name: $t('label.WorkspaceDetail'), component: null },
                 ]"
               />

@@ -1,25 +1,28 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-sider
+      v-model:collapsed="state.collapsed"
+      collapsed-width="72"
       class="admin-sider-layout"
-      :collapsed="state.collapsed"
+      width="240"
+      breakpoint="lg"
       :trigger="null"
       collapsible
     >
-      <AdminSider
-        :collapsed="state.collapsed"
-        @changeToggleCollapsed="setToggleCollapsed"
-      />
+      <AdminSider :collapsed="state.collapsed" />
     </a-layout-sider>
     <a-layout>
       <a-layout-header class="admin-layout-header">
-        <AdminHeader />
+        <AdminHeader
+          :collapsed="state.collapsed"
+          @setCollapsed="setCollapsed"
+        />
       </a-layout-header>
       <a-layout-content class="admin-layout-content">
         <router-view />
       </a-layout-content>
       <a-layout-footer class="admin-layout-footer">
-        <AdminFooter />
+        <Footer />
       </a-layout-footer>
     </a-layout>
   </a-layout>
@@ -28,7 +31,7 @@
 <script>
 import AdminSider from "./sider/AdminSider";
 import AdminHeader from "./header/AdminHeader";
-import AdminFooter from "./footer/AdminFooter";
+import Footer from "./footer/Footer";
 import { defineComponent, reactive, ref } from "vue";
 
 export default defineComponent({
@@ -36,7 +39,7 @@ export default defineComponent({
   components: {
     AdminSider,
     AdminHeader,
-    AdminFooter,
+    Footer,
   },
   setup() {
     const state = reactive({
@@ -47,7 +50,7 @@ export default defineComponent({
     };
   },
   methods: {
-    setToggleCollapsed: function () {
+    setCollapsed() {
       this.state.collapsed = !this.state.collapsed;
     },
   },
@@ -56,10 +59,7 @@ export default defineComponent({
 
 <style>
 .admin-sider-layout {
-  flex: 0 0 256px !important;
-  max-width: 256px !important;
-  min-width: 256px !important;
-  width: 256px !important;
+  min-width: 10px !important;
   background: white;
 }
 
@@ -70,8 +70,10 @@ export default defineComponent({
 
 .admin-layout-content {
   background: #f0f2f5;
-  min-height: 700px;
-  height: 100%;
+}
+
+.ant-layout-content {
+  min-height: fit-content !important;
 }
 
 .admin-layout-footer {

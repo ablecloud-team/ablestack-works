@@ -1,10 +1,11 @@
 {
-  "name": "Works",
+  "name": "works",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve --mode production",
+    "dev": "vue-cli-service serve --mode development",
+    "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
     "i18n:report": "vue-cli-service i18n:report --locales \"./src/locales/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""
   },
@@ -36,6 +37,7 @@
     "@vue/eslint-config-prettier": "^6.0.0",
     "async": "^3.2.1",
     "babel-eslint": "^10.1.0",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "eslint": "^6.7.2",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-vue": "^7.0.0",

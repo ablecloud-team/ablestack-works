@@ -7,22 +7,45 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
-                  { name: $t('label.workspace'), component: 'Workspaces' },
-                  { name: name, component: null },
+                :paths="[
+                  { name: $t('label.workspace'), component: 'Workspace' },
+                  { name: workspaceInfo.name, component: null },
                 ]"
               />
+              <a-button
+                shape="round"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
+                </template>
+              </a-button>
             </a-col>
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <Actions
+                v-if="actionFrom === 'WorkspaceDetail'"
+                :action-from="actionFrom"
+                :workspace-info="workspaceInfo"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <WorkSpaceBody :name="name" :info="info" />
+          <WorkSpaceBody
+            v-if="actionFrom === 'WorkspaceDetail'"
+            ref="listRefreshCall"
+            :workspace-info="workspaceInfo"
+            :offering-info="offeringDataList"
+            :network-list="networkList"
+            :vm-list="vmList"
+            :group-info="groupInfo"
+            @parentRefresh="refresh"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -32,18 +55,75 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workSpace/WorkSpaceBody";
+import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
-  },
   components: { Apath, Actions, WorkSpaceBody },
+  props: {},
   setup() {
     return {
-      actionFrom: ref("WorkspaceDetail"),
+      actionFrom: ref(""),
     };
+  },
+  data() {
+    return {
+      workspaceInfo: ref([]),
+      offeringDataList: ref([]),
+      networkList: ref([]),
+      vmList: ref([]),
+      groupInfo: ref([]),
+      timer: ref(null),
+    };
+  },
+  created() {
+    this.fetchData(true);
+    this.timer = setInterval(() => {
+      //30초 자동 갱신
+      this.fetchData(false);
+    }, 30000);
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
+  },
+  methods: {
+    async fetchData(refreshClick) {
+      await worksApi
+        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
+        .then((response) => {
+          if (response.status == 200) {
+            this.workspaceInfo = response.data.result.workspaceInfo;
+            this.offeringDataList =
+              response.data.result.serviceOfferingInfo.serviceoffering[0];
+            this.networkList = response.data.result.networkInfo.network;
+
+            if (response.data.result.instanceList !== null) {
+              this.vmList = response.data.result.instanceList;
+            } else {
+              this.vmList = ref([]);
+            }
+            if (response.data.result.groupDetail !== null) {
+              this.groupInfo = response.data.result.groupDetail;
+            }
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error(this.$t("message.response.data.fail"));
+        })
+        .finally(() => {
+          this.actionFrom = "WorkspaceDetail";
+        });
+      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
+    },
+    refresh() {
+      this.fetchData(true);
+    },
   },
 });
 </script>
@@ -61,7 +141,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -69,6 +149,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

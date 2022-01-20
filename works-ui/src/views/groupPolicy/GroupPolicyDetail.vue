@@ -9,21 +9,21 @@
               <Apath
                 v-bind:paths="[
                   { name: $t('label.group.policy'), component: 'GroupPolicy' },
-                  { name: name, component: null },
+                  { name: groupDataInfo.groupname, component: null },
                 ]"
               />
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :destroy="true" />
+              <Actions :actionFrom="actionFrom" />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody :name="name" :info="info" />
+          <GroupPolicyBody :groupDataInfo="groupDataInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -31,16 +31,47 @@
 </template>
 
 <script>
-import Actions from "@/components/Actions";
-import Apath from "@/components/Apath";
-import UserBody from "@/views/users/UserBody";
-import { defineComponent } from "vue";
+import Actions from "../../components/Actions";
+import Apath from "../../components/Apath";
+import GroupPolicyBody from "./GroupPolicyBody.vue";
+import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
+  props: {},
+  components: { GroupPolicyBody, Apath, Actions },
+  setup() {
+    return {
+      actionFrom: ref("GroupPolicyDetail"),
+    };
   },
-  components: { UserBody, Apath, Actions },
+  data() {
+    return {
+      groupDataInfo: [],
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      worksApi
+        .get("/api/v1/group/" + this.$route.params.groupName)
+        .then((response) => {
+          if (response.status == 200) {
+            this.groupDataInfo = response.data.result;
+            //console.log(response.data.result.member);
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
+          }
+        })
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
+        });
+    },
+  },
 });
 </script>
 
@@ -57,7 +88,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -65,6 +96,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

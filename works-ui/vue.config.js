@@ -1,8 +1,6 @@
 module.exports = {
   pluginOptions: {
     i18n: {
-      locale: "en",
-      fallbackLocale: "en",
       localeDir: "locales",
       enableLegacy: true,
       runtimeOnly: false,
@@ -10,4 +8,7 @@ module.exports = {
       fullInstall: true,
     },
   },
+  css: {
+    extract: true
+  }
 };

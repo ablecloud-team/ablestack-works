@@ -2,6 +2,8 @@ works-api/works-api
 works-shell/works-shell.exe
 works-shell/works-shell
 .idea/
-**/docs/docs.go
-works-api/docs/
-works-api/README.md
+samba-ad.zip
+*.exe
+*.log
+*.msi
+*.zip
