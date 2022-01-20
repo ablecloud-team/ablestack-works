@@ -59,6 +59,10 @@ func handshakeVdi(instanceInfo Instance, vdiType string) {
 				log.WithFields(logrus.Fields{
 					"VDI_IP": vdiUrl,
 				}).Infof("VDI AD join Success. [%v]", statusString)
+			} else {
+				log.WithFields(logrus.Fields{
+					"VDI_IP": vdiUrl,
+				}).Errorf("VDI AD join Fail. [%v]", resp.StatusCode)
 			}
 
 		} else if statusString == Joining {
