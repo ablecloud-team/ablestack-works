@@ -68,13 +68,15 @@ func main() {
 		v1.Use(checkToken)
 		//v1.Use(updateInstanceChecked0)
 		{
+			v1.GET("/logout", getLogout)
+
 			v1.GET("/token", getUserToken)
 
 			v1.GET("/dashboard", getDashboard)
 
 			v1.GET("/workspace", getWorkspaces)
 			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
-			v1.PUT("/workspace", putWorkspaces)
+			v1.POST("/workspace", putWorkspaces)
 			v1.DELETE("/workspace/:workspaceUuid", deleteWorkspaces)
 
 			v1.GET("/offering", getOffering)

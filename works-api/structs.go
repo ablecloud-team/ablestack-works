@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 const (
 	WorkspaceString = "workspace"
 	InstanceString  = "instance"
@@ -16,6 +14,10 @@ const (
 	Disable         = "Disable"
 	UserVm          = "UserVm"
 	ALL             = "all"
+
+	WorksDc    = "Works-DC"
+	WorksSamba = "Works-Samba"
+	Mold       = "Mold"
 
 	Trace = "Trace"
 	Debug = "Debug"
@@ -161,9 +163,4 @@ type InstanceInstanceVolumeInfo struct {
 		Zoneid                     string        `json:"zoneid"`
 		Zonename                   string        `json:"zonename"`
 	} `json:"volume"`
-}
-
-type Configuration struct {
-	Id, Name, Category, Value, DefaultValue, Description string
-	UpdateDate                                           time.Time
 }
