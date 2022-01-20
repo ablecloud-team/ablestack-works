@@ -21,29 +21,33 @@ const (
 
 //listVirtualMachinesMetrics.Virtualmachine[0].Ipaddress
 
-func handshakeVdi(instance Instance, vdiType string) {
-	vdiUrl := "http://" + instance.Ipaddress + ":8083/api"
-	vdiName := instance.Name
+func handshakeVdi(instanceInfo Instance, vdiType string) {
+	vdiUrl := "http://" + instanceInfo.Ipaddress + ":8083/api"
+	vdiName := instanceInfo.Name
 	var DCInfo = os.Getenv("DCUrl")
 	MyDomain := os.Getenv("SambaDomain")
 	client := http.Client{
-		Timeout: 60 * time.Second,
+		Timeout: 300 * time.Second,
 	}
 	for i := 0; i <= 120; i++ {
+
 		statusString, err := getVdiAdStatus(vdiUrl)
 
 		if statusString == Failed {
-			time.Sleep(time.Second * 10)
 			log.WithFields(logrus.Fields{
-				"VDI IP": vdiUrl,
+				"VDI_IP": vdiUrl,
 			}).Errorf("VDI communication failed. [%v], status [%v]", err, statusString)
+			// 중간에 인터벌을 안두면 for 문이 120번이 순간적으로 돌면서 handshake 가 종료됨
+			time.Sleep(time.Second * 30)
 
 		} else if statusString == Pending {
-			updateInstanceHandshakeStatus(statusString, instance.Uuid)
+			updateInstanceHandshakeStatus(instanceInfo.Uuid, statusString)
+			if vdiType == WorkspaceString {
+				updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, statusString)
+			}
 			log.WithFields(logrus.Fields{
-				"VDI IP": vdiUrl,
+				"VDI_IP": vdiUrl,
 			}).Infof("VDI AD join status. [%v]", statusString)
-			time.Sleep(time.Second * 30)
 			reqPutAd, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/ad/%v", vdiUrl, MyDomain), nil)
 			if err != nil {
 				log.Errorf("An error occurred while setting the URL. [%v]", err)
@@ -51,20 +55,25 @@ func handshakeVdi(instance Instance, vdiType string) {
 			reqPutAd.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 			resp, err1 := client.Do(reqPutAd)
 			if err1 != nil {
-				time.Sleep(time.Second * 30)
 			} else if resp.Status == OK200 {
 				log.WithFields(logrus.Fields{
-					"VDI IP": vdiUrl,
+					"VDI_IP": vdiUrl,
 				}).Infof("VDI AD join Success. [%v]", statusString)
-				time.Sleep(time.Second * 30)
+			} else {
+				log.WithFields(logrus.Fields{
+					"VDI_IP": vdiUrl,
+				}).Errorf("VDI AD join Fail. [%v]", resp.StatusCode)
 			}
 
 		} else if statusString == Joining {
-			updateInstanceHandshakeStatus(statusString, instance.Uuid)
+			updateInstanceHandshakeStatus(instanceInfo.Uuid, statusString)
+			if vdiType == WorkspaceString {
+				updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, statusString)
+			}
 			log.WithFields(logrus.Fields{
-				"VDI IP": vdiUrl,
+				"VDI_IP": vdiUrl,
 			}).Infof("VDI AD join status. [%v]", statusString)
-			reqPutComputer, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/computer/%v/%v", DCInfo, vdiName, instance.WorkspaceName), nil)
+			reqPutComputer, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/computer/%v/%v", DCInfo, vdiName, instanceInfo.WorkspaceName), nil)
 			if err != nil {
 				log.Errorf("An error occurred while setting the URL. [%v]", err)
 			}
@@ -72,18 +81,19 @@ func handshakeVdi(instance Instance, vdiType string) {
 			resp, err1 := client.Do(reqPutComputer)
 			if err1 != nil {
 				log.Errorf("VDI add workspaces group error [%v]", err1)
-				time.Sleep(time.Second * 30)
-			} else if resp.Status == OK200 {
-				time.Sleep(time.Second * 30)
+			} else if resp.StatusCode == http.StatusOK {
 				log.WithFields(logrus.Fields{
-					"VDI IP": vdiUrl,
+					"VDI_IP": vdiUrl,
 				}).Infof("VDI add workspaces group success. [%v]", statusString)
 			}
 
 		} else if statusString == Joined {
-			updateInstanceHandshakeStatus(statusString, instance.Uuid)
+			updateInstanceHandshakeStatus(instanceInfo.Uuid, statusString)
+			if vdiType == WorkspaceString {
+				updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, statusString)
+			}
 			log.WithFields(logrus.Fields{
-				"VDI IP": vdiUrl,
+				"VDI_IP": vdiUrl,
 			}).Infof("VDI AD join status. [%v]", statusString)
 			reqGetGpupdate, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%v/v1/cmd/?timeout=60&cmd=%v", vdiUrl, url.QueryEscape("gpupdate /force")), nil)
 			if err != nil {
@@ -91,39 +101,37 @@ func handshakeVdi(instance Instance, vdiType string) {
 			}
 			reqGetGpupdate.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 			resp, err1 := client.Do(reqGetGpupdate)
-			log.Warnf("resp [%v], err1 [%v]", resp, err1)
+			log.Warnf("resp [%v], err1 [%v]", resp.StatusCode, err1)
 			if err1 != nil {
 				log.WithFields(logrus.Fields{
-					"VDI IP": vdiUrl,
+					"VDI_IP": vdiUrl,
 				}).Errorf("VDI gpupdate failed. [%v], err1 [%v]", statusString, err1)
-				time.Sleep(time.Second * 30)
-			} else if resp.Status == OK200 {
+			} else if resp.StatusCode == http.StatusOK {
 				log.WithFields(logrus.Fields{
-					"VDI IP": vdiUrl,
+					"VDI_IP": vdiUrl,
 				}).Infof("VDI gpupdate success. [%v], resp [%v]", statusString, resp)
-				time.Sleep(time.Second * 30)
 			} else {
 				log.WithFields(logrus.Fields{
-					"VDI IP": vdiUrl,
+					"VDI_IP": vdiUrl,
 				}).Errorf("VDI gpupdate . [%v], resp [%v], err1 [%v]", statusString, resp, err1)
 			}
 
 		} else if statusString == Ready {
-			updateInstanceHandshakeStatus(statusString, instance.Uuid)
+			updateInstanceHandshakeStatus(instanceInfo.Uuid, statusString)
 			log.WithFields(logrus.Fields{
-				"VDI IP": vdiUrl,
+				"VDI_IP": vdiUrl,
 			}).Infof("VDI AD join status. [%v]", statusString)
 			if vdiType == WorkspaceString {
-				workspaceTemplateCheck := updateWorkspaceTemplateCheck(instance.WorkspaceUuid, AgentOK)
+				workspaceTemplateCheck := updateWorkspaceTemplateCheck(instanceInfo.WorkspaceUuid, statusString)
+				asyncJob := AsyncJob{}
+				asyncJob.Id = getUuid()
+				asyncJob.Name = VMDestroy
+				asyncJob.ExecUuid = instanceInfo.Uuid
+				asyncJob.Ready = 1
+				resultInsertAsyncJob := insertAsyncJob(asyncJob)
+				log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
+				updateWorkspacePostfix(instanceInfo.WorkspaceUuid, 0)
 				if workspaceTemplateCheck["status"] == http.StatusOK {
-					asyncJob := AsyncJob{}
-					asyncJob.Id = getUuid()
-					asyncJob.Name = VMDestroy
-					asyncJob.ExecUuid = instance.Uuid
-					asyncJob.Ready = 1
-					resultInsertAsyncJob := insertAsyncJob(asyncJob)
-					log.Infof("AsyncJob Insert Result [%v]", resultInsertAsyncJob)
-					updateWorkspacePostfix(instance.WorkspaceUuid, 0)
 				}
 			}
 			break
@@ -157,4 +165,66 @@ func getVdiAdStatus(vdiUrl string) (string, error) {
 	}
 
 	return returnString, err1
+}
+
+func dcBootstrap() {
+	for {
+		log.Infof("1st bootstrap start")
+		time.Sleep(10 * time.Second)
+		var DCInfo = os.Getenv("DCUrl")
+		log.Infof("DCInfo [%v]", DCInfo)
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		resp, err := client.Get(DCInfo + "/v1/version")
+		res := map[string]interface{}{}
+
+		if err != nil {
+			log.Errorf("Failed to communicate with DC Server. [%v]", err)
+		} else if resp.Status == OK200 {
+			json.NewDecoder(resp.Body).Decode(&res)
+			if res["Bootstraped"] == false {
+				log.Infof("1st bootstrap end")
+				r, _ := http.NewRequest("PATCH", DCInfo+"/v1", nil) // URL-encoded payload
+
+				r.Header.Add("Content-Type", "application/json")
+				resp, _ := client.Do(r)
+				log.Infof("%v", resp)
+				time.Sleep(60 * time.Second)
+				break
+			} else {
+				log.Infof("1st bootstrap end & bootstraped true")
+				break
+			}
+			break
+		}
+	}
+
+	for {
+		client := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		var DCInfo = os.Getenv("DCUrl")
+		r1, _ := http.NewRequest("GET", DCInfo+"/v1/policy", nil) // URL-encoded payload
+		resp1, err := client.Do(r1)
+		if err != nil {
+			log.Errorf("%v/v1/policy err [%v]", DCInfo, err)
+		} else {
+			respBody1, err1 := ioutil.ReadAll(resp1.Body)
+			if err1 != nil {
+				log.Errorf("[%v] [%v]", respBody1, err1)
+			} else if string(respBody1) == "[]" {
+				log.Infof("%v/v1/policy err [%v]", DCInfo, err)
+				r, _ := http.NewRequest("PATCH", DCInfo+"/v1/policy", nil) // URL-encoded payload
+
+				r.Header.Add("Content-Type", "application/json")
+				resp, err := client.Do(r)
+				log.Infof("%v, %v", resp, err)
+			} else {
+				log.Infof("%v/v1/policy respBody [%v]", DCInfo, respBody1)
+				log.Infof("4th bootstrap end")
+				break
+			}
+		}
+	}
 }

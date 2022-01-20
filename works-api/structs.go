@@ -1,5 +1,54 @@
 package main
 
+const (
+	WorkspaceString = "workspace"
+	InstanceString  = "instance"
+	ServiceDaaS     = "ServiceDaaS"
+	ServiceWorks    = "ServiceWorks"
+	WorkspaceName   = "WorkspaceName"
+	AblecloudWorks  = "Ablecloud.Works"
+	ClusterName     = "ClusterName"
+	AgentOK         = "AgentOK"
+	AgentCheck      = "AgentCheck"
+	Enable          = "Enable"
+	Disable         = "Disable"
+	UserVm          = "UserVm"
+	ALL             = "all"
+
+	WorksDc    = "Works-DC"
+	WorksSamba = "Works-Samba"
+	Mold       = "Mold"
+
+	Trace = "Trace"
+	Debug = "Debug"
+	Info  = "Info"
+	Warn  = "Warn"
+	Error = "Error"
+
+	VMStart   = "VMStart"
+	VMStop    = "VMStop"
+	VMsDeploy = "VMsDeploy"
+	VMDestroy = "VMDestroy"
+
+	MsgDBConnectError      = "DB connect error"
+	MsgDBConnectOK         = "DB connect success"
+	MsgDBNoRows            = "sql: no rows in result set"
+	BaseErrorCode          = 9000
+	SignatureErrorCode     = 9001
+	SQLConnectError        = 9100
+	SQLQueryError          = 9101
+	NotFound404            = "404 Not Found"
+	Conflict409            = "409 Conflict"
+	Gone410                = "410 Gone"
+	OK200                  = "200 OK"
+	Created201             = "201 Created"
+	Accepted202            = "202 Accepted"
+	NotFound               = "Not Found"
+	MessageAccountNotFound = "message.account.not.found"
+	MessageSignatureError  = "message.Signature.error"
+	MessageAgentUpdateOK   = "message.Agent.update.ok"
+)
+
 type ListVirtualMachinesMetrics struct {
 	Count          int `json:"count"`
 	Virtualmachine []struct {

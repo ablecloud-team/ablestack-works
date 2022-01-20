@@ -6,7 +6,7 @@
       "password":"Ablecloud1!"
     },
     "host":{
-      "address": "10.10.10.42",
+      "address": "192.168.0.101",
       "port": "3306",
       "protocol": "tcp"
     },

@@ -46,6 +46,7 @@ type Instance struct {
 	CheckedDate     *string `json:"checked_date"`
 	Removed         string  `json:"removed"`
 	MoldStatus      string  `json:"mold_status"`
+	WorkspaceType   string  `json:"workspace_type"`
 }
 
 func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
@@ -220,7 +221,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 	queryString := "SELECT" +
 		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid," +
 		" IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date," +
-		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress" +
+		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress, w.workspace_type" +
 		" FROM vm_instances AS vi" +
 		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
 		" WHERE vi.removed IS NULL"
@@ -249,7 +250,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 		err = rows.Scan(
 			&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
 			&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate,
-			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress)
+			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress, &instance.WorkspaceType)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"workspaceImpl": "selectInstanceList",
@@ -410,7 +411,7 @@ func selectZoneId() string {
 	return zoneId
 }
 
-func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]interface{} {
+func updateWorkspaceTemplateCheck(uuid string, workspaceStatus string) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -422,10 +423,10 @@ func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]int
 	}
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "updateWorkspaceTemplateCheck",
-	}).Infof("uuid [%v]", uuid)
+	}).Infof("uuid [%v], workspaceStatus [%v]", uuid, workspaceStatus)
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", typeString, Enable, uuid)
+	result, err := db.Exec("UPDATE workspaces set template_ok_check=?, state=? where uuid=?", workspaceStatus, Enable, uuid)
 	if err != nil {
 		log.Error(MsgDBConnectError)
 		log.Error(err)
@@ -433,7 +434,6 @@ func updateWorkspaceTemplateCheck(uuid string, typeString string) map[string]int
 		resultReturn["status"] = SQLQueryError
 	}
 	n1, _ := result.RowsAffected()
-	log.Debugf("123123123 [%v]", n1)
 	if n1 == 1 {
 		resultReturn["message"] = "workspace template check OK"
 		resultReturn["status"] = http.StatusOK
@@ -468,12 +468,15 @@ func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[s
 	if err2 != nil {
 		return nil
 	}
-	loginTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
+	logInTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
 	logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
 	log.Debugf("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
-	if logOutTime.Before(loginTime) {
+	if logOutTime.Before(logInTime) {
+		connected = 0
+		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
+	} else if !logOutTime.Before(logInTime) {
 		connected = 1
-		log.Debugf("connected [%v]", logOutTime.Before(loginTime))
+		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
 	}
 	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Ready' where uuid=?", connected, uuid)
 	if err != nil {
@@ -583,7 +586,7 @@ func updateInstanceChecked() {
 	}
 }
 
-func updateInstanceHandshakeStatus(handshakeStatus string, instanceUuid string) {
+func updateInstanceHandshakeStatus(instanceUuid string, handshakeStatus string) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
