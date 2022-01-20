@@ -14,6 +14,7 @@ import (
 // getWorkspaces godoc
 // @Summary 워크스페이스 리스트를 조회하는 API
 // @Description 워크 스페이스 리스트를 조회하는 API 입니다.
+// @Tags workspaces
 // @Accept  json
 // @Produce  json
 // @Router /api/v1/workspace [get]
@@ -41,6 +42,7 @@ func getWorkspaces(c *gin.Context) {
 // getWorkspacesDetail godoc
 // @Summary 워크스페이스 리스트를 조회하는 API
 // @Description 워크 스페이스 리스트를 조회하는 API 입니다.
+// @Tags workspaces
 // @Accept  json
 // @Produce  json
 // @Param workspaceUuid path string true "워크스페이스 UUID"
@@ -113,6 +115,7 @@ func getWorkspacesDetail(c *gin.Context) {
 // getOffering godoc
 // @Summary 템플릿 및 각종 오퍼링을 조회하는 API
 // @Description 템플릿, 서비스 오퍼링, 디스크 오퍼링 정보를 Mold 에서 조회하여 제공하는 API 입니다.
+// @Tags offering
 // @Accept  json
 // @Produce  json
 // @Router /api/v1/offering [get]
@@ -140,13 +143,14 @@ func getOffering(c *gin.Context) {
 // @Description 워크스페이를 추가하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags workspaces
 // @Param name path string true "워크스페이스 이름"
 // @Param description path string true "워크스페이스 설명"
 // @Param type path string true "워크스페이스 타입(Desktop or Application)"
 // @Param computeOfferingUuid path string true "워크스페이스에서 사용할 Compute offering UUID"
 // @Param templateUuid path string true "워크스페이스에서 사용할 Template UUID"
 // @Param shared path bool true "워크스페이스에서 Shard 여부 전용이면 'false', 공용이면 'true'"
-// @Router /api/v1/workspace [put]
+// @Router /api/v1/workspace [POST]
 // @Success 200 {object} map[string]interface{}
 func putWorkspaces(c *gin.Context) {
 	workspace := Workspace{}
@@ -235,6 +239,7 @@ func putWorkspaces(c *gin.Context) {
 // @Description 워크스페이를 추가하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags workspaces
 // @Param workspaceUuid path string true "워크스페이스 UUID"
 // @Router /api/v1/workspace [delete]
 // @Success 200 {object} map[string]interface{}
@@ -258,6 +263,7 @@ func deleteWorkspaces(c *gin.Context) {
 // @Description 워크스페이를 추가하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags workspacesAgent
 // @Param uuid path string true "UUID"
 // @Param asyncJobId path string true "async job UUID"
 // @Param type path string true "workspace or instance"
@@ -312,6 +318,7 @@ func putWorkspacesAgent(c *gin.Context) {
 // @Description 워크스페이스의 instance 를 조회하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Instances
 // @Param workspaceUuid path string true "Instance UUID"
 // @Router /api/v1/instance/:instanceUuid [GET]
 // @Success 200 {object} map[string]interface{}
@@ -353,6 +360,7 @@ func getInstances(c *gin.Context) {
 // @Description 워크스페이스의 instance 를 추가하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Instances
 // @Param instanceUuid path string true "instance UUID"
 // @Router /api/v1/instance/detail/:instanceUuid [GET]
 // @Success 200 {object} map[string]interface{}
@@ -396,6 +404,7 @@ func getInstancesDetail(c *gin.Context) {
 // @Description 워크스페이스의 instance 를 추가하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Instances
 // @Param uuid path string true "UUID"
 // @Param quantity path string true "워크스페이스에 추가할 Instance 수량"
 // @Router /api/v1/instance [PUT]
@@ -434,6 +443,7 @@ func putInstances(c *gin.Context) {
 // @Description instance 에 사용자를 할당하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Connection
 // @Param instanceUuid path string true "Instance UUID"
 // @Param username path string true "Instance 에 할당할 userName"
 // @Router /api/v1/connection/:instanceUuid/:username [PUT]
@@ -478,6 +488,7 @@ func putConnection(c *gin.Context) {
 // @Description instance 에 사용자를 할당하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Connection
 // @Param instanceUuid path string true "Instance UUID"
 // @Param username path string true "Instance 에 할당할 userName"
 // @Router /api/v1/appConnection/:instanceUuid/:username [PUT]
@@ -525,6 +536,7 @@ func putAppConnection(c *gin.Context) {
 // @Description instance 에 사용자를 할당하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Connection
 // @Param instanceUuid path string true "Connection 을 삭제할 instance Uuid"
 // @Router /api/v1/connection/:instanceUuid [DELETE]
 // @Success 200 {object} map[string]interface{}
@@ -559,6 +571,7 @@ func deleteConnection(c *gin.Context) {
 // @Description instance 의 상태를 변경하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Instances
 // @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다."
 // @Param instanceUuid path string true "Instance UUID"
 // @Router /api/v1/instance/:action/:instanceUuid [PATCH]
@@ -591,6 +604,7 @@ func patchInstances(c *gin.Context) {
 // @Description instance 의 handshake 를 재실행 하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Handshake
 // @Param instanceUuid path string true "Instance UUID"
 // @Param instanceType path string true "Instance Type InstanceString OR WorkspaceString"
 // @Router /api/v1/handshake/:instanceUuid/:instanceType [PATCH]
@@ -613,6 +627,7 @@ func patchHandshake(c *gin.Context) {
 // @Description 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Dashboard
 // @Router /api/v1/dashboard [get]
 // @Success 200 {object} map[string]interface{}
 func getDashboard(c *gin.Context) {

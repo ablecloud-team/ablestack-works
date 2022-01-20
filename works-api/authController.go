@@ -14,9 +14,10 @@ import (
 // @Description 사용자 로그인 하는 API 입니다.
 // @Accept  json
 // @Produce  json
+// @Tags Login
 // @Param id path string true "사용자 계정"
 // @Param password path string true "사용자 비밀번호"
-// @Router /api/login [put]
+// @Router /api/login [POST]
 // @Success 200 {object} map[string]interface{}
 // @Success 400 {object} map[string]interface{} "DC 서버와 통신이 안된경우 발생"
 // @Success 401 {object} map[string]interface{} "로그인처리는 정상적으로 되었으나 토큰생성에서 에러가 발생한경우"
@@ -71,6 +72,7 @@ func getLogin(c *gin.Context) {
 // getLogout godoc
 // @Summary 사용자 로그아웃 하는 API
 // @Description 사용자 로그아웃 하는 API 입니다.
+// @Tags Login
 // @Accept  json
 // @Produce  json
 // @Router /api/v1/logout [get]
@@ -92,6 +94,7 @@ func getLogout(c *gin.Context) {
 // @Description 사용자 상세 조회를 위한 API 입니다.
 // @Description 해더에 로그인시 생성된 토큰값을 "Authorization" 키값에 넣어주시면 됩니다.
 // @Accept  json
+// @Tags User
 // @Produce  json
 // @Param username path string true "사용자 계정"
 // @Router /api/v1/user/:userName [get]
@@ -126,6 +129,7 @@ func getUserDetail(c *gin.Context) {
 // @Description 사용자 토큰을 조회를 위한 API 입니다.
 // @Description 해더에 로그인시 생성된 토큰값을 "Authorization" 키값에 넣어주시면 됩니다.
 // @Accept  json
+// @Tags User
 // @Produce  json
 // @Router /api/v1/token [get]
 // @Success 200 {object} map[string]interface{}
@@ -146,6 +150,7 @@ func getUserToken(c *gin.Context) {
 // @Summary 사용자 리스트를 조회 하는 API
 // @Description 사용자 리스트를 조회를 위한 API 입니다.
 // @Accept  json
+// @Tags User
 // @Produce  json
 // @Router /api/v1/user [get]
 // @Success 200 {object} map[string]interface{}
@@ -174,6 +179,7 @@ func getUser(c *gin.Context) {
 // @Summary 사용자 리스트를 조회 하는 API
 // @Description 사용자 리스트를 조회를 위한 API 입니다.
 // @Accept  json
+// @Tags User
 // @Produce  json
 // @Param userName path string true "사용자 계정"
 // @Router /api/v1/user/:userName [delete]
@@ -193,6 +199,7 @@ func deleteUser(c *gin.Context) {
 // @Summary 사용자 생성하는 하는 API
 // @Description 사용자 생성을 위한 API 입니다.
 // @Accept  json
+// @Tags User
 // @Produce  json
 // @Param username path string true "사용자 계정"
 // @Param password path string true "사용자 계정 비밀번호"
@@ -326,6 +333,7 @@ func putUser(c *gin.Context) {
 // getGroup godoc
 // @Summary 그룹 리스트를 조회 하는 API
 // @Description 그룹 리스트를 조회를 위한 API 입니다.
+// @Tags Group
 // @Accept  json
 // @Produce  json
 // @Router /api/v1/group [get]
@@ -353,6 +361,7 @@ func getGroup(c *gin.Context) {
 // getGroupDetail godoc
 // @Summary 그룹 리스트를 조회 하는 API
 // @Description 그룹 리스트를 조회를 위한 API 입니다.
+// @Tags Group
 // @Param groupName path string true "사용자 계정"
 // @Accept  json
 // @Produce  json
@@ -382,6 +391,7 @@ func getGroupDetail(c *gin.Context) {
 // delGroupDetail godoc
 // @Summary 그룹을 삭제하는 API
 // @Description 그룹을 삭제하기 위한 API 입니다.
+// @Tags Group
 // @Param groupName path string true "사용자 계정"
 // @Accept  json
 // @Produce  json
@@ -411,6 +421,7 @@ func delGroupDetail(c *gin.Context) {
 // putAddUserToGroup godoc
 // @Summary 그룹을 삭제하는 API
 // @Description 그룹을 삭제하기 위한 API 입니다.
+// @Tags Group
 // @Param groupName path string true "사용자를 추가할 그룹 이름"
 // @Param userName path string true "그룹에 추가할 사용자 계정"
 // @Accept  json
@@ -448,6 +459,7 @@ func putAddUserToGroup(c *gin.Context) {
 // delDeleteUserToGroup godoc
 // @Summary 그룹에서 유저를 삭제하는 API
 // @Description 그룹에서 유저를 삭제하는 API 입니다.
+// @Tags Group
 // @Param groupName path string true "사용자를 삭제할 그룹 이름"
 // @Param userName path string true "그룹에 삭제할 사용자 계정"
 // @Accept  json
