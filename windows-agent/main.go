@@ -444,7 +444,7 @@ func AgentSave() (err error) {
 		log.Fatalf("agentsave: %s", err)
 		return err
 	}
-	byteValue, err := json.Marshal(Agentconfig)
+	byteValue, err := json.MarshalIndent(Agentconfig, "", " ")
 	if err != nil {
 		log.Fatalf("ADinit: %s", err)
 		return err
