@@ -1,0 +1,61 @@
+처음
+
+CsDomain      : WORKGROUP
+CsDNSHostName : DESKTOP-8A5KCR6
+CsDomainRole  : StandaloneWorkstation
+CsName        : DESKTOP-8A5KCR6
+CsWorkgroup   : WORKGROUP
+CsUserName    : DESKTOP-8A5KCR6\user
+LogonServer   : \\DESKTOP-8A5KCR6
+
+
+rename직후
+
+
+CsDomain      : WORKGROUP
+CsDNSHostName : DESKTOP-8A5KCR6
+CsDomainRole  : StandaloneWorkstation
+CsName        : DESKTOP-8A5KCR6
+CsWorkgroup   : WORKGROUP
+CsUserName    : DESKTOP-8A5KCR6\user
+LogonServer   : \\DESKTOP-8A5KCR6
+
+
+
+재부팅
+
+
+CsDomain      : WORKGROUP
+CsDNSHostName : testVM
+CsDomainRole  : StandaloneWorkstation
+CsName        : TESTVM
+CsWorkgroup   : WORKGROUP
+CsUserName    : TESTVM\user
+LogonServer   : \\TESTVM
+
+
+adjoin직후
+
+
+CsDomain      : ycyun.local
+CsDNSHostName : testVM
+CsDomainRole  : MemberWorkstation
+CsName        : TESTVM
+CsWorkgroup   : 
+CsUserName    : TESTVM\user
+LogonServer   : \\TESTVM
+
+
+
+재부팅후
+
+CsDomain      : ycyun.local
+CsDNSHostName : testVM
+CsDomainRole  : MemberWorkstation
+CsName        : TESTVM
+CsWorkgroup   : 
+CsUserName    : YCYUN\Administrator
+LogonServer   : \\YCYUN-WORKS
+
+
+
