@@ -91,9 +91,10 @@ func main() {
 			v1.PUT("/connection/:instanceUuid/:username", putConnection)
 			v1.DELETE("/connection/:instanceUuid", deleteConnection)
 
-			v1.PATCH("/handshake/:instanceUuid/:instanceType", patchHandshake)
+			v1.GET("/configuration", getConfiguration)
+			v1.PATCH("/configuration/:id", patchConfiguration)
 
-			v1.GET("/logout", getLogout)
+			v1.PATCH("/handshake/:instanceUuid/:instanceType", patchHandshake)
 
 			v1.GET("/user", getUser)
 			v1.GET("/user/:userName", getUserDetail)
