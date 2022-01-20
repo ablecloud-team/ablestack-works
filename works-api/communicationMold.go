@@ -5,6 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
+	"time"
 )
 
 func getTemplate(params []MoldParams) map[string]interface{} {
@@ -395,4 +396,30 @@ func getListVolumesMetrics(params []MoldParams) map[string]interface{} {
 	err = json.NewDecoder(resp.Body).Decode(&res)
 
 	return res
+}
+
+func getListApis() (*http.Response, error) {
+	var baseurl = os.Getenv("MoldUrl")
+	params := []MoldParams{
+		{"command": "listApis"},
+	}
+	client := http.Client{
+		Timeout: 60 * time.Second,
+	}
+
+	log.WithFields(logrus.Fields{
+		"communicationMold.go": "getListApis",
+	}).Infof("listApis params [%v]", params)
+
+	stringParams := makeStringParams(params)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
+	log.WithFields(logrus.Fields{
+		"communicationMold.go": "getListApis",
+	}).Infof("listNetworks endUrl [%v]", endUrl)
+
+	resp, err := client.Get(endUrl)
+
+	return resp, err
 }
