@@ -25,7 +25,6 @@ import (
 var log = logrus.New() //.WithField("who", "Main")[
 var Version = "development"
 
-
 func setup() {
 	log.SetFormatter(&nested.Formatter{
 		HideKeys: false,
@@ -59,9 +58,6 @@ func setup() {
 
 }
 
-
-
-
 // @title Ablecloud Works windows agent API
 // @version 1.0
 // @description 이 API는 Ablecloud Works의 Domain Controller(DC)를 제어하는 역할을 합니다.
@@ -93,18 +89,18 @@ func main() {
 	}
 
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		fmt.Errorf("%v", err)
 	}
 	hostname, err := shell.Exec("hostname")
-	if err != nil{
+	if err != nil {
 		fmt.Errorf("%v", err)
 	}
 	hostname = strings.TrimSpace(hostname)
 	log.Println(hostname)
 	log.Println(Agentconfig.HostName)
 
-	if !strings.EqualFold(hostname,Agentconfig.HostName) && Agentconfig.HostName != ""{
+	if !strings.EqualFold(hostname, Agentconfig.HostName) && Agentconfig.HostName != "" {
 		cmd := fmt.Sprintf("Rename-Computer -NewName %v", Agentconfig.HostName)
 		log.Errorf("cmd: %v", cmd)
 		out, err := shell.Exec(cmd)
@@ -116,9 +112,8 @@ func main() {
 		log.Errorf("out: %v", out)
 		log.Errorf("err: %v", err)
 	}
-	time.Sleep(10*time.Second)
+	time.Sleep(10 * time.Second)
 	interval := Agentconfig.Interval
-
 
 	//logincheckfnc2()
 	//return
@@ -168,7 +163,7 @@ func appListHandler(c *gin.Context) {
 	return
 }
 
-func ipcheck() []string{
+func ipcheck() []string {
 	shell, err := setupShell()
 	if err != nil {
 		log.Errorf("setupShell error: %v", err)
@@ -179,8 +174,8 @@ func ipcheck() []string{
 	}
 	stdouts := strings.Split(strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1), "\n")[2:]
 	ips := []string{}
-	for _, ip := range stdouts{
-		if ! strings.Contains(ip, "127.0.0.1"){
+	for _, ip := range stdouts {
+		if !strings.Contains(ip, "127.0.0.1") {
 			ips = append(ips, ip)
 		}
 	}
@@ -188,7 +183,6 @@ func ipcheck() []string{
 
 	return ips
 }
-
 
 type shellReturnModel struct {
 	Stdout string `json:"stdout"`
@@ -276,7 +270,6 @@ func logoutcheckfnc() map[string]string {
 		log.Errorf("user-name error: %v", err)
 	} //user-name
 
-
 	logintimeout_, err := shell.Exec("get-date -Date $elog.TimeGenerated -UFormat \"%Y/%m/%d %T\"")
 	if err != nil {
 		log.Errorf("logintime error: %v", err)
@@ -286,22 +279,22 @@ func logoutcheckfnc() map[string]string {
 	logintimeout := strings.TrimSpace(logintimeout_)
 	//log.Infof("%v, %v, %v, ", vdinameout, usernameout, logintimeout)
 	ret := map[string]string{
-		"vdi":vdinameout,
-		"username":usernameout,
-		"time":logintimeout,
+		"vdi":      vdinameout,
+		"username": usernameout,
+		"time":     logintimeout,
 	}
 	log.Infof("logout return: %v", ret)
 	return ret
 }
 func logoutcheck(c chan map[string]string, c1 chan string, interval int) {
-	for true{
+	for true {
 		ret := logoutcheckfnc()
-		c<-ret
+		c <- ret
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 }
 func logincheckfnc2() []map[string]string {
-	shell, err:= setupShell()
+	shell, err := setupShell()
 	stdout, err := shell.Exec("Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser")
 	stdout, err = shell.Exec("./get-session.ps1")
 	//log.Infof("stdout: %v", stdout)
@@ -356,7 +349,6 @@ func logincheckfnc() map[string]string {
 		log.Errorf("user-name error: %v", err)
 	} //user-name
 
-
 	logintimeout_, err := shell.Exec("get-date -Date $elog.TimeGenerated -UFormat \"%Y/%m/%d %T\"")
 	if err != nil {
 		log.Errorf("logintime error: %v", err)
@@ -366,18 +358,18 @@ func logincheckfnc() map[string]string {
 	logintimeout := strings.TrimSpace(logintimeout_)
 	//log.Infof("%v, %v, %v, ", vdinameout, usernameout, logintimeout)
 	ret := map[string]string{
-		"vdi":vdinameout,
-		"username":usernameout,
-		"time":logintimeout,
+		"vdi":      vdinameout,
+		"username": usernameout,
+		"time":     logintimeout,
 	}
 	log.Infof("login return: %v", ret)
 	return ret
 }
 
 func logincheck(c chan []map[string]string, c1 chan string, interval int) {
-	for true{
+	for true {
 		ret := logincheckfnc2()
-		c<-ret
+		c <- ret
 		time.Sleep(time.Duration(interval) * time.Second)
 
 	}
@@ -409,7 +401,6 @@ func healthCheck(c1 chan string, interval int) {
 	}
 }
 
-
 type AGENTCONFIG struct {
 	WorksServer string `json:"WorksServer"`
 	WorksPort   int    `json:"WorksPort"`
@@ -419,8 +410,9 @@ type AGENTCONFIG struct {
 	Interval    int    `json:"Interval"`
 	Status      string `json:"Status"`
 	HostName    string `json:"HostName"`
-	Domain    string `json:"Domain"`
+	Domain      string `json:"Domain"`
 }
+
 var Agentconfig = AGENTCONFIG{Silent: false, Interval: 10}
 
 func AgentInit() (err error) {
@@ -446,14 +438,13 @@ func AgentInit() (err error) {
 
 }
 
-
 func AgentSave() (err error) {
-	data, err := os.OpenFile("conf.json", os.O_WRONLY, 0777)
+	data, err := os.Create("conf.json")
 	if err != nil {
 		log.Fatalf("agentsave: %s", err)
 		return err
 	}
-	byteValue, err:=json.Marshal(Agentconfig)
+	byteValue, err := json.Marshal(Agentconfig)
 	if err != nil {
 		log.Fatalf("ADinit: %s", err)
 		return err
@@ -467,6 +458,7 @@ func AgentSave() (err error) {
 	return nil
 
 }
+
 //user password change
 func httpReq(li []map[string]string, ips []string) error {
 	setLog()
@@ -483,7 +475,6 @@ func httpReq(li []map[string]string, ips []string) error {
 	//data.Set("logout", string(logoutdata))
 	data.Set("ip", string(ip))
 
-
 	log.Infof("data: %v", data.Encode())
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))
 	if err != nil {
@@ -498,7 +489,7 @@ func httpReq(li []map[string]string, ips []string) error {
 	log.Infof("Form: %v", req.Form)
 	log.Infof("PostForm: %v", req.PostForm)
 	log.Infof("RequestURI: %v", req.RequestURI)
-	br, _ :=req.GetBody()
+	br, _ := req.GetBody()
 	insert := make([]byte, 2048)
 	_, _ = br.Read(insert)
 	log.Infof("BodyRead: %v", string(insert))
@@ -522,7 +513,7 @@ func httpReq(li []map[string]string, ips []string) error {
 		return err
 	}
 	log.Infof("response Status : %v", resp.Status)
-	if resp.StatusCode>=400{
+	if resp.StatusCode >= 400 {
 		log.Infof("%v", resp.Status)
 	} else {
 		var responseData map[string]interface{}
@@ -547,7 +538,6 @@ func httpReq(li []map[string]string, ips []string) error {
 	//cmd=string(respBody)
 	return nil
 }
-
 
 func adjoinHandler(c *gin.Context) {
 	setLog()
@@ -580,11 +570,10 @@ func adjoinHandler(c *gin.Context) {
 		return
 	}
 	Agentconfig.Status = "Joining"
-	_=AgentSave()
+	_ = AgentSave()
 	c.JSON(http.StatusOK, output)
 	return
 }
-
 
 func bootstrapHandler(c *gin.Context) {
 	setLog()
@@ -613,10 +602,9 @@ func bootstrapHandler(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err2.Error(), Target: "getComputer"})
 		return
 	}
-	c.JSON(http.StatusOK, map[string]string{"output1": output1, "output2":output2})
+	c.JSON(http.StatusOK, map[string]string{"output1": output1, "output2": output2})
 	return
 }
-
 
 func adStatusHandler(c *gin.Context) {
 	setLog()
@@ -630,16 +618,16 @@ func adStatusHandler(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 		return
 	}
-	domain:=strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
+	domain := strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
 
-	if strings.EqualFold(domain, "WORKGROUP") && Agentconfig.Status!="Joining"{
+	if strings.EqualFold(domain, "WORKGROUP") && Agentconfig.Status != "Joining" {
 		Agentconfig.Status = "Pending"
-		_=AgentSave()
+		_ = AgentSave()
 		c.JSON(http.StatusOK,
-		map[string]string{
-			"status": Agentconfig.Status,
-			"next": "PUT <vdi>/ad/:domain/",
-		})
+			map[string]string{
+				"status": Agentconfig.Status,
+				"next":   "PUT <vdi>/ad/:domain/",
+			})
 		return
 	} else {
 		output, err := shell.Exec("get-computerinfo -property csname | format-list")
@@ -647,44 +635,44 @@ func adStatusHandler(c *gin.Context) {
 			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 			return
 		}
-		comname:=strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
+		comname := strings.TrimSpace(strings.Split(strings.TrimSpace(output), ":")[1])
 		output, err = shell.Exec(fmt.Sprintf("gpresult /scope computer /r | select-string -pattern cn=%v", comname))
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 			return
 		}
-		if strings.Contains(strings.TrimSpace(output),  "OU=")		{
+		if strings.Contains(strings.TrimSpace(output), "OU=") {
 			Agentconfig.Status = "Joined"
-			_=AgentSave()
+			_ = AgentSave()
 		}
 		output, err = shell.Exec("gpresult /scope computer /r | select-string -pattern remote")
 		if err != nil {
 			c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 			return
 		}
-		if strings.Contains(strings.TrimSpace(output),  "remotefx")		{
+		if strings.Contains(strings.TrimSpace(output), "remotefx") {
 			Agentconfig.Status = "Ready"
-			_=AgentSave()
+			_ = AgentSave()
 		}
 		if Agentconfig.Status == "Joining" {
 			c.JSON(http.StatusOK,
 				map[string]string{
 					"status": Agentconfig.Status,
-					"next": "PUT <dc>/computer/:computername/:groupname",
+					"next":   "PUT <dc>/computer/:computername/:groupname",
 				})
 			return
-		} else if Agentconfig.Status == "Joined"{
+		} else if Agentconfig.Status == "Joined" {
 			c.JSON(http.StatusOK,
 				map[string]string{
 					"status": Agentconfig.Status,
-					"next": "GET <vdi>/cmd/?timeout=60&cmd=gpupdate /force",
+					"next":   "GET <vdi>/cmd/?timeout=60&cmd=gpupdate /force",
 				})
 			return
-		} else if Agentconfig.Status == "Ready"{
+		} else if Agentconfig.Status == "Ready" {
 			c.JSON(http.StatusOK,
 				map[string]string{
 					"status": Agentconfig.Status,
-					"next": "Ready to use",
+					"next":   "Ready to use",
 				})
 			return
 		}
