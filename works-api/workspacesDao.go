@@ -46,6 +46,7 @@ type Instance struct {
 	CheckedDate     *string `json:"checked_date"`
 	Removed         string  `json:"removed"`
 	MoldStatus      string  `json:"mold_status"`
+	WorkspaceType   string  `json:"workspace_type"`
 }
 
 func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
@@ -220,7 +221,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 	queryString := "SELECT" +
 		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid," +
 		" IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date," +
-		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress" +
+		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress, w.workspace_type" +
 		" FROM vm_instances AS vi" +
 		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
 		" WHERE vi.removed IS NULL"
@@ -249,7 +250,7 @@ func selectInstanceList(uuid string, selectType string) ([]Instance, error) {
 		err = rows.Scan(
 			&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
 			&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate,
-			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress)
+			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress, &instance.WorkspaceType)
 		if err != nil {
 			log.WithFields(logrus.Fields{
 				"workspaceImpl": "selectInstanceList",

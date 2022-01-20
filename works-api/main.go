@@ -61,6 +61,9 @@ func main() {
 		api.POST("/login", getLogin)
 		api.POST("/workspaceAgent/:instanceUuid", putWorkspacesAgent)
 		api.POST("/workspaceAgent", putWorkspacesAgent)
+
+		api.GET("/serverCheck", getServerCheck)
+
 		api.GET("/version", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"version": Version})
 		})
