@@ -12,6 +12,7 @@
       :span="12"
       style="float: right; text-align: right; padding-right: 5px"
     >
+      {{ $t("label.domain") }} : {{ $t("cjs") }} 
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
