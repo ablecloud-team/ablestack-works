@@ -12,6 +12,12 @@ export default createStore({
       status: "",
       name: "",
     },
+    dashboard: {
+      works: false,
+      mold: false,
+      dc: false,
+      samba: false,
+    },
   },
   getters: {},
   mutations: {
@@ -25,16 +31,23 @@ export default createStore({
       state.user.isLogin = false;
       state.user.isAdmin = false;
     },
+    serverCheckSuccess(state, payload) {
+      state.dashboard.works = payload.status;
+      state.dashboard.mold = payload.data.result["Mold"];
+      state.dashboard.dc = payload.data.result["Works-DC"];
+      state.dashboard.samba = payload.data.result["Works-Samba"];
+    }, Î
   },
   actions: {
     loginCommit({ commit }, payload) {
-      // console.log("store index loginCommit");
-      //console.log(payload);
       commit("loginSuccess", payload);
     },
     logoutCommit({ commit }) {
       commit("logoutSuccess");
       sessionStorage.clear();
+    },
+    serverCheckCommit({ commit }, payload) {
+      commit("serverCheckSuccess", payload);
     },
   },
   modules: {},

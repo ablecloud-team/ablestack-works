@@ -219,6 +219,8 @@
 import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
+import store from "@/store/index";
+
 export default defineComponent({
   name: "Dashboard",
   components: {},
@@ -246,6 +248,7 @@ export default defineComponent({
       descStep2: ref(this.$t("message.status.checking")),
       descStep3: ref(this.$t("message.status.checking")),
       descStep4: ref(this.$t("message.status.checking")),
+      
     };
   },
   created() {
@@ -271,6 +274,7 @@ export default defineComponent({
         .get("/api/serverCheck")
         .then((response) => {
           if (response.status == 200) {
+            store.dispatch("serverCheckCommit", response);
             this.descStep1 = this.$t("message.status.check.ok");
             this.dashboardStep = 1;
             if (response.data.result["Mold"] === 200) {
