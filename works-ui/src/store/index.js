@@ -13,11 +13,12 @@ export default createStore({
       name: "",
     },
     dashboard: {
-      works: false,
-      mold: false,
-      dc: false,
-      samba: false,
+      works: 0,
+      mold: 0,
+      dc: 0,
+      samba: 0,
     },
+    menukey: 0,
   },
   getters: {},
   mutations: {
@@ -33,10 +34,16 @@ export default createStore({
     },
     serverCheckSuccess(state, payload) {
       state.dashboard.works = payload.status;
-      state.dashboard.mold = payload.data.result["Mold"];
-      state.dashboard.dc = payload.data.result["Works-DC"];
-      state.dashboard.samba = payload.data.result["Works-Samba"];
-    }, Î
+      if (payload.status === 200) {
+        state.dashboard.mold = payload.data.result["Mold"];
+        state.dashboard.dc = payload.data.result["Works-DC"];
+        state.dashboard.samba = payload.data.result["Works-Samba"];
+      } else {
+        state.dashboard.mold = 0;
+        state.dashboard.dc = 0;
+        state.dashboard.samba = 0;
+      }
+    },
   },
   actions: {
     loginCommit({ commit }, payload) {

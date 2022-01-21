@@ -155,6 +155,7 @@
                 :title="$t('label.account.count')"
                 class="dashboard-a-card-cl"
                 hoverable
+                @click="$router.push({ name: 'Account' })"
               >
                 <span style="font-size: 80px">{{ accountCount }}</span>
               </a-card>
@@ -164,6 +165,7 @@
                 :title="$t('label.desktop.connected.count')"
                 class="dashboard-a-card-cl"
                 hoverable
+                @click="$router.push({ name: 'VirtualMachine' })"
               >
                 <span style="font-size: 80px">{{ desktopConCount }}</span>
               </a-card>
@@ -243,20 +245,19 @@ export default defineComponent({
       desktopConCount: ref("0"),
       appConCount: ref("0"),
       stepStatus: ref("error"),
-      dashboardStep: ref(0),
+      dashboardStep: ref(sessionStorage.getItem("dashboardStep")),
       descStep1: ref(this.$t("message.status.checking")),
       descStep2: ref(this.$t("message.status.checking")),
       descStep3: ref(this.$t("message.status.checking")),
       descStep4: ref(this.$t("message.status.checking")),
-      
     };
   },
   created() {
-    this.refresh(false);
-
+    this.setServerStatus();
+    this.fetchData();
     this.timer = setInterval(() => {
-      //60초 자동 갱신
-      this.refresh(false);
+      //30초 자동 갱신
+      this.fetchData();
     }, 30000);
   },
   unmounted() {
@@ -269,60 +270,32 @@ export default defineComponent({
       }
       this.fetchData();
     },
-    async fetchData() {
-      await worksApi
+    fetchData() {
+      worksApi
         .get("/api/serverCheck")
         .then((response) => {
           if (response.status == 200) {
             store.dispatch("serverCheckCommit", response);
-            this.descStep1 = this.$t("message.status.check.ok");
-            this.dashboardStep = 1;
-            if (response.data.result["Mold"] === 200) {
-              this.descStep2 = this.$t("message.status.check.ok");
-              this.dashboardStep = 2;
-              if (response.data.result["Works-DC"] === 200) {
-                this.descStep3 = this.$t("message.status.check.ok");
-                this.dashboardStep = 3;
-                if (response.data.result["Works-Samba"] === 200) {
-                  this.descStep4 = this.$t("message.status.check.ok");
-                  this.dashboardStep = 4;
-                } else {
-                  this.descStep4 = this.$t("message.status.check.nosignal");
-                }
-              } else {
-                this.descStep3 = this.$t("message.status.check.nosignal");
-                this.descStep4 = this.$t("message.status.check.nosignal");
-              }
-            } else {
-              this.descStep2 = this.$t("message.status.check.nosignal");
-              this.descStep3 = this.$t("message.status.check.nosignal");
-              this.descStep4 = this.$t("message.status.check.nosignal");
-            }
-          } else {
-            this.dashboardStep = 0;
-            this.descStep1 = this.$t("message.status.check.nosignal");
-            this.descStep2 = this.$t("message.status.check.nosignal");
-            this.descStep3 = this.$t("message.status.check.nosignal");
-            this.descStep4 = this.$t("message.status.check.nosignal");
           }
         })
         .catch((error) => {
+          store.dispatch("serverCheckCommit", error.response);
           // message.error(this.$t("message.response.data.fail"));
-          console.log(error.message);
+          console.log(error.response.status);
         })
         .finally(() => {
-          sessionStorage.setItem("dashboardStep", this.dashboardStep);
+          this.setServerStatus();
         });
 
-      await worksApi
+      worksApi
         .get("/api/v1/dashboard")
         .then((response) => {
           if (response.status == 200) {
             this.workspaceCount = response.data.result.workspaceCount;
             this.desktopVmCount = response.data.result.instanceCount;
+            this.accountCount = response.data.result.usersCount;
+            this.desktopConCount = response.data.result.connectedCount;
             this.appVmCount = "0";
-            this.accountCount = "0";
-            this.desktopConCount = "0";
             this.appConCount = "0";
           }
         })
@@ -333,6 +306,41 @@ export default defineComponent({
         .finally(() => {
           this.spinning = false;
         });
+    },
+    async setServerStatus() {
+      if (store.state.dashboard.works === 200) {
+        this.descStep1 = this.$t("message.status.check.ok");
+        this.dashboardStep = 1;
+        if (store.state.dashboard.mold === 200) {
+          this.descStep2 = this.$t("message.status.check.ok");
+          this.dashboardStep = 2;
+          if (store.state.dashboard.dc === 200) {
+            this.descStep3 = this.$t("message.status.check.ok");
+            this.dashboardStep = 3;
+            if (store.state.dashboard.samba === 200) {
+              this.descStep4 = this.$t("message.status.check.ok");
+              this.dashboardStep = 4;
+            } else {
+              this.descStep4 = this.$t("message.status.check.nosignal");
+            }
+          } else {
+            this.descStep3 = this.$t("message.status.check.nosignal");
+            this.descStep4 = this.$t("message.status.check.nosignal");
+          }
+        } else {
+          this.descStep2 = this.$t("message.status.check.nosignal");
+          this.descStep3 = this.$t("message.status.check.nosignal");
+          this.descStep4 = this.$t("message.status.check.nosignal");
+        }
+      } else {
+        this.dashboardStep = 0;
+        this.descStep1 = this.$t("message.status.check.nosignal");
+        this.descStep2 = this.$t("message.status.check.nosignal");
+        this.descStep3 = this.$t("message.status.check.nosignal");
+        this.descStep4 = this.$t("message.status.check.nosignal");
+      }
+
+      sessionStorage.setItem("dashboardStep", this.dashboardStep);
     },
   },
 });
