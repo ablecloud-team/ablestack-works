@@ -12,26 +12,82 @@
         </h4>
       </div>
     </div>
+
+    <div id="Status" class="CardItem">
+      <div class="ItemName">{{ $t("label.vm.state") }}</div>
+      <div class="Item">
+        <a-tooltip placement="bottom">
+          <template #title>{{ vmDbDataInfo.mold_status }}</template>
+          <a-badge
+            class="head-example"
+            :color="
+              vmDbDataInfo.mold_status === 'Running'
+                ? 'green'
+                : vmDbDataInfo.mold_status === 'Stopping' ||
+                  vmDbDataInfo.mold_status === 'Starting'
+                ? 'blue'
+                : vmDbDataInfo.mold_status === 'Stopped'
+                ? 'red'
+                : ''
+            "
+            :text="
+              vmDbDataInfo.mold_status === 'Running'
+                ? $t('label.vm.status.running')
+                : vmDbDataInfo.mold_status === 'Starting'
+                ? $t('label.vm.status.starting')
+                : vmDbDataInfo.mold_status === 'Stopping'
+                ? $t('label.vm.status.stopping')
+                : vmDbDataInfo.mold_status === 'Stopped'
+                ? $t('label.vm.status.stopped')
+                : ''
+            "
+          />
+        </a-tooltip>
+      </div>
+    </div>
+
     <div id="Status" class="CardItem">
       <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
       <div class="Item">
-        <a-badge
-          class="head-example"
-          :color="vmDbDataInfo.checked === true ? 'green' : 'red'"
-          :text="
-            vmDbDataInfo.checked === true
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
-          "
-        />
+        <a-tooltip placement="bottom">
+          <template #title>{{ vmDbDataInfo.handshake_status }}</template>
+          <a-badge
+            class="head-example"
+            :color="
+              vmDbDataInfo.handshake_status === 'Not Ready' ||
+              vmDbDataInfo.handshake_status === 'Pending'
+                ? 'red'
+                : vmDbDataInfo.handshake_status === 'Joining' ||
+                  vmDbDataInfo.handshake_status === 'Joined'
+                ? 'yellow'
+                : vmDbDataInfo.handshake_status === 'Ready'
+                ? 'green'
+                : 'red'
+            "
+            :text="
+              vmDbDataInfo.handshake_status === 'Not Ready' ||
+              vmDbDataInfo.handshake_status === 'Pending'
+                ? $t('label.vm.status.initializing') +
+                  '(' +
+                  vmDbDataInfo.handshake_status +
+                  ')'
+                : vmDbDataInfo.handshake_status === 'Joining' ||
+                  vmDbDataInfo.handshake_status === 'Joined'
+                ? $t('label.vm.status.configuring') +
+                  '(' +
+                  vmDbDataInfo.handshake_status +
+                  ')'
+                : vmDbDataInfo.handshake_status === 'Ready'
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
+            "
+          />
+        </a-tooltip>
       </div>
     </div>
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        <a-button shape="circle" type="dashed">
-          <BarcodeOutlined />
-        </a-button>
         {{ vmDbDataInfo.uuid }}
       </div>
     </div>
@@ -46,7 +102,12 @@
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
       <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
-      <a-progress :percent="cpuused" size="small" status="active" />
+      <a-progress
+        :percent="cpuused"
+        size="small"
+        status="active"
+        style="width: 97%"
+      />
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
@@ -87,9 +148,10 @@
           <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
         >
         <a-tag>
-          <ArrowDownOutlined /> TX {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+          <ArrowDownOutlined /> TX
+          {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
         ><br />
-        {{ vmNetworkInfo.networkname }}
+        {{ vmNetworkInfo.networkname }} ({{ vmNetworkInfo.type }})
       </div>
     </div>
     <div class="CardItem">
@@ -108,13 +170,36 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: {},
   props: {
+    vmDbDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmMoldDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmNetworkInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmDiskInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    cpuused: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   setup() {
     return {};
@@ -122,45 +207,17 @@ export default defineComponent({
   data() {
     return {
       spinning: ref(true),
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
-      vmNetworkInfo: ref([]),
-      vmDiskInfo: ref([]),
-      cpuused: ref(0),
     };
   },
   created() {
-    this.reflesh();
+    this.fetchRefresh();
   },
   methods: {
-    reflesh() {
-      this.fetchData();
+    fetchRefresh() {
       this.spinning = true;
       setTimeout(() => {
         this.spinning = false;
       }, 500);
-    },
-    fetchData() {
-      worksApi
-        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-        .then((response) => {
-          if (response.status === 200) {
-            //console.log(response.data.result.instanceDBInfo);
-            this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo =
-              response.data.result.instanceMoldInfo.virtualmachine[0];
-            this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
-            this.vmDiskInfo =
-              response.data.result.instanceInstanceVolumeInfo.volume[0];
-            this.cpuused = this.vmMoldDataInfo.cpuused.split("%")[0];
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
   },
 });

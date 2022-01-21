@@ -1,33 +1,42 @@
 <template>
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
-      <a-tab-pane key="1" :tab="$t('label.detail')">
+      <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
         <DetailContent
-          ref="listRefleshCall1"
-          :action-from="'UserDetail'"
+          ref="listRefreshCall1"
+          :action-from="'AccountDetail'"
+          :account-info="accountInfo"
         />
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('label.vm.list')">
-        <!-- <TableContent
-          ref="listRefleshCall2"
+      <!-- <a-tab-pane key="2" :tab="$t('label.vm.list')" :forceRender="forceRender">
+        <TableContent
+          ref="listRefreshCall2"
           :tap-name="'desktop'"
           :action-from="'VirtualMachineList'"
-        /> -->
+        />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('label.app.list')">
-        <!-- <TableContent
-          ref="listRefleshCall3"
+      <a-tab-pane
+        key="3"
+        :tab="$t('label.app.list')"
+        :forceRender="forceRender"
+      >
+        <TableContent
+          ref="listRefreshCall3"
           :tap-name="'app'"
           :action-from="'VirtualMachineList'"
-        /> -->
+        />
       </a-tab-pane>
-      <a-tab-pane key="4" :tab="$t('label.policy.list')">
-        <!-- <TableContent
-          ref="listRefleshCall4"
+      <a-tab-pane
+        key="4"
+        :tab="$t('label.policy.list')"
+        :forceRender="forceRender"
+      >
+        <TableContent
+          ref="listRefreshCall4"
           :tap-name="'policy'"
           :action-from="'PolicyGroupList'"
-        /> -->
-      </a-tab-pane>
+        />
+      </a-tab-pane> -->
     </a-tabs>
   </div>
 </template>
@@ -36,8 +45,6 @@
 import { defineComponent, ref } from "vue";
 import TableContent from "@/components/TableContent";
 import DetailContent from "@/components/DetailContent";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {
@@ -45,40 +52,33 @@ export default defineComponent({
     DetailContent,
   },
   props: {
-    userDataInfo: {
+    accountInfo: {
       type: Object,
-      required: true,
+      required: false,
       default: null,
     },
-    // vmDiskList:{
-    //   type: Object,
-    //   required: false,
-    //   default: null,
-    // },
-    // vmNetworkList:{
-    //   type: Object,
-    //   required: false,
-    //   default: null,
-    // },
   },
   setup() {
-    const tabPosition = ref("top");
-    const activeKey = ref("1");
     return {
-      tabPosition,
-      activeKey,
+      tabPosition: ref("top"),
+      activeKey: ref("1"),
+      forceRender: ref(false),
     };
   },
   data() {
-    return {
-    };
+    return {};
+  },
+  created() {
+    setTimeout(() => {
+      this.forceRender = true;
+    }, 1000);
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      // this.$refs.listRefleshCall2.fetchData();
-      // this.$refs.listRefleshCall3.fetchData();
-      // this.$refs.listRefleshCall4.fetchData();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
+      // this.$refs.listRefreshCall2.fetchRefresh();
+      // this.$refs.listRefreshCall3.fetchRefresh();
+      // this.$refs.listRefreshCall4.fetchRefresh();
     },
   },
 });

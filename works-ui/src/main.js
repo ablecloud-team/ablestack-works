@@ -1,11 +1,11 @@
 import { createApp } from "vue";
+import VueCryptojs from "vue-cryptojs"
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-
 import {
   faCameraRetro,
   faUserSecret,
@@ -63,6 +63,17 @@ import {
   UsergroupAddOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  LoginOutlined,
+  WindowsFilled,
+  StarFilled,
+  StarTwoTone,
+  CloudDownloadOutlined,
+  CodeFilled,
+  SettingOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  SmileOutlined,
+  FrownOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -110,5 +121,16 @@ app.component("Html5Outlined", Html5Outlined);
 app.component("UsergroupAddOutlined", UsergroupAddOutlined);
 app.component("ArrowUpOutlined", ArrowUpOutlined);
 app.component("ArrowDownOutlined", ArrowDownOutlined);
+app.component("LoginOutlined", LoginOutlined);
+app.component("WindowsFilled", WindowsFilled);
+app.component("StarFilled", StarFilled);
+app.component("StarTwoTone", StarTwoTone);
+app.component("CloudDownloadOutlined", CloudDownloadOutlined);
+app.component("CodeFilled", CodeFilled);
+app.component("SettingOutlined", SettingOutlined);
+app.component("CheckCircleOutlined", CheckCircleOutlined);
+app.component("CloseCircleOutlined", CloseCircleOutlined);
+app.component("SmileOutlined", SmileOutlined);
+app.component("FrownOutlined", FrownOutlined);
 
-app.use(i18n).use(store).use(router).use(Antd).mount("#app");
+app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

@@ -1,33 +1,34 @@
+import { message } from "ant-design-vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { worksApi } from "../api";
-import { message } from "ant-design-vue";
-import Login from "../views/auth/Login.vue";
-import AdminApp from "../components/layouts/AdminApp.vue";
 import AdminBaseLayout from "../components/layouts/AdminBaseLayout.vue";
-import Dashboard from "../views/dashboard/Dashboard.vue";
-import Workspace from "../views/workSpace/WorkSpace.vue";
 import UserBaseLayout from "../components/layouts/UserBaseLayout.vue";
-import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
-import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
-import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
-import Favorites from "../views/favorites/Favorites.vue";
-import UserDesktop from "../views/desktopApplication/DesktopApplication.vue";
 import Account from "../views/account/Account.vue";
 import AccountDetail from "../views/account/AccountDetail.vue";
+import Login from "../views/auth/Login.vue";
+import Configuration from "../views/configuration/Configuration.vue";
+import Dashboard from "../views/dashboard/Dashboard.vue";
+import Exception404 from "../views/exception/404.vue";
+import Favorite from "../views/favorite/Favorite.vue";
 import GroupPolicy from "../views/groupPolicy/GroupPolicy.vue";
 import GroupPolicyDetail from "../views/groupPolicy/GroupPolicyDetail.vue";
+import UserDetail from "../views/user/UserDetail.vue";
+import UserDesktop from "../views/userDesktop/UserDesktop.vue";
+import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
+import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
+import Workspace from "../views/workspace/WorkSpace.vue";
+import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
+import GuacClient from '@/components/GuacClient'
+
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
 // import Community from "../views/community/Community.vue";
 // import CommunityDetail from "../views/community/CommunityDetail.vue";
 // import axios from "axios";
 
-const requireAuth = (to, from, next) => {
-  //console.log("-----------------------------------");
-  //console.log("to.name : " + to.name + ", from.name : " + from.name);
-
-  let menukey = "1";
-  //let menuName = to.name.toLowerCase();
+let menukey = "";
+const adminAuthCheck = (to, from, next) => {
+  //console.log("adminAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
   if (to.name.includes("Dashboard")) { menukey = "1"; }
   if (to.name.includes("Workspace")) { menukey = "2"; }
   if (to.name.includes("VirtualMachine")) { menukey = "3"; }
@@ -35,65 +36,128 @@ const requireAuth = (to, from, next) => {
   if (to.name.includes("GroupPolicy")) { menukey = "5"; }
   if (to.name.includes("Audit")) { menukey = "6"; }
   if (to.name.includes("Community")) { menukey = "7"; }
-  if (to.name.includes("Favorite")) { menukey = "8"; }
-  if (to.name.includes("UserDesktop")) { menukey = "9"; }
-
-  //console.log(menukey);
+  if (to.name.includes("Configuration")) { menukey = "8"; }
   sessionStorage.setItem("menukey", menukey);
 
-  const isAuth = sessionStorage.getItem("token");
-  if (isAuth && isAuth !== "") {
-    if (to.name === "Dashboard" && from.name === "Login") {
-      next();
-      // setTimeout(() => {
-      //   location.reload(); //강제 리로드 필요함. 버그인지 모르겠음. =>(정상적인 토큰이 localstorage에 있어도 토큰체크시 response status값이 9998로 받음)
-      // }, 0);
+  tokenCheck(to, from, next, true);
+};
+
+const userAuthCheck = (to, from, next) => {
+  //console.log("userAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
+  if (to.name.includes("Favorite")) { menukey = "1"; }
+  if (to.name.includes("UserDesktop")) { menukey = "2"; }
+  sessionStorage.setItem("menukey", menukey);
+
+  tokenCheck(to, from, next, false);
+};
+
+const tokenCheck = (to, from, next, isAdmin) => {
+  const isToken = sessionStorage.getItem("token");
+  if (isToken && isToken !== "") {
+    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
+      goRoute(0, next);
     } else {
       worksApi
         .get("/api/v1/token")
         .then((response) => {
           //console.log(response);
           if (response.status === 200) {
-            //this.userDataInfo = response.data.result.vmInfo;
-            next();
+            if (
+              /*response.data.result.isAdmin === isAdmin */
+              (isAdmin && response.data.result.name.toLowerCase() === "administrator") ||
+              (!isAdmin && response.data.result.name.toLowerCase() !== "administrator")
+            ) {
+              goRoute(0, next);
+            } else {
+              //goRoute(2, next);
+            }
           } else {
-            message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-            sessionStorage.setItem("token", "");
-            next({ name: "Login" });
+            goRoute(1, next);
           }
         })
         .catch(function () {
-          message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-          sessionStorage.setItem("token", "");
-          next({ name: "Login" });
+          goRoute(1, next);
         });
     }
   } else {
-    message.error("정상적인 토큰값이 아닙니다. 다시 로그인 해주세요.");
-    sessionStorage.clear();
-    next({ name: "Login" });
+    goRoute(1, next);
+  }
+};
+
+const goRoute = (cd, next) => {
+  switch (cd) {
+    case 0:
+      next();
+      break;
+    case 1:
+      message.error("정상적인 로그인 인증값이 아닙니다. 다시 로그인해주세요.");
+      sessionStorage.clear();
+      next({ name: "Login" });
+      break;
+    // case 2:
+    //   message.error("해당 URL을 이용하여 접근할 수 없습니다.");
+    //   setTimeout(() => {
+    //     router.go(-1);
+    //   }, 1000);
+    //   break;
+
+    default:
+      break;
   }
 };
 
 const routes = [
   {
     path: "/:catchAll(.*)",
-    redirect: "/login",
-    name: "NotFound"
+    name: "Exception",
+    hidden: true,
+    component: Exception404,
+    redirect: "/exception/404",
+    children: [
+      // {
+      //   path: '/exception/403',
+      //   name: '403',
+      //   hidden: true,
+      //   component: () => import('@/views/exception/403'),
+      //   meta: { title: '403' },
+      // },
+      {
+        path: "/exception/404",
+        name: "404",
+        hidden: true,
+        component: () => import("@/views/exception/404"),
+        meta: { title: "404" },
+      },
+      // {
+      //   path: '/exception/500',
+      //   name: '500',
+      //   hidden: true,
+      //   component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
+      //   meta: { title: '500' },
+      // }
+    ],
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
   {
-    path: "/login",
-    name: "Login",
-    component: Login,
-  },
-  {
-    path: "/adminApp",
-    name: "AdminApp",
-    component: AdminApp,
+    path: '/client',
+    name: 'Client',
+    component: GuacClient
   },
   {
     path: "/",
-    name: "home",
+    name: "Root",
+    redirect: "/login",
+    component: Login,
+    children: [
+      {
+        path: "/login",
+        name: "Login",
+        component: Login,
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    name: "Admin",
     component: AdminBaseLayout,
     redirect: "/dashboard",
     // beforeEnter: (to, from, failure) => {},
@@ -102,86 +166,92 @@ const routes = [
         path: "/dashboard",
         name: "Dashboard",
         component: Dashboard,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
       },
       {
         path: "/workspace",
         name: "Workspace",
         component: Workspace,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
       },
       {
-        path: "/workspaceDetail/:workspaceUuid/:workspaceName",
+        path: "/workspaceDetail/:workspaceUuid",
         name: "WorkspaceDetail",
         component: WorkspaceDetail,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
         props: true,
       },
       {
         path: "/virtualMachine",
         name: "VirtualMachine",
         component: VirtualMachine,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
       },
       {
-        path: "/virtualMachineDetail/:vmUuid/:vmName",
+        path: "/virtualMachineDetail/:vmUuid",
         name: "VirtualMachineDetail",
         component: VirtualMachineDetail,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
         props: true,
       },
       {
         path: "/account",
         name: "Account",
         component: Account,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
       },
       {
-        path: "/accountDetail/:userName",
+        path: "/accountDetail/:accountName",
         name: "AccountDetail",
         component: AccountDetail,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
         props: true,
       },
       {
         path: "/groupPolicy",
         name: "GroupPolicy",
         component: GroupPolicy,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
       },
       {
         path: "/groupPolicyDetail/:groupName",
         name: "GroupPolicyDetail",
         component: GroupPolicyDetail,
-        beforeEnter: requireAuth,
+        beforeEnter: adminAuthCheck,
         props: true,
       },
       // {
       //   path: "/audit",
       //   name: "Audit",
       //   component: Audit,
-      //   beforeEnter: requireAuth,
+      //   beforeEnter: adminAuthCheck,
       // },
       // {
       //   path: "/auditDetail",
       //   name: "AuditDetail",
       //   component: AuditDetail,
-      //   beforeEnter: requireAuth,
+      //   beforeEnter: adminAuthCheck,
       //   props: true,
       // },
       // {
       //   path: "/community",
       //   name: "/Community",
       //   component: Community,
-      //   beforeEnter: requireAuth,
+      //   beforeEnter: adminAuthCheck,
       // },
       // {
       //   path: "/community",
       //   name: "CommunityDetail",
       //   component: CommunityDetail,
-      //   beforeEnter: requireAuth,
+      //   beforeEnter: adminAuthCheck,
       //   props: true,
       // },
+      {
+        path: "/configuration",
+        name: "Configuration",
+        component: Configuration,
+        beforeEnter: adminAuthCheck,
+      },
     ],
   },
   {
@@ -189,19 +259,25 @@ const routes = [
     name: "User",
     component: UserBaseLayout,
     meta: { icon: "home" },
-    redirect: "/favorites",
+    redirect: "/favorite",
     children: [
       {
-        path: "/favorites",
-        name: "Favorites",
-        component: Favorites,
-        beforeEnter: requireAuth,
+        path: "/favorite",
+        name: "Favorite",
+        component: Favorite,
+        beforeEnter: userAuthCheck,
       },
       {
         path: "/userDesktop",
         name: "UserDesktop",
         component: UserDesktop,
-        beforeEnter: requireAuth,
+        beforeEnter: userAuthCheck,
+      },
+      {
+        path: "/userDetail",
+        name: "UserDetail",
+        component: UserDetail,
+        beforeEnter: userAuthCheck,
       },
     ],
   },

@@ -4,18 +4,14 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <AccountInfoCard
-            ref="listRefleshCall1"
-          />
+          <AccountInfoCard ref="listRefreshCall1" :account-info="accountInfo" />
         </ACard>
       </ACol>
 
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <AccountTab 
-            ref="listRefleshCall2"
-          />
+          <AccountTab ref="listRefreshCall2" :account-info="accountInfo" />
         </ACard>
       </ACol>
     </ARow>
@@ -26,7 +22,7 @@
 // import TabbedContent from "@/components/TabbedContent";
 import AccountInfoCard from "./AccountInfoCard";
 import AccountTab from "./AccountTab";
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   components: {
@@ -34,9 +30,9 @@ export default defineComponent({
     AccountTab,
   },
   props: {
-    userDataInfo: {
+    accountInfo: {
       type: Object,
-      required: true,
+      required: false,
       default: null,
     },
   },
@@ -44,9 +40,9 @@ export default defineComponent({
     return {};
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      this.$refs.listRefleshCall2.reflesh();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
+      this.$refs.listRefreshCall2.fetchRefresh();
     },
   },
 });

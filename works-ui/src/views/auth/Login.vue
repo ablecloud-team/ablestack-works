@@ -1,13 +1,33 @@
 <template>
   <div class="user-layout desktop">
+    <span>
+      <a-alert
+        v-if="serverStatus"
+        :message="statusMessage"
+        :description="statusDescription"
+        :type="statusType"
+        banner
+        show-icon
+      >
+        <!-- <template #icon>
+          <smile-outlined />
+          <smile-outlined v-if="statusType == 'success'" />
+          <frown-outlined v-else /> -->
+        <!-- </template> -->
+      </a-alert>
+    </span>
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-          src="../../assets/ablestack-logo.png"
+          src="@/assets/ablestack-logo.png"
           alt="logo"
           class="user-layout-logo"
         />
+        <div v-if="disabled" style="text-align: center">
+          <a-spin />
+        </div>
       </div>
+
       <a-form
         ref="formRef"
         layout="horizontal"
@@ -18,6 +38,7 @@
       >
         <a-form-item has-feedback name="id">
           <a-input
+            :disabled="disabled"
             v-model:value="formState.id"
             :placeholder="$t('label.user.id')"
             size="large"
@@ -27,8 +48,10 @@
             </template>
           </a-input>
         </a-form-item>
+
         <a-form-item has-feedback name="password">
           <a-input-password
+            :disabled="disabled"
             v-model:value="formState.password"
             type="password"
             :placeholder="$t('label.password')"
@@ -40,32 +63,17 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" block class="login-button" html-type="submit">
+          <a-button
+            :disabled="disabled"
+            type="primary"
+            block
+            class="login-button"
+            html-type="submit"
+          >
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <!-- <a-popover placement="bottom">
-          <template #content>
-            <a-button type="text" @click="setLocale('ko')">
-              한국어
-            </a-button>
-            <br />
-            <a-button type="text" @click="setLocale('en')">
-              English
-            </a-button>
-          </template>
-          <a-button type="text">
-            <template #icon>
-              <font-awesome-icon
-                  :icon="['fas', 'language']"
-                  size="4x"
-                  style="color: #666"
-                  class="login-ico"
-              />
-            </template>
-          </a-button>
-        </a-popover> -->
         <a-dropdown>
           <a-button type="text" shape="circle" class="header-notice-button">
             <a class="ant-dropdown-link" @click.prevent>
@@ -89,9 +97,11 @@
       </a-form>
     </div>
   </div>
+  <!-- </a-spin> -->
 </template>
 
 <script>
+import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { worksApi } from "@/api/index";
@@ -100,6 +110,7 @@ import router from "@/router";
 
 export default defineComponent({
   name: "Login",
+  components: { SmileOutlined, FrownOutlined },
   setup() {
     const formRef = ref();
     const formState = reactive({
@@ -123,13 +134,33 @@ export default defineComponent({
     };
   },
   data() {
-    return {};
+    return {
+      timer: ref(null),
+      spinning: ref(true),
+      language: ref(""),
+      loadedLanguage: ref[""],
+      disabled: ref(true),
+      serverStatus: ref(true),
+      statusMessage: ref(this.$t("message.status.check.worksapi")),
+      statusDescription: ref(this.$t("message.status.check.desc.wait")),
+      statusType: ref("info"),
+    };
   },
-  computed: {},
   created() {
+    this.serverStatus = true;
+    this.statusType = "info";
+    this.disabled = true;
+    this.serverCheck();
+    this.timer = setInterval(() => {
+      this.serverCheck();
+    }, 10000);
+
     this.rules.id.message = this.$t("message.please.enter.your.id");
     this.rules.password.message = this.$t("message.please.enter.your.password");
     this.onClear();
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
     setLocaleClick(e) {
@@ -154,48 +185,145 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          message.loading(this.$t("message.logging"), 10);
+          message.destroy();
+          message.loading(this.$t("message.logging"), 60);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
-          // try {
-          //  res = await axiosLogin(params)
+
           worksApi
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
-              if (response.status === 200) {
-                if (response.data.result.isAdmin == "false") {
-                  message.error(this.$t("message.login.wrong"));
-                  router.push({ name: "Login" });
-                } else {
-                  store.dispatch("loginCommit", response.data);
-                  sessionStorage.setItem("token", response.data.result.token);
-                  sessionStorage.setItem(
-                    "username",
-                    response.data.result.username
-                  );
+              if (
+                response.status === 200 &&
+                response.data.result.login === true
+              ) {
+                store.dispatch("loginCommit", response.data);
+                sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem(
+                  "username",
+                  response.data.result.username
+                );
+                sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
+                if (
+                  response.data.result.username.toLowerCase() ===
+                  "administrator"
+                ) {
                   router.push({ name: "Dashboard" });
-                  message.destroy();
-                  message.success(this.$t("message.login.completed"));
+                } else {
+                  router.push({ name: "Favorite" });
                 }
+                message.destroy();
+                message.success(this.$t("message.login.completed"));
               } else {
                 message.destroy();
                 message.error(this.$t("message.login.wrong"));
               }
             })
-            .catch(function (error) {
+            .catch((error) => {
+              message.destroy();
               console.log(error);
+              if (error.response.status === 400) {
+                message.error(this.$t("message.login.wrong.400"));
+              } else if (error.response.status === 401) {
+                message.error(this.$t("message.login.wrong.401"));
+              } else {
+                message.error(this.$t("message.login.wrong"));
+              }
             });
-          // }catch (error){
-          //   message.destroy();
-          //   //TODO i18n 적용
-          //   console.log(error)
-          //   message.error(this.$t("message.login.wrong"))
-          // }
         })
         .catch((error) => {
           console.log("error", error);
         });
+    },
+    async serverCheck() {
+      await worksApi
+        .get("/api/serverCheck")
+        .then((response) => {
+          this.statusMessage = this.$t("message.status.check.worksapi");
+          setTimeout(() => {
+            if (response.status === 200) {
+              this.statusDescription = this.$t(
+                "message.status.check.desc.worksapi.ok"
+              );
+
+              setTimeout(() => {
+                this.statusMessage = this.$t("message.status.check.moldapi");
+                if (response.data.result["Mold"] === 200) {
+                  this.statusDescription = this.$t(
+                    "message.status.check.desc.moldapi.ok"
+                  );
+
+                  setTimeout(() => {
+                    this.statusMessage = this.$t("message.status.check.dc");
+                    if (response.data.result["Works-DC"] === 200) {
+                      this.statusDescription = this.$t(
+                        "message.status.check.desc.dc.ok"
+                      );
+                      setTimeout(() => {
+                        this.statusMessage = this.$t("message.status.check.ad");
+                        if (response.data.result["Works-Samba"] === 200) {
+                          this.statusDescription = this.$t(
+                            "message.status.check.desc.ad.ok"
+                          );
+
+                          setTimeout(() => {
+                            //정상일 경우
+                            this.statusMessage = this.$t(
+                              "message.status.check.all.ok"
+                            );
+                            this.statusDescription = this.$t(
+                              "message.status.check.desc.all.ok"
+                            );
+                            this.statusType = "success";
+                            clearInterval(this.timer);
+                            setTimeout(() => {
+                              this.disabled = false;
+                              this.serverStatus = false;
+                            }, 1500);
+                          }, 500);
+                        } else {
+                          this.statusDescription = this.$t(
+                            "message.status.check.desc.ad.fail"
+                          );
+                          this.statusType = "error";
+                          return false;
+                        }
+                      }, 200);
+                    } else {
+                      this.statusDescription = this.$t(
+                        "message.status.check.desc.dc.fail"
+                      );
+                      this.statusType = "error";
+                      return false;
+                    }
+                  }, 200);
+                } else {
+                  this.statusDescription = this.$t(
+                    "message.status.check.desc.moldapi.fail"
+                  );
+                  this.statusType = "error";
+                  return false;
+                }
+              }, 200);
+            } else {
+              this.statusDescription = this.$t(
+                "message.status.check.desc.worksapi.fail"
+              );
+              this.statusType = "error";
+              return false;
+            }
+          }, 200);
+        })
+        .catch((error) => {
+          this.statusMessage = this.$t("message.status.check.worksapi");
+          this.statusDescription = this.$t(
+            "message.status.check.desc.worksapi.fail"
+          );
+          this.statusType = "error";
+          console.log(error.message);
+        })
+        .finally(() => {});
     },
   },
 });
@@ -254,6 +382,11 @@ export default defineComponent({
   border-style: none;
   display: block;
 }
+// .user-layout-logo {
+//   margin: 0 auto 2rem;
+//   border-style: none;
+//   display: block;
+// }
 .login-button {
   margin-top: 8px;
   padding: 0 15px;

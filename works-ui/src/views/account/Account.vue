@@ -9,11 +9,12 @@
               <Apath :paths="[$t('label.users')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
-                @click="reflesh()"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -24,6 +25,8 @@
                 <Actions
                   v-if="actionFrom === 'AccountList'"
                   :action-from="actionFrom"
+                  :multi-select-list="multiSelectList"
+                  @fetchData="refresh"
                 />
                 <a-button
                   type="primary"
@@ -43,7 +46,7 @@
       <a-layout-content>
         <div id="content-body">
           <AccountList
-            ref="listRefleshCall"
+            ref="listRefreshCall"
             @actionFromChange="actionFromChange"
           />
         </div>
@@ -79,7 +82,11 @@
         </a-form-item>
         <a-row :gutter="12">
           <a-col :md="24" :lg="12">
-            <a-form-item has-feedback name="lastName" :label="$t('label.lastname')">
+            <a-form-item
+              has-feedback
+              name="lastName"
+              :label="$t('label.lastname')"
+            >
               <a-input
                 v-model:value="formState.lastName"
                 :placeholder="$t('tooltip.user.lastname')"
@@ -107,12 +114,12 @@
               name="password"
               :label="$t('label.password')"
               :label-col="12"
-              autocomplete="off"
             >
               <a-input
                 v-model:value="formState.password"
                 type="password"
                 :placeholder="$t('tooltip.user.password')"
+                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
@@ -122,12 +129,12 @@
               name="passwordCheck"
               :label="$t('label.passwordCheck')"
               :label-col="12"
-              autocomplete="off"
             >
               <a-input
                 v-model:value="formState.passwordCheck"
                 type="password"
                 :placeholder="$t('tooltip.user.passwordCheck')"
+                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
@@ -146,6 +153,13 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
+        <a-form-item name="department" :label="$t('label.department')">
+          <a-input
+            v-model:value="formState.department"
+            :placeholder="$t('tooltip.user.department')"
+            class="addmodal-aform-item-div"
+          />
+        </a-form-item>
         <a-form-item name="title" :label="$t('label.title')">
           <a-input
             v-model:value="formState.title"
@@ -153,13 +167,6 @@
             class="addmodal-aform-item-div"
           />
         </a-form-item>
-        <!-- <a-form-item name="department" :label="$t('label.department')">
-          <a-input
-            v-model:value="formState.department"
-            :placeholder="$t('tooltip.user.department')"
-            class="addmodal-aform-item-div"
-          />
-        </a-form-item> -->
       </a-form>
     </a-modal>
     <!-- ADD WORKSPACE MODAL END  -->
@@ -196,8 +203,9 @@ export default defineComponent({
       passwordCheck: "",
       email: "",
       userGroup: "",
-      department: "",
       phone: "",
+      title: "",
+      department: "",
     });
     let validatePass = async (rule, value) => {
       let lengthCheck = value.length >= rule.min ? true : false; //길이체크
@@ -227,9 +235,9 @@ export default defineComponent({
       }
     };
     const rules = {
-      account: { required: true },
-      firstName: { required: true },
-      lastName: { required: true },
+      account: [{ required: true }, { max: 32 }],
+      firstName: [{ required: true }, { max: 32 }],
+      lastName: [{ required: true }, { max: 32 }],
       password: {
         min: 7,
         required: true,
@@ -249,7 +257,8 @@ export default defineComponent({
         required: false,
         pattern: /^\d{2,3}-\d{3,4}-\d{4}$/,
       },
-      title: { required: false },
+      title: [{ required: false }, { max: 32 }],
+      department: [{ required: false }, { max: 32 }],
     };
     return {
       labelCol: { span: 10 },
@@ -266,25 +275,36 @@ export default defineComponent({
     return {
       addModalTitle: this.$t("label.user.add"),
       actionFrom: ref("Account"),
+      multiSelectList: ref([]),
     };
   },
   created() {
-    this.rules.account.message = this.$t("input.user.account");
-    this.rules.firstName.message = this.$t("input.user.firstname");
-    this.rules.lastName.message = this.$t("input.user.lastname");
+    this.rules.account[0].message = this.$t("input.user.account");
+    this.rules.firstName[0].message = this.$t("input.user.firstname");
+    this.rules.lastName[0].message = this.$t("input.user.lastname");
     this.rules.password.message = this.$t("input.user.password");
     this.rules.passwordCheck.message = this.$t("input.user.passwordCheck");
     this.rules.email.message = this.$t("input.user.email");
     this.rules.phone.message = this.$t("input.user.phone");
-    this.rules.title.message = this.$t("input.user.title");
+    this.rules.title[0].message = this.$t("input.user.title");
+    this.rules.department[0].message = this.$t("input.user.department");
+
+    this.rules.account[1].message = this.$t("input.max.32");
+    this.rules.title[1].message = this.$t("input.max.32");
+    this.rules.firstName[1].message = this.$t("input.max.32");
+    this.rules.lastName[1].message = this.$t("input.max.32");
+    this.rules.department[1].message = this.$t("input.max.32");
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall.fetchRefresh();
     },
-    actionFromChange(val) {
-      //console.log(val);
-      this.actionFrom = ref(val);
+    actionFromChange(val, obj) {
+      this.actionFrom = "Account";
+      setTimeout(() => {
+        this.actionFrom = val;
+        this.multiSelectList = obj;
+      }, 100);
     },
     putUser() {
       let params = new URLSearchParams();
@@ -295,6 +315,7 @@ export default defineComponent({
       params.append("email", this.formState.email);
       params.append("phone", this.formState.phone);
       params.append("title", this.formState.title);
+      params.append("department", this.formState.department);
 
       //console.log(params);
       this.formRef
@@ -303,11 +324,13 @@ export default defineComponent({
           worksApi //이름 중복 확인 체크
             .get("/api/v1/user/" + this.formState.account)
             .then((response) => {
-              if (response.status === 200) { //중복일 때 
+              if (response.status === 200) {
+                //중복일 때
                 message.error(this.$t("message.name.dupl"));
               }
             })
-            .catch((error) => {//중복 이름 없을 때
+            .catch((error) => {
+              //중복 이름 없을 때
               message.loading(this.$t("message.user.createing"), 1);
               worksApi
                 .put("/api/v1/user", params)
@@ -318,13 +341,14 @@ export default defineComponent({
                   } else {
                     message.error(this.$t("message.user.create.fail"));
                   }
-                  this.showModal(false);
-                  setTimeout(() => {
-                    this.$refs.listRefleshCall.fetchData();
-                  }, 1500);
                 })
                 .catch((error) => {
-                  message.error(error);
+                  message.error(this.$t("message.user.create.fail"));
+                  console.log("error", error);
+                })
+                .finally(() => {
+                  this.showModal(false);
+                  this.$refs.listRefreshCall.fetchRefresh();
                 });
             });
         })
@@ -350,7 +374,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -358,6 +382,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

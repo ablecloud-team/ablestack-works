@@ -122,13 +122,6 @@ export default defineComponent({
       rowSelection,
       state,
       addDesktopQuantity,
-      pagination: {
-        pageSize: 10,
-        showSizeChanger: true, // display can change the number of pages per page
-        pageSizeOptions: ["10", "20", "30", "50"], // number of pages per option
-        showTotal: (total) => `Total ${total} items`, // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
-      },
       //actionFrom: ref(props.actionFrom),
     };
   },
@@ -143,6 +136,14 @@ export default defineComponent({
       userDataList: [],
       selectedUser: ref(""),
       selectedVmQuantity: ref(1),
+      pagination: {
+        pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
       columns: [
         {
           dataIndex: "name",
@@ -207,11 +208,11 @@ export default defineComponent({
               });
             }
           } else {
-            message.error(this.t("message.response.data.fail"));
+            message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
           message.error(error);
           //console.log(error);
         });
@@ -227,7 +228,7 @@ export default defineComponent({
       //       //console.log("데이터를 정상적으로 가져오지 못했습니다.");
       //     }
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     console.log(error);
       //   });
       setTimeout(() => {
@@ -253,9 +254,9 @@ export default defineComponent({
       //       message.error(response.data.result.createuserresponse.errortext);
       //     }
       //     changeModal('user', false)
-      //     //this.$refs.listRefleshCall.fetchData();
+      //     //this.$refs.listRefreshCall.fetchData();
       //   })
-      //   .catch(function (error) {
+      //   .catch((error) => {
       //     message.error(error.message);
       //   //console.log(error);
       //   });

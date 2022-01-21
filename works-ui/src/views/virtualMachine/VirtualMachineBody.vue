@@ -4,8 +4,13 @@
       <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <ACard bordered style="min-height: 300px">
-          <VirtualMachineInfoCard 
-            ref="listRefleshCall1"
+          <VirtualMachineInfoCard
+            ref="listRefreshCall1"
+            :vmDbDataInfo="vmDbDataInfo"
+            :vmMoldDataInfo="vmMoldDataInfo"
+            :vmNetworkInfo="vmNetworkInfo"
+            :vmDiskInfo="vmDiskInfo"
+            :cpuused="cpuused"
           />
         </ACard>
       </ACol>
@@ -13,8 +18,12 @@
       <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <ACard bordered>
-          <VirtualMachineTab 
-            ref="listRefleshCall2"
+          <VirtualMachineTab
+            ref="listRefreshCall2"
+            :vmDbDataInfo="vmDbDataInfo"
+            :vmMoldDataInfo="vmMoldDataInfo"
+            :vmNetworkInfo="vmNetworkInfo"
+            :vmDiskInfo="vmDiskInfo"
           />
         </ACard>
       </ACol>
@@ -23,14 +32,38 @@
 </template>
 
 <script>
-// import TabbedContent from "@/components/TabbedContent";
-import VirtualMachineTab from "./VirtualMachineTab.vue";
 import { defineComponent, ref } from "vue";
 import VirtualMachineInfoCard from "./VirtualMachineInfoCard.vue";
+import VirtualMachineTab from "./VirtualMachineTab.vue";
 
 export default defineComponent({
   components: { VirtualMachineTab, VirtualMachineInfoCard },
   props: {
+    vmDbDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmMoldDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmNetworkInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmDiskInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    cpuused: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   setup() {
     return {
@@ -38,9 +71,9 @@ export default defineComponent({
     };
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall1.reflesh();
-      this.$refs.listRefleshCall2.reflesh();
+    fetchRefresh() {
+      this.$refs.listRefreshCall1.fetchRefresh();
+      this.$refs.listRefreshCall2.fetchRefresh();
     },
   },
 });

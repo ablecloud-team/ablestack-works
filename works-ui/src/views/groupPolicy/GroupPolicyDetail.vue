@@ -66,7 +66,8 @@ export default defineComponent({
             //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
     },
@@ -87,7 +88,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -95,6 +96,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

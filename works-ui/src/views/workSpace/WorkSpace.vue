@@ -9,11 +9,12 @@
               <Apath :paths="[$t('label.workspace')]" />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
-                @click="reflesh()"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
@@ -23,6 +24,8 @@
                 <Actions
                   v-if="actionFrom === 'WorkspaceList'"
                   :action-from="actionFrom"
+                  :multi-select-list="multiSelectList"
+                  @fetchData="refresh"
                 />
                 <a-button
                   type="primary"
@@ -42,7 +45,7 @@
       <a-layout-content>
         <div id="content-body">
           <WorkSpaceList
-            ref="listRefleshCall"
+            ref="listRefreshCall"
             @actionFromChange="actionFromChange"
           />
         </div>
@@ -93,10 +96,7 @@
         </a-form-item>
         <!--워크스페이스 설명 end-->
         <!--워크스페이스 타입 start-->
-        <a-form-item
-          name="workspaceType"
-          :label="$t('label.type')"
-        >
+        <a-form-item name="workspaceType" :label="$t('label.type')">
           <!-- <a-select
             v-model:value="formState.workspaceType"
             :placeholder="$t('tooltip.workspace.type')"
@@ -109,7 +109,11 @@
           <a-radio-group
             v-model:value="formState.workspaceType"
             button-style="solid"
-            @change="selected => { workspaceTypeChange(selected) }"
+            @change="
+              (selected) => {
+                workspaceTypeChange(selected);
+              }
+            "
           >
             <a-radio-button value="desktop">{{
               $t("label.desktop")
@@ -126,12 +130,6 @@
           name="dedicatedOrSharedBoolean"
           :label="$t('label.dedicated.shared')"
         >
-          <!-- {{ $t(switchLabel) }}
-            <a-switch
-              v-model:checked="formState.dedicatedOrSharedBoolean"
-              @change="dedicatedChange"
-            /> -->
-
           <a-radio-group
             v-model:value="formState.dedicatedOrSharedBoolean"
             button-style="solid"
@@ -157,16 +155,14 @@
             show-search
             option-filter-prop="label"
             class="addmodal-aform-item-div"
-            
           >
             <a-select-option
               v-for="option in templates"
               :key="option.name"
               :value="option.id"
               :label="option.name"
-              
             >
-              {{ option.name + '(' + option.version +')' }}
+              {{ option.name + "(" + option.version + ")" }}
             </a-select-option>
           </a-select>
         </a-form-item>
@@ -205,7 +201,7 @@
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceList from "./WorkSpaceList";
-import { defineComponent, onMounted, reactive, ref, toRaw } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 
@@ -226,8 +222,8 @@ export default defineComponent({
     const formState = reactive({
       name: ref(""),
       description: ref(""),
-      selectedMasterTemplateId: ref(""),
-      selectedOfferingId: ref(""),
+      selectedMasterTemplateId: undefined,
+      selectedOfferingId: undefined,
       workspaceType: ref("desktop"),
       dedicatedOrSharedBoolean: ref(false),
       desktopBoolean: ref(true),
@@ -272,7 +268,6 @@ export default defineComponent({
       formRef,
       formState,
       rules,
-      switchLabel: ref("label.dedicated"),
       visible,
       showModal,
     };
@@ -281,6 +276,7 @@ export default defineComponent({
     return {
       addModalTitle: this.$t("label.workspace.add"),
       actionFrom: ref("Workspace"),
+      multiSelectList: ref([]),
     };
   },
   created() {
@@ -288,50 +284,55 @@ export default defineComponent({
     this.rules.name.message = this.$t("input.workspace.name");
     this.rules.description.message = this.$t("input.workspace.description");
     this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
-    this.rules.selectedMasterTemplateId.message = this.$t("input.workspace.selectedTemplateId");
-    this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
+    this.rules.selectedMasterTemplateId.message = this.$t(
+      "input.workspace.selectedTemplateId"
+    );
+    this.rules.selectedOfferingId.message = this.$t(
+      "input.workspace.selectedOfferingId"
+    );
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.fetchData();
+    refresh() {
+      this.$refs.listRefreshCall.fetchRefresh();
     },
-    actionFromChange(val) {
-      this.actionFrom = ref(val);
-    },
-    dedicatedChange(value) {
-      this.dedicatedOrSharedBoolean = value;
-      if (this.dedicatedOrSharedBoolean) {
-        this.switchLabel = ref("label.shared");
-        //console.log("true");
-      } else {
-        this.switchLabel = ref("label.dedicated");
-        //console.log("false");
-      }
+    actionFromChange(val, obj) {
+      // console.log(val, obj);
+      this.actionFrom = "Workspace";
+      setTimeout(() => {
+        this.actionFrom = val;
+        this.multiSelectList = obj;
+      }, 100);
     },
     workspaceTypeChange(value) {
       this.formState.selectedMasterTemplateId = ref("");
       if (value.target.value === "application") {
-        this.formState.desktopBoolean = ref(false);
+        this.formState.desktopBoolean = false;
         this.templates = this.applicationTemplates;
       } else {
-        this.formState.desktopBoolean = ref(true);
+        this.formState.desktopBoolean = true;
         this.templates = this.desktopTemplates;
       }
     },
     putWorkspace() {
       this.rules.name.message = this.$t("input.workspace.name");
       this.rules.description.message = this.$t("input.workspace.description");
-      this.rules.workspaceType.message = this.$t("input.workspace.workspaceType");
-      this.rules.selectedMasterTemplateId.message = this.$t("input.workspace.selectedTemplateId");
-      this.rules.selectedOfferingId.message = this.$t("input.workspace.selectedOfferingId");
+      this.rules.workspaceType.message = this.$t(
+        "input.workspace.workspaceType"
+      );
+      this.rules.selectedMasterTemplateId.message = this.$t(
+        "input.workspace.selectedTemplateId"
+      );
+      this.rules.selectedOfferingId.message = this.$t(
+        "input.workspace.selectedOfferingId"
+      );
 
       // 실제 template uuid 를 넘겨주기 위함.
       var realTemplateId = "";
       var masterTemplateName = "";
       for (let str of this.templates) {
-        if(str.id === this.formState.selectedMasterTemplateId){
+        if (str.id === this.formState.selectedMasterTemplateId) {
           realTemplateId = str.templateId;
-          masterTemplateName =str.name + "(" +str.version + ")";
+          masterTemplateName = str.name + "(" + str.version + ")";
           break;
         }
       }
@@ -358,31 +359,34 @@ export default defineComponent({
             })
             .catch((error) => {
               //이름 중복이 아닐때(status code = 401)
-              message.loading(this.$t("message.workspace.createing"), 1);
+              message.loading(this.$t("message.workspace.createing"));
               worksApi
-                .put("/api/v1/workspace", params)
+                .post("/api/v1/workspace", params)
                 .then((response) => {
+                  message.destroy();
                   if (response.status === 200) {
-                    message.loading(
-                      this.$t("message.workspace.create.success"),1
+                    message.success(
+                      this.$t("message.workspace.create.success"),
+                      10
                     );
                   } else {
                     message.error(this.$t("message.workspace.create.fail"));
                   }
                   this.showModal(false);
-                  setTimeout(() => {
-                    this.$refs.listRefleshCall.fetchData();
-                  }, 1500);
                 })
-                .catch(function (error) {
-                  message.error(error);
-                  //console.log(error);
+                .catch((error) => {
+                  message.destroy();
+                  message.error(this.$t("message.workspace.create.fail"));
+                  console.log(error);
+                })
+                .finally(() => {
+                  this.showModal(false);
+                  this.$refs.listRefreshCall.fetchRefresh();
                 });
             });
         })
         .catch((error) => {
           console.log("error", error);
-          //message.error(error);
         });
     },
     fetchOfferingsAndTemplates() {
@@ -390,24 +394,38 @@ export default defineComponent({
         .get("/api/v1/offering")
         .then((response) => {
           if (response.status == 200) {
-            this.offerings = response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
-            const masterTemplates = response.data.templateList.listdesktopmasterversionsresponse.desktopmasterversion;
+            this.offerings =
+              response.data.serviceOfferingList.listserviceofferingsresponse.serviceoffering;
+            const masterTemplates =
+              response.data.templateList.listdesktopmasterversionsresponse
+                .desktopmasterversion;
 
             for (let str of masterTemplates) {
-              if(str.mastertemplatetype === "DESKTOP"){
-                this.desktopTemplates.push({ id: str.id, templateId: str.templateid, name: str.name, version: str.version });
+              if (str.mastertemplatetype === "DESKTOP") {
+                this.desktopTemplates.push({
+                  id: str.id,
+                  templateId: str.templateid,
+                  name: str.name,
+                  version: str.version,
+                });
                 this.templates = this.desktopTemplates; //기본값 desktop용 template 목록 세팅
-              } else if(str.mastertemplatetype === "APP"){
-                this.applicationTemplates.push({ id: str.id, templateId: str.templateid, name: str.name, version: str.version });
+              } else if (str.mastertemplatetype === "APP") {
+                this.applicationTemplates.push({
+                  id: str.id,
+                  templateId: str.templateid,
+                  name: str.name,
+                  version: str.version,
+                });
               }
             }
           } else {
             //console.log(response.message);
           }
         })
-        .catch(function (error) {
-          message.error(error.message);
-          //console.log(error);
+        .catch((error) => {
+          message.destroy();
+          message.error(this.$t("message.response.data.fail"));
+          console.log(error);
         });
     },
   },
@@ -427,7 +445,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -435,6 +453,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

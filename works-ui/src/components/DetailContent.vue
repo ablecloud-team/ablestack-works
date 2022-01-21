@@ -1,6 +1,9 @@
 <template>
   <a-spin :spinning="spinning">
-    <a-list v-if="actionFrom === 'VirtualMachineDetail'" item-layout="horizontal">
+    <a-list
+      v-if="actionFrom === 'VirtualMachineDetail'"
+      item-layout="horizontal"
+    >
       <a-list-item>
         <strong>{{ $t("label.name") }}</strong>
         <br />
@@ -13,12 +16,18 @@
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.vm.state") }}</strong>
-        <br />{{vmDbDataInfo.state}}
-        
+        <br />{{ vmDbDataInfo.state }}
+
         {{
-          vmMoldDataInfo.state == "Running"
+          vmDbDataInfo.mold_status === "Running"
             ? $t("label.vm.status.running")
-            : $t("label.vm.status.stopped")
+            : vmDbDataInfo.mold_status === "Starting"
+            ? $t("label.vm.status.starting")
+            : vmDbDataInfo.mold_status === "Stopping"
+            ? $t("label.vm.status.stopping")
+            : vmDbDataInfo.mold_status === "Stopped"
+            ? $t("label.vm.status.stopped")
+            : ""
         }}
       </a-list-item>
       <a-list-item>
@@ -51,67 +60,73 @@
         {{ vmMoldDataInfo.pooltype }}
       </a-list-item>
     </a-list>
-    <a-list v-if="actionFrom === 'UserDetail'" item-layout="horizontal">
+    <a-list
+      v-if="actionFrom === 'UserDetail' || actionFrom === 'AccountDetail'"
+      item-layout="horizontal"
+    >
       <a-list-item>
-        <strong>{{ $t("label.account") }}</strong
-        ><br />
-        {{ userDataInfo.username }}
+        <strong>{{ $t("label.account") }}</strong>
+        <br />
+        {{ accountInfo.username }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.country") }}</strong
-        ><br />
-        {{ userDataInfo.co }}
+        <strong>{{ $t("label.country") }}</strong>
+        <br />
+        {{ accountInfo.co }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.countryCode") }}</strong
-        ><br />
-        {{ userDataInfo.countryCode }}
+        <strong>{{ $t("label.countryCode") }}</strong>
+        <br />
+        {{ accountInfo.countryCode }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.title") }}</strong
-        ><br />
-        {{ userDataInfo.title }}
+        <strong>{{ $t("label.title") }}</strong>
+        <br />
+        {{ accountInfo.title }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.email") }}</strong
-        ><br />
-        {{ userDataInfo.mail }}
+        <strong>{{ $t("label.department") }}</strong>
+        <br />
+        {{ accountInfo.department }}
+      </a-list-item>
+      <a-list-item>
+        <strong>{{ $t("label.email") }}</strong>
+        <br />
+        {{ accountInfo.mail }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.isAdmin") }}</strong
         ><br />
-        {{ userDataInfo.isAdmin }}
+        {{ accountInfo.isAdmin }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.telephoneNumber") }}</strong
-        ><br />
-        {{ userDataInfo.telephoneNumber }}
+        <strong>{{ $t("label.telephoneNumber") }}</strong>
+        <br />
+        {{ accountInfo.telephoneNumber }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.userPrincipalName") }}</strong
-        ><br />
-        {{ userDataInfo.userPrincipalName }}
+        <strong>{{ $t("label.userPrincipalName") }}</strong>
+        <br />
+        {{ accountInfo.userPrincipalName }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.distinguishedName") }}</strong
-        ><br />
-        {{ userDataInfo.distinguishedName }}
+        <strong>{{ $t("label.distinguishedName") }}</strong>
+        <br />
+        {{ accountInfo.distinguishedName }}
       </a-list-item>
     </a-list>
     <a-list v-if="actionFrom === 'GroupPolicyDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ userDataInfo.username }}
+        {{ accountInfo.username }}
       </a-list-item>
     </a-list>
   </a-spin>
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "DetailContent",
@@ -121,67 +136,45 @@ export default defineComponent({
       required: true,
       default: null,
     },
+    vmDbDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmMoldDataInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    accountInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   setup(props) {
-     const state = reactive({
-      actionFrom: ref(props.actionFrom),
-    });
     return {
-      state,
+      actionFrom: ref(props.actionFrom),
     };
   },
   data() {
     return {
       spinning: ref(true),
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
       userDataInfo: ref([]),
     };
   },
   created() {
-    this.reflesh();
+    this.fetchRefresh();
   },
   methods: {
-    reflesh() {
+    fetchRefresh() {
       this.fetchData();
       this.spinning = true;
+    },
+    fetchData() {
       setTimeout(() => {
         this.spinning = false;
       }, 500);
-    },
-    fetchData() {
-      // 가상머신 상세조회
-      if (this.state.actionFrom == "VirtualMachineDetail") {
-        worksApi
-        .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-        .then((response) => {
-          if (response.status === 200) {
-            this.vmDbDataInfo = response.data.result.instanceDBInfo;
-            this.vmMoldDataInfo =
-              response.data.result.instanceMoldInfo.virtualmachine[0];
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      }else if (this.state.actionFrom === "UserDetail") {
-        worksApi
-          .get("/api/v1/user/" + this.$route.params.userName)
-          .then((response) => {
-            if (response.status == 200) {
-              this.userDataInfo = response.data.result;
-            } else {
-              message.error(this.$t("message.response.data.fail"));
-              //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-            }
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      }
     },
   },
 });

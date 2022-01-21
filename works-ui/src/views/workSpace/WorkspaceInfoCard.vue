@@ -25,12 +25,26 @@
           <a-badge
             class="head-example"
             :color="
-              workspaceInfo.template_ok_check == 'AgentOK' ? 'green' : 'red'
+              workspaceInfo.template_ok_check === 'Not Ready' ||
+              workspaceInfo.template_ok_check === 'Pending'
+                ? 'red'
+                : workspaceInfo.template_ok_check === 'Joining' ||
+                  workspaceInfo.template_ok_check === 'Joined'
+                ? 'yellow'
+                : workspaceInfo.template_ok_check === 'Ready'
+                ? 'green'
+                : 'red'
             "
             :text="
-              workspaceInfo.template_ok_check == 'AgentOK'
-                ? $t('label.enable')
-                : $t('label.disable')
+              workspaceInfo.template_ok_check === 'Not Ready' ||
+              workspaceInfo.template_ok_check === 'Pending'
+                ? $t('label.vm.status.initializing')
+                : workspaceInfo.template_ok_check === 'Joining' ||
+                  workspaceInfo.template_ok_check === 'Joined'
+                ? $t('label.vm.status.configuring')
+                : workspaceInfo.template_ok_check === 'Ready'
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
             "
           />
           : [{{ workspaceInfo.template_ok_check }}]
@@ -41,9 +55,6 @@
     <div id="ID" class="CardItem">
       <div class="ItemName">ID</div>
       <div class="Item">
-        <a-button shape="circle" type="dashed">
-          <BarcodeOutlined />
-        </a-button>
         {{ workspaceInfo.uuid }}
       </div>
     </div>
@@ -98,7 +109,7 @@
 
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.compute.offering") }}</div>
-      <div class="Item">{{ offeringDataList.displaytext }}</div>
+      <div class="Item">{{ offeringInfo.displaytext }}</div>
     </div>
   </a-spin>
 </template>
@@ -109,44 +120,33 @@ import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
   components: {},
-  props: {},
+  props: {
+    workspaceInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    offeringInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
   data() {
     return {
       spinning: ref(true),
-      workspaceInfo: ref([]),
-      //templateDataList: ref([]),
-      offeringDataList: ref([]),
-      workspaceUuid: ref(this.$route.params.workspaceUuid),
     };
   },
   created() {
-    this.reflesh();
+    this.fetchRefresh(true);
   },
   methods: {
-    reflesh() {
-      this.fetchData();
-      this.spinning = true;
+    fetchRefresh(refreshClick) {
+      if (refreshClick) this.spinning = true;
+      else this.spinning = false;
       setTimeout(() => {
         this.spinning = false;
       }, 500);
-    },
-    fetchData() {
-      worksApi
-        .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
-        .then((response) => {
-          if (response.status == 200) {
-            this.workspaceInfo = response.data.result.workspaceInfo;
-            //this.templateDataList = response.data.result.templateInfo.template[0];
-            this.offeringDataList =
-              response.data.result.serviceOfferingInfo.serviceoffering[0];
-          } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
   },
 });

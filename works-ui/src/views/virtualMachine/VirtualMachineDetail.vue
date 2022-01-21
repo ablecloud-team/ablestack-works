@@ -9,24 +9,27 @@
               <Apath
                 :paths="[
                   { name: $t('label.vm'), component: 'VirtualMachine' },
-                  { name: vmName, component: null },
+                  { name: vmDbDataInfo.name, component: null },
                 ]"
               />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
-                @click="reflesh()"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
+                v-if="actionFrom === 'VirtualMachineDetail'"
                 :action-from="actionFrom"
-                @fetchData="reflesh"
+                :vm-info="vmDbDataInfo"
+                @fetchData="refresh"
               />
             </a-col>
           </a-row>
@@ -34,7 +37,14 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody ref="listRefleshCall"/>
+          <VirtualMachineBody
+            ref="listRefreshCall"
+            :vmDbDataInfo="vmDbDataInfo"
+            :vmMoldDataInfo="vmMoldDataInfo"
+            :vmNetworkInfo="vmNetworkInfo"
+            :vmDiskInfo="vmDiskInfo"
+            :cpuused="cpuused"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -54,22 +64,52 @@ export default defineComponent({
   props: {},
   setup() {
     return {
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
-      actionFrom: ref("VirtualMachineDetail"),
+      actionFrom: ref(""),
     };
   },
   data() {
     return {
-      vmUuid: ref(this.$route.params.vmUuid),
-      vmName: ref(this.$route.params.vmName),
+      vmDbDataInfo: ref([]),
+      vmMoldDataInfo: ref([]),
+      vmNetworkInfo: ref([]),
+      vmDiskInfo: ref([]),
+      cpuused: ref(0),
     };
   },
   created() {
+    this.fetchData();
   },
   methods: {
-    reflesh() {
-      this.$refs.listRefleshCall.reflesh();
+    refresh() {
+      this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
+    },
+    async fetchData() {
+      try {
+        const response = await worksApi.get(
+          "/api/v1/instance/detail/" + this.$route.params.vmUuid
+        );
+
+        if (response.status === 200) {
+          //console.log(response.data.result.instanceDBInfo);
+          this.vmDbDataInfo = response.data.result.instanceDBInfo;
+          this.vmMoldDataInfo =
+            response.data.result.instanceMoldInfo.virtualmachine[0];
+          this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
+          this.vmDiskInfo =
+            response.data.result.instanceInstanceVolumeInfo.volume[0];
+          this.cpuused =
+            response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
+              "%"
+            )[0];
+        } else {
+          message.error(this.$t("message.response.data.fail"));
+        }
+      } catch (error) {
+        console.log(error);
+        message.error(this.$t("message.response.data.fail"));
+      }
+      this.actionFrom = "VirtualMachineDetail";
     },
   },
 });
@@ -88,7 +128,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -96,6 +136,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

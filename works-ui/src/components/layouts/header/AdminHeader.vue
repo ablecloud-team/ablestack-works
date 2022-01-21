@@ -1,5 +1,5 @@
 <template>
-  <a-row class="user-menu">
+  <a-row>
     <a-col :span="12">
       <menu-unfold-outlined
         v-if="state.collapsed"
@@ -10,7 +10,7 @@
     </a-col>
     <a-col
       :span="12"
-      style="float: right; text-align: right; padding-right: 40px"
+      style="float: right; text-align: right; padding-right: 5px"
     >
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
@@ -24,42 +24,42 @@
           </a>
         </a-button>
         <template #overlay>
-          <a-menu :selected-keys="[language]" @click="setLocaleClick">
+          <a-menu
+            v-model:selected-keys="[language]"
+            mode="inline"
+            @click="setLocaleClick"
+          >
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+            <a-menu-divider />
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
-      <a-button type="text" shape="circle" class="header-notice-button">
+      <!-- <a-button type="text" shape="circle" class="header-notice-button">
         <a class="ant-dropdown-link" @click.prevent>
           <BellOutlined class="header-notice-icon" />
         </a>
-      </a-button>
+      </a-button> -->
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
+            {{ username }}
           </a>
         </a-button>
         <template #overlay>
-          <a-menu style="width: 100%">
-            <a-menu-item key="a">
-              <template #icon>
-                <UserOutlined />
-              </template>
-              <router-link :to="{ path: '/accountDetail/' + username }" style="margin-left: 4px;">
-                {{ $t("label.profile") }}
-              </router-link>
+          <a-menu selected-keys="" mode="inline">
+            <a-menu-item key="1" @click="userinfo">
+              <UserOutlined />{{ $t("label.profile") }}
             </a-menu-item>
-            <a-menu-item key="b" @click="logoutSubmit">
-              <template #icon>
-                <LogoutOutlined />
-              </template>
-              {{ $t("label.logout") }}
+            <a-menu-divider />
+            <a-menu-item key="2" @click="logoutSubmit">
+              <LogoutOutlined />{{ $t("label.logout") }}
             </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
+
       <!-- <a-popover placement="bottom">
         <template #content>
           <a-button type="text" @click="setLocaleClick() $i18n.locale = 'ko'">한국어</a-button>
@@ -104,7 +104,7 @@
 <script>
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosUserDetail, axiosLogout } from "@/api/index";
+import { axiosLogout } from "@/api/index";
 import store from "@/store/index";
 import router from "@/router";
 export default defineComponent({
@@ -115,7 +115,6 @@ export default defineComponent({
   },
   emits: ["setCollapsed"],
   setup(props) {
-    let res;
     const state = reactive({
       //userID: "",
       collapsed: ref(props.collapsed),
@@ -127,7 +126,7 @@ export default defineComponent({
   data() {
     return {
       language: ref(""),
-      loadedLanguage: [],
+      loadedLanguage: ref[""],
       username: ref(""),
     };
   },
@@ -173,19 +172,22 @@ export default defineComponent({
         await router.push({ name: "Login" });
       }
     },
-    setLanguage(lang, message) {
-      if (i18n) {
-        i18n.locale = lang;
-        if (message && Object.keys(message).length > 0) {
-          i18n.setLocaleMessage(lang, message);
-        }
-      }
-      if (!this.loadedLanguage.includes(lang)) {
-        this.loadedLanguage.push(lang);
-      }
-      if (message && Object.keys(message).length > 0) {
-        messages[lang] = message;
-      }
+    // setLanguage(lang, message) {
+    //   if (i18n) {
+    //     i18n.locale = lang;
+    //     if (message && Object.keys(message).length > 0) {
+    //       i18n.setLocaleMessage(lang, message);
+    //     }
+    //   }
+    //   if (!this.loadedLanguage.includes(lang)) {
+    //     this.loadedLanguage.push(lang);
+    //   }
+    //   if (message && Object.keys(message).length > 0) {
+    //     messages[lang] = message;
+    //   }
+    // },
+    userinfo() {
+      router.push({ path: "/accountDetail/" + this.username });
     },
   },
 });

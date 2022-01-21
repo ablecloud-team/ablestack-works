@@ -9,6 +9,9 @@ module.exports = {
     },
   },
   css: {
-    extract: true
-  }
+    extract: true,
+  },
+  devServer: {
+    historyApiFallback: true,
+  },
 };

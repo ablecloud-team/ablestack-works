@@ -9,32 +9,35 @@
               <Apath
                 :paths="[
                   { name: $t('label.users'), component: 'Account' },
-                  { name: userName, component: null },
+                  { name: accountInfo.name, component: null },
                 ]"
               />
               <a-button
                 shape="round"
-                style="margin-left: 20px; height: 30px"
-                @click="reflesh()"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
               >
                 <template #icon>
-                  <ReloadOutlined /> {{ $t("label.reflesh") }}
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
                 </template>
               </a-button>
             </a-col>
 
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
-              <Actions :action-from="actionFrom" />
+              <Actions
+                v-if="actionFrom === 'AccountDetail'"
+                :action-from="actionFrom"
+                :account-info="accountInfo"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody 
-            ref="listRefleshCall"
-          />
+          <AccountBody ref="listRefreshCall" :account-info="accountInfo" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -57,35 +60,37 @@ export default defineComponent({
   props: {},
   setup() {
     return {
-      actionFrom: ref("AccountDetail"),
+      actionFrom: ref(""),
     };
   },
   data() {
     return {
-      userName: ref(this.$route.params.userName),
+      accountInfo: ref([]),
     };
   },
   created() {
     this.fetchData();
   },
   methods: {
-    reflesh() { 
-      this.$refs.listRefleshCall.reflesh();
+    refresh() {
+      this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
     },
-    fetchData() {
-      worksApi
-        .get("/api/v1/user/" + this.$route.params.userName)
+    async fetchData() {
+      await worksApi
+        .get("/api/v1/user/" + this.$route.params.accountName)
         .then((response) => {
           if (response.status == 200) {
-            this.userDataInfo = response.data.result;
+            this.accountInfo = response.data.result;
           } else {
             message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
-        .catch(function (error) {
+        .catch((error) => {
+          message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
+      this.actionFrom = "AccountDetail";
     },
   },
 });
@@ -104,7 +109,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -112,6 +117,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {
