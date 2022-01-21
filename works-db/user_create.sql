@@ -1,0 +1,3 @@
+CREATE USER works@'%' IDENTIFIED BY 'Ablecloud1!';
+GRANT ALL ON *.* TO works@'%';
+FLUSH PRIVILEGES;
