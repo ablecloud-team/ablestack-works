@@ -23,7 +23,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody :name="name" :info="info" />
+          <AccountBody :name="name" :info="info" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -33,14 +33,14 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import UserBody from "@/views/users/UserBody";
+import AccountBody from "@/views/account/AccountBody";
 import { defineComponent } from "vue";
 export default defineComponent({
   props: {
     name: String,
     info: Object,
   },
-  components: { UserBody, Apath, Actions },
+  components: { AccountBody, Apath, Actions },
 });
 </script>
 
@@ -57,7 +57,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -65,6 +65,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

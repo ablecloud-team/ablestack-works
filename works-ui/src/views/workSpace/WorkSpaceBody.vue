@@ -1,17 +1,28 @@
 <template>
-  <a-space direction="horizontal" id="content-space">
-    <a-row style="min-height: 400px" id="content-row">
+  <a-space id="content-space" direction="horizontal">
+    <a-row id="content-row" style="min-height: 400px">
       <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
-        <ACard bordered style="min-height: 300px">
-          <InfoCard :name="name" :tags="['test', 'tag', 'list']" :info="info" />
-        </ACard>
+        <a-card bordered style="min-height: 300px">
+          <WorkspaceInfoCard
+            ref="listRefreshCall1"
+            :workspace-info="workspaceInfo"
+            :offering-info="offeringInfo"
+          />
+        </a-card>
       </a-col>
 
       <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
-          <WorkSpaceTab />
+          <WorkSpaceTab
+            ref="listRefreshCall2"
+            :workspace-info="workspaceInfo"
+            :network-list="networkList"
+            :vm-list="vmList"
+            :group-info="groupInfo"
+            @parentRefresh="parentRefresh"
+          />
         </a-card>
       </a-col>
     </a-row>
@@ -19,15 +30,52 @@
 </template>
 
 <script>
-import InfoCard from "../../components/InfoCard";
+import { defineComponent, ref } from "vue";
 import WorkSpaceTab from "./WorkSpaceTab";
-import { defineComponent } from "vue";
+import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 
 export default defineComponent({
-  components: { WorkSpaceTab, InfoCard },
+  components: { WorkSpaceTab, WorkspaceInfoCard },
   props: {
-    name: String,
-    info: Object,
+    workspaceInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    offeringInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    networkList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    groupInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
+  emits: ["parentRefresh"],
+  setup() {
+    return {};
+  },
+  created() {},
+  methods: {
+    fetchRefresh(refreshClick) {
+      this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
+    },
+    parentRefresh() {
+      this.$emit("parentRefresh");
+    },
   },
 });
 </script>

@@ -3,16 +3,45 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
 	"os"
-	"time"
 )
 
-type Configuration struct {
-	Id, Name, Category, Value, DefaultValue, Description string
-	UpdateDate                                           time.Time
+type settingInfo struct {
+	Database struct {
+		TYPE string `json:"type"`
+		User struct {
+			ID       string `json:"id"`
+			Password string `json:"password"`
+		} `json:"user"`
+		Host struct {
+			Address  string `json:"address"`
+			Port     string `json:"port"`
+			Protocol string `json:"protocol"`
+		} `json:"host"`
+		DB string `json:"db"`
+	} `json:"database"`
+}
+
+//WorksConfig
+var WorksConfig settingInfo
+
+func getWorksInfo() settingInfo {
+	file, err := os.Open("properties.json")
+	defer file.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&WorksConfig)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(WorksConfig)
+	return WorksConfig
 }
 
 func DBSetting() {
@@ -365,10 +394,57 @@ func ClusterNameSetting() {
 	for _, v := range jsonUnmarshal {
 		clusterValue[v.Name] = v.Value
 	}
-	clutsterName := clusterValue["cluster.default.name"].(string)
+	clusterName := clusterValue["cluster.default.name"].(string)
 
 	log.WithFields(logrus.Fields{
 		"worksInit": "WorksSetting",
-	}).Infof("clutster Name [%v]", clutsterName)
-	os.Setenv("ClutsterName", clutsterName)
+	}).Infof("clutster Name [%v]", clusterName)
+	os.Setenv("ClusterName", clusterName)
+}
+
+func RDPPortSetting() {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("DB connect error[%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"worksInit": "RDPPortSetting",
+	}).Infof("DB connect success")
+
+	rows, err := db.Query("SELECT * FROM configuration WHERE name LIKE 'rdp.default%'")
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("worksInit RDP port Setting Query Failed[%v]", err)
+	}
+	defer rows.Close()
+
+	result, err := rowsToString(rows)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("Row to String conversion error [%v]", err)
+	}
+
+	jsonUnmarshal := []Configuration{}
+	err = json.Unmarshal([]byte(result), &jsonUnmarshal)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"worksInit": "RDPPortSetting",
+		}).Errorf("String to JSON conversion error [%v]", err)
+	}
+
+	clusterValue := map[string]interface{}{}
+	for _, v := range jsonUnmarshal {
+		clusterValue[v.Name] = v.Value
+	}
+	portForRDP := clusterValue["rdp.default.port"].(string)
+
+	log.WithFields(logrus.Fields{
+		"worksInit": "RDPPortSetting",
+	}).Infof("RDP Port [%v]", portForRDP)
+	os.Setenv("PortForRDP", portForRDP)
 }

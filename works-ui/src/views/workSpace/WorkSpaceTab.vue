@@ -1,94 +1,109 @@
 <template>
   <div id="ContentTab">
-    <a-tabs
-      type="card"
-      v-model:activeKey="activeKey"
-      :tab-position="tabPosition"
-      @change="changeTap"
-    >
-      <a-tab-pane key="1" :tab="$t('label.vm.list')">
+    <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
+      <a-tab-pane key="1" :tab="$t('label.vm.list')" :forceRender="forceRender">
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="VMListData"
-          :columns="VMListColumns"
-          comp="VirtualMachineDetail"
+          ref="listRefreshCall1"
+          :tap-name="'desktop'"
+          :action-from="'VirtualMachineList'"
+          :workspace-info="workspaceInfo"
+          :vm-list="vmList"
+          @parentRefresh="parentRefresh"
         />
       </a-tab-pane>
-      <a-tab-pane key="2" :tab="$t('label.users')">
+      <a-tab-pane key="2" :tab="$t('label.users')" :forceRender="forceRender">
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="UserListData"
-          :columns="UserListColumns"
+          ref="listRefreshCall2"
+          :tap-name="'user'"
+          :action-from="'WorkspaceUserList'"
+          :workspace-info="workspaceInfo"
+          :group-info="groupInfo"
+          @parentRefresh="parentRefresh"
         />
       </a-tab-pane>
-      <a-tab-pane key="3" :tab="$t('label.disk.list')">
+      <a-tab-pane
+        key="3"
+        :tab="$t('label.policy.list')"
+        :forceRender="forceRender"
+      >
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="VMDiskListData"
-          :columns="VMDiskListColumns"
+          ref="listRefreshCall3"
+          :tap-name="'policy'"
+          :action-from="'policyList'"
+          :workspace-info="workspaceInfo"
         />
       </a-tab-pane>
-      <a-tab-pane key="4" :tab="$t('label.network.list')">
+      <a-tab-pane
+        key="4"
+        :tab="$t('label.network.list')"
+        :forceRender="forceRender"
+      >
         <TableContent
-          v-model:tapName="state.callTap"
-          :data="NWListData"
-          :columns="NWListColumns"
+          ref="listRefreshCall4"
+          :tap-name="'network'"
+          :network-list="networkList"
+          :workspace-info="workspaceInfo"
         />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
-
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import TableContent from "../../components/TableContent";
+import { defineComponent, ref } from "vue";
+import TableContent from "@/components/TableContent";
 
-import {
-  VMListData,
-  VMListColumns,
-  VMDiskListData,
-  VMDiskListColumns,
-  NWListData,
-  NWListColumns,
-  UserListData,
-  UserListColumns,
-} from "../../data";
 export default defineComponent({
   components: { TableContent },
+  props: {
+    workspaceInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    networkList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    vmList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    groupInfo: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  },
+  emits: ["parentRefresh"],
   setup() {
-    const tabPosition = ref("top");
-    const activeKey = ref("1");
-    const state = reactive({
-      callTap: ref("desktop"),
-    });
-    const changeTap = (value) => {
-      console.log(`${value}`);
-      if (`${value}` === "1") {
-        state.callTap = ref("desktop");
-      } else if (`${value}` === "2") {
-        state.callTap = ref("user");
-      } else if (`${value}` === "3") {
-        state.callTap = ref("datadisk");
-      } else if (`${value}` === "4") {
-        state.callTap = ref("network");
-      }
-      console.log("sdfsdfsdf");
-      console.log(state.callTap);
-    };
     return {
-      state,
-      changeTap,
-      tabPosition,
-      activeKey,
-      VMListData,
-      VMListColumns,
-      VMDiskListData,
-      VMDiskListColumns,
-      NWListData,
-      NWListColumns,
-      UserListData,
-      UserListColumns,
+      tabPosition: ref("top"),
+      activeKey: ref("1"),
+      forceRender: ref(true),
+      vmActionFrom: ref("VirtualMachineList"),
+      userActionFrom: ref("WorkspaceUserList"),
     };
+  },
+  created() {},
+  methods: {
+    fetchRefresh(refreshClick) {
+      this.forceRender = true;
+      // this.vmActionFrom = "VirtualMachineList";
+      // this.userActionFrom = "WorkspaceUserList";
+      // setTimeout(() => {
+      this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
+      // }, 100);
+    },
+    parentRefresh() {
+      // this.vmActionFrom = "";
+      // this.userActionFrom = "";
+      this.$emit("parentRefresh");
+    },
   },
 });
 </script>

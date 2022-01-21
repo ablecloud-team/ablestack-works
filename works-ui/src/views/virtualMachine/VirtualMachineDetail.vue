@@ -4,26 +4,47 @@
       <a-layout-header id="content-header">
         <div>
           <a-row>
-            <!-- 오른쪽 경로 -->
+            <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                v-bind:paths="[
-                  { name: $t('label.vm'), component: 'Virtualmachine' },
-                  { name: name, component: null },
+                :paths="[
+                  { name: $t('label.vm'), component: 'VirtualMachine' },
+                  { name: vmDbDataInfo.name, component: null },
                 ]"
               />
+              <a-button
+                shape="round"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
+                </template>
+              </a-button>
             </a-col>
-
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <Actions
+                v-if="actionFrom === 'VirtualMachineDetail'"
+                :action-from="actionFrom"
+                :vm-info="vmDbDataInfo"
+                @fetchData="refresh"
+              />
             </a-col>
           </a-row>
         </div>
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <VirtualMachineBody :name="name" :info="info" />
+          <VirtualMachineBody
+            ref="listRefreshCall"
+            :vmDbDataInfo="vmDbDataInfo"
+            :vmMoldDataInfo="vmMoldDataInfo"
+            :vmNetworkInfo="vmNetworkInfo"
+            :vmDiskInfo="vmDiskInfo"
+            :cpuused="cpuused"
+          />
         </div>
       </a-layout-content>
     </a-layout>
@@ -33,18 +54,63 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import VirtualMachineBody from "@/views/virtualMachine/VirtualMachineBody";
+import VirtualMachineBody from "./VirtualMachineBody.vue";
 import { defineComponent, ref } from "vue";
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
+
 export default defineComponent({
-  props: {
-    name: String,
-    info: Object,
-  },
   components: { VirtualMachineBody, Apath, Actions },
+  props: {},
   setup() {
     return {
-      actionFrom: ref("VirtualMachineDetail"),
+      actionFrom: ref(""),
     };
+  },
+  data() {
+    return {
+      vmDbDataInfo: ref([]),
+      vmMoldDataInfo: ref([]),
+      vmNetworkInfo: ref([]),
+      vmDiskInfo: ref([]),
+      cpuused: ref(0),
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    refresh() {
+      this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
+    },
+    async fetchData() {
+      try {
+        const response = await worksApi.get(
+          "/api/v1/instance/detail/" + this.$route.params.vmUuid
+        );
+
+        if (response.status === 200) {
+          //console.log(response.data.result.instanceDBInfo);
+          this.vmDbDataInfo = response.data.result.instanceDBInfo;
+          this.vmMoldDataInfo =
+            response.data.result.instanceMoldInfo.virtualmachine[0];
+          this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
+          this.vmDiskInfo =
+            response.data.result.instanceInstanceVolumeInfo.volume[0];
+          this.cpuused =
+            response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
+              "%"
+            )[0];
+        } else {
+          message.error(this.$t("message.response.data.fail"));
+        }
+      } catch (error) {
+        console.log(error);
+        message.error(this.$t("message.response.data.fail"));
+      }
+      this.actionFrom = "VirtualMachineDetail";
+    },
   },
 });
 </script>
@@ -62,7 +128,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -70,6 +136,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

@@ -4,14 +4,29 @@
       <a-layout-header id="content-header">
         <div id="content-header-body">
           <a-row id="content-header-row">
-            <!-- 오른쪽 경로 -->
+            <!-- 좌측 경로 -->
             <a-col id="content-path" :span="12">
-              <Apath v-bind:paths="[$t('label.vm')]" />
+              <Apath :paths="[$t('label.vm')]" />
+              <a-button
+                shape="round"
+                style="margin-left: 20px"
+                size="small"
+                @click="refresh()"
+              >
+                <template #icon>
+                  <ReloadOutlined /> {{ $t("label.refresh") }}
+                </template>
+              </a-button>
             </a-col>
 
-            <!-- 왼쪽 액션 -->
+            <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
-              <actions :actionFrom="actionFrom" />
+              <Actions
+                v-if="actionFrom === 'VirtualMachineList'"
+                :action-from="actionFrom"
+                :multi-select-list="multiSelectList"
+                @fetchData="refresh"
+              />
             </a-col>
           </a-row>
         </div>
@@ -19,9 +34,8 @@
       <a-layout-content>
         <div id="content-body">
           <VirtualMachineList
-            :data="VMListData"
-            :columns="VMListColumns"
-            :bordered="false"
+            ref="listRefreshCall"
+            @actionFromChange="actionFromChange"
           />
         </div>
       </a-layout-content>
@@ -32,22 +46,34 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import { VMListColumns, VMListData } from "@/data";
-import VirtualMachineList from "@/views/virtualMachine/VirtualMachineList";
 import { defineComponent, ref } from "vue";
+import VirtualMachineList from "./VirtualMachineList";
 
 export default defineComponent({
-  props: {
-    msg: String,
+  name: "VirtualMachine",
+  components: {
+    VirtualMachineList,
+    Apath,
+    Actions,
   },
-  components: { VirtualMachineList, Apath, Actions },
-
-  setup() {
+  props: {},
+  data() {
     return {
-      actionFrom: ref("VirtualMachine"),
-      VMListColumns,
-      VMListData,
+      actionFrom: ref(""),
+      multiSelectList: ref([]),
     };
+  },
+  methods: {
+    refresh() {
+      this.$refs.listRefreshCall.fetchRefresh();
+    },
+    actionFromChange(val, obj) {
+      this.actionFrom = "";
+      setTimeout(() => {
+        this.actionFrom = val;
+        this.multiSelectList = obj;
+      }, 100);
+    },
   },
 });
 </script>
@@ -65,7 +91,7 @@ export default defineComponent({
   /*color: #fff;*/
   font-size: 14px;
   line-height: 1.5;
-  padding: 24px;
+  padding: 20px;
   height: auto;
 }
 
@@ -73,6 +99,7 @@ export default defineComponent({
   text-align: left;
   align-items: center;
   display: flex;
+  height: 32px;
 }
 
 #content-action {

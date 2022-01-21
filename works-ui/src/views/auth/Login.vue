@@ -1,37 +1,63 @@
 <template>
+  <!-- <a-spin :spinning="spinning" size="large" :tip="tip"> -->
   <div class="user-layout desktop">
+    <span>
+      <a-alert
+        v-if="serverStatus"
+        :message="statusMessage"
+        :description="statusDescription"
+        :type="statusType"
+        banner
+        show-icon
+      >
+        <!-- <template #icon>
+          <smile-outlined />
+          <smile-outlined v-if="statusType == 'success'" />
+          <frown-outlined v-else /> -->
+        <!-- </template> -->
+      </a-alert>
+    </span>
+
     <div class="user-layout-container">
       <div class="user-layout-container">
         <img
-            src="../../assets/ablestack-logo.png"
-            alt="logo"
-            class="user-layout-logo"
+          src="@/assets/ablestack-logo.png"
+          alt="logo"
+          class="user-layout-logo"
         />
+        <div v-if="disabled" style="text-align: center">
+          <a-spin />
+        </div>
       </div>
+
       <a-form
-          ref="formRef"
-          layout="horizontal"
-          :model="formState"
-          :rules="rules"
-          class="user-layout-login"
+        ref="formRef"
+        layout="horizontal"
+        :model="formState"
+        :rules="rules"
+        @finish="onSubmit"
+        class="user-layout-login"
       >
-        <a-form-item name="id">
+        <a-form-item has-feedback name="id">
           <a-input
-              v-model:value="formState.id"
-              :placeholder="$t('label.user.id')"
-              size="large"
+            :disabled="disabled"
+            v-model:value="formState.id"
+            :placeholder="$t('label.user.id')"
+            size="large"
           >
             <template #prefix>
               <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
             </template>
           </a-input>
         </a-form-item>
-        <a-form-item name="password">
+
+        <a-form-item has-feedback name="password">
           <a-input-password
-              v-model:value="formState.password"
-              type="password"
-              :placeholder="$t('label.password')"
-              size="large"
+            :disabled="disabled"
+            v-model:value="formState.password"
+            type="password"
+            :placeholder="$t('label.password')"
+            size="large"
           >
             <template #prefix>
               <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -39,121 +65,212 @@
           </a-input-password>
         </a-form-item>
         <a-form-item style="margin-bottom: 0">
-          <a-button type="primary" @click="onSubmit" block class="login-button">
+          <a-button
+            :disabled="disabled"
+            type="primary"
+            block
+            class="login-button"
+            html-type="submit"
+          >
             {{ $t("label.login") }}
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <a-popover placement="bottom">
-          <template #content>
-            <a-button type="text" @click="$i18n.locale = 'ko'">
-              한국어
-            </a-button>
-            <br />
-            <a-button type="text" @click="$i18n.locale = 'en'">
-              English
-            </a-button>
-          </template>
-          <a-button type="text">
-            <template #icon>
+        <a-dropdown>
+          <a-button type="text" shape="circle" class="header-notice-button">
+            <a class="ant-dropdown-link" @click.prevent>
               <font-awesome-icon
-                  :icon="['fas', 'language']"
-                  size="4x"
-                  style="color: #666"
-                  class="login-ico"
+                :icon="['fas', 'language']"
+                size="2x"
+                style="color: #666"
+                class="login-icon"
               />
-            </template>
+              <!-- <GlobalOutlined /> -->
+            </a>
           </a-button>
-        </a-popover>
+          <template #overlay>
+            <a-menu :selected-keys="[language]" @click="setLocaleClick">
+              <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+              <a-menu-item key="en" value="enUS"> English </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
         <!--   언어변환 버튼 끝     -->
       </a-form>
     </div>
   </div>
+  <!-- </a-spin> -->
 </template>
 
 <script>
+import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
-import { axiosLogin } from "../../api/index";
-import store from "../../store/index"
-import router from "../../router";
+import { worksApi } from "@/api/index";
+import store from "@/store/index";
+import router from "@/router";
 
 export default defineComponent({
   name: "Login",
+  components: { SmileOutlined, FrownOutlined },
   setup() {
     const formRef = ref();
     const formState = reactive({
-      id: "administrator",
-      password: "Ablecloud1!",
-      // id: "",
-      // password: "",
+      id: ref(""),
+      password: ref(""),
     });
-    const rulesIdMeassage = ref();
-    const rulesPasswordMeassage = ref();
     const rules = {
       id: {
         required: true,
-        message: "message.login.failure",
+        trigger: "change",
       },
       password: {
         required: true,
-        message: "Please input name",
+        trigger: "change",
       },
     };
-
     return {
       formRef,
       formState,
       rules,
-      rulesIdMeassage,
-      rulesPasswordMeassage
     };
   },
   data() {
-    let rulesIdMeassage = this.$t(`message.please.enter.your.id`)
-    let rulesPasswordMeassage = this.$t("message.please.enter.your.password")
     return {
-      rulesIdMeassage,
-      rulesPasswordMeassage,
+      timer: ref(null),
+      spinning: ref(true),
+      tip: ref("서버 체크중..."),
+      language: ref(""),
+      loadedLanguage: ref[""],
+      disabled: ref(true),
+      serverStatus: ref(true),
+      statusMessage: ref("서버 체크중입니다."),
+      statusDescription: ref(
+        "DC서버와 정상적인 통신이 가능한지 확인하는 작업이 진행중입니다. 잠시만 기다려주세요."
+      ),
+      statusType: ref("error"),
     };
   },
-  computed: {
+  created() {
+    this.serverStatus = true;
 
+    this.timer = setInterval(() => {
+      //임시 테스터 api임 , 해당 api 개발 후 재테스트 예정
+      worksApi
+        .get("/api/version")
+        .then((response) => {
+          if (response.status == 200) {
+            //정상일 경우
+            this.statusMessage = "서버 체크가 완료되었습니다.";
+            this.statusDescription =
+              "데스크톱 서비스 환경구성이 완료되었습니다. Works Portal에 로그인을 진행해주세요.";
+            this.statusType = "success";
+            this.disabled = false;
+            // this.tip = "DC서버 구성이 완료되었습니다. 로그인 해주세요.";
+            // this.spinning = false;
+
+            clearInterval(this.timer);
+            setTimeout(() => {
+              //this.serverStatus = false;
+            }, 3000);
+          } else {
+            // DC 서버가 구성중일 경우
+            this.statusMessage = "DC서버 구성중입니다.";
+            this.statusDescription = "1단계: xXx";
+            this.tip = "DC서버 구성중입니다. (1단계: xXx)";
+            //this.spinning = false;
+            // clearInterval(this.timer);
+          }
+        })
+        .catch((error) => {
+          this.statusMessage = "API 서버 통신불가";
+          this.statusDescription =
+            "Works API 서버와 통신이 원활하지 않습니다. 관리자에 문의하세요.";
+          this.tip = "Works API 서버와 통신이 원활하지 않습니다.";
+          // message.error(this.$t("message.response.data.fail"));
+          console.log(error.message);
+        })
+        .finally(() => {});
+    }, 3000);
+
+    this.rules.id.message = this.$t("message.please.enter.your.id");
+    this.rules.password.message = this.$t("message.please.enter.your.password");
+    this.onClear();
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
   methods: {
+    setLocaleClick(e) {
+      let localeValue = e.key;
+      if (!localeValue) {
+        localeValue = "ko";
+      }
+      this.setLocale(localeValue);
+    },
+    setLocale(localeValue) {
+      this.$locale = localeValue;
+      this.$i18n.locale = localeValue;
+      this.language = localeValue;
+      sessionStorage.setItem("locale", localeValue);
+      //this.loadLanguageAsync(localeValue);
+    },
+    onClear() {
+      sessionStorage.clear();
+    },
     onSubmit() {
-      this.rules.id.message = this.rulesIdMeassage;
-      this.rules.password.message = this.rulesPasswordMeassage;
       let params = new URLSearchParams();
-      let res
       this.formRef
-          .validate()
-          .then(async () => {
-            message.loading(this.$t("message.logging"), 0);
-            params.append("id", this.formState.id);
-            params.append("password", this.formState.password);
-            try {
-              res = await axiosLogin(params)
-              // console.log(res);
-              if (res.status === 200) {
+        .validate()
+        .then(() => {
+          message.loading(this.$t("message.logging"), 60);
+          params.append("id", this.formState.id);
+          params.append("password", this.formState.password);
+
+          worksApi
+            .post("/api/login", params)
+            .then((response) => {
+              //console.log(response);
+              if (
+                response.status === 200 &&
+                response.data.result.login === true
+              ) {
+                store.dispatch("loginCommit", response.data);
+                sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem(
+                  "username",
+                  response.data.result.username
+                );
+                sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
+                if (
+                  response.data.result.username.toLowerCase() ===
+                  "administrator"
+                ) {
+                  router.push({ name: "Dashboard" });
+                } else {
+                  router.push({ name: "Favorite" });
+                }
                 message.destroy();
-                message.success(this.$t("message.login.completed"), 2);
-                await store.dispatch("loginCommit", res.data)
-                await router.push({name: "home"})
-                // console.log("res.data.result");
-                // console.log(res.data);
-                // console.log(store.state.user.accessToken);
+                message.success(this.$t("message.login.completed"));
+              } else {
+                message.destroy();
+                message.error(this.$t("message.login.wrong"));
               }
-            }catch (error){
+            })
+            .catch((error) => {
               message.destroy();
-              //TODO i18n 적용
-              console.log(error)
-              message.error("로그인에 실패했습니다. 관리자에게 문의해주세요")
-            }
-          })
-          .catch((error) => {
-            console.log("error", error);
-          });
+              if (error.response.status === 400) {
+                message.error(this.$t("message.login.wrong.400"));
+              } else if (error.response.status === 401) {
+                message.error(this.$t("message.login.wrong.401"));
+              } else {
+                message.error(this.$t("message.login.wrong"));
+              }
+            });
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
     },
   },
 });
