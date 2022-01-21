@@ -155,7 +155,7 @@ func selectCountDesktopConnected() (int, error) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"workspaceImpl": "selectCountInstance",
+			"workspaceImpl": "selectCountDesktopConnected",
 		}).Errorf("DB Connect Error [%v]", err)
 	}
 	defer db.Close()
@@ -175,7 +175,7 @@ func selectCountDesktopConnected() (int, error) {
 	err = db.QueryRow(queryString).Scan(&desktopConnectedCount)
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"workspaceImpl": "selectCountInstance",
+			"workspaceImpl": "selectCountDesktopConnected",
 		}).Errorf("Instance Connected Count Select Query FAILED [%v]", err)
 	}
 

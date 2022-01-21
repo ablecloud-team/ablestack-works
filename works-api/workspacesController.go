@@ -641,19 +641,23 @@ func patchHandshake(c *gin.Context) {
 // @Router /api/v1/dashboard [get]
 // @Success 200 {object} map[string]interface{}
 func getDashboard(c *gin.Context) {
-	//TODO 데스크톱 연결수, APP 연겴 수
+	//TODO 사용자 수, 데스크톱 연결 수
 	resultData := map[string]interface{}{}
 	resultCode := http.StatusNotFound
 	returnCountWorkspace, workspaceErr := selectCountWorkspace()
 	returnCountInstance, instanceErr := selectCountInstance()
+	returnCountConnected, connectedErr := selectCountDesktopConnected()
+	userList, userListErr := getUserList()
 	log.WithFields(logrus.Fields{
 		"workspacesController.go": "getDashboard",
 	}).Infof("clientIP [%v]", c.ClientIP())
 
-	if workspaceErr == nil && instanceErr == nil {
+	if workspaceErr == nil && instanceErr == nil && connectedErr == nil && userListErr == nil {
 		resultCode = http.StatusOK
 		resultData["workspaceCount"] = returnCountWorkspace
 		resultData["instanceCount"] = returnCountInstance
+		resultData["connectedCount"] = returnCountConnected
+		resultData["usersCount"] = len(userList)
 	}
 	c.JSON(resultCode, gin.H{
 		"result": resultData,
