@@ -205,6 +205,8 @@ export default defineComponent({
                   response.data.result.username
                 );
                 sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
+                sessionStorage.setItem("clusterName", response.data.result.clusterName);
+                sessionStorage.setItem("domainName", response.data.result.domainName);
                 if (
                   response.data.result.username.toLowerCase() ===
                   "administrator"
