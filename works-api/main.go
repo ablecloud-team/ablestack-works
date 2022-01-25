@@ -109,12 +109,6 @@ func main() {
 			v1.DELETE("/group/:groupName", delGroupDetail)
 			v1.DELETE("/group/:groupName/:userName", delDeleteUserToGroup)
 			v1.PUT("/group/:groupName/:userName", putAddUserToGroup)
-
-			v1.GET("/applicationServer/:workspaceUuid", getApplicationServer)
-
-			v1.GET("/application/:workspaceUuid", getApplication)
-			v1.POST("/application", postApplication)
-			v1.DELETE("/application/:applicationUuid", deleteApplication)
 		}
 		test := api.Group("/test")
 		{
