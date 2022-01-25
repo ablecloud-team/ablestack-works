@@ -40,6 +40,10 @@
                     :title="$t('label.status.ad')"
                     :description="descStep4"
                   />
+                  <a-step
+                    :title="$t('label.status.guac')"
+                    :description="descStep5"
+                  />
                 </a-steps>
               </a-card>
             </a-col>
@@ -250,6 +254,7 @@ export default defineComponent({
       descStep2: ref(this.$t("message.status.checking")),
       descStep3: ref(this.$t("message.status.checking")),
       descStep4: ref(this.$t("message.status.checking")),
+      descStep5: ref(this.$t("message.status.checking")),
     };
   },
   created() {
