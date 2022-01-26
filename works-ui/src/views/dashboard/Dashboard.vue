@@ -325,17 +325,26 @@ export default defineComponent({
             if (store.state.dashboard.samba === 200) {
               this.descStep4 = this.$t("message.status.check.ok");
               this.dashboardStep = 4;
+              if (store.state.dashboard.guac === 200) {
+                this.descStep5 = this.$t("message.status.check.ok");
+                this.dashboardStep = 5;
+              } else {
+                this.descStep5 = this.$t("message.status.check.nosignal");
+              }
             } else {
               this.descStep4 = this.$t("message.status.check.nosignal");
+              this.descStep5 = this.$t("message.status.check.nosignal");
             }
           } else {
             this.descStep3 = this.$t("message.status.check.nosignal");
             this.descStep4 = this.$t("message.status.check.nosignal");
+            this.descStep5 = this.$t("message.status.check.nosignal");
           }
         } else {
           this.descStep2 = this.$t("message.status.check.nosignal");
           this.descStep3 = this.$t("message.status.check.nosignal");
           this.descStep4 = this.$t("message.status.check.nosignal");
+          this.descStep5 = this.$t("message.status.check.nosignal");
         }
       } else {
         this.dashboardStep = 0;
@@ -343,6 +352,7 @@ export default defineComponent({
         this.descStep2 = this.$t("message.status.check.nosignal");
         this.descStep3 = this.$t("message.status.check.nosignal");
         this.descStep4 = this.$t("message.status.check.nosignal");
+        this.descStep5 = this.$t("message.status.check.nosignal");
       }
 
       sessionStorage.setItem("dashboardStep", this.dashboardStep);
