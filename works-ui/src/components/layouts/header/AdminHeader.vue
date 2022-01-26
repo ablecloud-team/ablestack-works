@@ -1,6 +1,6 @@
 <template>
-  <a-row>
-    <a-col :span="12">
+  <a-row type="flex">
+    <a-col :flex="2">
       <menu-unfold-outlined
         v-if="state.collapsed"
         class="trigger3"
@@ -9,9 +9,13 @@
       <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
     <a-col
-      :span="12"
+      :flex="3"
       style="float: right; text-align: right; padding-right: 5px"
     >
+      <span>
+        【 {{ $t("label.cluster") }} : {{ clustername }} 
+        ㅣ {{ $t("label.domain") }} : {{ domainname }} 】
+      </span>
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
@@ -140,7 +144,10 @@ export default defineComponent({
       sessionStorage.getItem("locale") === null
         ? "ko"
         : sessionStorage.getItem("locale");
-    this.username = sessionStorage.getItem("username");
+    this.userName = sessionStorage.getItem("username");
+    this.clustername = sessionStorage.getItem("clusterName");
+    this.domainname = sessionStorage.getItem("domainName");
+
     this.setLocale(this.language);
   },
   methods: {
