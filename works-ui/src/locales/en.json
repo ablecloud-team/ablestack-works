@@ -244,6 +244,7 @@
     "label.status.ad": "Directory Server",
     "label.status.worksapi": "Works API",
     "label.status.mold": "Mold API",
+    "label.status.guac": "User Client",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",

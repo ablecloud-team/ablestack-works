@@ -244,6 +244,7 @@
     "label.status.ad": "디렉토리 서버",
     "label.status.worksapi": "Works API",
     "label.status.mold": "Mold API",
+    "label.status.guac": "사용자 클라이언트",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
