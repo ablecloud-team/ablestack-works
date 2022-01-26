@@ -17,8 +17,8 @@ func (s SortMoldParams) Len() int {
 	return len(s)
 }
 func (s SortMoldParams) Less(i, j int) bool {
-	for keyi, _ := range s[i] {
-		for keyj, _ := range s[j] {
+	for keyi := range s[i] {
+		for keyj := range s[j] {
 			return keyi < keyj
 		}
 	}
@@ -66,7 +66,8 @@ func makeSignature(payload string) string {
 	hash.Write(message)
 	strHash := base64.StdEncoding.EncodeToString(hash.Sum(nil))
 	log.Infof("makeSignature payload [%v]\n", payload)
-	return strHash
+	returnString := strings.Replace(strHash, "+", "%2B", -1)
+	return returnString
 }
 
 func getUuid() string {

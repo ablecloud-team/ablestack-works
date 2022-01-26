@@ -1,0 +1,9 @@
+works-api/works-api
+works-shell/works-shell.exe
+works-shell/works-shell
+.idea/
+samba-ad.zip
+*.exe
+*.log
+*.msi
+*.zip
