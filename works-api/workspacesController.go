@@ -257,12 +257,16 @@ func deleteWorkspaces(c *gin.Context) {
 	returnData := map[string]interface{}{}
 	resultCode := http.StatusNotFound
 	workspaceUuid := c.Param("workspaceUuid")
-	resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
-
-	if resultDeleteWorkspace["status"] == http.StatusOK {
-		returnData["message"] = "workspace delete success"
-		resultCode = http.StatusOK
+	workspaceList, _ := selectWorkspaceList(workspaceUuid)
+	_, errDeleteGroup := deleteGroup(workspaceList[0].Name)
+	if errDeleteGroup != nil {
+		resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
+		if resultDeleteWorkspace["status"] == http.StatusOK {
+			returnData["message"] = "workspace delete success"
+			resultCode = http.StatusOK
+		}
 	}
+
 	c.JSON(resultCode, gin.H{
 		"result": returnData,
 	})
