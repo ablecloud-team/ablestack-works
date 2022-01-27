@@ -144,7 +144,7 @@ export default defineComponent({
       sessionStorage.getItem("locale") === null
         ? "ko"
         : sessionStorage.getItem("locale");
-    this.userName = sessionStorage.getItem("username");
+    this.username = sessionStorage.getItem("username");
     this.clustername = sessionStorage.getItem("clusterName");
     this.domainname = sessionStorage.getItem("domainName");
 
