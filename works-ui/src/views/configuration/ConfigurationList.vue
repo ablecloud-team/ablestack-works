@@ -233,20 +233,20 @@ export default defineComponent({
         );
         if (res.status == 200) {
           message.success(
-            this.$t("message.response.data.update.success", {
+            this.$t("message.configuration.data.update.success", {
               name: this.editableData[name].name,
             })
           );
         } else {
           message.error(
-            this.$t("message.response.data.update.fail", {
+            this.$t("message.configuration.data.update.fail", {
               name: this.editableData[name].name,
             })
           );
         }
       } catch (error) {
         message.error(
-          this.$t("message.response.data.update.fail", {
+          this.$t("message.configuration.data.update.fail", {
             name: this.editableData[name].name,
           })
         );
