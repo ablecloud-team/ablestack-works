@@ -11,25 +11,6 @@ import (
 	"time"
 )
 
-type UserInfo struct {
-	C                 string `json:"c"`                 // 국가코드 영문
-	Cn                string `json:"cn"`                // 유저아이디
-	Co                string `json:"co"`                // 국가코드 영문
-	CountryCode       string `json:"countryCode"`       // 국가코드 숫자
-	DistinguishedName string `json:"distinguishedName"` // 고유이름
-	GivenName         string `json:"givenName"`         // 사용자 이름
-	Mail              string `json:"mail"`              // e-mail
-	MemberOf          string `json:"memberOf"`          // 소속 그룹
-	Name              string `json:"name"`              // 사용자 계정
-	SAMAccountName    string `json:"sAMAccountName"`    // 사용자 계정
-	Sn                string `json:"sn"`                // 사용자 성
-	TelephoneNumber   string `json:"telephoneNumber"`   // 전화번호
-	Title             string `json:"title"`             // 직책
-	UserPrincipalName string `json:"userPrincipalName"` // 사용자 도메인 계정정보
-	Password          string `json:"password"`          // 사용자 비밀번호
-	Department        string `json:"department"`        // 사용자 부서
-}
-
 //login
 func postLogin(id string, password string) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
@@ -51,19 +32,19 @@ func postLogin(id string, password string) (*http.Response, error) {
 
 //************************** User 관련 시작 **************************
 //유저를 DC 에 추가하는 func
-func postDCUser(userInfo UserInfo) (*http.Response, error) {
+func postDCUser(user User) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	params := url.Values{
-		"username":  {userInfo.Cn},
-		"password":  {userInfo.Password},
-		"sn":        {userInfo.Sn},
-		"givenName": {userInfo.GivenName},
-		"email":     {userInfo.Mail},
-		"phone":     {userInfo.TelephoneNumber},
-		"title":     {userInfo.Title},
+		"username":  {user.Cn},
+		"password":  {user.Password},
+		"sn":        {user.Sn},
+		"givenName": {user.GivenName},
+		"email":     {user.Mail},
+		"phone":     {user.TelephoneNumber},
+		"title":     {user.Title},
 	}
 	log.Infof("paramsInfo = [%v]", params)
-	log.Infof("userInfo = [%v]", userInfo)
+	log.Infof("user = [%v]", user)
 	client := http.Client{
 		Timeout: 60 * time.Second,
 	}
@@ -73,7 +54,7 @@ func postDCUser(userInfo UserInfo) (*http.Response, error) {
 }
 
 // 유저 리스트를 DC 에서 조회하는 func
-func getUserList() ([]UserInfo, error) {
+func getUserList() ([]User, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
 		Timeout: 60 * time.Second,
@@ -81,7 +62,7 @@ func getUserList() ([]UserInfo, error) {
 	//resp, err := client.PostForm(DCInfo+"/v1/user/", params)
 	resp, err := client.Get(DCInfo + "/v1/user/")
 	var res []map[string]interface{}
-	var userInfoList []UserInfo
+	var userInfoList []User
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"authDAO": "getUserList",
@@ -241,7 +222,7 @@ func deleteAddUserToGroup(groupName string, userName string) (*http.Response, er
 	return resp, err1
 }
 
-func insertUserDB(userInfo UserInfo) map[string]interface{} {
+func insertUserDB(user User) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	if err != nil {
@@ -250,7 +231,7 @@ func insertUserDB(userInfo UserInfo) map[string]interface{} {
 		resultReturn["message"] = "DB connect error"
 	}
 	defer db.Close()
-	result, err := db.Exec("INSERT INTO users(uuid, user_name, password, create_date) VALUES (?, ?, ?, now())", getUuid(), userInfo.Cn, userInfo.Password)
+	result, err := db.Exec("INSERT INTO users(uuid, user_name, password, create_date) VALUES (?, ?, ?, now())", getUuid(), user.Cn, user.Password)
 	if err != nil {
 		log.Errorf("유저를 DB 등록중에러가 발생했습니다. [%v]", err)
 		resultReturn["message"] = "An error occurred while registering Async Job."

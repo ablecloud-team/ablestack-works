@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 // getLogin godoc
@@ -35,36 +36,41 @@ func getLogin(c *gin.Context) {
 		})
 		return
 	} else {
-		if resultLogin.Status == OK200 {
-			json.NewDecoder(resultLogin.Body).Decode(&result)
-			loginBool := result["login"].(bool)
-			log.Debugln(loginBool)
-			if loginBool == false {
-				result["message"] = "Login failed"
-				c.JSON(http.StatusNotFound, gin.H{
-					"result": result,
-				})
-				return
-			} else if loginBool == true {
-				token, err := createToken(userId)
-				if err != nil {
-					if err == jwt.ErrSignatureInvalid {
-						result["message"] = "token is expired"
-						c.JSON(http.StatusUnauthorized, gin.H{
-							"result": result,
-						})
-						return
-					}
+
+		var res map[string]interface{}
+		json.NewDecoder(resultLogin.Body).Decode(&res)
+
+		user := User{}
+		userInfo, _ := json.Marshal(res)
+		json.Unmarshal(userInfo, &user)
+		loginBool := user.Login
+		if loginBool == false {
+			result["message"] = "Login failed"
+			c.JSON(http.StatusNotFound, gin.H{
+				"result": result,
+			})
+			return
+		} else if loginBool == true {
+			token, err := createToken(userId)
+			if err != nil {
+				if err == jwt.ErrSignatureInvalid {
+					result["message"] = "token is expired"
+					c.JSON(http.StatusUnauthorized, gin.H{
+						"result": result,
+					})
+					return
 				}
-				log.Infof("%v token is [%v]", userId, token)
-				result["token"] = token
-				//c.Header("access-token", token)
-				//log.Info(c.sameSite)
-				c.JSON(http.StatusOK, gin.H{
-					"result": result,
-				})
-				return
 			}
+			log.Infof("%v token is [%v]", userId, token)
+			//ClusterName
+			//SambaDomain
+			user.ClusterName = os.Getenv("ClusterName")
+			user.DomainName = os.Getenv("SambaDomain")
+			user.Token = token
+			c.JSON(http.StatusOK, gin.H{
+				"result": user,
+			})
+			return
 		}
 	}
 }
@@ -215,9 +221,9 @@ func putUser(c *gin.Context) {
 	resultValue := map[string]interface{}{}
 	res := map[string]interface{}{}
 	resultCode := http.StatusUnauthorized
-	userInfo := UserInfo{}
+	user := User{}
 	if c.PostForm("username") != "" {
-		userInfo.Cn = c.PostForm("username")
+		user.Cn = c.PostForm("username")
 	} else {
 		resultValue["msg"] = "There is no username."
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -228,7 +234,7 @@ func putUser(c *gin.Context) {
 	}
 	if c.PostForm("password") != "" {
 		if RegexpPassword(c.PostForm("password")) {
-			userInfo.Password = c.PostForm("password")
+			user.Password = c.PostForm("password")
 		} else {
 			resultValue["msg"] = "The password format is incorrect.."
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -246,7 +252,7 @@ func putUser(c *gin.Context) {
 		return
 	}
 	if c.PostForm("firstName") != "" {
-		userInfo.Sn = c.PostForm("firstName")
+		user.Sn = c.PostForm("firstName")
 	} else {
 		resultValue["msg"] = "There is no firstName."
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -256,7 +262,7 @@ func putUser(c *gin.Context) {
 		return
 	}
 	if c.PostForm("lastName") != "" {
-		userInfo.GivenName = c.PostForm("lastName")
+		user.GivenName = c.PostForm("lastName")
 	} else {
 		resultValue["msg"] = "There is no lastName."
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -266,7 +272,7 @@ func putUser(c *gin.Context) {
 		return
 	}
 	if c.PostForm("email") != "" {
-		userInfo.Mail = c.PostForm("email")
+		user.Mail = c.PostForm("email")
 	} else {
 		//resultValue["msg"] = "There is no email."
 		//c.JSON(http.StatusBadRequest, gin.H{
@@ -274,24 +280,24 @@ func putUser(c *gin.Context) {
 		//})
 		//c.Abort()
 		//return
-		userInfo.Mail = ""
+		user.Mail = ""
 	}
 	if c.PostForm("phone") != "" {
-		userInfo.TelephoneNumber = c.PostForm("phone")
+		user.TelephoneNumber = c.PostForm("phone")
 	} else {
-		userInfo.TelephoneNumber = ""
+		user.TelephoneNumber = ""
 	}
 	if c.PostForm("title") != "" {
-		userInfo.Title = c.PostForm("title")
+		user.Title = c.PostForm("title")
 	} else {
-		userInfo.Title = ""
+		user.Title = ""
 	}
 	if c.PostForm("department") != "" {
-		userInfo.Department = c.PostForm("department")
+		user.Department = c.PostForm("department")
 	} else {
-		userInfo.Department = ""
+		user.Department = ""
 	}
-	result, errInsertDCUser := postDCUser(userInfo)
+	result, errInsertDCUser := postDCUser(user)
 	if errInsertDCUser != nil {
 		log.Error(errInsertDCUser)
 		resultValue["insertDCUser"] = errInsertDCUser
@@ -305,12 +311,12 @@ func putUser(c *gin.Context) {
 			log.Errorf("An error occurred while converting http.Response to JSON.")
 		}
 		resultValue["dcResult"] = res
-		resultInsertUserDB := insertUserDB(userInfo)
+		resultInsertUserDB := insertUserDB(user)
 		if resultInsertUserDB["status"] == http.StatusOK {
 			resultCode = http.StatusOK
 			resultValue["insertDBResult"] = resultInsertUserDB
 		} else {
-			result, _ := deleteDCUser(userInfo.Cn)
+			result, _ := deleteDCUser(user.Cn)
 			log.Errorf("DC 에 유저 생성 후 Works DB에 insert 중 에러가 발생하여 rollback 되었습니다.")
 			resultCode = http.StatusUnauthorized
 			resultValue["message"] = "After creating a user on DC, an error occurred while inserting into the Works DB and it was rolled back."

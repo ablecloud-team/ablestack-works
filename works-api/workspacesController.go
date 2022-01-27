@@ -641,7 +641,7 @@ func patchHandshake(c *gin.Context) {
 // @Router /api/v1/dashboard [get]
 // @Success 200 {object} map[string]interface{}
 func getDashboard(c *gin.Context) {
-	//TODO 사용자 수, 데스크톱 연결 수
+
 	resultData := map[string]interface{}{}
 	resultCode := http.StatusNotFound
 	returnCountWorkspace, workspaceErr := selectCountWorkspace()
