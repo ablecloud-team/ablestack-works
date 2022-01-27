@@ -220,7 +220,7 @@ export default defineComponent({
         this.editableData[name]
       );
 
-      console.log(this.editableData[name].id, this.editableData[name].value);
+      console.log(this.editableData[name].name, this.editableData[name].value);
       let params = new URLSearchParams();
 
       params.append("id", this.editableData[name].id);
@@ -232,9 +232,24 @@ export default defineComponent({
           params
         );
         if (res.status == 200) {
-          message.error(this.$t("message.response.data.success"));
+          message.success(
+            this.$t("message.configuration.data.update.success", {
+              name: this.editableData[name].name,
+            })
+          );
+        } else {
+          message.error(
+            this.$t("message.configuration.data.update.fail", {
+              name: this.editableData[name].name,
+            })
+          );
         }
       } catch (error) {
+        message.error(
+          this.$t("message.configuration.data.update.fail", {
+            name: this.editableData[name].name,
+          })
+        );
         console.log(error);
       }
       delete this.editableData[name];
