@@ -1,6 +1,6 @@
 <template>
-  <a-row>
-    <a-col :span="12">
+  <a-row type="flex">
+    <a-col :flex="2">
       <menu-unfold-outlined
         v-if="state.collapsed"
         class="trigger3"
@@ -9,9 +9,13 @@
       <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
     <a-col
-      :span="12"
+      :flex="3"
       style="float: right; text-align: right; padding-right: 5px"
     >
+      <span>
+        【 {{ $t("label.cluster") }} : {{ clusterName }} 
+        ㅣ {{ $t("label.domain") }} : {{ domainName }} 】
+      </span>
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
@@ -44,7 +48,7 @@
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
-            {{ username }}
+            {{ userName }}
           </a>
         </a-button>
         <template #overlay>
@@ -127,7 +131,7 @@ export default defineComponent({
     return {
       language: ref(""),
       loadedLanguage: ref[""],
-      username: ref(""),
+      userName: ref(""),
     };
   },
   created() {
@@ -140,7 +144,10 @@ export default defineComponent({
       sessionStorage.getItem("locale") === null
         ? "ko"
         : sessionStorage.getItem("locale");
-    this.username = sessionStorage.getItem("username");
+    this.userName = sessionStorage.getItem("userName");
+    this.clusterName = sessionStorage.getItem("clusterName");
+    this.domainName = sessionStorage.getItem("domainName");
+
     this.setLocale(this.language);
   },
   methods: {
