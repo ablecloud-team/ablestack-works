@@ -30,6 +30,7 @@ func getServerCheck(c *gin.Context) {
 		WorksDc:    http.StatusNotFound,
 		WorksSamba: http.StatusNotFound,
 		Mold:       http.StatusNotFound,
+		Guacamole:  http.StatusNotFound,
 	}
 
 	respDC, errDC := client.Get(DCInfo + "/v1/version")
@@ -54,6 +55,13 @@ func getServerCheck(c *gin.Context) {
 		result[Mold] = respMold.StatusCode
 	}
 
+	respGuacamole, errGuacamole := getGuacamoleToken()
+	if errGuacamole != nil {
+		log.Error(errGuacamole)
+		log.Error(errGuacamole)
+	} else {
+		result[Guacamole] = respGuacamole.StatusCode
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"result": result,
 	})

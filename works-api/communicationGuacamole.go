@@ -118,22 +118,26 @@ type GuacamoleConnections struct {
 	} `json:"attributes"`
 }
 
-func getGuacamoleToken() string {
-	var guacamoleUrl = os.Getenv("GuacamoleUrl")
-	var guacamoleUsername = os.Getenv("GuacamoleUsername")
-	resource := "/guacamole/api/tokens"
+func getGuacamoleToken() (*http.Response, error) {
+	//var guacamoleUrl = os.Getenv("GuacamoleUrl")
+	//TODO 과카몰리 URL을 works URL을 이용하여 통신함
+	var guacamoleUrl = "http://" + os.Getenv("WorksIp") + ":8080"
+	//var guacamoleUsername = os.Getenv("GuacamoleUsername")
+	resource := "/api/tokens"
 
 	params := url.Values{}
-	params.Set("username", guacamoleUsername)
-	params.Set("password", guacamoleUsername)
+	//TODO 과카몰리 계정 및 패스워드 하드코딩
+
+	params.Set("username", "administrator")
+	params.Set("password", "Ablecloud1!")
 	log.Infof("paramsInfo = [%v]", params)
 	u, _ := url.ParseRequestURI(guacamoleUrl)
 	u.Path = resource
 	urlStr := u.String() // "https://api.com/user/"
 	client := &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 60 * time.Second,
 	}
-	log.Infof("url [%v], username [%v]", urlStr, guacamoleUsername)
+	//log.Infof("url [%v], username [%v]", urlStr, guacamoleUsername)
 	r, err := http.NewRequest("POST", urlStr, strings.NewReader(params.Encode())) // URL-encoded payload
 	if err != nil {
 		log.Fatal(err)
@@ -142,16 +146,30 @@ func getGuacamoleToken() string {
 	r.Header.Add("Content-Length", strconv.Itoa(len(params.Encode())))
 	resp, err := client.Do(r)
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("%v", err)
+	} else {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Errorf("%v", err)
+		}
+		result := map[string]interface{}{}
+		json.Unmarshal(body, &result)
+		log.Infof("communication guacamole [%v], result [%v], error [%v]", resp, result, err)
+		//return result["authToken"].(string)
+		return resp, err
+
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	return nil, nil
+}
+
+func getGuacamoleTokenString() string {
+
+	resp, _ := getGuacamoleToken()
+	body, _ := ioutil.ReadAll(resp.Body)
 	result := map[string]interface{}{}
 	json.Unmarshal(body, &result)
-	log.Infof("통신결과 [%v], result [%v], error [%v]", resp, result, err)
 	return result["authToken"].(string)
 }
 
@@ -159,7 +177,7 @@ func insertGuacamoleUser(username string, password string) *http.Response {
 	var guacamoleUrl = os.Getenv("GuacamoleUrl")
 	var guacamoleUsername = os.Getenv("GuacamoleUsername")
 	resource := "/guacamole/api/session/data/mysql/users"
-	token := "?token=" + getGuacamoleToken()
+	token := "?token=" + getGuacamoleTokenString()
 	guacamoleUser := GuacamoleUser{}
 	guacamoleUser.Username = username
 	guacamoleUser.Password = password
@@ -192,7 +210,7 @@ func deleteGuacamoleUser(username string) *http.Response {
 	var guacamoleUrl = os.Getenv("GuacamoleUrl")
 	var guacamoleUsername = os.Getenv("GuacamoleUsername")
 	resource := "/guacamole/api/session/data/mysql/users/" + username
-	token := "?token=" + getGuacamoleToken()
+	token := "?token=" + getGuacamoleTokenString()
 	log.Infof("paramsInfo = [%v]", username)
 	u, _ := url.ParseRequestURI(guacamoleUrl)
 	u.Path = resource
@@ -219,7 +237,7 @@ func insertGuacamoleVMAllocateUser(username string, instanceUuid string) *http.R
 	var guacamoleUrl = os.Getenv("GuacamoleUrl")
 	var guacamoleUsername = os.Getenv("GuacamoleUsername")
 	resource := "/guacamole/api/session/data/mysql/connections"
-	token := "?token=" + getGuacamoleToken()
+	token := "?token=" + getGuacamoleTokenString()
 	instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
 	instanceInfo := instanceList[0]
 	guacamoleConnections := GuacamoleConnections{}
