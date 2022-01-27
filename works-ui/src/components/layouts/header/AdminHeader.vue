@@ -194,7 +194,7 @@ export default defineComponent({
     //   }
     // },
     userinfo() {
-      router.push({ path: "/accountDetail/" + this.username });
+      router.push({ path: "/accountDetail/" + this.userName });
     },
   },
 });
