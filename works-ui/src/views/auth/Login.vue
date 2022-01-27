@@ -201,7 +201,7 @@ export default defineComponent({
                 store.dispatch("loginCommit", response.data);
                 sessionStorage.setItem("token", response.data.result.token);
                 sessionStorage.setItem(
-                  "username",
+                  "userName",
                   response.data.result.username
                 );
                 sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
