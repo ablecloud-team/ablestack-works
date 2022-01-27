@@ -18,6 +18,7 @@ const (
 	WorksDc    = "Works-DC"
 	WorksSamba = "Works-Samba"
 	Mold       = "Mold"
+	Guacamole  = "Guacamole"
 
 	Trace = "Trace"
 	Debug = "Debug"
