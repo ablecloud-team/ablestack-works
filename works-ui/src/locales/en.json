@@ -35,7 +35,7 @@
     "message.workspace.status.delete": "[{count}] workspaces deleted.",
     "message.workspace.delete.fail": "Failed to delete workspace.",
     "message.workspace.delete.existvm": "There are workspaces with virtual machines. The selected [{count}] workspaces were not deleted.",
-    "message.login.wrong.400":"Failed to communicate with DC server. Please contact the administrator.",
+    "message.login.wrong.400":"Failed to communicate with controller server. Please contact the administrator.",
     "message.login.wrong.401":"Failed to generate settlement token when logging in. Please contact the administrator.",
     "message.vm.status.start.ok": "[{count}] desktop virtual machines have completed startup requests.",
     "message.vm.status.stop.ok": "The request to stop [{count}] desktop virtual machines has been completed.",
@@ -75,7 +75,7 @@
     "message.workspace.test.vmcreate": "Create Test VM",
     "message.workspace.test.initializing": "Initializing",
     "message.workspace.test.configuring": "configuring",
-    "message.workspace.test": " We are currently creating a Test VM to check whether normal communication with the DC server and AD server is in progress. The test will be performed for about 10 to 15 minutes, and the final confirmation operation will be normal. TestVM will be deleted automatically. Please wait.",
+    "message.workspace.test": " We are currently creating a Test VM and checking whether normal communication with the controller server and directory server is in progress. The test is performed for about 10 to 15 minutes, and the final check is normal. Test VM will be deleted automatically. Please wait.",
 
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",

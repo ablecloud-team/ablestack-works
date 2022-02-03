@@ -35,7 +35,7 @@
     "message.workspace.status.delete": "[{count}]개의 워크스페이스가 삭제되었습니다.",
     "message.workspace.delete.fail": "워크스페이스 삭제에 실패하였습니다.",
     "message.workspace.delete.existvm": "가상머신이 존재하는 워크스페이스가 있습니다. 선택하신 [{count}]개 워크스페이스는 삭제되지 않았습니다.",
-    "message.login.wrong.400":"DC서버와 통신에 실패하였습니다. 관리자에게 문의하세요.",
+    "message.login.wrong.400":"컨트롤서버와 통신에 실패하였습니다. 관리자에게 문의하세요.",
     "message.login.wrong.401":"로그인 시 정산적인 토큰생성에 실패하였습니다. 관리자에게 문의하세요.",
     "message.vm.status.start.ok": "[{count}]개의 데스크톱 가상머신이 시작 요청이 완료되었습니다.",
     "message.vm.status.stop.ok": "[{count}]개의 데스크톱 가상머신이 정지 요청이 완료되었습니다.",
@@ -75,7 +75,7 @@
     "message.workspace.test.vmcreate": "Test VM 생성",
     "message.workspace.test.initializing": "초기화 중",
     "message.workspace.test.configuring": "구성 중",
-    "message.workspace.test": " 현재 Test VM을 생성하여 DC서버, AD서버와 정상적인 통신을 수행하는지 확인하는 작업을 진행중입니다. 약 10분 ~ 15분 간 테스트 작업을 수행하며 최종 확인 작업이 정상일 경우 TestVM은 자동으로 삭제됩니다. 잠시만 기다려주세요.",
+    "message.workspace.test": "현재 Test VM을 생성하여 컨트롤서버, 디렉토리서버와 정상적인 통신을 수행하는지 확인하는 작업을 진행중입니다. 약 10분 ~ 15분 간 테스트 작업을 수행하며 최종 확인 작업이 정상일 경우 Test VM은 자동으로 삭제됩니다. 잠시만 기다려주세요.",
 
     "tooltip.vmStart": "시작",
     "tooltip.vmStop": "정지",
