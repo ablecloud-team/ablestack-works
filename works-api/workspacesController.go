@@ -148,7 +148,7 @@ func getOffering(c *gin.Context) {
 	})
 }
 
-// putWorkspaces godoc
+// postWorkspaces godoc
 // @Summary 워크스페이스를 추가하는 API
 // @Description 워크스페이를 추가하는 API 입니다.
 // @Accept  json
@@ -162,7 +162,7 @@ func getOffering(c *gin.Context) {
 // @Param shared path bool true "워크스페이스에서 Shard 여부 전용이면 'false', 공용이면 'true'"
 // @Router /api/v1/workspace [POST]
 // @Success 200 {object} map[string]interface{}
-func putWorkspaces(c *gin.Context) {
+func postWorkspaces(c *gin.Context) {
 	workspace := Workspace{}
 	result := map[string]interface{}{}
 	resultCode := http.StatusNotFound
@@ -260,6 +260,8 @@ func deleteWorkspaces(c *gin.Context) {
 	workspaceList, _ := selectWorkspaceList(workspaceUuid)
 	_, errDeleteGroup := deleteGroup(workspaceList[0].Name)
 	if errDeleteGroup != nil {
+		log.Errorf("%v", errDeleteGroup)
+	} else {
 		resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
 		if resultDeleteWorkspace["status"] == http.StatusOK {
 			returnData["message"] = "workspace delete success"
