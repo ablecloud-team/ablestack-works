@@ -79,6 +79,7 @@ func asyncJobExec() {
 				deleteAsyncJob(asyncJob.Id)
 				deleteInstance(asyncJob.ExecUuid)
 				delConnection(instanceInfo.Name)
+				deleteComputer(instanceInfo.Name)
 				updateWorkspaceQuantity(workspaceInfo.Uuid)
 			} else {
 				deleteAsyncJob(asyncJob.Id)

@@ -79,7 +79,7 @@ func main() {
 
 			v1.GET("/workspace", getWorkspaces)
 			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
-			v1.POST("/workspace", putWorkspaces)
+			v1.POST("/workspace", postWorkspaces)
 			v1.DELETE("/workspace/:workspaceUuid", deleteWorkspaces)
 
 			v1.GET("/offering", getOffering)

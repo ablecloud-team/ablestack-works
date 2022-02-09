@@ -35,13 +35,14 @@ func postLogin(id string, password string) (*http.Response, error) {
 func postDCUser(user User) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 	params := url.Values{
-		"username":  {user.Cn},
-		"password":  {user.Password},
-		"sn":        {user.Sn},
-		"givenName": {user.GivenName},
-		"email":     {user.Mail},
-		"phone":     {user.TelephoneNumber},
-		"title":     {user.Title},
+		"username":   {user.Cn},
+		"password":   {user.Password},
+		"sn":         {user.Sn},
+		"givenName":  {user.GivenName},
+		"email":      {user.Mail},
+		"phone":      {user.TelephoneNumber},
+		"title":      {user.Title},
+		"department": {user.Department},
 	}
 	log.Infof("paramsInfo = [%v]", params)
 	log.Infof("user = [%v]", user)
@@ -188,7 +189,24 @@ func deleteGroup(groupName string) (*http.Response, error) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)
 	log.WithFields(logrus.Fields{
-		"authDAO": "deleteGroup",
+		"communicationDC": "deleteGroup",
+	}).Infof("workspace group delete status. resp [%v], err [%v]", resp, err)
+
+	return resp, err
+}
+
+func deleteComputer(computerName string) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	//resp, err := client.Get(DCInfo + "/v1/group/" + groupName)
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/computer/%v", DCInfo, computerName), nil)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	log.WithFields(logrus.Fields{
+		"authDAO": "deleteComputer",
 	}).Infof("workspace group delete status. resp [%v], err [%v]", resp, err)
 
 	return resp, err
