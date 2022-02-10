@@ -33,7 +33,9 @@ jobs:
 
       # npm 필수 패키지 설치 및 빌드 , 테스트
       - name: npm install && npm run build && npm test
-        run: npm install && npm run build && npm test
+        run: |
+          npm install
+          npm run build --if-present
         working-directory: ${{ env.working-directory }}
 
       # build된 소스를 다운로드 할수 있도록 artifact upload 수행
