@@ -27,7 +27,7 @@ jobs:
       run: env GOOS=${{ env.GOOS }};GOARCH=${{ env.GOARCH }} go build -o dist/works-api -v 
       working-directory: ${{ env.working-directory }}
 
-    - name: GoTest
+    - name: Go Test
       run: env GOOS=${{ env.GOOS }};GOARCH=${{ env.GOARCH }} go test .
       working-directory: ${{ env.working-directory }}
       
