@@ -13,22 +13,30 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    env:
+      working-directory: ./works-ui
     strategy:
       matrix:
         node-version: [16.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
       # npm ci는 npm install과 같은 기능을 수행한다. 자세한 내용은 아래 링크 참조.
-      - run: cd works-ui && npm install && npm run build
-      
-      - uses: actions/upload-artifact@v2
+      - name: npm build
+        run: npm install && npm run build && npm run test
+        working-directory: ${{ env.working-directory }}
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
         with:
           name: action-build
-          path: dist/
+          path: dist
+          working-directory: ${{ env.working-directory }}
