@@ -1,4 +1,4 @@
-name: works-api
+name: works-api workflow
 
 on:
   push:
