@@ -1,0 +1,38 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # working 위치
+      working-directory: ./works-api
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: env GOOS=linux, GOARCH=arm64 go build .
+      working-directory: ${{ env.working-directory }}
+
+    - name: Test
+      run: env GOOS=linux, GOARCH=arm64 go test .
+      working-directory: ${{ env.working-directory }}
+      
+    # build된 소스를 다운로드 할수 있도록 artifact upload 수행
+    - name: build result upload step
+      uses: actions/upload-artifact@v2
+      with:
+        name: Action-build
+        path: works-api/dist/
