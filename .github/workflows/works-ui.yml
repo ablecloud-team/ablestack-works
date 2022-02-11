@@ -47,6 +47,6 @@ jobs:
       - name: build result upload step
         uses: actions/upload-artifact@v2
         with:
-          name: Action-build
+          name: Build-Artifact
           path: works-ui/dist/
           
