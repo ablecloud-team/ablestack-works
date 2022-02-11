@@ -5,11 +5,13 @@ name: works-ui workflow
 
 on:
   push:
-    branches: [ master ]
+    types:
+      - opened
     paths:
       - '.works-ui/**'
   pull_request:
-    branches: [ master ]
+    types:
+      - opened
     paths:
       - '.works-ui/**'
 jobs:
