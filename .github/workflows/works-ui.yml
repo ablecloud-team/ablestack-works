@@ -5,14 +5,12 @@ name: works-ui workflow
 
 on:
   push:
-    types:
-      - opened
+    branches: [ master ]
     paths:
       - '.github/workflows/**'
       - 'works-ui/**'
   pull_request:
-    types:
-      - opened
+    branches: [ master ]
     paths:
       - '.github/workflows/**'
       - 'works-ui/**'
