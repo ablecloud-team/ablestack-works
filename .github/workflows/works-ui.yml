@@ -6,9 +6,12 @@ name: works-ui workflow
 on:
   push:
     branches: [ master ]
+    paths:
+      - '.works-ui/**'
   pull_request:
     branches: [ master ]
-
+    paths:
+      - '.works-ui/**'
 jobs:
   build:
     # 빌드 환경(window, ubuntu, macos)
