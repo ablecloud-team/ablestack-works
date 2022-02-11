@@ -8,11 +8,13 @@ on:
     types:
       - opened
     paths:
+      - '.github/workflows/**'
       - '.works-ui/**'
   pull_request:
     types:
       - opened
     paths:
+      - '.github/workflows/**'
       - '.works-ui/**'
 jobs:
   build:
