@@ -9,13 +9,13 @@ on:
       - opened
     paths:
       - '.github/workflows/**'
-      - '.works-ui/**'
+      - 'works-ui/**'
   pull_request:
     types:
       - opened
     paths:
       - '.github/workflows/**'
-      - '.works-ui/**'
+      - 'works-ui/**'
 jobs:
   build:
     # 빌드 환경(window, ubuntu, macos)
