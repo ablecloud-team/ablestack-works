@@ -4,12 +4,12 @@ on:
   push:
     branches: [ master ]
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/works-api.yml'
       - 'works-api/**'
   pull_request:
     branches: [ master ]
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/works-api.yml'
       - 'works-api/**'
       
 jobs:
