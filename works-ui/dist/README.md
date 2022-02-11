@@ -1,1 +1,1 @@
-build 폴더
+build folder
