@@ -7,7 +7,7 @@ on:
   push:
     branches: [ master ]
     paths:
-      - '.github/workflows/**'
+      - '.github/workflows/works-ui.yml'
       - 'works-ui/**'
   pull_request:
     branches: [ master ]
@@ -47,6 +47,6 @@ jobs:
       - name: build result upload step
         uses: actions/upload-artifact@v2
         with:
-          name: Build-Artifact
+          name: Build-Artifact(works-ui)
           path: works-ui/dist/
           
