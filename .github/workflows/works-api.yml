@@ -3,9 +3,12 @@ name: works-api workflow
 on:
   push:
     branches: [ master ]
+    paths:
+      - '.works-api/**'
   pull_request:
     branches: [ master ]
-
+    paths:
+      - '.works-api/**'
 jobs:
   build:
     runs-on: ubuntu-latest
