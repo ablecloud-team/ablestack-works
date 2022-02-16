@@ -133,7 +133,7 @@
     "label.desktop": "데스크탑",
     "label.application": "애플리케이션",
     "label.detail": "상세",
-    "label.vm.list": "가상데스크톱",
+    "label.desktop.vm.list": "데스크톱 VM",
     "label.disk.list": "데이터 디스크",
     "label.network.list": "네트워크",
     "label.add.workspace": "워크스페이스 추가",
