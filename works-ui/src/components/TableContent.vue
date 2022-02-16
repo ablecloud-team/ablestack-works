@@ -226,12 +226,12 @@
           value: item.name,
           label:
             item.name === 'Guest'
-              ? '👥&nbsp;&nbsp;&nbsp;&nbsp;' + item.name
+              ? '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name
               : '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name,
         }))
       "
     >
-      <!-- <a-select-option
+      <!--👥 <a-select-option
         v-for="option in addAbleUserList"
         :key="option.name"
         :value="option.name"
@@ -363,6 +363,7 @@ export default defineComponent({
   },
   methods: {
     parentRefresh() {
+      console.log(111);
       this.$emit("parentRefresh");
     },
     changeModal(target, value) {
@@ -793,7 +794,7 @@ export default defineComponent({
           if (response.status === 200) {
             this.loading = ref(true);
             setTimeout(() => {
-              this.fetchData();
+              this.parentRefresh();
               message.destroy();
               message.success(this.$t("message.workspace.vm.add"), 1);
             }, 20000);
