@@ -70,6 +70,7 @@
             <Actions
               :action-from="actionFrom"
               :vm-info="record"
+              :ws-name="workspaceInfo.name"
               @fetchData="parentRefresh"
             />
           </ASpace>
@@ -218,7 +219,7 @@
       v-model:value="selectedUser"
       :placeholder="$t('tooltip.user')"
       mode="multiple"
-      style="width: 100%"
+      style="width: 98%"
       option-filter-prop="label"
       class="addmodal-aform-item-div"
       :options="
@@ -363,7 +364,6 @@ export default defineComponent({
   },
   methods: {
     parentRefresh() {
-      console.log(111);
       this.$emit("parentRefresh");
     },
     changeModal(target, value) {
@@ -781,41 +781,76 @@ export default defineComponent({
       //     this.loading = false;
       //   });
     },
-
-    putVmToWorksapce() {
+    async funcDelay(delay) {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve("delay call!");
+        }, delay);
+      });
+    },
+    funcEndMessage() {
+      message.destroy();
+      if (this.succCnt > 0) {
+        message.success(
+          this.$t(this.sucMessage, {
+            count: this.succCnt,
+          }),
+          5
+        );
+      }
+      if (this.failCnt > 0) {
+        message.error(
+          this.$t(this.failMessage, {
+            count: this.failCnt,
+          }),
+          5
+        );
+      }
+      this.failCnt = 0;
+      this.succCnt = 0;
+    },
+    async putVmToWorksapce() {
       //데스크톱 가상머신 개수선택해 추가
-      message.loading(this.$t("message.workspace.vm.adding"), 20);
+      message.loading(this.$t("message.workspace.vm.adding"), 100);
       let params = new URLSearchParams();
       params.append("uuid", this.$route.params.workspaceUuid);
       params.append("quantity", this.selectedVmQuantity);
-      worksApi
-        .put("/api/v1/instance", params)
-        .then((response) => {
-          if (response.status === 200) {
-            this.loading = ref(true);
-            setTimeout(() => {
-              this.parentRefresh();
-              message.destroy();
-              message.success(this.$t("message.workspace.vm.add"), 1);
-            }, 20000);
-          } else {
-            message.error(this.$t("message.workspace.vm.add.fail"));
-          }
+
+      try {
+        const response = await worksApi.put("/api/v1/instance", params);
+        if (response.status == 200) {
+          this.loading = ref(true);
+
+          //생성 요청 후 20초 정도 딜레이 후 리프레시
+          await this.funcDelay(20000);
+          this.parentRefresh();
+
+          //2초 후 메시지 표시
+          await this.funcDelay(2000);
           this.changeModal("desktop", false);
-        })
-        .catch((error) => {
           message.destroy();
+          message.success(
+            this.$t("message.workspace.vm.add.success", {
+              count: this.selectedVmQuantity,
+            }),
+            5
+          );
+        } else {
           message.error(this.$t("message.workspace.vm.add.fail"));
-          console.log(error);
-        });
+        }
+      } catch (error) {
+        message.destroy();
+        message.error(this.$t("message.workspace.vm.add.fail"));
+        console.log(error);
+      }
     },
     async putUserToWorksapce() {
       //워크스페이스에 사용자 추가
       //console.log(this.selectedUser);
       if (this.selectedUser.length == 0) return false;
 
-      let sucMessage = "message.workspace.user.add.ok";
-      let failMessage = "message.workspace.user.add.dupl";
+      this.sucMessage = "message.workspace.user.add.ok";
+      this.failMessage = "message.workspace.user.add.dupl";
       message.loading(this.$t("message.workspace.vm.user.allocateing"), 20);
 
       for (let val of this.selectedUser) {
@@ -833,31 +868,12 @@ export default defineComponent({
           console.log(error);
         }
       }
-
       //console.log(this.succCnt, this.failCnt);
-      this.changeModal("user", false);
-
-      message.destroy();
-      if (this.succCnt > 0) {
-        message.success(
-          this.$t(sucMessage, {
-            count: this.succCnt,
-          }),
-          5
-        );
-      }
-      if (this.failCnt > 0) {
-        message.error(
-          this.$t(failMessage, {
-            count: this.failCnt,
-          }),
-          5
-        );
-      }
-      this.selectedUser = [];
       this.parentRefresh();
-      this.failCnt = 0;
-      this.succCnt = 0;
+      await this.funcDelay(2000);
+      this.changeModal("user", false);
+      this.funcEndMessage();
+      this.selectedUser = [];
     },
     async delUserFromWorkspace(val) {
       message.loading(this.$t("message.workspace.vm.user.deleting"), 20);
