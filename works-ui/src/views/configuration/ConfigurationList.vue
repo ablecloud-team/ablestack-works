@@ -118,7 +118,7 @@ export default defineComponent({
       dataList: [],
       columns: [
         {
-          title: this.$t("label.account"),
+          title: this.$t("label.name"),
           dataIndex: "name",
           width: "25%",
           slots: {

@@ -16,8 +16,8 @@ import UserDetail from "../views/user/UserDetail.vue";
 import UserDesktop from "../views/userDesktop/UserDesktop.vue";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
-import Workspace from "../views/workspace/WorkSpace.vue";
-import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
+import Workspace from "../views/workSpace/WorkSpace.vue";
+import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
 import GuacClient from "@/components/GuacClient"
 
 // import Audit from "../views/audit/Audit.vue";

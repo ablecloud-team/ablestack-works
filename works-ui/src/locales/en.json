@@ -133,7 +133,7 @@
     "label.desktop": "Desktop",
     "label.application": "Application",
     "label.detail": "Detail",
-    "label.vm.list": "Virtual Desktops",
+    "label.desktop.vm.list": "Desktop VMs",
     "label.disk.list": "Data Disks",
     "label.network.list": "Networks",
     "label.add.workspace": "Add Workspace",

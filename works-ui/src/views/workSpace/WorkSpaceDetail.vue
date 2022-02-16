@@ -56,7 +56,7 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
+import WorkSpaceBody from "./WorkSpaceBody.vue";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
