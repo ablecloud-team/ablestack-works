@@ -36,6 +36,7 @@ function worksApiAuth() {
     //baseURL: process.env.VUE_APP_API_URL,
     baseURL: process.env.VUE_APP_API_URL == "" ? "http://" + window.location.hostname + ":8082" : process.env.VUE_APP_API_URL,
     withCredentials: true,
+    timeout: 5000,
   });
   return setInterceptors(instance);
 }

@@ -1,0 +1,26 @@
+[
+  {
+    "name":"clipboard_block",
+    "description":"클립보드 사용 금지"
+  },
+  {
+    "name":"usb_block",
+    "description":"usb 사용 금지"
+  },
+  {
+    "name":"share_block",
+    "description":"공유 스토리지 사용 금지"
+  },
+  {
+    "name":"remotefx",
+    "description":"RemoteFX 기능 사용"
+  },
+  {
+    "name":"install_block",
+    "description":"신규 설치 금지"
+  },
+  {
+    "name":"update_block",
+    "description":"업데이트 금지"
+  }
+]

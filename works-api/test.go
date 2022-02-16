@@ -6,13 +6,10 @@ import (
 )
 
 func testFunc(c *gin.Context) {
-	params := []MoldParams{
-		{"resourceids": "4a54e716-ebd3-4ee6-99ad-9e7fa90a3131"},
-		{"tags[0].key": "321"},
-		{"tags[0].value": "123"},
-	}
-	result := getCreateTags(params)
+	userName := c.PostForm("userName")
+	insertPolicyRemotefx(userName)
 	c.JSON(http.StatusOK, gin.H{
-		"testResult": result,
+
+		"result": "",
 	})
 }

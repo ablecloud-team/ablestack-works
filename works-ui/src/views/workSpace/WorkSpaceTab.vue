@@ -1,7 +1,7 @@
 <template>
   <div id="ContentTab">
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
-      <a-tab-pane key="1" :tab="$t('label.vm.list')" :forceRender="forceRender">
+      <a-tab-pane key="1" :tab="$t('label.desktop.vm.list')" :forceRender="forceRender">
         <TableContent
           ref="listRefreshCall1"
           :tap-name="'desktop'"
@@ -30,6 +30,7 @@
           ref="listRefreshCall3"
           :tap-name="'policy'"
           :action-from="'policyList'"
+          :workspace-info="workspaceInfo"
           :workspace-policy-list="workspacePolicyList"
         />
       </a-tab-pane>
