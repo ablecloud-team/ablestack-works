@@ -188,7 +188,11 @@ import clipboard from "@/lib/clipboard";
 import token from "@/assets/param.json";
 import Modal from "./Modal";
 
-const wsUrl = `ws://10.10.1.24:8087/`;
+const hostname =
+  process.env.VUE_APP_API_URL == ""
+    ? window.location.hostname
+    : process.env.VUE_APP_API_URL;
+const wsUrl = "ws://" + hostname + ":8088/";
 export default {
   components: {
     Modal,
