@@ -7,3 +7,4 @@ samba-ad.zip
 *.log
 *.msi
 *.zip
+works-api/docs/docs.go

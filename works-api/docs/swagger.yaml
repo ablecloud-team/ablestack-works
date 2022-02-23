@@ -2,7 +2,7 @@ info:
   contact: {}
 paths:
   /api/login:
-    put:
+    post:
       consumes:
       - application/json
       description: 사용자 로그인 하는 API 입니다.
@@ -41,6 +41,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 로그인 하는 API
+      tags:
+      - Login
   /api/v1/appConnection/:instanceUuid/:username:
     put:
       consumes:
@@ -66,6 +68,161 @@ paths:
             additionalProperties: true
             type: object
       summary: instance 에 사용자를 할당하는 API
+      tags:
+      - Connection
+  /api/v1/application:
+    delete:
+      consumes:
+      - application/json
+      description: 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
+      parameters:
+      - description: Application 이름
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Application 경로
+        in: path
+        name: path
+        required: true
+        type: string
+      - description: Application workingDirectory
+        in: path
+        name: workingDirectory
+        required: true
+        type: string
+      - description: Application RegApplicationServer
+        in: path
+        name: RegApplicationServer
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Application 가상화를 등록하는 API
+      tags:
+      - Application
+    post:
+      consumes:
+      - application/json
+      description: 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
+      parameters:
+      - description: Workspace 의 Uuid
+        in: path
+        name: workspaceUuid
+        required: true
+        type: string
+      - description: Application 이름
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Application 경로
+        in: path
+        name: path
+        required: true
+        type: string
+      - description: Application workingDirectory
+        in: path
+        name: workingDirectory
+        required: true
+        type: string
+      - description: Application RegApplicationServer
+        in: path
+        name: RegApplicationServer
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Application 가상화를 등록하는 API
+      tags:
+      - Application
+  /api/v1/application/:workspaceUuid:
+    get:
+      consumes:
+      - application/json
+      description: Application List 를 조회하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Application List  조회하는 API
+      tags:
+      - Application
+  /api/v1/applicationServer/:workspaceUuid:
+    get:
+      consumes:
+      - application/json
+      description: Application List 를 조회하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Application List  조회하는 API
+      tags:
+      - Application
+  /api/v1/configuration:
+    get:
+      consumes:
+      - application/json
+      description: Works 의 환경 설정을 조회하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Works 의 환경 설정을 조회하는 API
+      tags:
+      - Configurationt
+  /api/v1/configuration/:id:
+    patch:
+      consumes:
+      - application/json
+      description: Works 의 환경 설정을 변경하는 API 입니다.
+      parameters:
+      - description: 설정 값 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 변경될 설정 값
+        in: path
+        name: value
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Works 의 환경 설정을 변경하는 API
+      tags:
+      - Configuration
   /api/v1/connection/:instanceUuid:
     delete:
       consumes:
@@ -86,6 +243,8 @@ paths:
             additionalProperties: true
             type: object
       summary: instance 에 사용자를 할당하는 API
+      tags:
+      - Connection
   /api/v1/connection/:instanceUuid/:username:
     put:
       consumes:
@@ -111,6 +270,8 @@ paths:
             additionalProperties: true
             type: object
       summary: instance 에 사용자를 할당하는 API
+      tags:
+      - Connection
   /api/v1/dashboard:
     get:
       consumes:
@@ -125,6 +286,8 @@ paths:
             additionalProperties: true
             type: object
       summary: dashboard 조회하는 API
+      tags:
+      - Dashboard
   /api/v1/group:
     delete:
       consumes:
@@ -145,6 +308,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 그룹을 삭제하는 API
+      tags:
+      - Group
     get:
       consumes:
       - application/json
@@ -158,6 +323,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 그룹 리스트를 조회 하는 API
+      tags:
+      - Group
   /api/v1/group/:groupName:
     get:
       consumes:
@@ -178,6 +345,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 그룹 리스트를 조회 하는 API
+      tags:
+      - Group
   /api/v1/group/:groupName/:userName:
     delete:
       consumes:
@@ -203,6 +372,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 그룹에서 유저를 삭제하는 API
+      tags:
+      - Group
     put:
       consumes:
       - application/json
@@ -227,6 +398,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 그룹을 삭제하는 API
+      tags:
+      - Group
   /api/v1/handshake/:instanceUuid/:instanceType:
     patch:
       consumes:
@@ -252,6 +425,8 @@ paths:
             additionalProperties: true
             type: object
       summary: instance 의 handshake 를 재실행 하는 API
+      tags:
+      - Handshake
   /api/v1/instance:
     put:
       consumes:
@@ -277,6 +452,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스의 instance 를 추가하는 API
+      tags:
+      - Instances
   /api/v1/instance/:action/:instanceUuid:
     patch:
       consumes:
@@ -302,6 +479,8 @@ paths:
             additionalProperties: true
             type: object
       summary: instance 의 상태 변경하는 API
+      tags:
+      - Instances
   /api/v1/instance/:instanceUuid:
     get:
       consumes:
@@ -322,6 +501,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스의 instance 를 조회하는 API
+      tags:
+      - Instances
   /api/v1/instance/detail/:instanceUuid:
     get:
       consumes:
@@ -342,6 +523,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스의 instance 를 추가하는 API
+      tags:
+      - Instances
   /api/v1/logout:
     get:
       consumes:
@@ -356,6 +539,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 로그아웃 하는 API
+      tags:
+      - Login
   /api/v1/offering:
     get:
       consumes:
@@ -370,6 +555,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 템플릿 및 각종 오퍼링을 조회하는 API
+      tags:
+      - offering
   /api/v1/token:
     get:
       consumes:
@@ -386,6 +573,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 토큰을 조회하는 API
+      tags:
+      - User
   /api/v1/user:
     get:
       consumes:
@@ -400,6 +589,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 리스트를 조회 하는 API
+      tags:
+      - User
     put:
       consumes:
       - application/json
@@ -451,6 +642,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 생성하는 하는 API
+      tags:
+      - User
   /api/v1/user/:userName:
     delete:
       consumes:
@@ -471,6 +664,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 리스트를 조회 하는 API
+      tags:
+      - User
     get:
       consumes:
       - application/json
@@ -492,6 +687,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 사용자 상세조회 하는 API
+      tags:
+      - User
   /api/v1/workspace:
     delete:
       consumes:
@@ -512,6 +709,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스를 추가하는 API
+      tags:
+      - workspaces
     get:
       consumes:
       - application/json
@@ -525,7 +724,9 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스 리스트를 조회하는 API
-    put:
+      tags:
+      - workspaces
+    post:
       consumes:
       - application/json
       description: 워크스페이를 추가하는 API 입니다.
@@ -569,6 +770,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스를 추가하는 API
+      tags:
+      - workspaces
   /api/v1/workspace/:workspaceUuid:
     get:
       consumes:
@@ -589,6 +792,8 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스 리스트를 조회하는 API
+      tags:
+      - workspaces
   /api/v1/workspaceAgent:
     post:
       consumes:
@@ -619,4 +824,22 @@ paths:
             additionalProperties: true
             type: object
       summary: 워크스페이스를 추가하는 API
+      tags:
+      - workspacesAgent
+  /serverCheck:
+    get:
+      consumes:
+      - application/json
+      description: Works 서비스와 관련된 서버의 상태를 조회하는 API 입니다.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Works 서비스와 관련된 서버의 상태를 조회하는 API
+      tags:
+      - ServerCheck
 swagger: "2.0"
