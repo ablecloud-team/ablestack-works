@@ -83,9 +83,9 @@ export default defineComponent({
   created() {
     this.fetchData();
     this.timer = setInterval(() => {
-      //90초 자동 갱신
+      //60초 자동 갱신
       this.refresh(false);
-    }, 90000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
