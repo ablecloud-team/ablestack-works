@@ -214,7 +214,7 @@ func addUserHandler(c *gin.Context) {
 		"givenName":       givenName,
 		"title":           title,
 		"sn":              sn,
-		"department":	   department,
+		"department":      department,
 	}
 	err = addUser(l, user)
 	if err != nil {
@@ -1095,7 +1095,6 @@ func listPolicyHandler(c *gin.Context) {
 	return
 }
 
-
 func addComputerToGroupHandler(c *gin.Context) {
 	setLog()
 	computername := c.Param("computername")
@@ -1144,7 +1143,7 @@ func delComputerFromGroupHandler(c *gin.Context) {
 	//New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
 	setLog(fmt.Sprintf("computername: %v, groupname: %v", computername, groupname))
 	//computercn, _:= getComputerCN(l, computername)
-	computercn:=computername
+	computercn := computername
 	err = delComputerFromGroup(l, computercn, groupname)
 	if err != nil {
 		//errorlines := strings.Split(err.Error(), "\r\n")
@@ -1157,7 +1156,6 @@ func delComputerFromGroupHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, simpleReturnModel{Msg: "delComputerFromGroup Succes"})
 }
-
 
 // listComputerHandler godoc
 // @Summary 사용자 목록 조회
@@ -1192,7 +1190,6 @@ func listComputerHandler(c *gin.Context) {
 		"username": user.Username,
 	})*/
 }
-
 
 // getComputerHandler godoc
 // @Summary 사용자 목록 조회
@@ -1235,24 +1232,63 @@ func getComputerHandler(c *gin.Context) {
 	})*/
 }
 
+// delComputerHandler godoc
+// @Summary 사용자 목록 조회
+// @Description 사용자 목록 조회
+// @Accept  multipart/form-data
+// @Produce  json
+// @Success 200 {object} []ADUser "사용자 생성 성공"
+// @Failure 401 {object} errorModel "사용자 생성 실패"
+// @Failure default {objects} string
+// @Router /user [get]
+func delComputerHandler(c *gin.Context) {
+	setLog()
 
-func checkStatus(){
+	computername := c.Param("computername")
+	conn, status, err := ConnectAD()
+	defer conn.Conn.Close()
+	if err != nil {
+		log.Errorln(err)
+	}
+	if !status {
+		log.Errorln(status, err)
+	}
+	l := conn.Conn
+	//l, err := setupLdap()
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "delComputer"})
+		return
+
+	}
+	err = delComputer(l, computername)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "delComputer"})
+		return
+
+	}
+	c.JSON(http.StatusGone, gin.H{
+		"userID":       1,
+		"computername": computername,
+	})
+}
+
+func checkStatus() {
 
 	err2 := ""
 	shell, err := setupShell()
-	if err != nil{
+	if err != nil {
 		fmt.Errorf("%v", err)
 	}
 
 	//rename
 	hostname, err := shell.Exec("hostname")
-	if err != nil{
+	if err != nil {
 		fmt.Errorf("%v", err)
 	}
 	hostname = strings.TrimSpace(hostname)
 	log.Println(hostname)
 	log.Println(ADconfig.HostName)
-	if !strings.EqualFold(hostname,ADconfig.HostName) && ADconfig.HostName != ""{
+	if !strings.EqualFold(hostname, ADconfig.HostName) && ADconfig.HostName != "" {
 		cmd := fmt.Sprintf("Rename-Computer -NewName %v", ADconfig.HostName)
 		log.Errorf("cmd: %v", cmd)
 		out, err := shell.Exec(cmd)
@@ -1267,13 +1303,12 @@ func checkStatus(){
 		log.Errorf("err: %v", err)
 	}
 
-
 	//ad join
 	cmd := "get-computerinfo -property csdomainrole | Format-list"
 	output, err := shell.Exec(cmd)
 	outputs := strings.Split(strings.TrimSpace(output), ":")
 	log.Infof("DomainRole: %v", outputs)
-	if strings.TrimSpace(outputs[1]) == "StandaloneWorkstation"{
+	if strings.TrimSpace(outputs[1]) == "StandaloneWorkstation" {
 		cmd := fmt.Sprintf("$username = \"administrator@%v\"; ", ADconfig.Domain) +
 			"$password = \"Ablecloud1!\" | ConvertTo-SecureString -asPlainText -Force; " +
 			"$credential = New-Object System.Management.Automation.PSCredential($username,$password); " +
@@ -1289,24 +1324,22 @@ func checkStatus(){
 		output, err = shell.Exec(cmd)
 	}
 
-
 	//service 권한 elevate
 	cmd = "c:\\Works-DC\\nssm.exe get Works-DC ObjectName"
 	output_, err := shell.Exec(cmd)
 	output = strings.TrimSpace(output_)
-	if strings.EqualFold(output, "localsystem"){
+	if strings.EqualFold(output, "localsystem") {
 		aduser := fmt.Sprintf("%v\\%v", strings.Split(ADconfig.ADdomain, ".")[0], ADconfig.ADusername)
 		service := fmt.Sprintf("c:\\Works-DC\\nssm.exe set Works-DC objectName %v %v", aduser, ADconfig.ADpassword)
 		stdout1, err1 := shell.Exec(service)
 		log.Infof("stdout: %v, \nstderr: %v\n", stdout1, err1)
 		//service = fmt.Sprintf("c:\\Works-DC\\nssm.exe restart Works-DC > c:\\Works-DC\\nssm.txt")
 		service = "shutdown /r /f /t 10"
-		ADconfig.Status = ADconfig.Status+" serviceupdated"
+		ADconfig.Status = ADconfig.Status + " serviceupdated"
 		ADsave()
 		stdout2, err2 := shell.Exec(service)
 		log.Infof("stdout: %v, \nstderr: %v\n", stdout2, err2)
 	}
-
 
 	///gp import
 	stdout, err := shell.Exec("(get-gpo -all).displayname")
@@ -1326,7 +1359,7 @@ func checkStatus(){
 		}
 	}
 
-	if len(policylist)<1{
+	if len(policylist) < 1 {
 		currentWorkingDirectory, err := os.Getwd()
 		policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
 		data, err := os.Open(policyfile)
@@ -1376,31 +1409,29 @@ func checkStatus(){
 
 }
 
-
 func statusHandler(c *gin.Context) {
 	shell, err := setupShell()
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, errorModel{Msg: err.Error(), Target: "getComputer"})
 		return
 	}
-	cmd:="get-computerinfo -property csdomain,csdnshostname,csdomainrole,csname,csworkgroup,csusername,logonserver"
+	cmd := "get-computerinfo -property csdomain,csdnshostname,csdomainrole,csname,csworkgroup,csusername,logonserver"
 	output, err := shell.Exec(cmd)
 	outputs := strings.Split(output, "\n")
 	fmt.Println(outputs)
 	//"restart-computer -force"
 
 	c.JSON(http.StatusOK, map[string]string{
-		"ad":"notjoined",
-		"policy":"loaded",
-		"agent":"patched",
-		"output":output,
+		"ad":     "notjoined",
+		"policy": "loaded",
+		"agent":  "patched",
+		"output": output,
 	})
 	return /*gin.H{
 		"userID": 1,
 		"username": user.Username,
 	})*/
 }
-
 
 func adjoinHandler(c *gin.Context) {
 	setLog()
@@ -1433,7 +1464,7 @@ func adjoinHandler(c *gin.Context) {
 		return
 	}
 	ADconfig.Status = "Joining"
-	_=ADsave()
+	_ = ADsave()
 	c.JSON(http.StatusOK, output)
 	return
 }
