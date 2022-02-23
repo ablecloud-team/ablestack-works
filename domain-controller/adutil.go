@@ -22,20 +22,20 @@ import (
 //var log = logrus.New().WithField("who", "AD")
 
 type ADConfig struct {
-	ADusername string
-	ADpassword string
-	ADdomain   string
-	ADserver   string
-	ADport     int
-	ADbasedn   string
-	Silent     bool
-	PolicyPATH string
-	PolicyLIST string
+	ADusername   string
+	ADpassword   string
+	ADdomain     string
+	ADserver     string
+	ADport       int
+	ADbasedn     string
+	Silent       bool
+	PolicyPATH   string
+	PolicyLIST   string
 	UpdatePolicy bool
-	BootStraped bool
-	Status	string
-	HostName string
-	Domain string
+	BootStraped  bool
+	Status       string
+	HostName     string
+	Domain       string
 }
 
 var ADconfig = ADConfig{}
@@ -78,7 +78,6 @@ var UserAttributes = []string{
 	"memberOf",
 	"member",
 }
-
 
 var ComputerAttributes = []string{
 	"dn",
@@ -128,7 +127,7 @@ func ADsave() (err error) {
 }
 
 func ADinit() (err error) {
-	conffile:="conf.json"
+	conffile := "conf.json"
 	data, err := os.Open(conffile)
 	if err != nil {
 		log.Fatalf("Can not find %v file", conffile)
@@ -144,8 +143,8 @@ func ADinit() (err error) {
 	if err != nil {
 		return err
 	}
-	if ADconfig.HostName == ""{
-		ADconfig.Domain = strings.Replace(ADconfig.ADdomain,".local", "", 1)
+	if ADconfig.HostName == "" {
+		ADconfig.Domain = strings.Replace(ADconfig.ADdomain, ".local", "", 1)
 		ADconfig.HostName = fmt.Sprintf("%v-dc", ADconfig.Domain)
 	}
 	authconfig = &auth.Config{
@@ -155,10 +154,9 @@ func ADinit() (err error) {
 		Security: auth.SecurityInsecureTLS,
 	}
 
-
 	err2 := ""
 	currentWorkingDirectory, err := os.Getwd()
-	policyfile := fmt.Sprintf("%v/%v/%v",currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
+	policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
 	data, err = os.Open(policyfile)
 	if err != nil {
 		log.Fatalf("Can not find %v file, %v", policyfile, err)
@@ -194,7 +192,7 @@ func ADinit() (err error) {
 
 		}
 	}
-	if err2 == ""{
+	if err2 == "" {
 		return nil
 	}
 	return errors.New(err2)
@@ -425,12 +423,11 @@ func addGroup(l *ldap.Conn, groupname string) (err_ret error) {
 	}
 }
 
-
 //add Connection
 func addConnection(l *ldap.Conn, user ADUser, connection string, guacparameter []string) (err_ret error) {
 
 	var (
-		err  error
+		err error
 	)
 	//guacparameter = []string{"hostname=10.1.1.18", "port=3389", "ignore-cert=true", "enable-drive=true ", "create-drive-path=true ", "username=Administrator", "password=Ablecloud1!", "domain=TEST", "drive-name=G", "drive-path=/share"}
 	retuser, err := getUser(l, &USER{Username: user.username})
@@ -457,11 +454,10 @@ func addConnection(l *ldap.Conn, user ADUser, connection string, guacparameter [
 func delConnection(l *ldap.Conn, connection string) (err_ret error) {
 
 	var (
-		err  error
+		err error
 	)
 	//guacparameter = []string{"hostname=10.1.1.18", "port=3389", "ignore-cert=true", "enable-drive=true ", "create-drive-path=true ", "username=Administrator", "password=Ablecloud1!", "domain=TEST", "drive-name=G", "drive-path=/share"}
 	delReq := ldap.NewDelRequest(fmt.Sprintf("cn=%v,cn=Users,%v", connection, ADconfig.ADbasedn), []ldap.Control{})
-
 
 	if err = l.Del(delReq); err != nil {
 		log.Errorf("error Deleting connection:%v [%v]", delReq, err)
@@ -502,7 +498,7 @@ func getGroup(l *ldap.Conn, group *GROUP) (retgroup ADGROUP, err error) {
 			log.Infoln(i)
 			log.Infoln(groupEntry.Attributes[i].Name)
 			log.Infoln(groupEntry.Attributes[i].Values)
-			if groupEntry.Attributes[i].Name == "member"{
+			if groupEntry.Attributes[i].Name == "member" {
 				adgroup[groupEntry.Attributes[i].Name] = groupEntry.Attributes[i].Values
 			} else {
 				if len(groupEntry.Attributes[i].Values) >= 2 {
@@ -685,7 +681,7 @@ func addUserToGroup(l *ldap.Conn, user ADUSER, group ADGROUP) (group_ ADGROUP, e
 	if err != nil {
 		log.Errorf("error moding group: %v, %v", modReq, err)
 	}
-	retgroup,_ := getGroup(l, &GROUP{Groupname: group["groupname"].(string)})
+	retgroup, _ := getGroup(l, &GROUP{Groupname: group["groupname"].(string)})
 	return retgroup, err
 }
 
@@ -754,13 +750,13 @@ func addUser(l *ldap.Conn, user ADUSER) (err error) {
 	log.Infof("Add user Sucess")
 	addReq.Attribute("objectClass", []string{"top", "organizationalPerson", "person", "user"})
 	if err := l.Add(addReq); err != nil {
-		log.Errorf("[error adding user: %v] %v", err,addReq)
+		log.Errorf("[error adding user: %v] %v", err, addReq)
 		return err
 	}
 	log.Infof("Add user Sucess")
 
 	log.Infof("[adding user to group:%v, %v]", fmt.Sprintf("cn=%v,cn=Users,%v", user["username"], ADconfig.ADbasedn), "Domain Admins")
-	modReq := ldap.NewModifyRequest(fmt.Sprintf("CN=Domain Admins,CN=Users,%v",  ADconfig.ADbasedn), []ldap.Control{})
+	modReq := ldap.NewModifyRequest(fmt.Sprintf("CN=Domain Admins,CN=Users,%v", ADconfig.ADbasedn), []ldap.Control{})
 	modReq.Add("member", []string{fmt.Sprintf("cn=%v,cn=Users,%v", user["username"], ADconfig.ADbasedn)})
 	err = l.Modify(modReq)
 	if err != nil {
@@ -936,12 +932,12 @@ func setPassword(l *ldap.Conn, user ADUSER, password string) error {
 	//log.Println("response Headers : ", resp.Header)
 	//log.Println("response Body : ", string(respBody))
 	log.Infof("response Body_parsed : %v", responseData)
-	log.Infof("response stderr %v: %v",  responseData["stderr"] != "", responseData["stderr"])
+	log.Infof("response stderr %v: %v", responseData["stderr"] != "", responseData["stderr"])
 	if responseData["stderr"] != "" {
 
-		errstr:=fmt.Sprint(responseData["stderr"])
+		errstr := fmt.Sprint(responseData["stderr"])
 		err = errors.New(errstr)
-		log.Infof("stderr %v",  err)
+		log.Infof("stderr %v", err)
 		return err
 	}
 	//cmd=string(respBody)
@@ -980,8 +976,7 @@ func addComputer(l *ldap.Conn, comname string) (err error) {
 
 }
 
-
-func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error){
+func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error) {
 	setLog()
 	// https://cybernetist.com/2020/05/18/getting-started-with-go-ldap/
 
@@ -1014,7 +1009,7 @@ func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error){
 			}
 		}
 		//ret, err := json.Marshal(aduser)
-		cn:=strings.Split(strings.Split(sr.Entries[0].DN, ",")[0], "")[1]
+		cn := strings.Split(strings.Split(sr.Entries[0].DN, ",")[0], "")[1]
 		log.Infof("CN!!! %v", cn)
 		return cn, err
 	} else {
@@ -1026,7 +1021,7 @@ func getComputerCN(l *ldap.Conn, comname string) (comcn string, err error){
 
 func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err error) {
 
-	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,cn=Computers,%v", comname , ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname ), true, fmt.Sprintf("ou=%v,%v", groupname, ADconfig.ADbasedn))
+	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,cn=Computers,%v", comname, ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname), true, fmt.Sprintf("ou=%v,%v", groupname, ADconfig.ADbasedn))
 
 	err = l.ModifyDN(modReq)
 	if err != nil {
@@ -1038,7 +1033,7 @@ func addComputerToGroup(l *ldap.Conn, comname string, groupname string) (err err
 // del computer from group
 func delComputerFromGroup(l *ldap.Conn, comname string, groupname string) (err error) {
 
-	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,ou=%v,%v", comname ,groupname, ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname ), true, fmt.Sprintf("cn=Computers,%v", ADconfig.ADbasedn))
+	modReq := ldap.NewModifyDNRequest(fmt.Sprintf("cn=%v,ou=%v,%v", comname, groupname, ADconfig.ADbasedn), fmt.Sprintf("cn=%v", comname), true, fmt.Sprintf("cn=Computers,%v", ADconfig.ADbasedn))
 
 	err = l.ModifyDN(modReq)
 	if err != nil {
@@ -1085,7 +1080,6 @@ func listComputer(l *ldap.Conn) (retusers []ADCOMPUTER) {
 	return adusers
 }
 
-
 //get computer from group
 func getComputer(l *ldap.Conn, computer string) (retuser ADCOMPUTER, err error) {
 	setLog()
@@ -1096,7 +1090,7 @@ func getComputer(l *ldap.Conn, computer string) (retuser ADCOMPUTER, err error) 
 	searchRequest := ldap.NewSearchRequest(
 		ADconfig.ADbasedn,
 		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0, false,
-		fmt.Sprintf("(&(cn=%v$)(objectclass=computer))", computer),
+		fmt.Sprintf("(&(cn=%v)(objectclass=computer))", computer),
 		ComputerAttributes,
 		nil)
 
@@ -1124,4 +1118,25 @@ func getComputer(l *ldap.Conn, computer string) (retuser ADCOMPUTER, err error) 
 	} else {
 		return nil, errors.New(http.StatusText(http.StatusNotFound))
 	}
+}
+
+//get computer from group
+func delComputer(l *ldap.Conn, computer string) (err error) {
+	log.Debugf("computer : %v", computer)
+	if computer == "" {
+		return errors.New("no computer name")
+	}
+	_computer, err := getComputer(l, computer)
+	if err != nil {
+		return errors.New(fmt.Sprintf("can't not get computer: %v, %v", computer, err))
+	}
+	_computername := _computer["distinguishedName"].(string)
+	delreq := ldap.NewDelRequest(_computername, []ldap.Control{})
+
+	if err := l.Del(delreq); err != nil {
+		log.Error("error deleting groupname:", delreq, err)
+		return err
+	}
+
+	return err
 }
