@@ -1,6 +1,6 @@
 <template>
-  <a-row>
-    <a-col :span="12">
+  <a-row type="flex">
+    <a-col :flex="2">
       <menu-unfold-outlined
         v-if="state.collapsed"
         class="trigger3"
@@ -8,7 +8,14 @@
       />
       <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
-    <a-col :span="12" style="float: right; text-align: right; padding-right: 5px">
+    <a-col
+      :flex="3"
+      style="float: right; text-align: right; padding-right: 5px"
+    >
+      <span>
+        【 {{ $t("label.cluster") }} : {{ clusterName }} 
+        ㅣ {{ $t("label.domain") }} : {{ domainName }} 】
+      </span>
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
@@ -27,26 +34,27 @@
             @click="setLocaleClick"
           >
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+            <a-menu-divider />
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
-      <a-button type="text" shape="circle" class="header-notice-button">
+      <!-- <a-button type="text" shape="circle" class="header-notice-button">
         <a class="ant-dropdown-link" @click.prevent>
           <BellOutlined class="header-notice-icon" />
         </a>
-      </a-button>
+      </a-button> -->
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
-            {{ username }}
+            {{ userName }}
           </a>
         </a-button>
         <template #overlay>
           <a-menu selected-keys="" mode="inline">
             <a-menu-item key="1" @click="userinfo">
-              <UserOutlined /> {{ $t("label.profile") }}
+              <UserOutlined />{{ $t("label.profile") }}
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="2" @click="logoutSubmit">
@@ -123,7 +131,7 @@ export default defineComponent({
     return {
       language: ref(""),
       loadedLanguage: ref[""],
-      username: ref(""),
+      userName: ref(""),
     };
   },
   created() {
@@ -136,7 +144,10 @@ export default defineComponent({
       sessionStorage.getItem("locale") === null
         ? "ko"
         : sessionStorage.getItem("locale");
-    this.username = sessionStorage.getItem("username");
+    this.userName = sessionStorage.getItem("userName");
+    this.clusterName = sessionStorage.getItem("clusterName");
+    this.domainName = sessionStorage.getItem("domainName");
+
     this.setLocale(this.language);
   },
   methods: {
@@ -183,7 +194,7 @@ export default defineComponent({
     //   }
     // },
     userinfo() {
-      router.push({ path: "/accountDetail/" + this.username });
+      router.push({ path: "/accountDetail/" + this.userName });
     },
   },
 });

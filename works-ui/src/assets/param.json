@@ -1,0 +1,16 @@
+{
+    "connection": {
+        "type": "rdp",
+        "settings": {
+            "hostname": "",
+            "username": "",
+            "password": "",
+            "domain": "",
+            "port" : "",
+            "ignore-cert": true,
+            "width": 1920,
+            "height": 976,
+            "dpi": 96
+        }
+    }
+}

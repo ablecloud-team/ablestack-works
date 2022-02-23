@@ -1,0 +1,52 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: works-ui workflow
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - '.github/workflows/works-ui.yml'
+      - 'works-ui/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - '.github/workflows/works-ui.yml'
+      - 'works-ui/**'
+jobs:
+  build:
+    # 빌드 환경(window, ubuntu, macos)
+    runs-on: ubuntu-latest
+    env:
+      # working 위치
+      working-directory: ./works-ui
+    strategy:
+      matrix:
+        node-version: [16.x]
+        
+    steps:
+      # 레포지토리 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # node.js 버전 세팅
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # npm 필수 패키지 설치 및 빌드 , 테스트
+      - name: npm install && npm run build && npm test
+        run: |
+          npm install
+          npm run build --if-present
+        working-directory: ${{ env.working-directory }}
+
+      # build된 소스를 다운로드 할수 있도록 artifact upload 수행
+      - name: build result upload step
+        uses: actions/upload-artifact@v2
+        with:
+          name: Build-Artifact(works-ui)
+          path: works-ui/dist
+          

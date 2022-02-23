@@ -288,13 +288,14 @@ export default defineComponent({
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 30000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
     fetchRefresh() {
+      this.$emit("actionFromChange", "Workspace", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];

@@ -16,7 +16,7 @@
                 shape="round"
                 style="margin-left: 20px"
                 size="small"
-                @click="refresh()"
+                @click="refresh(true)"
               >
                 <template #icon>
                   <ReloadOutlined /> {{ $t("label.refresh") }}
@@ -44,6 +44,7 @@
             :network-list="networkList"
             :vm-list="vmList"
             :group-info="groupInfo"
+            :workspace-policy-list="workspacePolicyList"
             @parentRefresh="refresh"
           />
         </div>
@@ -55,7 +56,7 @@
 <script>
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
-import WorkSpaceBody from "@/views/workspace/WorkSpaceBody";
+import WorkSpaceBody from "./WorkSpaceBody.vue";
 import { defineComponent, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
@@ -74,22 +75,27 @@ export default defineComponent({
       offeringDataList: ref([]),
       networkList: ref([]),
       vmList: ref([]),
+      workspacePolicyList: ref([]),
       groupInfo: ref([]),
       timer: ref(null),
     };
   },
   created() {
-    this.fetchData(true);
+    this.fetchData();
     this.timer = setInterval(() => {
-      //30초 자동 갱신
-      this.fetchData(false);
-    }, 30000);
+      //60초 자동 갱신
+      this.refresh(false);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
-    async fetchData(refreshClick) {
+    async refresh(refreshClick) {
+      await this.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
+    },
+    async fetchData() {
       await worksApi
         .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
         .then((response) => {
@@ -107,9 +113,11 @@ export default defineComponent({
             if (response.data.result.groupDetail !== null) {
               this.groupInfo = response.data.result.groupDetail;
             }
+            if (response.data.result.workspacePolicy !== null) {
+              this.workspacePolicyList = response.data.result.workspacePolicy;
+            }
           } else {
             message.error(this.$t("message.response.data.fail"));
-            //console.log("데이터를 정상적으로 가져오지 못했습니다.");
           }
         })
         .catch((error) => {
@@ -119,10 +127,6 @@ export default defineComponent({
         .finally(() => {
           this.actionFrom = "WorkspaceDetail";
         });
-      this.$refs.listRefreshCall.fetchRefresh(refreshClick);
-    },
-    refresh() {
-      this.fetchData(true);
     },
   },
 });

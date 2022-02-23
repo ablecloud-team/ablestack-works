@@ -3,7 +3,7 @@
     <a-tabs v-model:activeKey="activeKey" :tab-position="tabPosition">
       <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
         <DetailContent
-          ref="listRefreshCall1"
+          ref="refreshCall"
           :action-from="'UserDetail'"
           :account-info="accountInfo"
         />
@@ -39,7 +39,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
-      this.$refs.listRefreshCall1.fetchRefresh();
+      this.$refs.refreshCall.fetchRefresh();
     },
   },
 });

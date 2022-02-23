@@ -16,8 +16,9 @@ import UserDetail from "../views/user/UserDetail.vue";
 import UserDesktop from "../views/userDesktop/UserDesktop.vue";
 import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
-import Workspace from "../views/workspace/WorkSpace.vue";
-import WorkspaceDetail from "../views/workspace/WorkSpaceDetail.vue";
+import Workspace from "../views/workSpace/WorkSpace.vue";
+import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
+import GuacClient from "@/components/GuacClient"
 
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
@@ -63,8 +64,10 @@ const tokenCheck = (to, from, next, isAdmin) => {
           if (response.status === 200) {
             if (
               /*response.data.result.isAdmin === isAdmin */
-              (isAdmin && response.data.result.name.toLowerCase() === "administrator") ||
-              (!isAdmin && response.data.result.name.toLowerCase() !== "administrator")
+              (isAdmin &&
+                response.data.result.name.toLowerCase() === "administrator") ||
+              (!isAdmin &&
+                response.data.result.name.toLowerCase() !== "administrator")
             ) {
               goRoute(0, next);
             } else {
@@ -136,6 +139,11 @@ const routes = [
       // }
     ],
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
+  {
+    path: "/client",
+    name: "Client",
+    component: GuacClient,
+  },
   {
     path: "/",
     name: "Root",

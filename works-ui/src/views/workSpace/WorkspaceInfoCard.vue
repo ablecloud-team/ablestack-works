@@ -53,7 +53,7 @@
     </div>
 
     <div id="ID" class="CardItem">
-      <div class="ItemName">ID</div>
+      <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
         {{ workspaceInfo.uuid }}
       </div>

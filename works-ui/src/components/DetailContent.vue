@@ -65,28 +65,33 @@
       item-layout="horizontal"
     >
       <a-list-item>
-        <strong>{{ $t("label.account") }}</strong
-        ><br />
+        <strong>{{ $t("label.account") }}</strong>
+        <br />
         {{ accountInfo.username }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.country") }}</strong
-        ><br />
+        <strong>{{ $t("label.country") }}</strong>
+        <br />
         {{ accountInfo.co }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.countryCode") }}</strong
-        ><br />
+        <strong>{{ $t("label.countryCode") }}</strong>
+        <br />
         {{ accountInfo.countryCode }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.title") }}</strong
-        ><br />
+        <strong>{{ $t("label.title") }}</strong>
+        <br />
         {{ accountInfo.title }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.email") }}</strong
-        ><br />
+        <strong>{{ $t("label.department") }}</strong>
+        <br />
+        {{ accountInfo.department }}
+      </a-list-item>
+      <a-list-item>
+        <strong>{{ $t("label.email") }}</strong>
+        <br />
         {{ accountInfo.mail }}
       </a-list-item>
       <a-list-item>
@@ -95,18 +100,18 @@
         {{ accountInfo.isAdmin }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.telephoneNumber") }}</strong
-        ><br />
+        <strong>{{ $t("label.telephoneNumber") }}</strong>
+        <br />
         {{ accountInfo.telephoneNumber }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.userPrincipalName") }}</strong
-        ><br />
+        <strong>{{ $t("label.userPrincipalName") }}</strong>
+        <br />
         {{ accountInfo.userPrincipalName }}
       </a-list-item>
       <a-list-item>
-        <strong>{{ $t("label.distinguishedName") }}</strong
-        ><br />
+        <strong>{{ $t("label.distinguishedName") }}</strong>
+        <br />
         {{ accountInfo.distinguishedName }}
       </a-list-item>
     </a-list>
@@ -121,9 +126,7 @@
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "DetailContent",
@@ -169,56 +172,6 @@ export default defineComponent({
       this.spinning = true;
     },
     fetchData() {
-      // 가상머신 상세조회
-      // if (this.state.actionFrom == "VirtualMachineDetail") {
-      //   worksApi
-      //     .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
-      //     .then((response) => {
-      //       if (response.status === 200) {
-      //         this.vmDbDataInfo = response.data.result.instanceDBInfo;
-      //         this.vmMoldDataInfo =
-      //           response.data.result.instanceMoldInfo.virtualmachine[0];
-      //       } else {
-      //         message.error(this.$t("message.response.data.fail"));
-      //         //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //       message.error(this.$t("message.response.data.fail"));
-      //     })
-      //     .finally(() => {
-      //       this.spinning = false;
-      //     });
-      // } else
-      // if (
-      //   this.actionFrom === "UserDetail"
-      // ) {
-      //   let apiUrl =
-      //     this.actionFrom === "AccountDetail"
-      //       ? "/api/v1/user/" + this.$route.params.accountName
-      //       : this.actionFrom === "UserDetail"
-      //       ? "/api/v1/user/" + sessionStorage.getItem("username")
-      //       : "";
-
-      //   worksApi
-      //     .get(apiUrl)
-      //     .then((response) => {
-      //       if (response.status == 200) {
-      //         this.userDataInfo = response.data.result;
-      //       } else {
-      //         message.error(this.$t("message.response.data.fail"));
-      //         //console.log("데이터를 정상적으로 가져오지 못했습니다.");
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //       message.error(this.$t("message.response.data.fail"));
-      //     })
-      //     .finally(() => {
-      //       this.spinning = false;
-      //     });
-      // }
       setTimeout(() => {
         this.spinning = false;
       }, 500);

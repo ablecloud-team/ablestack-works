@@ -43,9 +43,6 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import ConfigurationList from "@/views/configuration/ConfigurationList";
 import { defineComponent, ref, reactive } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-
 export default defineComponent({
   components: {
     ConfigurationList,
@@ -62,7 +59,7 @@ export default defineComponent({
   created() {},
   methods: {
     refresh() {
-      this.$refs.listRefreshCall.fetchData();
+      this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val) {
       //console.log(val);

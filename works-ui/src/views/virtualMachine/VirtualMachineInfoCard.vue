@@ -53,14 +53,30 @@
           <template #title>{{ vmDbDataInfo.handshake_status }}</template>
           <a-badge
             class="head-example"
-            :color="vmDbDataInfo.handshake_status === 'Ready' ? 'green' : 'red'"
+            :color="
+              vmDbDataInfo.handshake_status === 'Not Ready' ||
+              vmDbDataInfo.handshake_status === 'Pending'
+                ? 'red'
+                : vmDbDataInfo.handshake_status === 'Joining' ||
+                  vmDbDataInfo.handshake_status === 'Joined'
+                ? 'yellow'
+                : vmDbDataInfo.handshake_status === 'Ready'
+                ? 'green'
+                : 'red'
+            "
             :text="
               vmDbDataInfo.handshake_status === 'Not Ready' ||
               vmDbDataInfo.handshake_status === 'Pending'
-                ? $t('label.vm.status.initializing')
+                ? $t('label.vm.status.initializing') +
+                  '(' +
+                  vmDbDataInfo.handshake_status +
+                  ')'
                 : vmDbDataInfo.handshake_status === 'Joining' ||
                   vmDbDataInfo.handshake_status === 'Joined'
-                ? $t('label.vm.status.configuring')
+                ? $t('label.vm.status.configuring') +
+                  '(' +
+                  vmDbDataInfo.handshake_status +
+                  ')'
                 : vmDbDataInfo.handshake_status === 'Ready'
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
@@ -86,7 +102,12 @@
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
       <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
-      <a-progress :percent="cpuused" size="small" status="active" />
+      <a-progress
+        :percent="cpuused"
+        size="small"
+        status="active"
+        style="width: 97%"
+      />
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
@@ -150,8 +171,6 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 
 export default defineComponent({
   components: {},
@@ -185,7 +204,7 @@ export default defineComponent({
   setup() {
     return {};
   },
-  data(props) {
+  data() {
     return {
       spinning: ref(true),
     };

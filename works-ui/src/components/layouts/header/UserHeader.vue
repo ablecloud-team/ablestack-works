@@ -8,7 +8,10 @@
       />
       <menu-fold-outlined v-else class="trigger3" @click="setCollapsed()" />
     </a-col>
-    <a-col :span="12" style="float: right; text-align: right; padding-right: 5px">
+    <a-col
+      :span="12"
+      style="float: right; text-align: right; padding-right: 5px"
+    >
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
@@ -27,15 +30,16 @@
             @click="setLocaleClick"
           >
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+            <a-menu-divider />
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
-      <a-button type="text" shape="circle" class="header-notice-button">
+      <!-- <a-button type="text" shape="circle" class="header-notice-button">
         <a class="ant-dropdown-link" @click.prevent>
           <BellOutlined class="header-notice-icon" />
         </a>
-      </a-button>
+      </a-button> -->
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
@@ -46,7 +50,7 @@
         <template #overlay>
           <a-menu selected-keys="" mode="inline" style="hover">
             <a-menu-item key="1" @click="userinfo">
-              <UserOutlined /> {{ $t("label.profile") }}
+              <UserOutlined />{{ $t("label.profile") }}
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="2" @click="logoutSubmit">

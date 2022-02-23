@@ -204,7 +204,6 @@ import WorkSpaceList from "./WorkSpaceList";
 import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
 export default defineComponent({
   name: "WorkSpace",
   components: {
@@ -222,8 +221,8 @@ export default defineComponent({
     const formState = reactive({
       name: ref(""),
       description: ref(""),
-      selectedMasterTemplateId: ref(""),
-      selectedOfferingId: ref(""),
+      selectedMasterTemplateId: undefined,
+      selectedOfferingId: undefined,
       workspaceType: ref("desktop"),
       dedicatedOrSharedBoolean: ref(false),
       desktopBoolean: ref(true),
@@ -361,7 +360,7 @@ export default defineComponent({
               //이름 중복이 아닐때(status code = 401)
               message.loading(this.$t("message.workspace.createing"));
               worksApi
-                .put("/api/v1/workspace", params)
+                .post("/api/v1/workspace", params)
                 .then((response) => {
                   message.destroy();
                   if (response.status === 200) {

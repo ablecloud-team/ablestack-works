@@ -57,6 +57,14 @@
         >{{ record.name }}</router-link
       >
     </template>
+    <template #workspaceRender="{ record }">
+      <router-link
+        :to="{
+          path: '/workspaceDetail/' + record.workspace_uuid,
+        }"
+        >{{ record.workspace_name }}</router-link
+      >
+    </template>
 
     <template #actionRender="{ record }">
       <a-Popover placement="topLeft">
@@ -70,6 +78,9 @@
         </template>
         <MoreOutlined />
       </a-Popover>
+    </template>
+    <template #typeRender="{ record }">
+      {{ record.workspace_type.toUpperCase() }}
     </template>
     <template #vmStateRender="{ record }">
       <a-badge
@@ -134,12 +145,10 @@
       </a-tooltip>
     </template>
     <template #userRender="{ record }">
-      <!-- {{
-        record.owner_account_id === ""
-          ? $t("label.owner.account.false")
-          : record.owner_account_id
-      }} -->
-      {{ record.owner_account_id }}
+      <router-link
+        :to="{ path: '/accountDetail/' + record.owner_account_id }"
+        >{{ record.owner_account_id }}</router-link
+      >
     </template>
     <template #sessionRender="{ record }">
       {{ record.connected }}
@@ -242,6 +251,49 @@ export default defineComponent({
               : 0,
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
+          slots: { customRender: "workspaceRender" },
+        },
+        {
+          title: this.$t("label.workspacetype"),
+          dataIndex: "workspace_type",
+          key: "workspace_type",
+          width: "20%",
+          slots: {
+            customRender: "typeRender",
+            filterDropdown: "filterDropdown",
+            filterIcon: "filterIcon",
+          },
+          sorter: (a, b) =>
+            a.workspace_type < b.workspace_type
+              ? -1
+              : a.workspace_type > b.workspace_type
+              ? 1
+              : 0,
+          sortDirections: ["descend", "ascend"],
+          //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
+          //filterMultiple: false,
+          // filters: [
+          //   {
+          //     text: 'DESKTOP',
+          //     value: 'DESKTOP',
+          //   },
+          //   {
+          //     text: 'APP',
+          //     value: 'APP',
+          //   },
+          // ]
+          onFilter: (value, record) =>
+            record.workspace_type
+              .toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()),
+          onFilterDropdownVisibleChange: (visible) => {
+            if (visible) {
+              setTimeout(() => {
+                this.$refs.searchInput.focus();
+              }, 100);
+            }
+          },
         },
         {
           title: this.$t("label.users"),
@@ -308,13 +360,14 @@ export default defineComponent({
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 30000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);
   },
   methods: {
     fetchRefresh() {
+      this.$emit("actionFromChange", "VirtualMachine", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];

@@ -1,11 +1,11 @@
 import { createApp } from "vue";
+import VueCryptojs from "vue-cryptojs"
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-
 import {
   faCameraRetro,
   faUserSecret,
@@ -73,7 +73,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SmileOutlined,
-  FrownOutlined
+  FrownOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -133,4 +133,4 @@ app.component("CloseCircleOutlined", CloseCircleOutlined);
 app.component("SmileOutlined", SmileOutlined);
 app.component("FrownOutlined", FrownOutlined);
 
-app.use(i18n).use(store).use(router).use(Antd).mount("#app");
+app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

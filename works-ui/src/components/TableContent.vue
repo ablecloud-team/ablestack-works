@@ -13,7 +13,9 @@
 
   <a-alert
     v-if="state.statusReadyBool"
-    :message="'현재 테스트 상태 : ' + state.statusReadyMessage"
+    :message="
+      $t('message.workspace.test.status') + ' : ' + state.statusReadyMessage
+    "
     :description="state.statusReadyDescription"
     type="info"
     show-icon
@@ -49,12 +51,9 @@
       <span
         v-if="actionFrom !== undefined && actionFrom === 'VirtualMachineList'"
       >
-        <router-link
-          :to="{
-            path: '/virtualMachineDetail/' + record.uuid + '/' + record.name,
-          }"
-          >{{ record.name }}</router-link
-        >
+        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">
+          {{ record.name }}
+        </router-link>
       </span>
       <span v-else>
         {{ record.name }}
@@ -71,6 +70,7 @@
             <Actions
               :action-from="actionFrom"
               :vm-info="record"
+              :ws-name="workspaceInfo.name"
               @fetchData="parentRefresh"
             />
           </ASpace>
@@ -79,12 +79,9 @@
       </a-Popover>
     </template>
     <template #userRender="{ record }">
-      <!-- {{
-        record.owner_account_id == ""
-          ? $t("label.owner.account.false")
-          : record.owner_account_id
-      }} -->
-      {{ record.owner_account_id }}
+      <router-link :to="{ path: '/accountDetail/' + record.owner_account_id }">
+        {{ record.owner_account_id }}
+      </router-link>
     </template>
     <template #connRender="{ record }">
       {{
@@ -158,6 +155,11 @@
     <template #stateRender="{ record }">
       {{ record.state }}
     </template>
+    <template #accountNameRender="{ record }">
+      <router-link :to="{ path: '/accountDetail/' + record.name }">{{
+        record.name
+      }}</router-link>
+    </template>
     <template #deleteRender="{ record }">
       <a-popconfirm
         :title="$t('message.delete.confirm')"
@@ -216,26 +218,34 @@
     <a-select
       v-model:value="selectedUser"
       :placeholder="$t('tooltip.user')"
-      show-search
       mode="multiple"
-      style="width: 100%; margin-top: 7px"
+      style="width: 98%"
       option-filter-prop="label"
       class="addmodal-aform-item-div"
+      :options="
+        filteredOptions.map((item) => ({
+          value: item.name,
+          label:
+            item.name === 'Guest'
+              ? '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name
+              : '👤&nbsp;&nbsp;&nbsp;&nbsp;' + item.name,
+        }))
+      "
     >
-      <a-select-option
-        v-for="option in userDataList"
+      <!--👥 <a-select-option
+        v-for="option in addAbleUserList"
         :key="option.name"
         :value="option.name"
         :label="option.name"
-      >
+        >
         {{ option.name }}
-      </a-select-option>
+      </a-select-option> -->
     </a-select>
   </a-modal>
 </template>
 
 <script>
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent, reactive, ref, computed } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 import Actions from "../components/Actions";
@@ -285,6 +295,11 @@ export default defineComponent({
       required: false,
       default: null,
     },
+    workspacePolicyList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
   },
   emits: ["parentRefresh"],
   setup(props) {
@@ -317,8 +332,7 @@ export default defineComponent({
       groupInfo: ref(props.groupInfo),
       dataList: ref([]),
       loading: ref(false),
-      workspaceUserList: ref([]),
-      userDataList: ref([]),
+      addAbleUserList: ref([]),
       selectedUser: ref([]),
       selectedVmQuantity: ref(1),
       columns: ref([]),
@@ -335,6 +349,9 @@ export default defineComponent({
         showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       rowSelection: ref(null),
+      filteredOptions: computed(() =>
+        this.addAbleUserList.filter((o) => !this.selectedUser.includes(o.name))
+      ),
     };
   },
   created() {
@@ -377,34 +394,36 @@ export default defineComponent({
       this.vis = false;
       this.state.selectedRowKeys = [];
       this.state.selectedRows = [];
+
       this.fetchData();
     },
     fetchData() {
-      if (
-        this.state.callTapName === "desktop" ||
-        this.state.callTapName === "user"
-      ) {
+      if (this.state.callTapName === "desktop") {
         this.state.addButtonBoolean = ref(true);
+        this.fetchDesktop();
         let stat = this.workspaceInfo.template_ok_check;
         if (stat === "Ready") {
           this.state.statusReadyBool = false; //워크스페이스 Agent상태가 OK일때 데스크톱가상머신추가 활성화
         } else {
           this.state.statusReadyBool = true;
           if (stat === "Not Ready") {
-            this.state.statusReadyMessage = "Test VM 생성";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.vmcreate"
+            );
           } else if (stat === "Pending") {
-            this.state.statusReadyMessage = "초기화중";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.initializing"
+            );
           } else if (stat === "Joining" || stat === "Joined") {
-            this.state.statusReadyMessage = "구성중";
+            this.state.statusReadyMessage = this.$t(
+              "message.workspace.test.configuring"
+            );
           }
-          this.state.statusReadyDescription =
-            "현재 Test VM을 생성하여 DC서버, AD서버와 정상적인 통신을 수행하는지 확인하는 작업을 진행중입니다. 약 10분 ~ 15분 간 테스트 작업을 수행하며 최종 확인 작업이 정상일 경우 TestVM은 자동으로 삭제됩니다. 잠시만 기다려주세요.";
+          this.state.statusReadyDescription = this.$t("message.workspace.test");
         }
-        if (this.state.callTapName === "desktop") {
-          this.fetchDesktop();
-        } else if (this.state.callTapName === "user") {
-          this.fetchUser();
-        }
+      } else if (this.state.callTapName === "user") {
+        this.state.addButtonBoolean = ref(true);
+        this.fetchUser();
       } else if (this.state.callTapName === "policy") {
         this.fetchPolicy();
         // this.rowSelection = null;
@@ -525,14 +544,65 @@ export default defineComponent({
     },
     async fetchUser() {
       this.state.addButtontext = this.$t("label.desktop.user.add");
-
       this.columns = [
         {
           dataIndex: "name",
           key: "name",
-          slots: { customRender: "nameRender" },
           title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+          slots: { customRender: "accountNameRender" },
+        },
+        {
+          title: this.$t("label.lastname"),
+          dataIndex: "givenName",
+          key: "givenName",
+          width: "10%",
+          sorter: (a, b) =>
+            a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.firstname"),
+          dataIndex: "sn",
+          key: "sn",
+          width: "10%",
+          sorter: (a, b) => (a.sn < b.sn ? -1 : a.sn > b.sn ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.title"),
+          dataIndex: "title",
+          key: "title",
+          width: "15%",
+          sorter: (a, b) =>
+            a.title < b.title ? -1 : a.title > b.title ? 1 : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.department"),
+          dataIndex: "department",
+          key: "department",
+          width: "10%",
+          sorter: (a, b) =>
+            a.department < b.department
+              ? -1
+              : a.department > b.department
+              ? 1
+              : 0,
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.phone"),
+          dataIndex: "telephoneNumber",
+          key: "telephoneNumber",
+          width: "15%",
+          sorter: (a, b) =>
+            a.telephoneNumber < b.telephoneNumber
+              ? -1
+              : a.telephoneNumber > b.telephoneNumber
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
         },
         {
@@ -544,17 +614,15 @@ export default defineComponent({
           slots: { customRender: "deleteRender" },
         },
       ];
-      var pushList = [];
+      var userInWorkspaceList = [];
       if (
         this.groupInfo.member !== undefined &&
         this.groupInfo.member !== null
       ) {
         for (let str of this.groupInfo.member) {
-          pushList.push({ name: str.split(",")[0].split("CN=")[1] });
+          userInWorkspaceList.push({ name: str.split(",")[0].split("CN=")[1] });
         }
       }
-      this.dataList = pushList;
-
       // 워크스페이스에 추가 할 사용자 목록 조회
       await worksApi
         .get("/api/v1/user")
@@ -565,9 +633,19 @@ export default defineComponent({
               response.data.result.length !== 0 &&
               response.data.result !== undefined
             ) {
-              this.userDataList = response.data.result;
+              this.addAbleUserList = response.data.result.filter(function (o1) {
+                return !userInWorkspaceList.some(function (o2) {
+                  return o1.name == o2.name;
+                });
+              });
+              userInWorkspaceList = response.data.result.filter(function (o1) {
+                return userInWorkspaceList.some(function (o2) {
+                  return o1.name == o2.name;
+                });
+              });
+            } else {
+              this.addAbleUserList = [];
             }
-            // let temp = [...new Set(this.userDataList.map((it) => it.name))];
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
@@ -577,6 +655,8 @@ export default defineComponent({
           message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
+
+      this.dataList = userInWorkspaceList;
     },
     fetchPolicy() {
       this.columns = [
@@ -588,43 +668,29 @@ export default defineComponent({
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
-        // {
-        //   title: "",
-        //   key: "action",
-        //   dataIndex: "action",
-        //   align: "right",
-        //   width: "5px",
-        //   slots: { customRender: "actionRender" },
-        // },
         {
-          title: this.$t("label.state"),
-          dataIndex: "state",
-          key: "state",
+          title: this.$t("label.description"),
+          dataIndex: "description",
+          key: "description",
+          width: "60%",
           sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
+            a.description < b.description
+              ? -1
+              : a.description > b.description
+              ? 1
+              : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "stateRender" },
         },
       ];
-      // 워크스페이스 정책 리스트 조회
-      // worksApi
-      //   .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
-      //   .then((response) => {
-      //     if (response.status == 200) {
-      //       //console.log(response.data.result.networkInfo.listnetworksresponse.network[0]);
-      //       this.dataList = null;
-      //     } else {
-      //       message.error(this.$t("message.response.data.fail"));
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     message.destroy();
-      //     message.error(this.$t("message.response.data.fail"));
-      //     console.log(error);
-      //   })
-      //   .finally(() => {
-      //     this.loading = false;
-      //   });
+      if (
+        this.workspacePolicyList !== undefined &&
+        this.workspacePolicyList !== null
+      ) {
+        this.dataList = this.workspacePolicyList;
+        this.dataList.forEach((value, index, array) => {
+          this.dataList[index].key = index;
+        });
+      }
     },
     fetchNetwork() {
       this.columns = [
@@ -696,7 +762,6 @@ export default defineComponent({
       if (this.vmDiskInfo !== undefined && this.vmDiskInfo !== null)
         this.dataList = [this.vmDiskInfo];
 
-      this.loading = false;
       // worksApi
       //   .get("/api/v1/instance/detail/" + this.$route.params.vmUuid)
       //   .then((response) => {
@@ -716,45 +781,80 @@ export default defineComponent({
       //     this.loading = false;
       //   });
     },
-
-    putVmToWorksapce() {
+    async funcDelay(delay) {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve("delay call!");
+        }, delay);
+      });
+    },
+    funcEndMessage() {
+      message.destroy();
+      if (this.succCnt > 0) {
+        message.success(
+          this.$t(this.sucMessage, {
+            count: this.succCnt,
+          }),
+          5
+        );
+      }
+      if (this.failCnt > 0) {
+        message.error(
+          this.$t(this.failMessage, {
+            count: this.failCnt,
+          }),
+          5
+        );
+      }
+      this.failCnt = 0;
+      this.succCnt = 0;
+    },
+    async putVmToWorksapce() {
       //데스크톱 가상머신 개수선택해 추가
-      message.loading(this.$t("message.workspace.vm.adding"), 20);
+      message.loading(this.$t("message.workspace.vm.adding"), 100);
       let params = new URLSearchParams();
       params.append("uuid", this.$route.params.workspaceUuid);
       params.append("quantity", this.selectedVmQuantity);
-      worksApi
-        .put("/api/v1/instance", params)
-        .then((response) => {
-          if (response.status === 200) {
-            this.loading = ref(true);
-            setTimeout(() => {
-              this.fetchData();
-              message.destroy();
-              message.success(this.$t("message.workspace.vm.add"), 1);
-            }, 20000);
-          } else {
-            message.error(this.$t("message.workspace.vm.add.fail"));
-          }
+
+      try {
+        const response = await worksApi.put("/api/v1/instance", params);
+        if (response.status == 200) {
+          this.loading = ref(true);
+
+          //생성 요청 후 20초 정도 딜레이 후 리프레시
+          await this.funcDelay(20000);
+          this.parentRefresh();
+
+          //2초 후 메시지 표시
+          await this.funcDelay(2000);
           this.changeModal("desktop", false);
-        })
-        .catch((error) => {
           message.destroy();
+          message.success(
+            this.$t("message.workspace.vm.add.success", {
+              count: this.selectedVmQuantity,
+            }),
+            5
+          );
+        } else {
           message.error(this.$t("message.workspace.vm.add.fail"));
-          console.log(error);
-        });
+        }
+      } catch (error) {
+        message.destroy();
+        message.error(this.$t("message.workspace.vm.add.fail"));
+        console.log(error);
+      }
     },
     async putUserToWorksapce() {
       //워크스페이스에 사용자 추가
       //console.log(this.selectedUser);
       if (this.selectedUser.length == 0) return false;
 
-      let sucMessage = "message.workspace.user.add.ok";
-      let failMessage = "message.workspace.user.add.dupl";
+      this.sucMessage = "message.workspace.user.add.ok";
+      this.failMessage = "message.workspace.user.add.dupl";
       message.loading(this.$t("message.workspace.vm.user.allocateing"), 20);
 
       for (let val of this.selectedUser) {
-        console.log(val);
+        // console.log(val);
         try {
           const response = await worksApi.put(
             "/api/v1/group/" + this.workspaceInfo.name + "/" + val
@@ -768,30 +868,12 @@ export default defineComponent({
           console.log(error);
         }
       }
-
-      console.log(this.succCnt, this.failCnt);
-      this.changeModal("user", false);
-
-      message.destroy();
-      if (this.succCnt > 0) {
-        message.success(
-          this.$t(sucMessage, {
-            count: this.succCnt,
-          }),
-          5
-        );
-      }
-      if (this.failCnt > 0) {
-        message.error(
-          this.$t(failMessage, {
-            count: this.failCnt,
-          }),
-          5
-        );
-      }
+      //console.log(this.succCnt, this.failCnt);
       this.parentRefresh();
-      this.failCnt = 0;
-      this.succCnt = 0;
+      await this.funcDelay(2000);
+      this.changeModal("user", false);
+      this.funcEndMessage();
+      this.selectedUser = [];
     },
     async delUserFromWorkspace(val) {
       message.loading(this.$t("message.workspace.vm.user.deleting"), 20);
