@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --mode production",
-    "dev": "vue-cli-service serve --mode development",
+    "dev": "vue-cli-service serve --port 8081 --mode development",
     "build": "vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
     "i18n:report": "vue-cli-service i18n:report --locales \"./src/locales/**/*.?(js|vue)\" --locales \"./src/locales/**/*.json\""

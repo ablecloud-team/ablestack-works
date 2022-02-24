@@ -13,7 +13,7 @@
       inline="true"
       style="padding-top: 14px"
     >
-      <a-menu-item
+      <!-- <a-menu-item
         key="1"
         @click="
           $router.push({ name: 'Favorite' });
@@ -24,7 +24,7 @@
           <StarOutlined />
         </template>
         <span>즐겨찾기</span>
-      </a-menu-item>
+      </a-menu-item> -->
       <a-menu-item
         key="2"
         @click="
@@ -37,7 +37,7 @@
         </template>
         <span>데스크탑</span>
       </a-menu-item>
-      <a-menu-item
+      <!-- <a-menu-item
         key="3"
         @click="
           $router.push({ name: 'UserDesktop' });
@@ -60,7 +60,7 @@
           <CoffeeOutlined />
         </template>
         <span>커뮤니티</span>
-      </a-menu-item>
+      </a-menu-item> -->
     </a-menu>
   </div>
 </template>

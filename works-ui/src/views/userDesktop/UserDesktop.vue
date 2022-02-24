@@ -23,211 +23,218 @@
       </a-layout-header>
       <a-layout-content>
         <a-spin :spinning="spinning" size="large">
-          <a-card bodyStyle="">
-            <a-list
-              :grid="{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 5, xxl: 10 }"
-              :pagination="pagination"
-              :data-source="instanceList"
-            >
-              <template #renderItem="{ item }">
-                <a-list-item>
-                  <a-card
-                    hoverable
-                    style="width: 100%; text-align: center"
-                    :title="item.name"
+          <a-row class="dashboard-a-row" :gutter="4">
+            <a-col v-for="workspace in dataList" class="dashboard-a-col">
+              <a-card
+                :title="
+                  'WORKSPACE : ' +
+                  workspace.workspace +
+                  '(' +
+                  workspace.workspaceDesc +
+                  ')'
+                "
+                bodyStyle="margin: 1px; fontSize: 100px;"
+              >
+                <a-row :gutter="4">
+                  <a-col
+                    v-for="vm in workspace.instanceList"
+                    class="dashboard-a-col"
                   >
-                    <DesktopOutlined
-                      :style="{
-                        fontSize: '40px',
-                        color:
-                          item.handshake_status === 'Ready' ? 'black' : 'pink',
-                      }"
-                    />
-
-                    <template class="ant-card-actions" #actions>
-                      <a-popconfirm
-                        :title="
-                          item.favorite == true
-                            ? '즐겨찾기 해제하시겠습니까?'
-                            : '즐겨찾기에 추가하시겠습니까?'
-                        "
-                        placement="topRight"
-                        :ok-text="$t('label.ok')"
-                        :cancel-text="$t('label.cancel')"
-                        @confirm="favorite(item.id, item.favorite)"
-                      >
-                        <a-tooltip v-if="item.favorite" placement="bottom">
-                          <template #title>{{ $t("즐겨찾기 해제") }}</template>
-                          <StarFilled
-                            :id="item.id + '-TRUE'"
-                            :style="{ color: '#ffd700', fontSize: '18px' }"
-                          />
-                        </a-tooltip>
-                        <a-tooltip v-else placement="bottom">
-                          <template #title>{{ $t("즐겨찾기 추가") }}</template>
-                          <StarOutlined
-                            :id="item.id + '-FALSE'"
-                            :style="{ color: '#d9dbdf', fontSize: '18px' }"
-                          />
-                        </a-tooltip>
-                      </a-popconfirm>
-
-                      <a-popconfirm
-                        :title="'RDP 파일을 다운로드 하시겠습니까?'"
-                        placement="topRight"
-                        :ok-text="$t('label.ok')"
-                        :cancel-text="$t('label.cancel')"
-                        @confirm="downloadRDP(item.name)"
-                      >
-                        <a-tooltip placement="bottom">
-                          <template #title>{{ $t("RDP 다운로드") }}</template>
-                          <CloudDownloadOutlined
-                            :style="{ color: '#292929', fontSize: '18px' }"
-                          />
-                        </a-tooltip>
-                      </a-popconfirm>
-
-                      <a-popconfirm
-                        v-if="item.handshake_status == 'Ready'"
-                        placement="topRight"
-                        :title="'데스크톱에 접속하시겠습니까?'"
-                        :ok-text="$t('label.ok')"
-                        :cancel-text="$t('label.cancel')"
-                        @confirm="connectConsole(item.id)"
-                      >
-                        <a-tooltip placement="bottom">
-                          <template #title>{{ $t("데스크톱 접속") }}</template>
-                          <Html5Outlined
-                            :style="{
-                              color: '#333',
-                              fontSize: '18px',
-                            }"
-                          />
-                        </a-tooltip>
-                      </a-popconfirm>
-                      <a-Popover placement="topLeft" trigger="click">
-                        <template #content>
-                          <a-popconfirm
-                            v-if="item.state == 'Running'"
-                            :title="'가상머신을 종료하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="vmState(item.id, item.state)"
-                          >
-                            <a-tooltip
-                              placement="bottom"
-                              style="padding-right: 40px"
-                            >
-                              <template #title>{{
-                                $t("가상머신 종료")
-                              }}</template>
-                              <a-button shape="circle">
-                                <template #icon>
-                                  <PoweroffOutlined
-                                    :style="{
-                                      color: '#333',
-                                      fontSize: '18px',
-                                      marginTop: '3px',
-                                    }"
-                                  />
-                                </template>
-                              </a-button>
-                            </a-tooltip>
-                          </a-popconfirm>
-                          <a-popconfirm
-                            v-if="item.state == 'Running'"
-                            :title="'가상머신을 재시작하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="vmState(item.id, item.state)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("가상머신 재시작")
-                              }}</template>
-
-                              <a-button shape="circle">
-                                <template #icon>
-                                  <ReloadOutlined
-                                    :style="{
-                                      color: '#333',
-                                      fontSize: '18px',
-                                      marginTop: '3px',
-                                    }"
-                                  />
-                                </template>
-                              </a-button>
-                            </a-tooltip>
-                          </a-popconfirm>
-                          <a-popconfirm
-                            v-if="item.state == 'Stopped'"
-                            :title="'가상머신을 시작하시겠습니까?'"
-                            :ok-text="$t('label.ok')"
-                            :cancel-text="$t('label.cancel')"
-                            @confirm="vmState(item.id, item.state)"
-                          >
-                            <a-tooltip placement="bottom">
-                              <template #title>{{
-                                $t("가상머신 시작")
-                              }}</template>
-                              <a-button shape="circle">
-                                <template #icon>
-                                  <CaretRightOutlined
-                                    :style="{
-                                      color: '#333',
-                                      fontSize: '18px',
-                                      marginTop: '3px',
-                                    }"
-                                  />
-                                </template>
-                              </a-button>
-                            </a-tooltip>
-                          </a-popconfirm>
-                        </template>
-                        <MoreOutlined
-                          :style="{ color: '#333', fontSize: '18px' }"
-                        />
-                      </a-Popover>
-                    </template>
-
-                    <br /><br />
-                    <a-tooltip placement="bottom">
-                      <template #title>{{ item.handshake_status }}</template>
-                      <a-badge
-                        class="head-example"
-                        :color="
-                          item.handshake_status === 'Not Ready' ||
-                          item.handshake_status === 'Pending'
-                            ? 'red'
-                            : item.handshake_status === 'Joining' ||
-                              item.handshake_status === 'Joined'
-                            ? 'yellow'
-                            : item.handshake_status === 'Ready'
-                            ? 'green'
-                            : 'red'
-                        "
-                        :text="
-                          item.handshake_status === 'Not Ready' ||
-                          item.handshake_status === 'Pending'
-                            ? $t('label.vm.status.initializing')
-                            : item.handshake_status === 'Joining' ||
-                              item.handshake_status === 'Joined'
-                            ? $t('label.vm.status.configuring')
-                            : item.handshake_status === 'Ready'
-                            ? $t('label.vm.status.ready')
-                            : $t('label.vm.status.notready')
-                        "
+                    <a-card
+                      hoverable
+                      style="width: 200px; text-align: center"
+                      :title="vm.name"
+                    >
+                      <DesktopOutlined
+                        :style="{
+                          fontSize: '40px',
+                          color: vm.state == 'Running' ? 'black' : 'pink',
+                        }"
                       />
-                      ({{ item.state }})
-                    </a-tooltip>
 
-                    <br />
-                    <WindowsFilled /> {{ item.ostype }}
-                  </a-card>
-                </a-list-item>
-              </template>
-            </a-list>
-          </a-card>
+                      <template class="ant-card-actions" #actions>
+                        <a-popconfirm
+                          :title="
+                            vm.favorite == true
+                              ? '즐겨찾기 해제하시겠습니까?'
+                              : '즐겨찾기에 추가하시겠습니까?'
+                          "
+                          :ok-text="$t('label.ok')"
+                          :cancel-text="$t('label.cancel')"
+                          @confirm="favorite(vm.id, vm.favorite)"
+                        >
+                          <a-tooltip placement="bottom">
+                            <template #title>{{
+                              $t("즐겨찾기 해제")
+                            }}</template>
+
+                            <StarFilled
+                              v-if="vm.favorite"
+                              :id="vm.id + '-TRUE'"
+                              :style="{ color: '#ffd700' }"
+                            />
+                          </a-tooltip>
+                          <a-tooltip placement="bottom">
+                            <template #title>{{
+                              $t("즐겨찾기 추가")
+                            }}</template>
+                            <StarOutlined
+                              v-if="!vm.favorite"
+                              :id="vm.id + '-FALSE'"
+                              :style="{ color: '#d9dbdf' }"
+                            />
+                          </a-tooltip>
+                        </a-popconfirm>
+
+                        <a-popconfirm
+                          :title="'RDP 파일을 다운로드 하시겠습니까?'"
+                          :ok-text="$t('label.ok')"
+                          :cancel-text="$t('label.cancel')"
+                          @confirm="downloadRDP(vm.name)"
+                        >
+                          <a-tooltip placement="bottom">
+                            <template #title>{{ $t("RDP 다운로드") }}</template>
+                            <CloudDownloadOutlined
+                              :style="{ color: '#292929' }"
+                            />
+                          </a-tooltip>
+                        </a-popconfirm>
+
+                        <a-popconfirm
+                          :title="'데스크톱에 접속하시겠습니까?'"
+                          :ok-text="$t('label.ok')"
+                          :cancel-text="$t('label.cancel')"
+                          @confirm="connectConsole(vm.id)"
+                          :disabled="
+                            vm.handshake_status == 'Ready' ? false : true
+                          "
+                        >
+                          <a-tooltip placement="bottom">
+                            <template #title>{{
+                              vm.handshake_status === "Ready"
+                                ? $t("데스크톱 접속")
+                                : $t("데스크톱 접속 불가")
+                            }}</template>
+                            <CodeFilled
+                              :style="{
+                                color:
+                                  vm.handshake_status == 'Ready'
+                                    ? '#333'
+                                    : '#d9dbdf',
+                              }"
+                            />
+                          </a-tooltip>
+                        </a-popconfirm>
+
+                        <a-Popover placement="topLeft" trigger="click">
+                          <template #content>
+                            <a-popconfirm
+                              v-if="vm.state == 'Running'"
+                              :title="'가상머신을 종료하시겠습니까?'"
+                              :ok-text="$t('label.ok')"
+                              :cancel-text="$t('label.cancel')"
+                              @confirm="vmState(vm.id, vm.state)"
+                            >
+                              <a-tooltip
+                                placement="bottom"
+                                style="padding-right: 40px"
+                              >
+                                <template #title>{{
+                                  $t("가상머신 종료")
+                                }}</template>
+                                <a-button shape="circle">
+                                  <template #icon>
+                                    <PoweroffOutlined
+                                      :style="{
+                                        color: '#333',
+                                        fontSize: '18px',
+                                        marginTop: '3px',
+                                      }"
+                                    />
+                                  </template>
+                                </a-button>
+                              </a-tooltip>
+                            </a-popconfirm>
+                            <a-popconfirm
+                              v-if="vm.state == 'Running'"
+                              :title="'가상머신을 재시작하시겠습니까?'"
+                              :ok-text="$t('label.ok')"
+                              :cancel-text="$t('label.cancel')"
+                              @confirm="vmState(vm.id, vm.state)"
+                            >
+                              <a-tooltip placement="bottom">
+                                <template #title>{{
+                                  $t("가상머신 재시작")
+                                }}</template>
+
+                                <a-button shape="circle">
+                                  <template #icon>
+                                    <ReloadOutlined
+                                      :style="{
+                                        color: '#333',
+                                        fontSize: '18px',
+                                        marginTop: '3px',
+                                      }"
+                                    />
+                                  </template>
+                                </a-button>
+                              </a-tooltip>
+                            </a-popconfirm>
+                            <a-popconfirm
+                              v-if="vm.state == 'Stopped'"
+                              :title="'가상머신을 시작하시겠습니까?'"
+                              :ok-text="$t('label.ok')"
+                              :cancel-text="$t('label.cancel')"
+                              @confirm="vmState(vm.id, vm.state)"
+                            >
+                              <a-tooltip placement="bottom">
+                                <template #title>{{
+                                  $t("가상머신 시작")
+                                }}</template>
+                                <a-button shape="circle">
+                                  <template #icon>
+                                    <CaretRightOutlined
+                                      :style="{
+                                        color: '#333',
+                                        fontSize: '18px',
+                                        marginTop: '3px',
+                                      }"
+                                    />
+                                  </template>
+                                </a-button>
+                              </a-tooltip>
+                            </a-popconfirm>
+                          </template>
+                          <MoreOutlined
+                            :style="{ color: '#333', fontSize: '18px' }"
+                          />
+                        </a-Popover>
+                      </template>
+                      <br /><br />
+
+                      <a-tooltip placement="bottom">
+                        <template #title>{{ vm.handshake_status }}</template>
+                        <a-badge
+                          class="head-example"
+                          :color="
+                            vm.handshake_status == 'Ready' ? 'green' : 'red'
+                          "
+                          :text="
+                            vm.handshake_status == 'Ready'
+                              ? $t('label.vm.status.ready')
+                              : $t('label.vm.status.notready')
+                          "
+                        />({{ vm.state }})
+                      </a-tooltip>
+
+                      <br />
+                      <WindowsFilled /> {{ vm.ostype }}
+                    </a-card>
+                  </a-col>
+                </a-row>
+              </a-card>
+            </a-col>
+          </a-row>
         </a-spin>
       </a-layout-content>
     </a-layout>
@@ -262,17 +269,17 @@ export default defineComponent({
       pagination,
       instanceList: [
         {
-          id: "11111111-111111-1111111-1-6666",
-          name: "vm645",
+          id: "11111111-111111-1111111-1-123123",
+          name: "ws1-014",
           state: "Running",
           handshake_status: "Ready",
           ostype: "Windows 10 (64bit)",
           favorite: false,
-          hostname: "10.1.1.150",
+          hostname: "10.1.1.82",
           port: 3389,
           username: "user1",
-          password: "Ablecloud1!",
-          domain: "cjs",
+          password: "~!fkal1228",
+          domain: "able",
           "enable-wallpaper": true,
           "enable-font-smoothing": true,
           "enable-theming": true,
@@ -280,12 +287,40 @@ export default defineComponent({
           "resize-method": "display-update",
         },
         {
-          id: "11111111-111111-1111111-1-7777",
-          name: "vm27",
-          state: "Stopped",
+          id: "11111111-111111-1111111-1-234234",
+          name: "ws1-015",
+          state: "Running",
           handshake_status: "Ready",
           ostype: "Windows 10 (64bit)",
-          favorite: true,
+          favorite: false,
+          hostname: "10.1.1.111",
+          port: 3389,
+          username: "user1",
+          password: "~!fkal1228",
+          domain: "able",
+          "enable-wallpaper": false,
+          "enable-font-smoothing": false,
+          "enable-theming": false,
+          "enable-menu-animations": false,
+          "resize-method": "reconnect",
+        },
+        {
+          id: "11111111-111111-1111111-1-345345",
+          name: "ws1-016",
+          state: "Running",
+          handshake_status: "Ready",
+          ostype: "Windows 10 (64bit)",
+          favorite: false,
+          hostname: "10.1.1.73",
+          port: 3389,
+          username: "user1",
+          password: "~!fkal1228",
+          domain: "able",
+          "enable-wallpaper": true,
+          "enable-font-smoothing": true,
+          "enable-theming": true,
+          "enable-menu-animations": true,
+          "resize-method": "display-update",
         },
         {
           id: "11111111-111111-1111111-1-8888",
@@ -312,22 +347,6 @@ export default defineComponent({
           favorite: false,
         },
         {
-          id: "11111111-111111-1111111-1-8888",
-          name: "vm822",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-9999",
-          name: "vm9",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
           id: "11111111-111111-1111111-1-1231",
           name: "vm10",
           state: "Stopped",
@@ -335,77 +354,229 @@ export default defineComponent({
           ostype: "Windows 10 (64bit)",
           favorite: false,
         },
+      ],
+      dataList: [
         {
-          id: "11111111-111111-1111111-1-8888",
-          name: "vm822",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
+          workspace: "workspace 1",
+          workspaceDesc: "개인업무용1",
+          instanceList: [
+            {
+              id: "11111111-111111-1111111-1-123123",
+              name: "ws1-014",
+              state: "Running",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+              hostname: "10.1.1.82",
+              port: 3389,
+              username: "user1",
+              password: "~!fkal1228",
+              domain: "able",
+              "enable-wallpaper": true,
+              "enable-font-smoothing": true,
+              "enable-theming": true,
+              "enable-menu-animations": true,
+              "resize-method": "display-update",
+            },
+            {
+              id: "11111111-111111-1111111-1-234234",
+              name: "ws1-015",
+              state: "Running",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+              hostname: "10.1.1.111",
+              port: 3389,
+              username: "user1",
+              password: "~!fkal1228",
+              domain: "able",
+              "enable-wallpaper": false,
+              "enable-font-smoothing": false,
+              "enable-theming": false,
+              "enable-menu-animations": false,
+              "resize-method": "reconnect",
+            },
+            {
+              id: "11111111-111111-1111111-1-345345",
+              name: "ws1-016",
+              state: "Running",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+              hostname: "10.1.1.73",
+              port: 3389,
+              username: "user1",
+              password: "~!fkal1228",
+              domain: "able",
+              "enable-wallpaper": true,
+              "enable-font-smoothing": true,
+              "enable-theming": true,
+              "enable-menu-animations": true,
+              "resize-method": "display-update",
+            },
+            {
+              id: "11111111-111111-1111111-1-4444",
+              name: "vm46",
+              state: "Running",
+              handshake_status: "Not Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: true,
+            },
+            {
+              id: "11111111-111111-1111111-1-5555",
+              name: "vm55",
+              state: "Stopped",
+              handshake_status: "Not Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: true,
+            },
+            {
+              id: "11111111-111111-1111111-1-6666",
+              name: "vm645",
+              state: "Running",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-7777",
+              name: "vm27",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: true,
+            },
+            {
+              id: "11111111-111111-1111111-1-8888",
+              name: "vm822",
+              state: "Running",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-9999",
+              name: "vm9",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-111111-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+          ],
         },
         {
-          id: "11111111-111111-1111111-1-9999",
-          name: "vm9",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
+          workspace: "workspace 2",
+          workspaceDesc: "개인업무용2",
+          instanceList: [
+            {
+              id: "11111111-111441-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-666666-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+          ],
         },
         {
-          id: "11111111-111111-1111111-1-1231",
-          name: "vm10",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
+          workspace: "workspace 3",
+          workspaceDesc: "개인업무용3",
+          instanceList: [
+            {
+              id: "11111111-111441-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-666666-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+          ],
         },
         {
-          id: "11111111-111111-1111111-1-8888",
-          name: "vm822",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-9999",
-          name: "vm9",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-1231",
-          name: "vm10",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-8888",
-          name: "vm822",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-9999",
-          name: "vm9",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-1231",
-          name: "vm10",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
+          workspace: "workspace 4",
+          workspaceDesc: "개인업무용4",
+          instanceList: [
+            {
+              id: "11111111-111441-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "11111111-666666-1111111-1-1231",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+          ],
         },
       ],
     };
@@ -439,7 +610,62 @@ export default defineComponent({
       // document.getElementById(val).style.display = "none";
     },
     downloadRDP(vmName) {
-      let rdpConfig = ",fd,f,f,f,\ny777m7m\njjmjmjmjm\ndg34g3g3g3g3g3";
+      let rdpConfig =
+        "targetisaadjoined:i:0\n" +
+        "hubdiscoverygeourl:s:\n" +
+        "redirected video capture encoding quality:i:0\n" +
+        "camerastoredirect:s:\n" +
+        "gatewaybrokeringtype:i:0\n" +
+        "use redirection server name:i:0\n" +
+        "alternate shell:s:\n" +
+        "disable themes:i:0\n" +
+        "disable cursor setting:i:1\n" +
+        "remoteapplicationname:s:\n" +
+        "resourceprovider:s:\n" +
+        "disable menu anims:i:1\n" +
+        "remoteapplicationcmdline:s:\n" +
+        "promptcredentialonce:i:0\n" +
+        "gatewaycertificatelogonauthority:s:\n" +
+        "audiocapturemode:i:0\n" +
+        "prompt for credentials on client:i:0\n" +
+        "gatewayhostname:s:\n" +
+        "remoteapplicationprogram:s:\n" +
+        "gatewayusagemethod:i:2\n" +
+        "screen mode id:i:2\n" +
+        "use multimon:i:0\n" +
+        "authentication level:i:2\n" +
+        "desktopwidth:i:0\n" +
+        "desktopheight:i:0\n" +
+        "redirectsmartcards:i:0\n" +
+        "redirectclipboard:i:1\n" +
+        "forcehidpioptimizations:i:0\n" +
+        "full address:s:10.10.1.110:3389\n" +
+        "username:s:user1\n" +
+        "password 51:01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f7d63b57853e464ab1d317a8417beae70000000002000000000003660000c000000010000000bb23d3b56c695c0006389b38891c5b1a0000000004800000a00000001000000031421b3dbd931cda62251dd2120d53e4180000008240be3347e4a17740eadf42040e72b26f63d948260d626814000000be3e14b3083cb81535647a6a5d7755daf9f06dc1\n" +
+        "domain:s:able\n" +
+        "drivestoredirect:s:\n" +
+        "loadbalanceinfo:s:\n" +
+        "networkautodetect:i:1\n" +
+        "enablecredsspsupport:i:2\n" +
+        "redirectprinters:i:0\n" +
+        "autoreconnection enabled:i:1\n" +
+        "session bpp:i:32\n" +
+        "administrative session:i:0\n" +
+        "audiomode:i:0\n" +
+        "bandwidthautodetect:i:1\n" +
+        "authoring tool:s:\n" +
+        "connection type:i:7\n" +
+        "remoteapplicationmode:i:0\n" +
+        "disable full window drag:i:0\n" +
+        "gatewayusername:s:\n" +
+        "shell working directory:s:\n" +
+        "wvd endpoint pool:s:\n" +
+        "remoteapplicationappid:s:\n" +
+        "allow font smoothing:i:1\n" +
+        "connect to console:i:0\n" +
+        "disable wallpaper:i:0\n" +
+        "gatewayaccesstoken:s:\n" +
+        "promptcredentialonce:i:1\n";
 
       var element = document.createElement("a");
       element.setAttribute(
@@ -484,8 +710,14 @@ export default defineComponent({
   width: 12px;
   height: 12px;
 }
+.dashboard-a-row {
+  width: 100%;
+  padding-top: 5px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
 .dashboard-a-col {
-  padding-bottom: 10px;
+  padding-bottom: 5px;
 }
 .ant-card-actions {
   height: 10px;

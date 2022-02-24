@@ -213,7 +213,7 @@ export default defineComponent({
                 ) {
                   router.push({ name: "Dashboard" });
                 } else {
-                  router.push({ name: "Favorite" });
+                  router.push({ name: "UserDesktop" });
                 }
                 message.destroy();
                 message.success(this.$t("message.login.completed"));
