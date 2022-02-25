@@ -851,7 +851,7 @@ export default defineComponent({
 
       this.sucMessage = "message.workspace.user.add.ok";
       this.failMessage = "message.workspace.user.add.dupl";
-      message.loading(this.$t("message.workspace.vm.user.allocateing"), 20);
+      message.loading(this.$t("message.workspace.vm.user.allocateing"), 100);
 
       for (let val of this.selectedUser) {
         // console.log(val);
@@ -876,7 +876,7 @@ export default defineComponent({
       this.selectedUser = [];
     },
     async delUserFromWorkspace(val) {
-      message.loading(this.$t("message.workspace.vm.user.deleting"), 20);
+      message.loading(this.$t("message.workspace.vm.user.deleting"), 100);
 
       try {
         const response = await worksApi.delete(

@@ -12,25 +12,23 @@
       :span="12"
       style="float: right; text-align: right; padding-right: 5px"
     >
+      <span>
+        【 {{ $t("label.cluster") }} : {{ clusterName }} ㅣ
+        {{ $t("label.domain") }} : {{ domainName }} 】
+      </span>
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
-          <a class="ant-dropdown-link" @click.prevent>
-            <font-awesome-icon
-              :icon="['fas', 'language']"
-              style="color: #666; margin-bottom: -2px"
-              class="login-icon"
-            />
-            <!-- <GlobalOutlined /> -->
-          </a>
+          <font-awesome-icon :icon="['fas', 'language']" class="login-icon" />
+          <!-- <GlobalOutlined /> -->
         </a-button>
         <template #overlay>
           <a-menu
-            v-model:selected-keys="[language]"
-            mode="inline"
+            v-model:selected-keys="language"
             @click="setLocaleClick"
+            style="width: 100px"
+            mode="vertical"
           >
             <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
-            <a-menu-divider />
             <a-menu-item key="en" value="enUS"> English </a-menu-item>
           </a-menu>
         </template>
@@ -44,7 +42,7 @@
         <a-button type="text" shape="circle" class="header-notice-button">
           <a class="ant-dropdown-link" @click.prevent>
             <UserOutlined class="header-notice-icon" />
-            {{ username }}
+            {{ userName }}
           </a>
         </a-button>
         <template #overlay>
@@ -117,6 +115,7 @@ export default defineComponent({
     const state = reactive({
       //userID: "",
       collapsed: ref(props.collapsed),
+      language: [],
     });
     return {
       state,
@@ -124,7 +123,6 @@ export default defineComponent({
   },
   data() {
     return {
-      language: ref(""),
       loadedLanguage: ref[""],
       username: ref(""),
     };
@@ -135,12 +133,13 @@ export default defineComponent({
     //   this.$store.dispatch("loginCommit",res.data);
     //   this.state.userID = res.data.result.name;
     // }
-    this.language =
+    this.state.language =
       sessionStorage.getItem("locale") === null
         ? "ko"
         : sessionStorage.getItem("locale");
-    this.username = sessionStorage.getItem("username");
-    this.setLocale(this.language);
+    this.userName = sessionStorage.getItem("userName");
+    this.clusterName = sessionStorage.getItem("clusterName");
+    this.domainName = sessionStorage.getItem("domainName");
   },
   methods: {
     setCollapsed() {
@@ -160,7 +159,7 @@ export default defineComponent({
     setLocale(localeValue) {
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
-      this.language = localeValue;
+      this.state.language = localeValue;
       sessionStorage.setItem("locale", localeValue);
     },
     async logoutSubmit() {

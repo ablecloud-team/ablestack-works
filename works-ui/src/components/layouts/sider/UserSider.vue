@@ -35,7 +35,7 @@
         <template #icon>
           <DesktopOutlined />
         </template>
-        <span>데스크탑</span>
+        <span>{{ $t("label.desktop") }}</span>
       </a-menu-item>
       <!-- <a-menu-item
         key="3"
