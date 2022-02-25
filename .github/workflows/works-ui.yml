@@ -9,11 +9,11 @@ on:
     paths:
       - '.github/workflows/works-ui.yml'
       - 'works-ui/**'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - '.github/workflows/works-ui.yml'
-      - 'works-ui/**'
+  #pull_request:  주석처리
+  #  branches: [ master ]
+  #  paths:
+  #    - '.github/workflows/works-ui.yml'
+  #    - 'works-ui/**'
 jobs:
   build:
     # 빌드 환경(window, ubuntu, macos)
