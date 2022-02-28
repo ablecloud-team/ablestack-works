@@ -30,7 +30,7 @@
                   'WORKSPACE : ' +
                   workspace.workspace +
                   '(' +
-                  workspace.workspaceDesc +
+                  workspace.desc +
                   ')'
                 "
                 bodyStyle="margin: 1px; fontSize: 100px;"
@@ -85,22 +85,23 @@
                             />
                           </a-tooltip>
                         </a-popconfirm>
-
+                        <!-- 
                         <a-popconfirm
                           :title="'RDP 파일을 다운로드 하시겠습니까?'"
                           :ok-text="$t('label.ok')"
                           :cancel-text="$t('label.cancel')"
                           @confirm="downloadRDP(vm.name)"
-                        >
-                          <a-tooltip placement="bottom">
-                            <template #title>{{ $t("RDP 다운로드") }}</template>
-                            <CloudDownloadOutlined
-                              :style="{ color: '#292929' }"
-                            />
-                          </a-tooltip>
-                        </a-popconfirm>
+                        > -->
+                        <a-tooltip placement="bottom">
+                          <template #title>{{ $t("RDP 접속") }}</template>
+                          <CloudDownloadOutlined
+                            :style="{ color: '#292929' }"
+                            @click="downloadRDP(vm.name)"
+                          />
+                        </a-tooltip>
+                        <!-- </a-popconfirm> -->
 
-                        <a-popconfirm
+                        <!-- <a-popconfirm
                           :title="'데스크톱에 접속하시겠습니까?'"
                           :ok-text="$t('label.ok')"
                           :cancel-text="$t('label.cancel')"
@@ -108,23 +109,21 @@
                           :disabled="
                             vm.handshake_status == 'Ready' ? false : true
                           "
-                        >
-                          <a-tooltip placement="bottom">
-                            <template #title>{{
-                              vm.handshake_status === "Ready"
-                                ? $t("데스크톱 접속")
-                                : $t("데스크톱 접속 불가")
-                            }}</template>
-                            <CodeFilled
-                              :style="{
-                                color:
-                                  vm.handshake_status == 'Ready'
-                                    ? '#333'
-                                    : '#d9dbdf',
-                              }"
-                            />
-                          </a-tooltip>
-                        </a-popconfirm>
+                        > -->
+                        <a-tooltip placement="bottom">
+                          <template #title>{{
+                            vm.handshake_status === "Ready"
+                              ? $t("데스크톱 접속")
+                              : $t("데스크톱 접속 불가")
+                          }}</template>
+                          <CodeFilled
+                            v-if="vm.handshake_status == 'Ready'"
+                            :style="{ color: '#333' }"
+                            @click="connectConsole(workspace.id, vm.id)"
+                          />
+                          <CodeFilled v-else :style="{ color: '#d9dbdf' }" />
+                        </a-tooltip>
+                        <!-- </a-popconfirm> -->
 
                         <a-Popover placement="topLeft" trigger="click">
                           <template #content>
@@ -267,101 +266,102 @@ export default defineComponent({
       actionFrom: "VirtualMachineList",
       loading: ref(true),
       pagination,
-      instanceList: [
-        {
-          id: "11111111-111111-1111111-1-123123",
-          name: "ws1-014",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-          hostname: "10.1.1.82",
-          port: 3389,
-          username: "user1",
-          password: "~!fkal1228",
-          domain: "able",
-          "enable-wallpaper": true,
-          "enable-font-smoothing": true,
-          "enable-theming": true,
-          "enable-menu-animations": true,
-          "resize-method": "display-update",
-        },
-        {
-          id: "11111111-111111-1111111-1-234234",
-          name: "ws1-015",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-          hostname: "10.1.1.111",
-          port: 3389,
-          username: "user1",
-          password: "~!fkal1228",
-          domain: "able",
-          "enable-wallpaper": false,
-          "enable-font-smoothing": false,
-          "enable-theming": false,
-          "enable-menu-animations": false,
-          "resize-method": "reconnect",
-        },
-        {
-          id: "11111111-111111-1111111-1-345345",
-          name: "ws1-016",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-          hostname: "10.1.1.73",
-          port: 3389,
-          username: "user1",
-          password: "~!fkal1228",
-          domain: "able",
-          "enable-wallpaper": true,
-          "enable-font-smoothing": true,
-          "enable-theming": true,
-          "enable-menu-animations": true,
-          "resize-method": "display-update",
-        },
-        {
-          id: "11111111-111111-1111111-1-8888",
-          name: "vm822",
-          state: "Running",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-9999",
-          name: "vm9",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-1231",
-          name: "vm10",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-        {
-          id: "11111111-111111-1111111-1-1231",
-          name: "vm10",
-          state: "Stopped",
-          handshake_status: "Ready",
-          ostype: "Windows 10 (64bit)",
-          favorite: false,
-        },
-      ],
+      // instanceList: [
+      //   {
+      //     id: "11111111-111111-1111111-1-123123",
+      //     name: "ws1-014",
+      //     state: "Running",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //     hostname: "10.1.1.82",
+      //     port: 3389,
+      //     username: "user1",
+      //     password: "~!fkal1228",
+      //     domain: "able",
+      //     "enable-wallpaper": true,
+      //     "enable-font-smoothing": true,
+      //     "enable-theming": true,
+      //     "enable-menu-animations": true,
+      //     "resize-method": "display-update",
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-234234",
+      //     name: "ws1-015",
+      //     state: "Running",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //     hostname: "10.1.1.111",
+      //     port: 3389,
+      //     username: "user1",
+      //     password: "~!fkal1228",
+      //     domain: "able",
+      //     "enable-wallpaper": false,
+      //     "enable-font-smoothing": false,
+      //     "enable-theming": false,
+      //     "enable-menu-animations": false,
+      //     "resize-method": "reconnect",
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-345345",
+      //     name: "ws1-016",
+      //     state: "Running",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //     hostname: "10.1.1.73",
+      //     port: 3389,
+      //     username: "user1",
+      //     password: "~!fkal1228",
+      //     domain: "able",
+      //     "enable-wallpaper": true,
+      //     "enable-font-smoothing": true,
+      //     "enable-theming": true,
+      //     "enable-menu-animations": true,
+      //     "resize-method": "display-update",
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-8888",
+      //     name: "vm822",
+      //     state: "Running",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-9999",
+      //     name: "vm9",
+      //     state: "Stopped",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-1231",
+      //     name: "vm10",
+      //     state: "Stopped",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //   },
+      //   {
+      //     id: "11111111-111111-1111111-1-1231",
+      //     name: "vm10",
+      //     state: "Stopped",
+      //     handshake_status: "Ready",
+      //     ostype: "Windows 10 (64bit)",
+      //     favorite: false,
+      //   },
+      // ],
       dataList: [
         {
+          id: "1111111-1111111111",
           workspace: "workspace 1",
-          workspaceDesc: "개인업무용1",
+          desc: "개인업무용1",
           instanceList: [
             {
-              id: "11111111-111111-1111111-1-123123",
+              id: "111111111111",
               name: "ws1-014",
               state: "Running",
               handshake_status: "Ready",
@@ -379,7 +379,7 @@ export default defineComponent({
               "resize-method": "display-update",
             },
             {
-              id: "11111111-111111-1111111-1-234234",
+              id: "222222222222222",
               name: "ws1-015",
               state: "Running",
               handshake_status: "Ready",
@@ -397,7 +397,7 @@ export default defineComponent({
               "resize-method": "reconnect",
             },
             {
-              id: "11111111-111111-1111111-1-345345",
+              id: "3333333333333333333333333",
               name: "ws1-016",
               state: "Running",
               handshake_status: "Ready",
@@ -513,11 +513,12 @@ export default defineComponent({
           ],
         },
         {
+          id: "22222222-22222222",
           workspace: "workspace 2",
-          workspaceDesc: "개인업무용2",
+          desc: "개인업무용2",
           instanceList: [
             {
-              id: "11111111-111441-1111111-1-1231",
+              id: "22222222-11111",
               name: "vm10",
               state: "Stopped",
               handshake_status: "Ready",
@@ -525,7 +526,15 @@ export default defineComponent({
               favorite: false,
             },
             {
-              id: "11111111-666666-1111111-1-1231",
+              id: "22222222-2222",
+              name: "vm10",
+              state: "Stopped",
+              handshake_status: "Ready",
+              ostype: "Windows 10 (64bit)",
+              favorite: false,
+            },
+            {
+              id: "22222222-33333",
               name: "vm10",
               state: "Stopped",
               handshake_status: "Ready",
@@ -535,11 +544,12 @@ export default defineComponent({
           ],
         },
         {
+          id: "3333333-3333333",
           workspace: "workspace 3",
-          workspaceDesc: "개인업무용3",
+          desc: "개인업무용3",
           instanceList: [
             {
-              id: "11111111-111441-1111111-1-1231",
+              id: "3333333-11111",
               name: "vm10",
               state: "Stopped",
               handshake_status: "Ready",
@@ -547,7 +557,7 @@ export default defineComponent({
               favorite: false,
             },
             {
-              id: "11111111-666666-1111111-1-1231",
+              id: "3333333-22222",
               name: "vm10",
               state: "Stopped",
               handshake_status: "Ready",
@@ -557,19 +567,12 @@ export default defineComponent({
           ],
         },
         {
+          id: "44444-44444",
           workspace: "workspace 4",
-          workspaceDesc: "개인업무용4",
+          desc: "개인업무용4",
           instanceList: [
             {
-              id: "11111111-111441-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-666666-1111111-1-1231",
+              id: "44444-1111111",
               name: "vm10",
               state: "Stopped",
               handshake_status: "Ready",
@@ -633,7 +636,7 @@ export default defineComponent({
         "gatewayusagemethod:i:2\n" +
         "screen mode id:i:2\n" +
         "use multimon:i:0\n" +
-        "authentication level:i:2\n" +
+        "authentication level:i:3\n" +
         "desktopwidth:i:0\n" +
         "desktopheight:i:0\n" +
         "redirectsmartcards:i:0\n" +
@@ -665,7 +668,7 @@ export default defineComponent({
         "connect to console:i:0\n" +
         "disable wallpaper:i:0\n" +
         "gatewayaccesstoken:s:\n" +
-        "promptcredentialonce:i:1\n";
+        "promptcredentialonce:i:0\n";
 
       var element = document.createElement("a");
       element.setAttribute(
@@ -680,23 +683,26 @@ export default defineComponent({
 
       document.body.removeChild(element);
     },
-    connectConsole(uuid) {
-      const selArr = this.instanceList.filter((it) => it.id === uuid);
-      // console.log(new URLSearchParams(selArr[0]).toString());
+    connectConsole(worksId, vmId) {
+      // console.log(worksId, vmId);
+      console.log(
+        this.dataList
+          .filter((dl) => dl.id === worksId)[0]
+          .instanceList.filter((il) => il.id === vmId)
+      );
+      const liteParamArr = this.dataList
+        .filter((dl) => dl.id === worksId)[0]
+        .instanceList.filter((il) => il.id === vmId)[0];
+      console.log(new URLSearchParams(liteParamArr).toString());
 
       const encrypted = btoa(
         this.$CryptoJS.AES.encrypt(
-          JSON.stringify(selArr[0]),
+          JSON.stringify(liteParamArr),
           this.cryptKey
         ).toString()
       );
-
       console.log(encrypted);
-      window.open(
-        // window.location.hostname +
-        "/client/?enc=" + encrypted,
-        "_blank"
-      );
+      window.open("/client/?enc=" + encrypted, "_blank");
     },
     vmState(uuid, bool) {
       console.log(uuid + " :: " + bool);
