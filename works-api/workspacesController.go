@@ -138,11 +138,11 @@ func getOffering(c *gin.Context) {
 	paramsComputerOffering := []MoldParams{}
 	paramsTemplate := []MoldParams{}
 	//{"templatefilter": "all"},
-	result := map[string]interface{}{}
+	//result := map[string]interface{}{}
 	templateResult := getListDesktopMasterVersions(paramsTemplate)
 	serviceOfferingResult := getComputeOffering(paramsComputerOffering)
 	c.JSON(returnCode, gin.H{
-		"result":              result,
+		//"result":              result,
 		"templateList":        templateResult,
 		"serviceOfferingList": serviceOfferingResult,
 	})
