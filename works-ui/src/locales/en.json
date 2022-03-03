@@ -76,10 +76,12 @@
     "message.workspace.test.initializing": "Initializing",
     "message.workspace.test.configuring": "configuring",
     "message.workspace.test": " We are currently creating a Test VM and checking whether normal communication with the controller server and directory server is in progress. The test is performed for about 10 to 15 minutes, and the final check is normal. Test VM will be deleted automatically. Please wait.",
-
+    "message.account.file.upload.confirm": "After uploading the file, please check that all items are entered correctly.",
+    "message.account.file.upload.description": "If the data does not appear in the table below, the file format or data was not entered correctly, so please rewrite and upload.",
+    
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",
-    "tooltip.reset": "Restart",
+    "tooltip.vmRestart": "Restart",
     "tooltip.edit": "Edit",
     "tooltip.reinstall": "Reinstall",
     "tooltip.snapshot": "Take a Snapshot",
@@ -119,6 +121,8 @@
     "tooltip.multiUserAllocate": "Allocate users in bulk",
     "tooltip.multiUserUnlock": "Batch Unlock Users",
     "tooltip.vm.account.select":"Select desktop users",
+    "tooltip.account.download.csv":"Download User List(CSV)",
+    "tooltip.account.upload.csv":"Upload User List(CSV)",
 
     "label.fetch.latest": "Fetch latest",
     "label.refresh": "Refresh",
@@ -247,6 +251,12 @@
     "label.status.mold": "Mold API",
     "label.cluster": "Cluster",
     "label.status.guac": "User Client",
+    "label.user.csv.upload":"Upload user list in bulk",
+    "label.favorite.off": "Unfavorite",
+    "label.favorite.on": "Add to Favorites",
+    "label.rdp.connect": "RDP connection",
+    "label.desktop.console.connect.ready":"Desktop Connection",
+    "label.desktop.console.connect.notready":"Desktop not accessible",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",
@@ -262,7 +272,8 @@
     "input.user.title": "Input user user title.",
     "input.user.department": "Input user department.",
     "input.user.phone": "Please format your phone number(including numbers and '-').",
-    "input.max.32": "000",
+    "input.max.32": "Enter 32 characters or less.",
+    "input.file.upload.dragdrop": "Upload a file by clicking or dragging it to this area.",
 
     "search.name": "Search Name.",
     "search.type": "Search Type.",
@@ -276,5 +287,8 @@
     "modal.confirm.workspace.add.user": "Please select a user to add to workspace [{name}].",
     "modal.confirm.workspace.add.vm": "Please select the number of desktop VMs to add to the workspace [{name}].",
     "modal.confirm.workspace.allocate.vm.user": "Please select a user to assign to the selected [{count}] virtual machines.",
-    "modal.confirm.workspaceAccountDestroy": "Are you sure you want to delete [{count}] selected user accounts from your workspace?"
+    "modal.confirm.workspaceAccountDestroy": "Are you sure you want to delete [{count}] selected user accounts from your workspace?",
+    "modal.confirm.user.vmStop": "Are you sure you want to stop the desktop virtual machine?",
+    "modal.confirm.user.vmRestart": "Are you sure you want to restart the desktop virtual machine?",
+    "modal.confirm.user.vmStart": "Are you sure you want to start the desktop virtual machine?"
 }

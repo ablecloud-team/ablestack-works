@@ -65,7 +65,7 @@
                         >
                           <a-tooltip placement="bottom">
                             <template #title>{{
-                              $t("즐겨찾기 해제")
+                              $t("label.favorite.off")
                             }}</template>
 
                             <StarFilled
@@ -76,7 +76,7 @@
                           </a-tooltip>
                           <a-tooltip placement="bottom">
                             <template #title>{{
-                              $t("즐겨찾기 추가")
+                              $t("label.favorite.on")
                             }}</template>
                             <StarOutlined
                               v-if="!vm.favorite"
@@ -93,7 +93,9 @@
                           @confirm="downloadRDP(vm.name)"
                         > -->
                         <a-tooltip placement="bottom">
-                          <template #title>{{ $t("RDP 접속") }}</template>
+                          <template #title>{{
+                            $t("label.rdp.connect")
+                          }}</template>
                           <CloudDownloadOutlined
                             :style="{ color: '#292929' }"
                             @click="downloadRDP(vm.name)"
@@ -113,8 +115,8 @@
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             vm.handshake_status === "Ready"
-                              ? $t("데스크톱 접속")
-                              : $t("데스크톱 접속 불가")
+                              ? $t("label.desktop.console.connect.ready")
+                              : $t("label.desktop.console.connect.notready")
                           }}</template>
                           <CodeFilled
                             v-if="vm.handshake_status == 'Ready'"
@@ -129,7 +131,7 @@
                           <template #content>
                             <a-popconfirm
                               v-if="vm.state == 'Running'"
-                              :title="'가상머신을 종료하시겠습니까?'"
+                              :title="$t('modal.confirm.user.vmStop')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
                               @confirm="vmState(vm.id, vm.state)"
@@ -139,7 +141,7 @@
                                 style="padding-right: 40px"
                               >
                                 <template #title>{{
-                                  $t("가상머신 종료")
+                                  $t("tooltip.vmStop")
                                 }}</template>
                                 <a-button shape="circle">
                                   <template #icon>
@@ -156,14 +158,14 @@
                             </a-popconfirm>
                             <a-popconfirm
                               v-if="vm.state == 'Running'"
-                              :title="'가상머신을 재시작하시겠습니까?'"
+                              :title="$t('modal.confirm.user.vmRestart')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
                               @confirm="vmState(vm.id, vm.state)"
                             >
                               <a-tooltip placement="bottom">
                                 <template #title>{{
-                                  $t("가상머신 재시작")
+                                  $t("tooltip.vmRestart")
                                 }}</template>
 
                                 <a-button shape="circle">
@@ -181,14 +183,14 @@
                             </a-popconfirm>
                             <a-popconfirm
                               v-if="vm.state == 'Stopped'"
-                              :title="'가상머신을 시작하시겠습니까?'"
+                              :title="$t('modal.confirm.user.vmStart')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
                               @confirm="vmState(vm.id, vm.state)"
                             >
                               <a-tooltip placement="bottom">
                                 <template #title>{{
-                                  $t("가상머신 시작")
+                                  $t("tooltip.vmStart")
                                 }}</template>
                                 <a-button shape="circle">
                                   <template #icon>

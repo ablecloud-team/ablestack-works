@@ -76,10 +76,12 @@
     "message.workspace.test.initializing": "초기화 중",
     "message.workspace.test.configuring": "구성 중",
     "message.workspace.test": "현재 Test VM을 생성하여 컨트롤서버, 디렉토리서버와 정상적인 통신을 수행하는지 확인하는 작업을 진행중입니다. 약 10분 ~ 15분 간 테스트 작업을 수행하며 최종 확인 작업이 정상일 경우 Test VM은 자동으로 삭제됩니다. 잠시만 기다려주세요.",
+    "message.account.file.upload.confirm": "파일 업로드 후 모든 항목들이 정상적으로 입력된 것인지 한번 더 확인해주세요.",
+    "message.account.file.upload.description": "아래의 테이블에 데이터가 나오지 않는다면 파일형식 또는 데이터가 정상적으로 입력되지 않은것이니 재작성하여 업로드해주세요.",
 
-    "tooltip.vmStart": "시작",
-    "tooltip.vmStop": "정지",
-    "tooltip.reset": "재기동",
+    "tooltip.vmStart": "데스크톱 시작",
+    "tooltip.vmStop": "데스크톱 정지",
+    "tooltip.vmRestart": "데스크톱 재시작",
     "tooltip.edit": "편집",
     "tooltip.reinstall": "재설치",
     "tooltip.snapshot": "스냅샷 생성",
@@ -110,7 +112,7 @@
     "tooltip.userUnlock": "사용자 해제",
     "tooltip.desktop.allocate.user": "데스크톱 사용자 할당",
     "tooltip.accountDestroy":"사용자 계정 삭제",
-    "tooltip.vmDestroy":"데스크톱 가상머신 삭제",
+    "tooltip.vmDestroy":"데스크톱 삭제",
     "tooltip.workspaceDestroy":"워크스페이스 삭제",
     "tooltip.workspaceAccountDestroy": "워크스페이스 사용자 삭제",
     "tooltip.multiVmStart": "일괄 시작",
@@ -119,6 +121,8 @@
     "tooltip.multiUserAllocate": "사용자 일괄 할당",
     "tooltip.multiUserUnlock": "사용자 일괄 해제",
     "tooltip.vm.account.select":"데스크톱 사용자 선택",
+    "tooltip.account.download.csv":"사용자 목록 다운로드(CSV)",
+    "tooltip.account.upload.csv":"사용자 목록 업로드(CSV)",
 
     "label.fetch.latest": "최신 정보 가져오기",
     "label.refresh": "업데이트",
@@ -247,6 +251,12 @@
     "label.status.mold": "Mold API",
     "label.cluster": "클러스터",
     "label.status.guac": "사용자 클라이언트",
+    "label.user.csv.upload": "사용자 목록 일괄 업로드",
+    "label.favorite.off": "즐겨찾기 해제",
+    "label.favorite.on": "즐겨찾기 추가",
+    "label.rdp.connect": "RDP 접속",
+    "label.desktop.console.connect.ready":"데스크톱 접속",
+    "label.desktop.console.connect.notready":"데스크톱 접속 불가",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
@@ -263,6 +273,7 @@
     "input.user.department": "사용자 부서를 입력하세요.",
     "input.user.phone": "사용자 전화번호(숫자와 '-' 포함) 형식을 맞추세요.",
     "input.max.32": "32자 이하로 입력하세요.",
+    "input.file.upload.dragdrop": "클릭하여 파일을 선택하거나 이 영역으로 끌어서 업로드하세요.",
 
     "search.name": "이름을 검색하세요.",
     "search.workspace_type": "타입을 검색하세요.",
@@ -276,5 +287,8 @@
     "modal.confirm.workspace.add.user": "워크스페이스 [{name}]에 추가할 사용자를 선택해주세요.",
     "modal.confirm.workspace.add.vm": "워크스페이스 [{name}]에 추가할 데스크톱 VM 갯수를 선택해주세요.",
     "modal.confirm.workspace.allocate.vm.user": "선택하신 [{count}]개의 가상머신에 할당할 사용자를 선택해주세요.",
-    "modal.confirm.workspaceAccountDestroy": "선택하신 [{count}]개 항목의 사용자 계정을 워크스페이스에서 삭제하시겠습니까?"
+    "modal.confirm.workspaceAccountDestroy": "선택하신 [{count}]개 항목의 사용자 계정을 워크스페이스에서 삭제하시겠습니까?",
+    "modal.confirm.user.vmStop": "데스크톱 가상머신을 정지하시겠습니까?",
+    "modal.confirm.user.vmRestart": "데스크톱 가상머신을 재시작하시겠습니까?",
+    "modal.confirm.user.vmStart": "데스크톱 가상머신을 시작하시겠습니까?"
 }
