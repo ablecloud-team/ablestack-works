@@ -109,6 +109,8 @@ func main() {
 			v1.DELETE("/group/:groupName", delGroupDetail)
 			v1.DELETE("/group/:groupName/:userName", delDeleteUserToGroup)
 			v1.PUT("/group/:groupName/:userName", putAddUserToGroup)
+
+			v1.GET("/userdesktop/:userName", getUserDesktop)
 		}
 		test := api.Group("/test")
 		{
