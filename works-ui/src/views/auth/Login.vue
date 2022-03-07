@@ -76,7 +76,7 @@
         <!--   언어변환 버튼 start     -->
         <a-dropdown placement="bottomRight">
           <a-button type="text" shape="circle" class="header-notice-button">
-            <font-awesome-icon :icon="['fas', 'language']" class="login-icon" />
+            <font-awesome-icon icon="language" class="login-icon" />
             <!-- <GlobalOutlined /> -->
           </a-button>
           <template #overlay>
@@ -99,7 +99,6 @@
 </template>
 
 <script>
-import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { worksApi } from "@/api/index";
@@ -108,7 +107,7 @@ import router from "@/router";
 
 export default defineComponent({
   name: "Login",
-  components: { SmileOutlined, FrownOutlined },
+  components: {},
   setup() {
     const formRef = ref();
     const formState = reactive({
