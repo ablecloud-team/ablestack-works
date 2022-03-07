@@ -11,7 +11,7 @@
                 shape="round"
                 style="margin-left: 18px"
                 size="small"
-                @click="refresh()"
+                @click="fetchRefresh()"
               >
                 <template #icon>
                   <ReloadOutlined /> {{ $t("label.refresh") }}
@@ -24,17 +24,15 @@
       <a-layout-content>
         <a-spin :spinning="spinning" size="large">
           <a-row class="dashboard-a-row" :gutter="4">
-            <a-col v-for="workspace in dataList" class="dashboard-a-col">
+            <a-col
+              flex="auto"
+              v-for="workspace in dataList"
+              class="dashboard-a-col"
+            >
               <a-card
-                :title="
-                  'WORKSPACE : ' +
-                  workspace.workspace +
-                  '(' +
-                  workspace.desc +
-                  ')'
-                "
-                bodyStyle="margin: 1px; fontSize: 100px;"
-              >
+                :title="workspace.name + '(' + workspace.description + ')'"
+                bodyStyle="margin: 1px;"
+                ><font-awesome-icon :icon="['fa-chrome']" />
                 <a-row :gutter="4">
                   <a-col
                     v-for="vm in workspace.instanceList"
@@ -42,13 +40,13 @@
                   >
                     <a-card
                       hoverable
-                      style="width: 200px; text-align: center"
                       :title="vm.name"
+                      style="width: 200px; text-align: center"
                     >
                       <DesktopOutlined
                         :style="{
                           fontSize: '40px',
-                          color: vm.state == 'Running' ? 'black' : 'pink',
+                          color: vm.mold_status == 'Running' ? 'black' : 'pink',
                         }"
                       />
 
@@ -61,7 +59,7 @@
                           "
                           :ok-text="$t('label.ok')"
                           :cancel-text="$t('label.cancel')"
-                          @confirm="favorite(vm.id, vm.favorite)"
+                          @confirm="favorite(vm.uuid, vm.favorite)"
                         >
                           <a-tooltip placement="bottom">
                             <template #title>{{
@@ -70,7 +68,7 @@
 
                             <StarFilled
                               v-if="vm.favorite"
-                              :id="vm.id + '-TRUE'"
+                              :id="vm.uuid + '-TRUE'"
                               :style="{ color: '#ffd700' }"
                             />
                           </a-tooltip>
@@ -80,7 +78,7 @@
                             }}</template>
                             <StarOutlined
                               v-if="!vm.favorite"
-                              :id="vm.id + '-FALSE'"
+                              :id="vm.uuid + '-FALSE'"
                               :style="{ color: '#d9dbdf' }"
                             />
                           </a-tooltip>
@@ -118,10 +116,11 @@
                               ? $t("label.desktop.console.connect.ready")
                               : $t("label.desktop.console.connect.notready")
                           }}</template>
+
                           <CodeFilled
                             v-if="vm.handshake_status == 'Ready'"
                             :style="{ color: '#333' }"
-                            @click="connectConsole(workspace.id, vm.id)"
+                            @click="connectConsole(workspace.uuid, vm.uuid)"
                           />
                           <CodeFilled v-else :style="{ color: '#d9dbdf' }" />
                         </a-tooltip>
@@ -130,11 +129,11 @@
                         <a-Popover placement="topLeft" trigger="click">
                           <template #content>
                             <a-popconfirm
-                              v-if="vm.state == 'Running'"
+                              v-if="vm.mold_status == ''"
                               :title="$t('modal.confirm.user.vmStop')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
-                              @confirm="vmState(vm.id, vm.state)"
+                              @confirm="vmAction(vm.uuid, 'vmStop')"
                             >
                               <a-tooltip
                                 placement="bottom"
@@ -157,11 +156,11 @@
                               </a-tooltip>
                             </a-popconfirm>
                             <a-popconfirm
-                              v-if="vm.state == 'Running'"
+                              v-if="vm.mold_status == ''"
                               :title="$t('modal.confirm.user.vmRestart')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
-                              @confirm="vmState(vm.id, vm.state)"
+                              @confirm="vmAction(vm.uuid, 'vmRestart')"
                             >
                               <a-tooltip placement="bottom">
                                 <template #title>{{
@@ -182,11 +181,11 @@
                               </a-tooltip>
                             </a-popconfirm>
                             <a-popconfirm
-                              v-if="vm.state == 'Stopped'"
+                              v-if="vm.mold_status == 'Stopped'"
                               :title="$t('modal.confirm.user.vmStart')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
-                              @confirm="vmState(vm.id, vm.state)"
+                              @confirm="vmAction(vm.uuid, 'vmStart')"
                             >
                               <a-tooltip placement="bottom">
                                 <template #title>{{
@@ -225,7 +224,7 @@
                               ? $t('label.vm.status.ready')
                               : $t('label.vm.status.notready')
                           "
-                        />({{ vm.state }})
+                        />({{ vm.mold_status }})
                       </a-tooltip>
 
                       <br />
@@ -246,7 +245,8 @@
 import { defineComponent, ref } from "vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
-
+import { worksApi } from "@/api/index";
+import { message } from "ant-design-vue";
 export default defineComponent({
   name: "UserDesktop",
   components: {
@@ -262,343 +262,55 @@ export default defineComponent({
     };
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
-      cryptKey: "ikAkd39aszkdEghj",
+      cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       spinning: ref(false),
       favPopTitle: ref(""),
       actionFrom: "VirtualMachineList",
       loading: ref(true),
       pagination,
-      // instanceList: [
-      //   {
-      //     id: "11111111-111111-1111111-1-123123",
-      //     name: "ws1-014",
-      //     state: "Running",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //     hostname: "10.1.1.82",
-      //     port: 3389,
-      //     username: "user1",
-      //     password: "~!fkal1228",
-      //     domain: "able",
-      //     "enable-wallpaper": true,
-      //     "enable-font-smoothing": true,
-      //     "enable-theming": true,
-      //     "enable-menu-animations": true,
-      //     "resize-method": "display-update",
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-234234",
-      //     name: "ws1-015",
-      //     state: "Running",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //     hostname: "10.1.1.111",
-      //     port: 3389,
-      //     username: "user1",
-      //     password: "~!fkal1228",
-      //     domain: "able",
-      //     "enable-wallpaper": false,
-      //     "enable-font-smoothing": false,
-      //     "enable-theming": false,
-      //     "enable-menu-animations": false,
-      //     "resize-method": "reconnect",
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-345345",
-      //     name: "ws1-016",
-      //     state: "Running",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //     hostname: "10.1.1.73",
-      //     port: 3389,
-      //     username: "user1",
-      //     password: "~!fkal1228",
-      //     domain: "able",
-      //     "enable-wallpaper": true,
-      //     "enable-font-smoothing": true,
-      //     "enable-theming": true,
-      //     "enable-menu-animations": true,
-      //     "resize-method": "display-update",
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-8888",
-      //     name: "vm822",
-      //     state: "Running",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-9999",
-      //     name: "vm9",
-      //     state: "Stopped",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-1231",
-      //     name: "vm10",
-      //     state: "Stopped",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //   },
-      //   {
-      //     id: "11111111-111111-1111111-1-1231",
-      //     name: "vm10",
-      //     state: "Stopped",
-      //     handshake_status: "Ready",
-      //     ostype: "Windows 10 (64bit)",
-      //     favorite: false,
-      //   },
-      // ],
-      dataList: [
-        {
-          id: "1111111-1111111111",
-          workspace: "workspace 1",
-          desc: "개인업무용1",
-          instanceList: [
-            {
-              id: "111111111111",
-              name: "ws1-014",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-              hostname: "10.1.1.82",
-              port: 3389,
-              username: "user1",
-              password: "~!fkal1228",
-              domain: "able",
-              "enable-wallpaper": true,
-              "enable-font-smoothing": true,
-              "enable-theming": true,
-              "enable-menu-animations": true,
-              "resize-method": "display-update",
-            },
-            {
-              id: "222222222222222",
-              name: "ws1-015",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-              hostname: "10.1.1.111",
-              port: 3389,
-              username: "user1",
-              password: "~!fkal1228",
-              domain: "able",
-              "enable-wallpaper": false,
-              "enable-font-smoothing": false,
-              "enable-theming": false,
-              "enable-menu-animations": false,
-              "resize-method": "reconnect",
-            },
-            {
-              id: "3333333333333333333333333",
-              name: "ws1-016",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-              hostname: "10.1.1.73",
-              port: 3389,
-              username: "user1",
-              password: "~!fkal1228",
-              domain: "able",
-              "enable-wallpaper": true,
-              "enable-font-smoothing": true,
-              "enable-theming": true,
-              "enable-menu-animations": true,
-              "resize-method": "display-update",
-            },
-            {
-              id: "11111111-111111-1111111-1-4444",
-              name: "vm46",
-              state: "Running",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-5555",
-              name: "vm55",
-              state: "Stopped",
-              handshake_status: "Not Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-6666",
-              name: "vm645",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-7777",
-              name: "vm27",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: true,
-            },
-            {
-              id: "11111111-111111-1111111-1-8888",
-              name: "vm822",
-              state: "Running",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-9999",
-              name: "vm9",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "11111111-111111-1111111-1-1231",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
-        },
-        {
-          id: "22222222-22222222",
-          workspace: "workspace 2",
-          desc: "개인업무용2",
-          instanceList: [
-            {
-              id: "22222222-11111",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "22222222-2222",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "22222222-33333",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
-        },
-        {
-          id: "3333333-3333333",
-          workspace: "workspace 3",
-          desc: "개인업무용3",
-          instanceList: [
-            {
-              id: "3333333-11111",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-            {
-              id: "3333333-22222",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
-        },
-        {
-          id: "44444-44444",
-          workspace: "workspace 4",
-          desc: "개인업무용4",
-          instanceList: [
-            {
-              id: "44444-1111111",
-              name: "vm10",
-              state: "Stopped",
-              handshake_status: "Ready",
-              ostype: "Windows 10 (64bit)",
-              favorite: false,
-            },
-          ],
-        },
-      ],
+      dataList: ref([]),
+      succCnt: ref(0),
+      failCnt: ref(0),
     };
   },
   created() {
-    this.refresh();
+    this.fetchRefresh();
+    this.timer = setInterval(() => {
+      //60초 자동 갱신
+      this.fetchData();
+    }, 60000);
   },
   methods: {
-    refresh() {
+    fetchRefresh() {
       this.spinning = true;
-      setTimeout(() => {
-        this.fetchData();
-        this.spinning = false;
-      }, 1000);
+      this.fetchData();
     },
-    fetchData() {
+    async fetchData() {
       // console.log("fetchData!!");
+      await worksApi
+        .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
+        .then((response) => {
+          if (response.status == 200) {
+            if (
+              response.data.workspaceList !== null &&
+              response.data.workspaceList !== undefined
+            ) {
+              this.dataList = response.data.workspaceList;
+            } else {
+              this.dataList = [];
+            }
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+            //console.log(response.message);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error(this.$t("message.response.data.fail"));
+        })
+        .finally(() => {
+          this.spinning = false;
+        });
     },
     favorite(uuid, bool) {
       console.log(uuid + " :: " + bool);
@@ -687,15 +399,23 @@ export default defineComponent({
     },
     connectConsole(worksId, vmId) {
       // console.log(worksId, vmId);
-      console.log(
-        this.dataList
-          .filter((dl) => dl.id === worksId)[0]
-          .instanceList.filter((il) => il.id === vmId)
-      );
       const liteParamArr = this.dataList
-        .filter((dl) => dl.id === worksId)[0]
-        .instanceList.filter((il) => il.id === vmId)[0];
-      console.log(new URLSearchParams(liteParamArr).toString());
+        .filter((dl) => dl.uuid === worksId)[0]
+        .instanceList.filter((il) => il.uuid === vmId)[0];
+
+      liteParamArr["hostname"] = liteParamArr.ipaddress;
+      delete liteParamArr.ipaddress;
+      delete liteParamArr.owner_account_id;
+
+      liteParamArr["port"] = 3389;
+      liteParamArr["username"] = sessionStorage.getItem("userName");
+      liteParamArr["domain"] = sessionStorage.getItem("domainName");
+      liteParamArr["enable-wallpaper"] = true;
+      liteParamArr["enable-font-smoothing"] = true;
+      liteParamArr["enable-theming"] = true;
+      liteParamArr["enable-menu-animations"] = true;
+      liteParamArr["resize-method"] = "display-update";
+      console.log(liteParamArr);
 
       const encrypted = btoa(
         this.$CryptoJS.AES.encrypt(
@@ -703,11 +423,71 @@ export default defineComponent({
           this.cryptKey
         ).toString()
       );
-      console.log(encrypted);
+      //console.log(encrypted);
       window.open("/client/?enc=" + encrypted, "_blank");
     },
-    vmState(uuid, bool) {
-      console.log(uuid + " :: " + bool);
+    async vmAction(uuid, action) {
+      if (action == "vmStart") {
+        message.loading(this.$t("message.vm.status.starting"), 100);
+        this.worksUrl = "/api/v1/instance/VMStart/";
+        this.sucMessage = "message.vm.status.start.ok";
+        this.failMessage = "message.vm.status.start.fail";
+      }
+      if (action == "vmStop") {
+        message.loading(this.$t("message.vm.status.stopping"), 100);
+        this.worksUrl = "/api/v1/instance/VMStop/";
+        this.sucMessage = "message.vm.status.stop.ok";
+        this.failMessage = "message.vm.status.stop.fail";
+      }
+      if (action == "vmRestart") {
+        message.loading(this.$t("message.vm.status.restarting"), 100);
+        this.worksUrl = "/api/v1/instance/VMReboot/";
+        this.sucMessage = "message.vm.status.restart.ok";
+        this.failMessage = "message.vm.status.restart.fail";
+      }
+
+      try {
+        const res = await worksApi.patch(this.worksUrl + uuid);
+        console.log(res.status);
+        if (res.status == 200) {
+          this.succCnt = this.succCnt + 1;
+        }
+      } catch (error) {
+        console.log(error);
+        this.failCnt = this.failCnt + 1;
+      }
+
+      await this.funcDelay(12000);
+      this.funcEndMessage();
+      this.fetchRefresh();
+    },
+    async funcDelay(delay) {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          resolve("delay call!");
+        }, delay);
+      });
+    },
+    funcEndMessage() {
+      message.destroy();
+      if (this.succCnt > 0) {
+        message.success(
+          this.$t(this.sucMessage, {
+            count: this.succCnt,
+          }),
+          5
+        );
+      }
+      if (this.failCnt > 0) {
+        message.error(
+          this.$t(this.failMessage, {
+            count: this.failCnt,
+          }),
+          5
+        );
+      }
+      this.failCnt = 0;
+      this.succCnt = 0;
     },
   },
 });

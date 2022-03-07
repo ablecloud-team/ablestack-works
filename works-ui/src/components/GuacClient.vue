@@ -200,7 +200,7 @@ export default {
   props: {},
   data() {
     return {
-      cryptKey: "ikAkd39aszkdEghj",
+      cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       connected: false,
       guacMenu: false,
       display: null,

@@ -18,7 +18,7 @@
       </span>
       <a-dropdown placement="bottomRight">
         <a-button type="text" shape="circle" class="header-notice-button">
-          <font-awesome-icon :icon="['fas', 'language']" class="login-icon" />
+          <font-awesome-icon icon="language" class="login-icon" />
           <!-- <GlobalOutlined /> -->
         </a-button>
         <template #overlay>
