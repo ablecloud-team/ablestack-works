@@ -167,6 +167,18 @@ func asyncJobExec() {
 		if resultData["startvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
 			deleteAsyncJob(asyncJob.Id)
 		}
+	} else if asyncJob.Name == VMReboot { //instance start
+		log.Info("Async Job VM Restart Execution.")
+		instanceList, _ := selectInstanceList(asyncJob.ExecUuid, InstanceString)
+		instanceInfo := instanceList[0]
+		params := []MoldParams{
+			{"id": instanceInfo.MoldUuid},
+		}
+		resultData := getRebootVirtualMachine(params)
+		log.Info(resultData)
+		if resultData["rebootvirtualmachineresponse"].(map[string]interface{})["jobid"].(string) != "" {
+			deleteAsyncJob(asyncJob.Id)
+		}
 	}
 	log.Info("Async Job Execution end")
 }

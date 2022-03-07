@@ -588,7 +588,7 @@ func deleteConnection(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Tags Instances
-// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다."
+// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy, VMReboot] 으로 보내야 합니다."
 // @Param instanceUuid path string true "Instance UUID"
 // @Router /api/v1/instance/:action/:instanceUuid [PATCH]
 // @Success 200 {object} map[string]interface{}
