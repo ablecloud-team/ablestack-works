@@ -322,6 +322,34 @@ func getStartVirtualMachine(params []MoldParams) map[string]interface{} {
 	return res
 }
 
+func getRebootVirtualMachine(params []MoldParams) map[string]interface{} {
+	var baseurl = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "rebootVirtualMachine"},
+	}
+	params = append(params, params1...)
+
+	stringParams := makeStringParams(params)
+	log.Infof("stringParams = [%v]", stringParams)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
+	log.WithFields(logrus.Fields{
+		"communicationMold.go": "getStartVirtualMachine",
+	}).Infof("startVirtualMachine endUrl [%v]", endUrl)
+
+	resp, err := http.Get(endUrl)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"communicationMold.go": "getCreateTags",
+		}).Errorf("Failed to communicate with Mold. (startVirtualMachine) [%v]", err)
+	}
+	var res map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&res)
+
+	return res
+}
+
 func getStopVirtualMachine(params []MoldParams) map[string]interface{} {
 	var baseurl = os.Getenv("MoldUrl")
 	params1 := []MoldParams{

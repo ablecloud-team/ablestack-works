@@ -11,22 +11,23 @@ import (
 )
 
 type Workspace struct {
-	Id                  int     `json:"id"`
-	Name                string  `json:"name"`
-	Description         string  `json:"description"`
-	Uuid                string  `json:"uuid"`
-	State               string  `json:"state"`
-	WorkspaceType       string  `json:"workspace_type"`
-	TemplateOkCheck     string  `json:"template_ok_check"`
-	Quantity            int     `json:"quantity"`
-	NetworkUuid         string  `json:"network_uuid"`
-	ComputeOfferingUuid string  `json:"compute_offering_uuid"`
-	TemplateUuid        string  `json:"template_uuid"`
-	MasterTemplateName  string  `json:"master_template_name"`
-	Postfix             int     `json:"postfix"`
-	Shared              bool    `json:"shared"`
-	CreateDate          string  `json:"create_date"`
-	Removed             *string `json:"removed"`
+	Id                  int        `json:"id"`
+	Name                string     `json:"name"`
+	Description         string     `json:"description"`
+	Uuid                string     `json:"uuid"`
+	State               string     `json:"state"`
+	WorkspaceType       string     `json:"workspace_type"`
+	TemplateOkCheck     string     `json:"template_ok_check"`
+	Quantity            int        `json:"quantity"`
+	NetworkUuid         string     `json:"network_uuid"`
+	ComputeOfferingUuid string     `json:"compute_offering_uuid"`
+	TemplateUuid        string     `json:"template_uuid"`
+	MasterTemplateName  string     `json:"master_template_name"`
+	Postfix             int        `json:"postfix"`
+	Shared              bool       `json:"shared"`
+	CreateDate          string     `json:"create_date"`
+	Removed             *string    `json:"removed"`
+	InstanceList        []Instance `json:"instanceList"`
 }
 
 type Instance struct {
@@ -47,6 +48,7 @@ type Instance struct {
 	Removed         string  `json:"removed"`
 	MoldStatus      string  `json:"mold_status"`
 	WorkspaceType   string  `json:"workspace_type"`
+	Password        string  `json:"password"`
 }
 
 func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
