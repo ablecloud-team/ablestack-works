@@ -191,9 +191,10 @@ func getUser(c *gin.Context) {
 // @Router /api/v1/user/:userName [delete]
 // @Success 200 {object} map[string]interface{}
 func deleteUser(c *gin.Context) {
-	username := c.Param("userName")
+	userName := c.Param("userName")
 	//result := map[string]interface{}{}
-	deleteDCUserResult, err := deleteDCUser(username)
+	deleteDCUserResult, err := deleteDCUser(userName)
+	deleteUserDB(userName)
 	log.Infof("deleteDCUserResult [%v], err [%v]", deleteDCUserResult, err)
 	//result["status"] = http.StatusOK
 	c.JSON(http.StatusNoContent, gin.H{
