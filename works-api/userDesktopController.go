@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -26,10 +27,18 @@ func getUserDesktop(c *gin.Context) {
 			userPassword, _ := selectUserPassword(userName)
 			workspaceInfo, _ := selectWorkspaceList(workspaceUuid)
 			instanceList, _ := selectUserDesktopListForWorkspace(workspaceInfo[0].Uuid, userName)
-			for i, _ := range instanceList {
-				instanceList[i].Password = userPassword
+			for _, instanceInfo := range instanceList {
+				instanceInfo.Password = userPassword
+				paramsMold := []MoldParams{
+					{"id": instanceInfo.MoldUuid},
+				}
+				resultMoldInstanceInfo := getListVirtualMachinesMetrics(paramsMold)
+				listVirtualMachinesMetrics := ListVirtualMachinesMetrics{}
+				virtualMachineInfo, _ := json.Marshal(resultMoldInstanceInfo["listvirtualmachinesmetricsresponse"])
+				json.Unmarshal([]byte(virtualMachineInfo), &listVirtualMachinesMetrics)
+				instanceInfo.MoldStatus = listVirtualMachinesMetrics.Virtualmachine[0].State
+				workspaceInfo[0].InstanceList = append(workspaceInfo[0].InstanceList, instanceInfo)
 			}
-			workspaceInfo[0].InstanceList = append(workspaceInfo[0].InstanceList, instanceList...)
 			workspaceList = append(workspaceList, workspaceInfo[0])
 		}
 	}
