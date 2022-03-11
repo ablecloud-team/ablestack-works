@@ -261,7 +261,8 @@ const routes = [
     name: "User",
     component: UserBaseLayout,
     meta: { icon: "home" },
-    redirect: "/favorite",
+    // redirect: "/favorite",
+    redirect: "/userDesktop",
     children: [
       {
         path: "/favorite",

@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import VueCryptojs from "vue-cryptojs"
+import VueCryptojs from "vue-cryptojs";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import App from "./App.vue";
@@ -74,6 +74,7 @@ import {
   CloseCircleOutlined,
   SmileOutlined,
   FrownOutlined,
+  UploadOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -132,5 +133,6 @@ app.component("CheckCircleOutlined", CheckCircleOutlined);
 app.component("CloseCircleOutlined", CloseCircleOutlined);
 app.component("SmileOutlined", SmileOutlined);
 app.component("FrownOutlined", FrownOutlined);
+app.component("UploadOutlined", UploadOutlined);
 
 app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

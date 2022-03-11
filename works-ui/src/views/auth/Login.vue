@@ -74,20 +74,18 @@
           </a-button>
         </a-form-item>
         <!--   언어변환 버튼 start     -->
-        <a-dropdown>
+        <a-dropdown placement="bottomRight">
           <a-button type="text" shape="circle" class="header-notice-button">
-            <a class="ant-dropdown-link" @click.prevent>
-              <font-awesome-icon
-                :icon="['fas', 'language']"
-                size="2x"
-                style="color: #666"
-                class="login-icon"
-              />
-              <!-- <GlobalOutlined /> -->
-            </a>
+            <font-awesome-icon icon="language" class="login-icon" />
+            <!-- <GlobalOutlined /> -->
           </a-button>
           <template #overlay>
-            <a-menu :selected-keys="[language]" @click="setLocaleClick">
+            <a-menu
+              v-model:selected-keys="language"
+              @click="setLocaleClick"
+              style="width: 100px"
+              mode="vertical"
+            >
               <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
               <a-menu-item key="en" value="enUS"> English </a-menu-item>
             </a-menu>
@@ -101,7 +99,6 @@
 </template>
 
 <script>
-import { SmileOutlined, FrownOutlined } from "@ant-design/icons-vue";
 import { defineComponent, reactive, ref } from "vue";
 import { message } from "ant-design-vue";
 import { worksApi } from "@/api/index";
@@ -110,12 +107,13 @@ import router from "@/router";
 
 export default defineComponent({
   name: "Login",
-  components: { SmileOutlined, FrownOutlined },
+  components: {},
   setup() {
     const formRef = ref();
     const formState = reactive({
       id: ref(""),
       password: ref(""),
+      language: [],
     });
     const rules = {
       id: {
@@ -137,7 +135,6 @@ export default defineComponent({
     return {
       timer: ref(null),
       spinning: ref(true),
-      language: ref(""),
       loadedLanguage: ref[""],
       disabled: ref(true),
       serverStatus: ref(true),
@@ -173,7 +170,7 @@ export default defineComponent({
     setLocale(localeValue) {
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
-      this.language = localeValue;
+      this.formState.language = localeValue;
       sessionStorage.setItem("locale", localeValue);
       //this.loadLanguageAsync(localeValue);
     },
@@ -205,15 +202,21 @@ export default defineComponent({
                   response.data.result.username
                 );
                 sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
-                sessionStorage.setItem("clusterName", response.data.result.clusterName);
-                sessionStorage.setItem("domainName", response.data.result.domainName);
+                sessionStorage.setItem(
+                  "clusterName",
+                  response.data.result.clusterName
+                );
+                sessionStorage.setItem(
+                  "domainName",
+                  response.data.result.domainName
+                );
                 if (
                   response.data.result.username.toLowerCase() ===
                   "administrator"
                 ) {
                   router.push({ name: "Dashboard" });
                 } else {
-                  router.push({ name: "Favorite" });
+                  router.push({ name: "UserDesktop" });
                 }
                 message.destroy();
                 message.success(this.$t("message.login.completed"));
@@ -397,7 +400,7 @@ export default defineComponent({
   width: 100%;
 }
 
-.login-ico {
+.login-icon {
   font-size: 30px;
 }
 </style>
