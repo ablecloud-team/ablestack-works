@@ -1,9 +1,186 @@
 <template>
+  <a-drawer
+    placement="top"
+    :closable="true"
+    :height="660"
+    v-model:visible="visible"
+    :after-visible-change="afterVisibleChange"
+  >
+      <a-row :gutter="16">
+        <a-col></a-col>
+        <a-col></a-col>
+        <a-col></a-col>
+      </a-row>
+    <a-row :gutter="16">
+      <a-col :span="8"
+        ><h3>입력 방법</h3>
+        <div class="content">
+          <div class="choice">
+            <label
+              ><input
+                id="ime-none"
+                name="input-method"
+                ng-change="closeMenu()"
+                ng-model="menu.inputMethod"
+                type="radio"
+                value="none"
+              />
+              없음</label
+            >
+            <p class="caption">
+              <label for="ime-none"
+                >사용중인 입력 방법이 없습니다. 키보드 입력은 열결된 물리적
+                키보드에서 받아들여집니다.</label
+              >
+            </p>
+          </div>
+          <div class="choice">
+            <label
+              ><input
+                id="ime-text"
+                name="input-method"
+                ng-change="closeMenu()"
+                ng-model="menu.inputMethod"
+                type="radio"
+                value="text"
+              />텍스트 입력</label
+            >
+            <p class="caption">
+              <label for="ime-text">
+                텍스트 입력을 허용하고, 입력된 텍스트를 바탕으로 키보드 이벤트를
+                에뮬레이트 합니다. 이것은 물리적 키보드가 없는 휴대폰과 같은
+                장치에 필요합니다.</label
+              ><div class="figure">
+              <label for="ime-text"
+                ><img src="../assets/tablet-keys.svg" alt="" style="width: 30%"
+              /></label>
+            </div>
+            </p>
+          </div>
+          <div class="choice">
+            <label
+              ><input
+                id="ime-osk"
+                name="input-method"
+                ng-change="closeMenu()"
+                ng-model="menu.inputMethod"
+                type="radio"
+                value="osk"
+              />
+              화상 키보드</label
+            >
+            <p class="caption">
+              <label for="ime-osk">
+                내장된 데스크톱 화상 키보드의 입력을 표시하고 허용합니다. 화상
+                키보드는 다른 방법으로는 불가능할 수 있는 키 조합을 입력할 수
+                있습니다. (Ctrl-Alt-Del 등)</label
+              >
+            </p>
+          </div>
+        </div>
+      </a-col>
+      <a-col :span="8"
+        ><h3>마우스 에뮬레이션 모드</h3>
+        <div class="content">
+          <p>터치와 관련하여 원격 마우스가 어떻게 동작하는지 결정합니다.</p>
+          <!-- Touchscreen -->
+          <div class="choice">
+            <input
+              name="mouse-mode"
+              ng-change="closeMenu()"
+              ng-model="menu.emulateAbsoluteMouse"
+              type="radio"
+              ng-value="true"
+              checked="checked"
+              id="absolute"
+            />
+            <div class="figure">
+              <label for="absolute"
+                ><img src="../assets/touchscreen.svg" alt="터치 스크린" style="width: 50%"
+              /></label>
+              <p class="caption">
+                <label for="absolute"
+                  >탭하여 클릭합니다. 클릭은 터치 위치에서 발생합니다.</label
+                >
+              </p>
+            </div>
+          </div>
+          <!-- Touchpad -->
+          <div class="choice">
+            <input
+              name="mouse-mode"
+              ng-change="closeMenu()"
+              ng-model="menu.emulateAbsoluteMouse"
+              type="radio"
+              ng-value="false"
+              id="relative"
+            />
+            <div class="figure">
+              <label for="relative"
+                ><img src="../assets/touchpad.svg" alt="터치 패드" style="width: 50%"
+              /></label>
+              <p class="caption">
+                <label for="relative"
+                  >드래그하여 마우스 포인터를 움직이고 탭하여 클릭합니다. 클릭은
+                  마우스 포인터 위치에서 발생합니다.</label
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+        </a-col>
+        <a-col :span="8"
+        ><h3>디스플레이</h3>
+        <div class="content">
+          <div id="zoom-settings">
+            <div class="client-zoom">
+              <div class="client-zoom-editor">
+                <div ng-click="zoomOut()" class="client-zoom-out">
+                  <img src="../assets/zoom-out.svg" alt="-" />
+                </div>
+                <div class="client-zoom-state">
+                  <input
+                    type="number"
+                    guac-zoom-ctrl
+                    ng-model="client.clientProperties.scale"
+                    ng-model-options="{ updateOn: 'blur submit' }"
+                    ng-change="zoomSet()"
+                  />%
+                </div>
+                <div ng-click="zoomIn()" class="client-zoom-in">
+                  <img src="../assets/zoom-in.svg" alt="+" />
+                </div>
+              </div>
+              <div class="client-zoom-autofit">
+                <label
+                  ><input
+                    ng-model="client.clientProperties.autoFit"
+                    ng-change="changeAutoFit()"
+                    ng-disabled="autoFitDisabled()"
+                    type="checkbox"
+                    id="auto-fit"
+                  />
+                  브라우저 창에 자동으로 맞춤</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </a-col>
+    </a-row>
+  </a-drawer>
   <div class="viewport" ref="viewport">
-    <div ref="display" class="display" tabindex="0" />
+    <div ref="displayFrame" class="display" tabindex="0" />
     <modal ref="modal" @reconnect="connect()" />
-    <div class="sidebar">
+    <div class="headerbar">
       <transition name="slide">
+        <div class="header-panel">
+          <a-button :size="small" @click="showDrawer">
+            <template #icon><CaretDownFilled /> </template>
+          </a-button>
+        </div>
+      </transition>
+      <!-- <transition name="slide">
         <div v-if="guacMenu" class="sidebar-panel" id="guac-menu">
           <ul class="sidebar-panel-nav" id="clipboard-settings">
             <h3>클립보드</h3>
@@ -87,9 +264,9 @@
           <ul class="sidebar-panel-nav" id="mouse-settings">
             <h3>마우스 에뮬레이션 모드</h3>
             <div class="content">
-              <p>터치와 관련하여 원격 마우스가 어떻게 동작하는지 결정합니다.</p>
+              <p>터치와 관련하여 원격 마우스가 어떻게 동작하는지 결정합니다.</p>-->
               <!-- Touchscreen -->
-              <div class="choice">
+              <!-- <div class="choice">
                 <input
                   name="mouse-mode"
                   ng-change="closeMenu()"
@@ -110,9 +287,9 @@
                     >
                   </p>
                 </div>
-              </div>
+              </div> -->
               <!-- Touchpad -->
-              <div class="choice">
+              <!-- <div class="choice">
                 <input
                   name="mouse-mode"
                   ng-change="closeMenu()"
@@ -174,18 +351,18 @@
             </div>
           </ul>
         </div>
-      </transition>
+      </transition> --> 
     </div>
   </div>
 </template>
 
 <script>
+import { defineComponent, ref } from "vue";
 import Guacamole from "guacamole-common-js";
 import encrypt from "@/lib/encrypt";
 import dis from "@/lib/display";
 import states from "@/lib/states";
 import clipboard from "@/lib/clipboard";
-import token from "@/assets/param.json";
 import Modal from "./Modal";
 
 const hostname =
@@ -197,20 +374,46 @@ export default {
   components: {
     Modal,
   },
+  setup() {
+    const visible = ref(false);
+
+    const afterVisibleChange = (bool) => {
+      console.log("visible", bool);
+    };
+
+    const showDrawer = () => {
+      visible.value = true;
+    };
+
+    return {
+      visible,
+      afterVisibleChange,
+      showDrawer,
+    };
+  },
   props: {},
   data() {
     return {
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       connected: false,
       guacMenu: false,
-      display: null,
+      displayFrame: null,
       client: null,
       keyboard: null,
       mouse: null,
       connectionState: states.IDLE,
       errorMessage: "",
       arguments: {},
+      token: {
+        connection: {
+          type: "rdp",
+          settings: { "ignore-cert": true },
+        },
+      },
     };
+  },
+  create() {
+    new Guacamole.OnScreenKeyboard.Layout(template);
   },
   watch: {
     connectionState(state) {
@@ -241,8 +444,8 @@ export default {
     },
     handleMouseState(mouseState) {
       const scaledMouseState = Object.assign({}, mouseState, {
-        x: mouseState.x / this.display.getScale(),
-        y: mouseState.y / this.display.getScale(),
+        x: mouseState.x / this.displayFrame.getScale(),
+        y: mouseState.y / this.displayFrame.getScale(),
       });
       this.client.sendMouseState(scaledMouseState);
     },
@@ -255,17 +458,17 @@ export default {
       const width = elm.offsetWidth * pixelDensity;
       const height = elm.offsetHeight * pixelDensity;
       if (
-        this.display.getWidth() !== width ||
-        this.display.getHeight() !== height
+        this.displayFrame.getWidth() !== width ||
+        this.displayFrame.getHeight() !== height
       ) {
         this.client.sendSize(width, height);
       }
       setTimeout(() => {
         const scale = Math.min(
-          window.innerWidth / Math.max(this.display.getWidth(), 1),
-          window.innerHeight / Math.max(this.display.getHeight(), 1)
+          window.innerWidth / Math.max(this.displayFrame.getWidth(), 1),
+          window.innerHeight / Math.max(this.displayFrame.getHeight(), 1)
         );
-        this.display.scale(scale);
+        this.displayFrame.scale(scale);
       }, 100);
     },
     connect() {
@@ -273,12 +476,12 @@ export default {
       // console.log(tunnel);
       //reconnect 경우 초기화
       if (this.client) {
-        this.display.scale(0);
+        this.displayFrame.scale(0);
         this.keyboard.onkeydown = this.keyboard.onkeyup = () => {};
       }
 
       this.client = new Guacamole.Client(tunnel);
-      // console.log(this.client);
+      console.log(this.client);
       clipboard.install(this.client);
 
       tunnel.onerror = (status) => {
@@ -287,7 +490,7 @@ export default {
       };
 
       tunnel.onstatechange = (state) => {
-        // console.log(state);
+        console.log(state);
         switch (state) {
           case Guacamole.Tunnel.State.CONNECTING:
             this.connectionState = states.CONNECTING;
@@ -304,7 +507,7 @@ export default {
       };
 
       this.client.onstatechange = (clientState) => {
-        // console.log(clientState);
+        console.log(clientState);
         switch (clientState) {
           case 0:
             this.connectionState = states.IDLE;
@@ -357,12 +560,13 @@ export default {
       };
 
       this.client.onclipboard = clipboard.onClipboard;
-      this.display = this.client.getDisplay();
+      this.displayFrame = this.client.getDisplay();
+      console.log(this.client.getDisplay().getHeight());
       //console.log(this.display);
-      const displayElm = this.$refs.display;
+      const displayElm = this.$refs.displayFrame;
       //console.log(displayElm);
       //console.log(this.display.getElement());
-      displayElm.appendChild(this.display.getElement());
+      displayElm.appendChild(this.displayFrame.getElement());
       displayElm.addEventListener("contextmenu", (e) => {
         e.stopPropagation();
         if (e.preventDefault) {
@@ -373,9 +577,9 @@ export default {
 
       //display 현재 창 크기로 적용
       const dis_chg = dis();
-      token.connection.settings.width = dis_chg[0];
-      token.connection.settings.height = dis_chg[1];
-      token.connection.settings.dpi = dis_chg[2];
+      this.token.connection.settings.width = dis_chg[0];
+      this.token.connection.settings.height = dis_chg[1];
+      this.token.connection.settings.dpi = dis_chg[2];
 
       //파라미터로 넘어온 값 파라미터값 복호화
       const decrypted = this.$CryptoJS.AES.decrypt(
@@ -387,7 +591,7 @@ export default {
       //복호화 한 값 JSON 형식으로 변경 후 키,값 구분하여 token에 세팅
       const query = JSON.parse(decrypted);
       for (const key in query) {
-        token.connection.settings[key] = query[key];
+        this.token.connection.settings[key] = query[key];
       }
       // token.connection.settings.port = this.$route.query.port;
       // token.connection.settings.hostname = this.$route.query.hostname;
@@ -395,15 +599,15 @@ export default {
       // token.connection.settings.password = this.$route.query.password;
       // token.connection.settings.username = this.$route.query.username;
 
-      const encrypt_token = encrypt(token);
+      const encrypt_token = encrypt(this.token);
       this.client.connect("token=" + encrypt_token);
 
       //데스크탑 마우스 설정
       this.mouse = new Guacamole.Mouse(displayElm);
       // console.log(this.mouse);
       this.mouse.onmouseout = () => {
-        if (!this.display) return;
-        this.display.showCursor(false);
+        if (!this.displayFrame) return;
+        this.displayFrame.showCursor(false);
       };
       displayElm.onclick = () => {
         displayElm.focus();
@@ -428,7 +632,8 @@ export default {
 
         //Sidebar 설정 (shift+alt+ctrl)
         if (isCtrl == true && isShift == true && isAlt == true) {
-          this.guacMenu = !this.guacMenu;
+          this.showDrawer();
+          //this.guacMenu = !this.guacMenu;
         }
         this.client.sendKeyEvent(1, keysym);
       };
@@ -477,6 +682,15 @@ export default {
   transform: translateX(-100%);
   transition: all 150ms ease-in 0s;
 }
+.header-panel {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  text-align: center;
+  width: 100%;
+}
+
 .sidebar-panel {
   overflow-y: auto;
   background-color: #fff;

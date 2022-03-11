@@ -129,7 +129,7 @@
                         <a-Popover placement="topLeft" trigger="click">
                           <template #content>
                             <a-popconfirm
-                              v-if="vm.mold_status == ''"
+                              v-if="vm.mold_status == 'Running'"
                               :title="$t('modal.confirm.user.vmStop')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
@@ -156,7 +156,7 @@
                               </a-tooltip>
                             </a-popconfirm>
                             <a-popconfirm
-                              v-if="vm.mold_status == ''"
+                              v-if="vm.mold_status == 'Running'"
                               :title="$t('modal.confirm.user.vmRestart')"
                               :ok-text="$t('label.ok')"
                               :cancel-text="$t('label.cancel')"
@@ -415,6 +415,13 @@ export default defineComponent({
       liteParamArr["enable-theming"] = true;
       liteParamArr["enable-menu-animations"] = true;
       liteParamArr["resize-method"] = "display-update";
+      liteParamArr["disable-upload"] = false;
+      liteParamArr["create-drive-path"] = true;
+      liteParamArr["drive-name"] = "Z";
+      liteParamArr["drive-path"] = "/";
+      liteParamArr["enable-drive"] = true;
+      //liteParamArr["security"] = "rdp";
+
       console.log(liteParamArr);
 
       const encrypted = btoa(
