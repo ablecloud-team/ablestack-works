@@ -1,0 +1,1 @@
+worksapp://works/?full address={vdi_address}&port={vdi_port}&domain={vdi_domain}&password 51={hashed_password}&username={username}

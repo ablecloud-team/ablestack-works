@@ -1,14 +1,3 @@
-works-api/works-api
-works-shell/works-shell.exe
-works-shell/works-shell
-.idea/
-samba-ad.zip
-*.exe
-*.log
-*.msi
-*.zip
-
-
 # Miscellaneous
 *.class
 *.log
@@ -19,7 +8,6 @@ samba-ad.zip
 .buildlog/
 .history
 .svn/
-!Cert.exe
 
 # IntelliJ related
 *.iml
@@ -35,16 +23,16 @@ samba-ad.zip
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
-**/.dart_tool/
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-**/.packages
-**/.pub-cache/
-**/.pub/
-**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
 
 # Web related
-**/lib/generated_plugin_registrant.dart
+lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -53,7 +41,6 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-**/android/app/debug
-**/android/app/profile
-**/android/app/release
-
+/android/app/debug
+/android/app/profile
+/android/app/release
