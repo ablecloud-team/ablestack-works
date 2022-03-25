@@ -18,6 +18,47 @@
     "host": "ad-api.ablecloud.io",
     "basePath": "/api/v1",
     "paths": {
+        "/api/v1/cmd": {
+            "get": {
+                "description": "powershell 을 사용하여 명령을 처리 합니다.",
+                "consumes": [
+                    "text/html"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "powershell 명령 처리기",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "명령어",
+                        "name": "cmd",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "시간제한, 기본값",
+                        "name": "timeout",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "명령 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.shellReturnModel"
+                        }
+                    },
+                    "401": {
+                        "description": "명령 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    }
+                }
+            }
+        },
         "/app": {
             "get": {
                 "description": "윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API",
@@ -40,56 +81,32 @@
                         "schema": {
                             "$ref": "#/definitions/main.errorModel"
                         }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "objects"
-                        }
                     }
                 }
             }
         },
-        "/cmd/": {
+        "/computer": {
             "get": {
-                "description": "powershell 명령 처리기",
+                "description": "사용자 목록 조회",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "powershell 명령 처리기",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "명령어",
-                        "name": "cmd",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "인자",
-                        "name": "arg",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "시간제한, 기본값",
-                        "name": "timeout",
-                        "in": "query"
-                    }
-                ],
+                "summary": "사용자 목록 조회",
                 "responses": {
                     "200": {
-                        "description": "명령 성공",
+                        "description": "사용자 생성 성공",
                         "schema": {
-                            "$ref": "#/definitions/main.shellReturnModel"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.ADUser"
+                            }
                         }
                     },
                     "401": {
-                        "description": "명령 실패",
+                        "description": "사용자 생성 실패",
                         "schema": {
                             "$ref": "#/definitions/main.errorModel"
                         }
@@ -97,7 +114,84 @@
                     "default": {
                         "description": "",
                         "schema": {
-                            "type": "objects"
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "사용자 목록 조회",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 목록 조회",
+                "responses": {
+                    "200": {
+                        "description": "사용자 생성 성공",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.ADUser"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 생성 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/computer/{computername}": {
+            "get": {
+                "description": "사용자 목록 조회",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 목록 조회",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Computer name",
+                        "name": "computername",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "사용자 생성 성공",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.ADUser"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 생성 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -141,12 +235,6 @@
                         "schema": {
                             "$ref": "#/definitions/main.loginModel"
                         }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "objects"
-                        }
                     }
                 }
             }
@@ -163,7 +251,7 @@
                 "summary": "사용자 목록 조회",
                 "responses": {
                     "200": {
-                        "description": "사용자 생성 성공",
+                        "description": "사용자 목록 조회 성공",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -172,15 +260,9 @@
                         }
                     },
                     "401": {
-                        "description": "사용자 생성 실패",
+                        "description": "사용자 목록 조회 실패",
                         "schema": {
                             "$ref": "#/definitions/main.errorModel"
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "objects"
                         }
                     }
                 }
@@ -213,15 +295,13 @@
                         "type": "string",
                         "description": "전화번호",
                         "name": "phone",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
                         "description": "이메일",
                         "name": "email",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -241,8 +321,13 @@
                         "type": "string",
                         "description": "직급",
                         "name": "title",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "부서",
+                        "name": "department",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -257,26 +342,20 @@
                         "schema": {
                             "$ref": "#/definitions/main.userModel"
                         }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "objects"
-                        }
                     }
                 }
             }
         },
         "/user/{username}": {
             "get": {
-                "description": "사용자 목록 조회",
+                "description": "ldap에서 사용자의 정보를 조회합니다.",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "사용자 목록 조회",
+                "summary": "사용자 정보 조회",
                 "parameters": [
                     {
                         "type": "string",
@@ -288,13 +367,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "사용자 생성 성공",
+                        "description": "사용자 정보 조회 성공",
                         "schema": {
                             "$ref": "#/definitions/main.ADUser"
                         }
                     },
                     "401": {
-                        "description": "사용자 생성 실패",
+                        "description": "사용자 정보 조회 실패",
                         "schema": {
                             "$ref": "#/definitions/main.errorModel"
                         }
@@ -302,7 +381,327 @@
                     "default": {
                         "description": "",
                         "schema": {
-                            "type": "objects"
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "ldap에서 사용자의 정보를 수정합니다.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 정보 수정",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "구/군/시",
+                        "name": "I",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "어카운트명",
+                        "name": "accountname",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "주소-\u003e국가영문코드명(한국:KR,일본:JP,미국:US)",
+                        "name": "c",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": ":=c",
+                        "name": "co",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "AD회사명",
+                        "name": "company",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "주소-\u003e국가숫자코드(한국:410,일본:392.미국:840)",
+                        "name": "countryCode",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "부서",
+                        "name": "department",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "설명",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "name": "distinguishedName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "전화-\u003e팩스",
+                        "name": "facsimileTelephoneNumber",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "이름",
+                        "name": "givenName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "전화-\u003e집",
+                        "name": "homePhone",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "참고내용",
+                        "name": "info",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "이니셜",
+                        "name": "initials",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "전화-\u003eip전화",
+                        "name": "ipPhone",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "메일주소",
+                        "name": "mail",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "상사dn(\"CN=User3,CN=Users,DC=dc1,DC=local\")",
+                        "name": "manager",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "example": [
+                            "user"
+                        ],
+                        "description": "그룹dn목록",
+                        "name": "memberOf",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "전화-\u003e휴대폰",
+                        "name": "mobile",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "ldap회사명",
+                        "name": "o",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "전화-\u003e호출기",
+                        "name": "pager",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "사무실주소",
+                        "name": "physicalDeliveryOfficeName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "사서함주소",
+                        "name": "postOfficeBox",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "주소-\u003e우편번호",
+                        "name": "postalCode",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "windows2000이전사용자로그온이름(ADdomain\\sAMAccountName형식)",
+                        "name": "sAMAccountName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "성",
+                        "name": "sn",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "시/도",
+                        "name": "st",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "주소",
+                        "name": "streetAddress",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "일반-\u003e전화",
+                        "name": "telephoneNumber",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "직함",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "로그온이름(accountname@ADdomain형식)",
+                        "name": "userPrincipalName",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "works로그인명",
+                        "name": "username",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "example": "user",
+                        "description": "홈페이지주소",
+                        "name": "wWWHomePage",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "사용자 정보 조회 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.ADUser"
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 정보 조회 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "사용자의 비밀번호를 수정합니다.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "사용자 비밀번호 수정",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "사용자 이름",
+                        "name": "username",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "흠",
+                        "name": "password",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "사용자 비밀번호 변경 성공",
+                        "schema": {
+                            "$ref": "#/definitions/main.ADUser"
+                        }
+                    },
+                    "401": {
+                        "description": "사용자 비밀번호 변경 실패",
+                        "schema": {
+                            "$ref": "#/definitions/main.errorModel"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -313,9 +712,174 @@
         "main.ADUser": {
             "type": "object",
             "properties": {
-                "i": {
+                "I": {
                     "description": "구/군/시",
-                    "type": "string"
+                    "type": "string",
+                    "example": "user"
+                },
+                "accountname": {
+                    "description": "어카운트명",
+                    "type": "string",
+                    "example": "user"
+                },
+                "c": {
+                    "description": "주소-\u003e국가영문코드명(한국:KR,일본:JP,미국:US)",
+                    "type": "string",
+                    "example": "user"
+                },
+                "co": {
+                    "description": ":=c",
+                    "type": "string",
+                    "example": "user"
+                },
+                "company": {
+                    "description": "AD회사명",
+                    "type": "string",
+                    "example": "user"
+                },
+                "countryCode": {
+                    "description": "주소-\u003e국가숫자코드(한국:410,일본:392.미국:840)",
+                    "type": "integer",
+                    "example": 1
+                },
+                "department": {
+                    "description": "부서",
+                    "type": "string",
+                    "example": "user"
+                },
+                "description": {
+                    "description": "설명",
+                    "type": "string",
+                    "example": "user"
+                },
+                "distinguishedName": {
+                    "type": "string",
+                    "example": "user"
+                },
+                "facsimileTelephoneNumber": {
+                    "description": "전화-\u003e팩스",
+                    "type": "string",
+                    "example": "user"
+                },
+                "givenName": {
+                    "description": "이름",
+                    "type": "string",
+                    "example": "user"
+                },
+                "homePhone": {
+                    "description": "전화-\u003e집",
+                    "type": "string",
+                    "example": "user"
+                },
+                "info": {
+                    "description": "참고내용",
+                    "type": "string",
+                    "example": "user"
+                },
+                "initials": {
+                    "description": "이니셜",
+                    "type": "string",
+                    "example": "user"
+                },
+                "ipPhone": {
+                    "description": "전화-\u003eip전화",
+                    "type": "string",
+                    "example": "user"
+                },
+                "mail": {
+                    "description": "메일주소",
+                    "type": "string",
+                    "example": "user"
+                },
+                "manager": {
+                    "description": "상사dn(\"CN=User3,CN=Users,DC=dc1,DC=local\")",
+                    "type": "string",
+                    "example": "user"
+                },
+                "memberOf": {
+                    "description": "그룹dn목록",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "user"
+                    ]
+                },
+                "mobile": {
+                    "description": "전화-\u003e휴대폰",
+                    "type": "string",
+                    "example": "user"
+                },
+                "o": {
+                    "description": "ldap회사명",
+                    "type": "string",
+                    "example": "user"
+                },
+                "pager": {
+                    "description": "전화-\u003e호출기",
+                    "type": "string",
+                    "example": "user"
+                },
+                "physicalDeliveryOfficeName": {
+                    "description": "사무실주소",
+                    "type": "string",
+                    "example": "user"
+                },
+                "postOfficeBox": {
+                    "description": "사서함주소",
+                    "type": "string",
+                    "example": "user"
+                },
+                "postalCode": {
+                    "description": "주소-\u003e우편번호",
+                    "type": "string",
+                    "example": "user"
+                },
+                "sAMAccountName": {
+                    "description": "windows2000이전사용자로그온이름(ADdomain\\sAMAccountName형식)",
+                    "type": "string",
+                    "example": "user"
+                },
+                "sn": {
+                    "description": "성",
+                    "type": "string",
+                    "example": "user"
+                },
+                "st": {
+                    "description": "시/도",
+                    "type": "string",
+                    "example": "user"
+                },
+                "streetAddress": {
+                    "description": "주소",
+                    "type": "string",
+                    "example": "user"
+                },
+                "telephoneNumber": {
+                    "description": "일반-\u003e전화",
+                    "type": "string",
+                    "example": "user"
+                },
+                "title": {
+                    "description": "직함",
+                    "type": "string",
+                    "example": "user"
+                },
+                "userPrincipalName": {
+                    "description": "로그온이름(accountname@ADdomain형식)",
+                    "type": "string",
+                    "example": "user"
+                },
+                "username": {
+                    "description": "works로그인명",
+                    "type": "string",
+                    "example": "user"
+                },
+                "wWWHomePage": {
+                    "description": "홈페이지주소",
+                    "type": "string",
+                    "example": "user"
                 }
             }
         },
@@ -323,10 +887,12 @@
             "type": "object",
             "properties": {
                 "desc": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "메모장"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "notepad.exe"
                 },
                 "path": {
                     "type": "string"
@@ -337,10 +903,12 @@
             "type": "object",
             "properties": {
                 "msg": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Command not found"
                 },
                 "target": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Powershell"
                 }
             }
         },
@@ -368,10 +936,12 @@
             "type": "object",
             "properties": {
                 "stderr": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Hello World!"
                 },
                 "stdout": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Hello World!"
                 }
             }
         },

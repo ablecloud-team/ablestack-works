@@ -11,4 +11,6 @@ C:\agent\nssm.exe set "Ablecloud Works Agent" ObjectName LocalSystem
 C:\agent\nssm.exe set "Ablecloud Works Agent" Start SERVICE_DELAYED_AUTO_START
 C:\agent\nssm.exe set "Ablecloud Works Agent" Type SERVICE_WIN32_OWN_PROCESS
 
+powershell -command "set-executionpolicy unrestricted -force"
+
 C:\Windows\System32\Sysprep\sysprep.exe /generalize /oobe /shutdown /unattend:C:\agent\Unattend.xml

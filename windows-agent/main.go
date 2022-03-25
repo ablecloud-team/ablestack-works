@@ -198,13 +198,13 @@ type errorModel struct {
 // @Summary powershell 명령 처리기
 // @Description powershell 명령 처리기
 // @Accept  multipart/form-data
-// @Produce  json
+// @Produce  application/json
 // @Param cmd query string true "명령어"
 // @Param arg query string false "인자"
 // @Param timeout query int false "시간제한, 기본값"
 // @Success 200 {object} shellReturnModel "명령 성공"
 // @Failure 401 {object} errorModel "명령 실패"
-// @Failure default {objects} string
+// @Failure default {object} string
 // @Router /cmd/ [get]
 func exeShellHandler(c *gin.Context) {
 
