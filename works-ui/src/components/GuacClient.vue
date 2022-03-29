@@ -1,269 +1,97 @@
 <template>
+  <transition name="header">
+    <div class="header-panel">
+      <a-button
+        class="setting-btn"
+        @click="
+          (e) => {
+            drawerVisible = true;
+          }
+        "
+      >
+        <template #icon>
+          <CaretDownFilled />
+        </template>
+        <!-- {{ipAddress}} -->
+      </a-button>
+    </div>
+  </transition>
   <a-drawer
     placement="top"
     :closable="true"
-    :height="140"
-    v-model:visible="visible"
+    :height="120"
+    v-model:visible="drawerVisible"
   >
-    <a-row :gutter="16" type="flex" justify="center" align="top">
-      <a-col :span="4">
-        <h3>1. 입력 방법</h3>
-        <a-radio-group v-model:value="setText" button-style="solid">
-          <a-tooltip
-            placement="bottom"
-            title="데스크톱에서 복사하거나 잘라낸 텍스트가 여기에 표시됩니다. 텍스트 변경 사항은 원격 클립보드에 직접 적용됩니다."
-          >
-            <a-radio-button value="1">없음</a-radio-button>
-          </a-tooltip>
-          <a-tooltip
-            placement="bottom"
-            title="사용중인 입력 방법이 없습니다. 키보드 입력은 열결된 물리적 키보드에서 받아들여집니다."
-          >
-            <a-radio-button value="2">텍스트 입력</a-radio-button>
-          </a-tooltip>
-          <a-tooltip
-            placement="bottom"
-            title="내장된 데스크톱 화상 키보드의 입력을 표시하고 허용합니다. 화상 키보드는 다른 방법으로는 불가능할 수 있는 키 조합을 입력할 수 있습니다. (Ctrl-Alt-Del 등)"
-          >
-            <a-radio-button value="3">화상 키보드</a-radio-button>
-          </a-tooltip>
-        </a-radio-group>
-      </a-col>
-      <a-col :span="4">
-        <h3>2. 마우스 에뮬레이션 모드</h3>
-        <a-radio-group v-model:value="setMouse" button-style="solid">
-          <a-tooltip
-            placement="bottom"
-            title="탭하여 클릭합니다. 클릭은 터치 위치에서 발생합니다."
-          >
-            <a-radio-button value="1">터치 스크린</a-radio-button>
-          </a-tooltip>
-          <a-tooltip
-            placement="bottom"
-            title="드래그하여 마우스 포인터를 움직이고 탭하여 클릭합니다. 클릭은 마우스 포인터 위치에서 발생합니다."
-          >
-            <a-radio-button value="2">터치 패드</a-radio-button>
-          </a-tooltip>
-        </a-radio-group>
-      </a-col>
-      <a-col :span="4">
-        <h3>3. 디스플레이</h3>
-        <a-button @click="zoom('out')" shape="circle">
-          <template #icon><MinusOutlined /></template>
-        </a-button>
-        &nbsp;
-        <a-input
-          v-model:value="scale"
-          placeholder="100"
-          style="width: 50px"
-        />%&nbsp;
-        <a-button @click="zoom('in')" shape="circle">
-          <template #icon><PlusOutlined /></template>
-        </a-button>
-      </a-col>
-    </a-row>
+    <guac-client-setting
+      ref="setting"
+      :client="client"
+      :display="display"
+      :mouse="mouse"
+      :keyboard="keyboard"
+      @windowScale="windowScale"
+      @inputModeChange="inputModeChange"
+      @mouseModeChange="mouseModeChange"
+    ></guac-client-setting>
   </a-drawer>
-  <div ref="viewport" class="viewport">
-    <div ref="displayFrame" class="display" tabindex="0" />
-    <GuacClientModal ref="modal" @reconnect="connect()" />
-    <div class="headerbar">
-      <transition name="slide">
-        <div class="header-panel">
-          <a-button
-            @click="showDrawer(true)"
-            style="height: 18px; font-size: 1px; vertical-align: top"
-          >
-            <template #icon>
-              <CaretDownFilled />
-            </template>
-            <!-- {{ipAddress}} -->
-          </a-button>
-        </div>
-      </transition>
-      <!-- <transition name="slide">
-        <div v-if="guacMenu" class="sidebar-panel" id="guac-menu">
-          <ul class="sidebar-panel-nav" id="clipboard-settings">
-            <h3>클립보드</h3>
-            <div class="content">
-              <p>
-                데스크톱에서 복사하거나 잘라낸 텍스트가 여기에 표시됩니다.
-                텍스트 변경 사항은 원격 클립보드에 직접 적용됩니다.
-              </p>
-              <textarea class="clipboard"></textarea>
-            </div>
-          </ul>
-          <ul class="sidebar-panel-nav" id="keyboard-settings">
-            <h3>입력 방법</h3>
-            <div class="content">
-              <div class="choice">
-                <label
-                  ><input
-                    id="ime-none"
-                    name="input-method"
-                    ng-change="closeMenu()"
-                    ng-model="menu.inputMethod"
-                    type="radio"
-                    value="none"
-                  />
-                  없음</label
-                >
-                <p class="caption">
-                  <label for="ime-none"
-                    >사용중인 입력 방법이 없습니다. 키보드 입력은 열결된 물리적
-                    키보드에서 받아들여집니다.</label
-                  >
-                </p>
-              </div>
-              <div class="choice">
-                <div class="figure">
-                  <label for="ime-text"
-                    ><img src="../assets/tablet-keys.svg" alt=""
-                  /></label>
-                </div>
-                <label
-                  ><input
-                    id="ime-text"
-                    name="input-method"
-                    ng-change="closeMenu()"
-                    ng-model="menu.inputMethod"
-                    type="radio"
-                    value="text"
-                  />
-                  텍스트 입력</label
-                >
-                <p class="caption">
-                  <label for="ime-text">
-                    텍스트 입력을 허용하고, 입력된 텍스트를 바탕으로 키보드
-                    이벤트를 에뮬레이트 합니다. 이것은 물리적 키보드가 없는
-                    휴대폰과 같은 장치에 필요합니다.</label
-                  >
-                </p>
-              </div>
-              <div class="choice">
-                <label
-                  ><input
-                    id="ime-osk"
-                    name="input-method"
-                    ng-change="closeMenu()"
-                    ng-model="menu.inputMethod"
-                    type="radio"
-                    value="osk"
-                  />
-                  화상 키보드</label
-                >
-                <p class="caption">
-                  <label for="ime-osk">
-                    내장된 데스크톱 화상 키보드의 입력을 표시하고 허용합니다.
-                    화상 키보드는 다른 방법으로는 불가능할 수 있는 키 조합을
-                    입력할 수 있습니다. (Ctrl-Alt-Del 등)</label
-                  >
-                </p>
-              </div>
-            </div>
-          </ul>
-          <ul class="sidebar-panel-nav" id="mouse-settings">
-            <h3>마우스 에뮬레이션 모드</h3>
-            <div class="content">
-              <p>터치와 관련하여 원격 마우스가 어떻게 동작하는지 결정합니다.</p>-->
-      <!-- Touchscreen -->
-      <!-- <div class="choice">
-                <input
-                  name="mouse-mode"
-                  ng-change="closeMenu()"
-                  ng-model="menu.emulateAbsoluteMouse"
-                  type="radio"
-                  ng-value="true"
-                  checked="checked"
-                  id="absolute"
-                />
-                <div class="figure">
-                  <label for="absolute"
-                    ><img src="../assets/touchscreen.svg" alt="터치 스크린"
-                  /></label>
-                  <p class="caption">
-                    <label for="absolute"
-                      >탭하여 클릭합니다. 클릭은 터치 위치에서
-                      발생합니다.</label
-                    >
-                  </p>
-                </div>
-              </div> -->
-      <!-- Touchpad -->
-      <!-- <div class="choice">
-                <input
-                  name="mouse-mode"
-                  ng-change="closeMenu()"
-                  ng-model="menu.emulateAbsoluteMouse"
-                  type="radio"
-                  ng-value="false"
-                  id="relative"
-                />
-                <div class="figure">
-                  <label for="relative"
-                    ><img src="../assets/touchpad.svg" alt="터치 패드"
-                  /></label>
-                  <p class="caption">
-                    <label for="relative"
-                      >드래그하여 마우스 포인터를 움직이고 탭하여 클릭합니다.
-                      클릭은 마우스 포인터 위치에서 발생합니다.</label
-                    >
-                  </p>
-                </div>
-              </div>
-            </div>
-          </ul>
-          <ul class="sidebar-panel-nav" id="display-settings">
-            <h3>디스플레이</h3>
-            <div class="content">
-              <div id="zoom-settings">
-                <div class="client-zoom">
-                  <div class="client-zoom-editor">
-                    <div ng-click="zoomOut()" class="client-zoom-out">
-                      <img src="../assets/zoom-out.svg" alt="-" />
-                    </div>
-                    <div class="client-zoom-state">
-                      <input
-                        type="number"
-                        guac-zoom-ctrl
-                        ng-model="client.clientProperties.scale"
-                        ng-model-options="{ updateOn: 'blur submit' }"
-                        ng-change="zoomSet()"
-                      />%
-                    </div>
-                    <div ng-click="zoomIn()" class="client-zoom-in">
-                      <img src="../assets/zoom-in.svg" alt="+" />
-                    </div>
-                  </div>
-                  <div class="client-zoom-autofit">
-                    <label
-                      ><input
-                        ng-model="client.clientProperties.autoFit"
-                        ng-change="changeAutoFit()"
-                        ng-disabled="autoFitDisabled()"
-                        type="checkbox"
-                        id="auto-fit"
-                      />
-                      브라우저 창에 자동으로 맞춤</label
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ul>
-        </div>
-      </transition> -->
-    </div>
+  <!-- <div ref="viewport" id="viewport" style="position: relative"> -->
+  <div id="display" class="display software-cursor"></div>
+  <div class="client-bottom">
+    <!-- <div id="nestedInputText" class="footer-panel">
+      <a-input v-model:value="inputTextUse" class="target" id="inputTextUse" />
+    </div> -->
+    <!-- <transition name="footer" v-if="inputText"> -->
+    <!-- <div id ="nestedInputText" class="footer-panel">
+        <a-input
+          v-model:value="inputTextUse"
+          class="target"
+          id="inputTextUse"
+        />
+        <a-button danger>Ctrl</a-button>
+        <a-button danger>Alt</a-button>
+        <a-button danger>Esc</a-button>
+        <a-button danger>Tab</a-button>
+      </div> -->
+    <!-- </transition> -->
+    <!-- <transition name="footer" v-if="iuputOsk">
+      <div class="footer-panel">
+        <a-input v-model:value="vbvb" class="target1" />
+      </div>
+    </transition> -->
   </div>
+  <!-- </div> -->
+
+  <div class="modal" v-if="alertShow">
+    <!-- <h2>{{ title[status] }}</h2>
+    <p>{{ message ? message : text[status] }}</p>
+    <span class="rct" @click="$emit('reconnect')" v-if="canReconnect">
+      Reconnect
+    </span> -->
+
+    <a-result
+      :status="resultStatus"
+      :title="title[status]"
+      :sub-title="text[status]"
+    >
+      <template #extra v-if="resultStatus == 'error'">
+        <a-button v-if="ableReconnect" type="primary" @click="connect()">
+          재접속
+        </a-button>
+      </template>
+    </a-result>
+  </div>
+  <!-- <guac-client-modal ref="modal" @reconnect="connect()" /> -->
 </template>
 
 <script>
 import { ref } from "vue";
+import axios from "axios";
 import Guacamole from "guacamole-common-js";
+import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/lib/encrypt";
 import dis from "@/lib/display";
 import states from "@/lib/states";
 import clipboard from "@/lib/clipboard";
-import GuacClientModal from "./GuacClientModal";
+import GuacClientSetting from "./GuacClientSetting";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
@@ -271,37 +99,25 @@ const hostname =
 const wsUrl = "ws://" + hostname + ":8088/";
 export default {
   components: {
-    GuacClientModal,
+    GuacClientSetting,
   },
-  setup() {
-    const visible = ref(false);
-    const showDrawer = (bool) => {
-      console.log("visible", bool);
-      visible.value = bool;
-    };
-    const setText = ref("1");
-    const setMouse = ref("1");
-    return {
-      visible,
-      setText,
-      setMouse,
-      showDrawer,
-    };
-  },
+  setup() {},
   props: {},
   data() {
     return {
-      size: ref("small"),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
-      connected: false,
-      guacMenu: false,
-      displayFrame: null,
-      scale: ref(100),
-      client: null,
-      keyboard: null,
-      mouse: null,
-      connectionState: states.IDLE,
-      errorMessage: "",
+      client: ref(null),
+      keyboard: ref(null),
+      mouse: ref(null),
+      localCursor: ref(true),
+      scale: ref(0),
+      connectionState: ref(states.IDLE),
+      errorMessage: ref(""),
+      inputText: ref(false),
+      inputOsk: ref(false),
+      inputTextUse: ref(""),
+      drawerVisible: ref(false),
+      sentText: ref([]),
       arguments: {},
       token: {
         connection: {
@@ -309,172 +125,166 @@ export default {
           settings: { "ignore-cert": true },
         },
       },
-      ipAddress: hostname,
+      // ipAddress: hostname,
+      alertShow: ref(true),
+      resultStatus: ref(null),
+      status: ref(null),
+      title: {
+        CONNECTING: "데스크톱 연결 중",
+        DISCONNECTING: "연결 끊김",
+        DISCONNECTED: "연결 끊김",
+        UNSTABLE: "불안정",
+        WAITING: "대기중...",
+        CLIENT_ERROR: "클라이언트 오류",
+        TUNNEL_ERROR: "WebSocket Tunneling 오류",
+      },
+      text: {
+        CONNECTING: "데스크톱에 연결을 위해 응답을 기다리는 중...",
+        DISCONNECTING: "데스크톱에 접속이 끊어졌습니다.",
+        DISCONNECTED: "데스크톱에 접속이 끊어졌습니다.",
+        UNSTABLE: "서버에 대한 네트워크 연결이 불안정합니다.",
+        WAITING: "서버에 응답을 기다리는 중입니다.",
+        CLIENT_ERROR: "서버에 오류가 발생했습니다.",
+        TUNNEL_ERROR: "WebSocket Tunneling 중 오류가 발생하였습니다.",
+      },
     };
   },
-  create() {
-    new Guacamole.OnScreenKeyboard.Layout(template);
-  },
+  created() {},
   mounted() {
-    this.connected = true;
+    // this.connectionState = states.CONNECTING;
     this.connect();
-    this.connectionState = states.DISCONNECTED;
+  },
+  computed: {
+    ableReconnect() {
+      return ["DISCONNECTED", "CLIENT_ERROR"].includes(this.status);
+    },
   },
   watch: {
     connectionState(state) {
-      console.log("dddddd : ", state);
-      this.$refs.modal.show(state, this.errorMessage);
+      this.alertShow = true;
+      console.log("connectionState ", state);
+      this.alertShowHandle(state, this.errorMessage);
+    },
+    childScale(val) {
+      //console.log("childScale ::::::::: ", val);
+    },
+    client(val) {
+      //console.log("client ::::::::: ", val);
+    },
+    keyboard(val) {
+      //console.log("keyboard ::::::::: ", val);
+    },
+    mouse(val) {
+      //console.log("mouse ::::::::: ", val);
+    },
+    inputTextUse(val) {
+      //console.log("inputTextUse ::::::::: ", val);
+      this.target = document.getElementById("inputTextUse");
+
+      console.log("target.selectionStart", this.target.selectionStart);
+      if (this.composingText) return;
+
+      var i;
+      var content = val;
+      var TEXT_INPUT_PADDING = 4;
+      var expectedLength = TEXT_INPUT_PADDING * 2;
+
+      // If content removed, update
+      if (content.length < 2) {
+        // Calculate number of backspaces and send
+        var backspaceCount = TEXT_INPUT_PADDING - this.target.selectionStart;
+        for (i = 0; i < backspaceCount; i++) this.sendKeysym(0xff08);
+
+        // Calculate number of deletes and send
+        var deleteCount = expectedLength - content.length - backspaceCount;
+        for (i = 0; i < deleteCount; i++) this.sendKeysym(0xffff);
+      } else {
+        this.sendString(content);
+      }
+
+      this.resetTextInputTarget(TEXT_INPUT_PADDING);
+      //e.preventDefault();
+
+      // 한글 입력인경우
+      this.target.addEventListener("compositionstart", (event) => {
+        // console.log(`generated characters were: ${event}`, event);
+        this.composingText = true;
+      });
+      this.target.addEventListener("compositionend", (event) => {
+        console.log("한글 입력 :: ", event);
+        this.composingText = false;
+      });
     },
   },
   methods: {
-    send(cmd) {
-      if (!this.client) {
-        return;
-      }
-      for (const c of cmd.data) {
-        this.client.sendKeyEvent(1, c.charCodeAt(0));
-      }
-    },
-    copy(cmd) {
-      if (!this.client) {
-        return;
-      }
-      clipboard.cache = {
-        type: "text/plain",
-        data: cmd.data,
-      };
-      clipboard.setRemoteClipboard(this.client);
-    },
-    resize() {
-      const elm = this.$refs.viewport;
-      if (!elm || !elm.offsetWidth) {
-        return;
-      }
-      let pixelDensity = window.devicePixelRatio || 1;
-      const width = elm.offsetWidth * pixelDensity;
-      const height = elm.offsetHeight * pixelDensity;
-      if (
-        this.displayFrame.getWidth() !== width ||
-        this.displayFrame.getHeight() !== height
-      ) {
-        this.client.sendSize(width, height);
-      }
-      // setTimeout(() => {
-      //   const scale = Math.min(
-      //     window.innerWidth / Math.max(this.displayFrame.getWidth(), 1),
-      //     window.innerHeight / Math.max(this.displayFrame.getHeight(), 1)
-      //   );
-      //   this.displayFrame.scale(scale);
-      // }, 100);
-    },
     connect() {
       let tunnel = new Guacamole.WebSocketTunnel(wsUrl);
-      // console.log(tunnel);
-      //reconnect 경우 초기화
-      if (this.client) {
-        this.displayFrame.scale(0);
-        this.keyboard.onkeydown = this.keyboard.onkeyup = () => {};
-      }
-
-      this.client = new Guacamole.Client(tunnel);
-      console.log(this.client);
-      clipboard.install(this.client);
 
       tunnel.onerror = (status) => {
-        // console.log(status);
-        this.connectionState = states.TUNNEL_ERROR;
+        //this.connectionState = states.TUNNEL_ERROR;
       };
-
-      tunnel.onstatechange = (state) => {
-        //console.log(state);
+      // tunnel.onstatechange = (state) => {
+      //   console.log("tunnel", state);
+      //   switch (state) {
+      //     case 0:
+      //       this.connectionState = states.CONNECTING;
+      //       break;
+      //     case 1:
+      //       this.connectionState = states.CONNECTED;
+      //       break;
+      //     case 2:
+      //       this.connectionState = states.DISCONNECTED;
+      //       break;
+      //     case 3:
+      //       this.connectionState = states.UNSTABLE;
+      //       break;
+      //   }
+      // };
+      this.client = new Guacamole.Client(tunnel);
+      this.client.onerror = (error) => {
+        this.client.disconnect();
+        this.errorMessage = error.message;
+        this.connectionState = states.CLIENT_ERROR;
+      };
+      this.client.onstatechange = (state) => {
+        // console.log("client", state);
         switch (state) {
-          case Guacamole.Tunnel.State.CONNECTING:
-            this.connectionState = states.CONNECTING;
-            break;
-          case Guacamole.Tunnel.State.OPEN:
-            this.connectionState = states.CONNECTED;
-            break;
-          case Guacamole.Tunnel.State.UNSTABLE:
-            break;
-          case Guacamole.Tunnel.State.CLOSED:
-            this.connectionState = states.DISCONNECTED;
-            break;
-        }
-      };
-
-      this.client.onstatechange = (clientState) => {
-        console.log(clientState);
-        switch (clientState) {
           case 0:
             this.connectionState = states.IDLE;
             break;
           case 1:
+            this.connectionState = states.CONNECTING;
             break;
           case 2:
             this.connectionState = states.WAITING;
             break;
           case 3:
             this.connectionState = states.CONNECTED;
-            window.addEventListener("resize", this.resize);
-            this.$refs.viewport.addEventListener("mouseenter", this.resize);
-            clipboard.setRemoteClipboard(this.client);
             break;
           case 4:
+            this.connectionState = states.DISCONNECTING;
             break;
           case 5:
+            this.connectionState = states.DISCONNECTED;
             break;
         }
-      };
-
-      
-      this.client.onerror = (error) => {
-        this.client.disconnect();
-        this.errorMessage = error.message;
-        this.connectionState = states.CLIENT_ERROR;
       };
       this.client.onsync = () => {};
 
-      this.client.onargv = (stream, mimetype, name) => {
-        if (mimetype !== "text/plain") return;
-        const reader = new Guacamole.StringReader(stream);
-        let value = "";
-        reader.ontext = (text) => {
-          value += text;
-        };
-        reader.onend = () => {
-          const stream = this.client.createArgumentValueStream(
-            "text/plain",
-            name
-          );
-          stream.onack = (status) => {
-            if (status.isError()) {
-              return;
-            }
-            this.arguments[name] = value;
-          };
-        };
-      };
+      this.display = this.client.getDisplay();
+      this.appEl = document.getElementById("app");
+      this.displayEl = document.getElementById("display");
 
-      this.client.onclipboard = clipboard.onClipboard;
-      this.displayFrame = this.client.getDisplay();
-      const displayElm = this.$refs.displayFrame;
-      displayElm.appendChild(this.displayFrame.getElement());
-      displayElm.addEventListener("contextmenu", (e) => {
-        e.stopPropagation();
-        if (e.preventDefault) {
-          e.preventDefault();
-        }
-        e.returnValue = false;
-      });
+      if (this.displayEl !== null) this.displayEl.innerHTML = "";
+      this.displayEl.appendChild(this.display.getElement());
 
       //display 현재 창 크기로 적용
-      const dis_chg = dis();
-      this.token.connection.settings.width = dis_chg[0];
-      this.token.connection.settings.height = dis_chg[1];
-      this.token.connection.settings.dpi = dis_chg[2];
+      const browerSize = dis();
+      this.token.connection.settings.width = browerSize[0];
+      this.token.connection.settings.height = browerSize[1];
+      this.token.connection.settings.dpi = browerSize[2];
 
       //파라미터로 넘어온 값 파라미터값 복호화
-
       const decrypted = this.$CryptoJS.AES.decrypt(
         atob(this.$route.query.enc),
         this.cryptKey
@@ -486,288 +296,470 @@ export default {
       for (const key in query) {
         this.token.connection.settings[key] = query[key];
       }
-      // token.connection.settings.port = this.$route.query.port;
-      // token.connection.settings.hostname = this.$route.query.hostname;
-      // token.connection.settings.domain = this.$route.query.domain;
-      // token.connection.settings.password = this.$route.query.password;
-      // token.connection.settings.username = this.$route.queryquery.username;
+      if (
+        Math.floor(Date.now() / 1000) -
+          parseInt(this.token.connection.settings.timestamp) >
+        100000000
+        //10초로 변경 예정
+      ) {
+        this.connectionState = states.DISCONNECTED;
+      } else {
+        this.client.connect("token=" + encrypt(this.token));
+      }
 
-      const encrypt_token = encrypt(this.token);
-      this.client.connect("token=" + encrypt_token);
+      // this.client.onargv = (stream, mimetype, name) => {
+      //   if (mimetype !== "text/plain") return;
+      //   const reader = new Guacamole.StringReader(stream);
+      //   let value = "";
+      //   reader.ontext = (text) => {
+      //     value += text;
+      //   };
+      //   reader.onend = () => {
+      //     const stream = this.client.createArgumentValueStream(
+      //       "text/plain",
+      //       name
+      //     );
+      //     stream.onack = (status) => {
+      //       if (status.isError()) {
+      //         return;
+      //       }
+      //       this.arguments[name] = value;
+      //     };
+      //   };
+      // };
+
+      // this.displayEl.addEventListener("contextmenu", (e) => {
+      //   e.stopPropagation();
+      //   if (e.preventDefault) {
+      //     e.preventDefault();
+      //   }
+      //   e.returnValue = false;
+      // });
 
       //데스크탑 마우스 설정
-      this.mouse = new Guacamole.Mouse(displayElm);
-      console.log(this.mouse);
-      this.mouse.onmouseout = () => {
-        if (!this.displayFrame) return;
-        this.displayFrame.showCursor(false);
-      };
-      displayElm.onclick = () => {
-        displayElm.focus();
-      };
-      displayElm.onfocus = () => {
-        displayElm.className = "focus";
-      };
-      displayElm.onblur = () => {
-        displayElm.className = "";
-      };
-
-      //데스크탑 키보드 설정
-      var isCtrl = false;
-      var isSpace = false;
-
       this.keyboard = new Guacamole.Keyboard(document);
       this.keyboard.onkeydown = (keysym) => {
-        // console.log(keysym);
-        if (keysym === 65507) isCtrl = true;
-        if (keysym === 32) isSpace = true;
-
-        if (isCtrl == true && isSpace == true) {
-          this.showDrawer(!this.visible);
+        this.isMenuShortcutPressed(keysym);
+        if (this.isMenuShortcutPressed(keysym)) {
+          this.keyboard.reset();
+          setTimeout(() => {
+            this.drawerVisible = true;
+          }, 400);
         }
-        //this.client.sendKeyEvent(1, keysym);
+        this.client.sendKeyEvent(1, keysym);
       };
-      this.keyboard.onkeyup = () => {
-        isCtrl = false;
-        isSpace = false;
-        //this.client.sendKeyEvent(0, keysym);
+      this.keyboard.onkeyup = (keysym) => {
+        this.client.sendKeyEvent(0, keysym);
       };
 
-      this.mouse.onmousedown =
-        this.mouse.onmouseup =
-        this.mouse.onmousemove =
-          this.handleMouseState;
+      this.touch = new Guacamole.Touch(this.displayEl);
+      // console.log(this.touch);
+      // this.touch.onEach(
+      //   ["touchstart', 'touchmove', 'touchend"],
+      //   this.handleTouchEvent
+      // );
 
+      // this.touch.touchstart = (event) => {
+      //   //alert(111);
+      // };
+
+      this.touchScreen = new Guacamole.Mouse.Touchscreen(this.displayEl);
+      this.touchScreen.onmousedown = (state) => {
+        // console.log(this.display.getWidth(), this.display.getHeight());
+        // console.log(
+        //   this.appEl.offsetWidth,
+        //   this.appEl.offsetHeight
+        // );
+        //this.resize();
+      };
+      this.touchPad = new Guacamole.Mouse.Touchpad(this.displayEl);
+
+      this.mouse = new Guacamole.Mouse(this.displayEl);
+      this.mouse.onmouseout = (e) => {
+        if (!this.display) return;
+        this.display.showCursor(false);
+      };
+
+      this.mouse.on("mousedown", document.body.focus.bind(document.body));
+      this.mouse.onEach(["mousedown", "mousemove", "mouseup"], (event) => {
+        if (!this.client || !this.display) return;
+
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Send mouse state, show cursor if necessary
+        this.display.showCursor(this.localCursor);
+        this.client.sendMouseState(event.state, true);
+      });
+      this.mouse.onmousedown = (state) => {
+        // console.log(this.display.getWidth(), this.display.getHeight());
+        // console.log(this.appEl.offsetWidth,this.appEl.offsetHeight);
+        this.resizeWindowEvent();
+      };
+      this.display.onresize = (x, y) => {
+        //console.log("onresize event :::::::: ", x, y);
+        //this.client.sendSize(x, y);
+        //this.resize();
+      };
+
+      this.displayEl.onclick = () => {
+        this.displayEl.focus();
+      };
+      // this.displayEl.onfocus = () => {
+      //   this.displayEl.className = "focus";
+      // };
+      // this.displayEl.onblur = () => {
+      //   this.displayEl.className = "";
+      // };
+
+      window.addEventListener("resize", this.resizeWindowEvent);
+      this.mouseModeChange("touchscreen");
+      this.inputModeChange("none");
+    },
+    isMenuShortcutPressed(keysym) {
+      var SHIFT_KEYS = ["65505", "65506"],
+        ALT_KEYS = ["65513", "65514", "65027", "65511", "65512"],
+        CTRL_KEYS = ["65507", "65508"],
+        //F12 = ["65481"],
+        MENU_KEYS = [
+          "65505",
+          "65506",
+          "65507",
+          "65508",
+          "65511",
+          "65512",
+          "65513",
+          "65514",
+          //"65481",
+        ];
+      // Ctrl+Alt+Shift has NOT been pressed if any key is currently held
+      // down that isn't Ctrl, Alt, or Shift
+
+      if (!MENU_KEYS.includes(keysym.toString())) return false;
+
+      //console.log("::::::::::::::::::::::", Object.keys(this.keyboard.pressed));
+      const arr = Object.keys(this.keyboard.pressed);
+
+      return !!(
+        SHIFT_KEYS.filter((x) => arr.includes(x)).length > 0 &&
+        (ALT_KEYS.filter((x) => arr.includes(x)).length > 0 ||
+          CTRL_KEYS.filter((x) => arr.includes(x)).length > 0)
+      );
+    },
+    inputModeChange(inputMethod) {
+      this.drawerVisible = false;
+      // Remove current keyboard
+      if (this.onScreenKeyboard) {
+        this.$refs.display.removeChild(this.onScreenKeyboard.getElement());
+        this.onScreenKeyboard = null;
+      }
+      if (document.getElementById("nestedInputText")) {
+        document.getElementById("nestedInputText").remove();
+      }
+
+      if (inputMethod == "none") {
+        this.inputText = false;
+        this.inputOsk = false;
+      } else if (inputMethod == "text") {
+        this.inputText = true;
+        this.inputOsk = false;
+
+        let div = document.createElement("div");
+        div.id = "nestedInputText";
+        div.className = "target";
+        div.innerHTML =
+          "<a-input v-model:value='inputTextUse' class='target' id='inputTextUse' />" +
+          "<a-button danger>Ctrl</a-button>" +
+          "<a-button danger>Alt</a-button>" +
+          "<a-button danger>Esc</a-button>" +
+          "<a-button danger>Tab</a-button>";
+        this.displayEl.appendChild(div);
+      } else if (inputMethod == "osk") {
+        this.inputOsk = true;
+        this.inputText = false;
+
+        var layout = onScreenKeyboardLayout;
+        this.onScreenKeyboard = new Guacamole.OnScreenKeyboard(layout);
+        //console.log(this.onScreenKeyboard.getElement());
+        this.$refs.display.appendChild(this.onScreenKeyboard.getElement());
+
+        this.onScreenKeyboard.onkeydown = (keysym) => {
+          this.client.sendKeyEvent(1, keysym);
+        };
+
+        // Broadcast keydown for each key released
+        this.onScreenKeyboard.onkeyup = (keysym) => {
+          this.client.sendKeyEvent(0, keysym);
+        };
+      }
       setTimeout(() => {
-        this.resize();
-        displayElm.focus();
+        this.resizeWindowEvent();
       }, 1000);
     },
-    handleMouseState(mouseState) {
-      const scaledMouseState = Object.assign({}, mouseState, {
-        x: mouseState.x / this.displayFrame.getScale(),
-        y: mouseState.y / this.displayFrame.getScale(),
-      });
-      this.client.sendMouseState(scaledMouseState);
-    },
-    zoom(inout) {
-      if (inout == "out") {
-        this.scale -= 10;
-        if (this.scale < 100) this.scale = 100;
-      }
-      if (inout == "in") {
-        this.scale += 10;
-        if (this.scale > 300) this.scale = 300;
-      }
-      // console.log(this.scale);
+    mouseModeChange(absolute) {
+      this.drawerVisible = false;
+      // this.touch.offEach(
+      //   ["touchstart', 'touchmove', 'touchend"],
+      //   this.handleTouchEvent
+      // );
 
-      this.client.getDisplay().scale(this.scale * 0.01);
+      // this.touch.onEach(
+      //   ["touchstart', 'touchmove', 'touchend"],
+      //   this.handleTouchEvent
+      // );
 
-      //확대된 경우 스크롤 바 생성, 아닐경우 스크롤바 제거
-      if (this.scale > 100) this.$refs.viewport.style.overflow = "auto";
-      else this.$refs.viewport.style.overflow = "hidden";
+      this.touchScreen.offEach(
+        ["mousedown", "mousemove", "mouseup"],
+        this.handleEmulatedMouseEvent
+      );
+
+      this.touchPad.offEach(
+        ["mousedown", "mousemove", "mouseup"],
+        this.handleEmulatedMouseEvent
+      );
+
+      if (absolute == "touchscreen") {
+        this.touchScreen.onEach(
+          ["mousedown", "mousemove", "mouseup"],
+          this.handleEmulatedMouseEvent
+        );
+        // console.log(this.touchScreen);
+        this.touchScreen.mousedown = (event) => {
+          // console.log(event);
+          //this.resize();
+        };
+      } else {
+        this.touchPad.onEach(
+          ["mousedown", "mousemove", "mouseup"],
+          this.handleEmulatedMouseEvent
+        );
+        // console.log(this.touchPad);
+        this.touchPad.mousedown = (event) => {
+          // console.log(event);
+          //this.resize();
+        };
+      }
     },
+    handleTouchEvent(event) {
+      // console.log("handleTouchEvent", event);
+      // Do not attempt to handle touch state changes if the client
+      // or display are not yet available
+      if (!this.client || !this.display) return;
+      event.preventDefault();
+
+      // Send touch state, hiding local cursor
+      this.display.showCursor(false);
+      this.client.sendTouchState(event.state, true);
+    },
+    handleEmulatedMouseEvent(event) {
+      //console.log("handleEmulatedMouseEvent", event);
+      if (!this.client || !this.display) return;
+
+      event.stopPropagation();
+      event.preventDefault();
+
+      // Ensure software cursor is shown
+      this.display.showCursor(true);
+
+      // Send mouse state, ensure cursor is visible
+      this.scrollToMouse(event.state);
+      this.client.sendMouseState(event.state, true);
+    },
+    scrollToMouse(mouseState) {
+      const main = this.$refs.display;
+      if (!main || !main.offsetWidth) {
+        return;
+      }
+      // Determine mouse position within view
+      const mouse_view_x =
+        mouseState.x + this.displayEl.offsetLeft - main.scrollLeft;
+      const mouse_view_y =
+        mouseState.y + this.displayEl.offsetTop - main.scrollTop;
+
+      // Determine viewport dimensions
+      const view_width = main.offsetWidth;
+      const view_height = main.offsetHeight;
+
+      // Determine scroll amounts based on mouse position relative to document
+      let scroll_amount_x;
+      if (mouse_view_x > view_width)
+        scroll_amount_x = mouse_view_x - view_width;
+      else if (mouse_view_x < 0) scroll_amount_x = mouse_view_x;
+      else scroll_amount_x = 0;
+
+      let scroll_amount_y;
+      if (mouse_view_y > view_height)
+        scroll_amount_y = mouse_view_y - view_height;
+      else if (mouse_view_y < 0) scroll_amount_y = mouse_view_y;
+      else scroll_amount_y = 0;
+
+      // Scroll (if necessary) to keep mouse on screen.
+      main.scrollLeft += scroll_amount_x;
+      main.scrollTop += scroll_amount_y;
+    },
+    resizeWindowEvent() {
+      const pixelDensity = window.devicePixelRatio || 1;
+
+      const width = this.appEl.offsetWidth * pixelDensity;
+      const height = this.appEl.offsetHeight * pixelDensity;
+
+      this.client.sendSize(width, height);
+
+      if (this.onScreenKeyboard) {
+        this.onScreenKeyboard.resize(this.$refs.display.offsetWidth);
+      }
+    },
+
+    // setWindowSize() {
+    //   // console.log("resize ::: this.childScale", this.childScale);
+    //   setTimeout(() => {
+    //     if (this.childScale > 0) {
+    //       console.log(this.childScale, this.display.getScale());
+    //       this.display.scale(this.childScale * 0.01);
+    //       this.windowScale(this.childScale);
+    //     } else {
+    //       const scale = Math.min(
+    //         document.getElementById("viewport").offsetWidth /
+    //           Math.max(this.display.getWidth(), 1),
+    //         document.getElementById("viewport").offsetHeight /
+    //           Math.max(this.display.getHeight(), 1)
+    //       );
+
+    //       this.defaultScale =
+    //         Math.round(scale * 100) > 300 ? 100 : Math.round(scale * 100);
+    //       //console.log(this.defaultScale);
+    //     }
+    //   }, 1000);
+    // },
+    windowScale(curScale, defaultScale) {
+      this.display.scale(curScale * 0.01);
+
+      //확대시 스크롤 생성 및 해제
+      if (curScale > defaultScale) this.appEl.style.overflow = "auto";
+      else this.appEl.style.overflow = "hidden";
+    },
+    sendKeysym(keysym) {
+      // console.log("sendKeysym [keysym] :::::::::", keysym);
+      this.client.sendKeyEvent(1, keysym);
+      this.client.sendKeyEvent(0, keysym);
+      // $rootScope.$broadcast("guacSyntheticKeydown", keysym);
+      // $rootScope.$broadcast("guacSyntheticKeyup", keysym);
+    },
+    sendCodepoint(codepoint) {
+      if (codepoint === 10) {
+        this.sendKeysym(0xff0d);
+        // this.releaseStickyKeys();
+        return;
+      }
+
+      var keysym = this.keysymFromCodepoint(codepoint);
+      if (keysym) {
+        this.sendKeysym(keysym);
+        // this.releaseStickyKeys();
+      }
+    },
+    keysymFromCodepoint(codepoint) {
+      // Keysyms for control characters
+      if (codepoint <= 0x1f || (codepoint >= 0x7f && codepoint <= 0x9f))
+        return 0xff00 | codepoint;
+
+      // Keysyms for ASCII chars
+      if (codepoint >= 0x0000 && codepoint <= 0x00ff) return codepoint;
+
+      // Keysyms for Unicode
+      if (codepoint >= 0x0100 && codepoint <= 0x10ffff)
+        return 0x01000000 | codepoint;
+
+      return null;
+    },
+    sendString(content) {
+      var sentText = "";
+
+      // Send each codepoint within the string
+      for (var i = 0; i < content.length; i++) {
+        var codepoint = content.charCodeAt(i);
+        if (codepoint !== 0x200b) {
+          sentText += String.fromCharCode(codepoint);
+          this.sendCodepoint(codepoint);
+        }
+      }
+
+      // // Display the text that was sent
+
+      this.sentText.push(sentText);
+
+      // // Remove text after one second
+      setTimeout(() => {
+        this.sentText.shift();
+      }, 1000);
+      // console.log(this.sentText);
+    },
+    resetTextInputTarget(padding) {
+      var TEXT_INPUT_PADDING_CODEPOINT = 0x200b;
+      var paddingChar = String.fromCharCode(TEXT_INPUT_PADDING_CODEPOINT);
+
+      this.inputTextUse = new Array(padding * 2 + 1).join(paddingChar);
+      this.target.setSelectionRange(padding, padding);
+    },
+    alertShowHandle(state, message) {
+      // console.log(state, message);
+      this.status = state;
+
+      switch (state) {
+        case states.CONNECTING:
+          this.resultStatus = "info";
+          break;
+        case states.WAITING:
+          this.resultStatus = "info";
+          break;
+        case states.CONNECTED:
+          this.alertShow = false;
+          this.status = null;
+          this.resultStatus = null;
+          break;
+        case states.DISCONNECTING:
+          this.resultStatus = "error";
+          break;
+        case states.DISCONNECTED:
+          this.resultStatus = "error";
+          break;
+        case states.TUNNEL_ERROR:
+          this.resultStatus = "error";
+          break;
+        case states.CLIENT_ERROR:
+          this.resultStatus = "error";
+          break;
+      }
+    },
+    // send(cmd) {
+    //   if (!this.client) {
+    //     return;
+    //   }
+    //   for (const c of cmd.data) {
+    //     this.client.sendKeyEvent(1, c.charCodeAt(0));
+    //   }
+    // },
+    // copy(cmd) {
+    //   if (!this.client) {
+    //     return;
+    //   }
+    //   clipboard.cache = {
+    //     type: "text/plain",
+    //     data: cmd.data,
+    //   };
+    //   clipboard.setRemoteClipboard(this.client);
+    // },
+    // handleMouseState(mouseState) {
+    //   const scaledMouseState = Object.assign({}, mouseState, {
+    //     x: mouseState.x / this.display.getScale(),
+    //     y: mouseState.y / this.display.getScale(),
+    //   });
+    //   this.client.sendMouseState(scaledMouseState);
+    // },
   },
 };
 </script>
 
-<style scoped>
-.display {
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
-}
-.viewport {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-.slide-enter-active,
-.slide-leave-active {
-  transition: transform 0.2s ease;
-}
-.slide-enter,
-.slide-leave-to {
-  transform: translateX(-100%);
-  transition: all 150ms ease-in 0s;
-}
-.header-panel {
-  height: 1px;
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 999;
-  text-align: center;
-  width: 100%;
-}
-
-.sidebar-panel {
-  overflow-y: auto;
-  background-color: #fff;
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  z-index: 999;
-  padding: 1rem 10px 1rem 10px;
-  width: 465px;
-}
-ul.sidebar-panel-nav {
-  list-style-type: none;
-}
-ul.sidebar-panel-nav > h3 {
-  margin: 0;
-  padding: 0;
-  padding-bottom: 1em;
-}
-ul.sidebar-panel-nav ~ ul.sidebar-panel-nav h3 {
-  padding-top: 1em;
-}
-.clipboard {
-  position: relative;
-  border: 1px solid #aaa;
-  -moz-border-radius: 0.25em;
-  -webkit-border-radius: 0.25em;
-  -khtml-border-radius: 0.25em;
-  border-radius: 0.25em;
-  width: 100%;
-  height: 2in;
-  white-space: pre;
-  font-size: 1em;
-  overflow: auto;
-  padding: 0.25em;
-}
-#guac-menu .content {
-  padding: 0;
-  margin: 0;
-  /* IE10 */
-  display: -ms-flexbox;
-  -ms-flex-align: stretch;
-  -ms-flex-direction: column;
-  /* Ancient Mozilla */
-  display: -moz-box;
-  -moz-box-align: stretch;
-  -moz-box-orient: vertical;
-  /* Ancient WebKit */
-  display: -webkit-box;
-  -webkit-box-align: stretch;
-  -webkit-box-orient: vertical;
-  /* Old WebKit */
-  display: -webkit-flex;
-  -webkit-align-items: stretch;
-  -webkit-flex-direction: column;
-  /* W3C */
-  display: flex;
-  align-items: stretch;
-  flex-direction: column;
-}
-#guac-menu .content > * {
-  margin: 0;
-  -ms-flex: 0 0 auto;
-  -moz-box-flex: 0;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0 0 auto;
-  flex: 0 0 auto;
-}
-#guac-menu .content > * + * {
-  margin-top: 1em;
-}
-#guac-menu .header h2 {
-  white-space: nowrap;
-  overflow: hidden;
-  width: 100%;
-  text-overflow: ellipsis;
-}
-#guac-menu #mouse-settings .choice {
-  text-align: center;
-}
-#guac-menu #mouse-settings .choice .figure {
-  display: inline-block;
-  vertical-align: middle;
-  width: 75%;
-  max-width: 320px;
-}
-#guac-menu #keyboard-settings .caption {
-  font-size: 0.9em;
-  margin-left: 2em;
-  margin-right: 2em;
-}
-#guac-menu #mouse-settings .figure .caption {
-  text-align: center;
-  font-size: 0.9em;
-}
-#guac-menu #mouse-settings .figure img {
-  display: block;
-  width: 100%;
-  max-width: 320px;
-  margin: 1em auto;
-}
-#guac-menu #keyboard-settings .figure {
-  float: right;
-  max-width: 30%;
-  margin: 1em;
-}
-#guac-menu #keyboard-settings .figure img {
-  width: 100%;
-}
-#guac-menu #zoom-settings {
-  text-align: center;
-}
-.client-zoom .client-zoom-out,
-.client-zoom .client-zoom-in,
-.client-zoom .client-zoom-state {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.client-zoom .client-zoom-out,
-.client-zoom .client-zoom-in {
-  max-width: 3em;
-  border: 1px solid rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2em;
-  margin: 0.5em;
-  cursor: pointer;
-}
-
-.client-zoom .client-zoom-out img,
-.client-zoom .client-zoom-in img {
-  width: 100%;
-  opacity: 0.5;
-}
-
-.client-zoom .client-zoom-out:hover,
-.client-zoom .client-zoom-in:hover {
-  border: 1px solid rgba(0, 0, 0, 1);
-  background: #cda;
-}
-
-.client-zoom .client-zoom-out:hover img,
-.client-zoom .client-zoom-in:hover img {
-  opacity: 1;
-}
-
-.client-zoom .client-zoom-state {
-  font-size: 1.5em;
-}
-
-.client-zoom .client-zoom-autofit {
-  text-align: left;
-  margin-top: 1em;
-}
-
-.client-zoom .client-zoom-state input {
-  width: 2em;
-  font-size: 1em;
-  padding: 0;
-  background: transparent;
-  border-color: rgba(0, 0, 0, 0.125);
-}
-
-.client-zoom .client-zoom-state input::-webkit-inner-spin-button,
-.client-zoom .client-zoom-state input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
+<style lang="css">
+@import "../assets/css/client.css";
 </style>

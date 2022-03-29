@@ -420,6 +420,7 @@ export default defineComponent({
       liteParamArr["drive-name"] = "Z";
       liteParamArr["drive-path"] = "/";
       liteParamArr["enable-drive"] = true;
+      liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
       //liteParamArr["security"] = "rdp";
 
       console.log(liteParamArr);
