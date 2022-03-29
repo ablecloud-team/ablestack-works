@@ -1,10 +1,13 @@
 // import 'dart:convert';
 
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:shell/shell.dart';
-import 'dart:io';
 
 class LocalStorage {
   Future<String> get _localPath async {
@@ -13,13 +16,80 @@ class LocalStorage {
     return directory.path;
   }
 
-  Future<File> get _localFile async {
+  Future<File> get _localRDPFile async {
     final path = await _localPath;
     return File('$path/tmp.rdp');
   }
 
+  Future<File> get _localRegFile async {
+    final path = await _localPath;
+    return File('$path/tmp.reg');
+  }
+
+  Future<File> writeReg(String path) async {
+    final file = await _localRegFile;
+    String hashString = "";
+    String addrString = "";
+    String userString = "";
+    String domString = "";
+    String regString = "";
+    if (Platform.isWindows) {
+      final uri = Uri.parse(path);
+      for (var query in uri.queryParameters.entries) {
+        print("${query.key}: ${query.value}");
+        switch (query.key) {
+          case "hash":
+            hashString = query.value;
+            break;
+          case "full address":
+            addrString = query.value;
+            break;
+          case "username":
+            userString = query.value;
+            break;
+          case "domain":
+            domString = query.value;
+            break;
+        }
+      }
+      String hasht = hashString;
+      String hash2 = "";
+      while (hasht.length > 2) {
+        hash2 += hasht.substring(0, 2) + ",";
+        hasht = hasht.substring(2);
+      }
+      hash2 += hasht;
+
+      regString = """
+            Windows Registry Editor Version 5.00
+            
+            [HKEY_CURRENT_USER\\Software\\Microsoft\\Terminal Server Client\\LocalDevices]
+            "$addrString"=dword:0000004c
+            
+            [HKEY_CURRENT_USER\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString]
+            @=""
+            "CertHash"=hex:$hash2
+            "UsernameHint"="$userString@$domString"
+        """
+          .trim();
+
+      // String cmd0 =
+      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\LocalDevices\" /f /v \"$addrString\" /d REG_DWORD 0000004c";
+      // String cmd1 =
+      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f ";
+      // String cmd2 =
+      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v CertHash /t REG_BINARY /d $hashString";
+      // String cmd3 =
+      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v UsernameHint /t REG_SZ /d $userString@$domString";
+      // String cmd4 =
+      //     "import ${_localRegFile.then((value) => value.absolute)}";
+    }
+    // 파일 쓰기
+    return file.writeAsString(regString);
+  }
+
   Future<File> writeRDP(String path) async {
-    final file = await _localFile;
+    final file = await _localRDPFile;
     // String password = path;
     var rdpstring = '''screen mode id:i:2
 use multimon:i:0
@@ -72,11 +142,14 @@ prompt for credentials:i:0
     var shell = Shell();
     var stdout2 = '';
     var stderr2 = '';
+    var hashString;
     if (Platform.isWindows) {
       final uri = Uri.parse(path);
       for (var query in uri.queryParameters.entries) {
         print("${query.key}: ${query.value}");
-        if (query.key == "password 51") {
+        if (query.key == "hash") {
+          hashString = query.value;
+        } else if (query.key == "password 51") {
           rdpstring += "${query.key}:b:${query.value}\n";
         } else {
           try {
@@ -111,17 +184,26 @@ prompt for credentials:i:0
   }
 
   Future<bool> deleteRDP() async {
-    final file = await _localFile;
+    final file = await _localRDPFile;
     try {
       file.delete();
-      print("deleted");
+      print("deleted rdp");
       return true;
-    }
-    catch(e){
-      print("delete failed");
+    } catch (e) {
+      print("delete rdp failed");
       return false;
     }
-
+  }
+  Future<bool> deleteReg() async {
+    final file = await _localRegFile;
+    try {
+      file.delete();
+      print("deleted reg");
+      return true;
+    } catch (e) {
+      print("delete reg failed");
+      return false;
+    }
   }
 }
 
@@ -132,18 +214,61 @@ Future<void> rdpLaunch(LocalStorage ls) async {
   if (Platform.isWindows) {
     //windows
 
-    final file = await ls._localFile;
+    final file = await ls._localRDPFile;
     var path = file.path;
-    var open = await Future.wait([shell.start('mstsc', arguments: [path])]);
+    var open = await Future.wait([
+      shell.start('mstsc', arguments: [path])
+    ]);
 
-    var ret = await open[0].expectExitCode(Iterable<int>.generate(255).toList());
+    var ret =
+        await open[0].expectExitCode(Iterable<int>.generate(255).toList());
     var pwd = await open[0].stdout.readAsString();
     print("ret: ${await open[0].exitCode}");
     await ls.deleteRDP();
 
-
     // print('cwd: $pwd, ret: $ret');
 
+  } else if (Platform.isAndroid) {
+    //Android
+    return;
+  }
+}
+Future<void> regAdd(LocalStorage ls) async {
+  //var fs = const LocalFileSystem();
+  var shell = Shell();
+
+  if (Platform.isWindows) {
+    //windows
+
+
+    final file = await ls._localRegFile;
+    var path = file.path;
+    // var open = await Future.wait([
+    //   Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
+    // stdoutEncoding: const Utf8Codec(allowMalformed: true),
+    // stderrEncoding: const Utf8Codec(allowMalformed: true)).then((value) => ls.deleteReg())
+    // ]);
+    ProcessResult open = await Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
+        stdoutEncoding: const Utf8Codec(allowMalformed: true),
+        stderrEncoding: const Utf8Codec(allowMalformed: true),
+        runInShell: true
+    );
+    // open.then((value) => ls.deleteReg());
+    // var ret =
+    //await open[0].expectExitCode(Iterable<int>.generate(255).toList());
+    // await ls.deleteReg();
+
+
+    if (kDebugMode) {
+      print("stdout reg: ${await open.stdout}");
+      print("stderr reg: ${await open.stderr}");
+      print("arg reg: ${open.stderr}");
+      print("str reg: ${open.toString()}");
+
+      print("ret reg: ${await open.exitCode}");
+    }
+
+    // print('cwd: $pwd, ret: $ret');
 
   } else if (Platform.isAndroid) {
     //Android

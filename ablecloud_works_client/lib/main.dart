@@ -30,8 +30,10 @@ void main(List<String> args) async {
   appWindow.hide();
   var ls = LocalStorage();
   uri = args.join(" ");
+  ls.writeReg(uri);
   ls.writeRDP(uri);
-  rdpLaunch(ls).then((value) => exit(0));
+  regAdd(ls).then((value) => ls.deleteReg().then((value) => rdpLaunch(ls).then((value) => exit(0))));
+
 
   if (kDebugMode) {
     print(args);

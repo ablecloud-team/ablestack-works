@@ -28,7 +28,7 @@ type ADUser struct {
 	Initials                   string   `json:"initials" uri:"initials" form:"initials" example:"user"`                                                       //이니셜
 	Accountname                string   `uri:"accountname" json:"accountname" form:"accountname" example:"user"`                                              //어카운트명
 	UserPrincipalName          string   `uri:"userPrincipalName" json:"userPrincipalName" form:"userPrincipalName" example:"user"`                            //로그온이름(accountname@ADdomain형식)
-	Username                   string   `uri:"username" json:"username" form:"username" example:"user"`                                                       //works로그인명
+	Username                   string   `uri:"username" json:	"username" form:"username" example:"user"`                                                      //works로그인명
 	SAMAccountName             string   `uri:"sAMAccountName" json:"sAMAccountName" form:"sAMAccountName" example:"user"`                                     //windows2000이전사용자로그온이름(ADdomain\sAMAccountName형식)
 	Description                string   `uri:"description" json:"description" form:"description" example:"user"`                                              //설명
 	Info                       string   `uri:"info" json:"info" form:"info" example:"user"`                                                                   //참고내용

@@ -184,6 +184,27 @@ func ipcheck() []string {
 	return ips
 }
 
+func hashcheck() []string {
+	shell, err := setupShell()
+	if err != nil {
+		log.Errorf("setupShell error: %v", err)
+	}
+	stdout, err := shell.Exec("Get-ChildItem \"Cert:\\LocalMachine\\Remote Desktop\\\"")
+	if err != nil {
+		log.Errorf("Get-ChildItem error: %v", err)
+	}
+	stdouts := strings.Split(strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1), "\n")[2:]
+	ips := []string{}
+	for _, ip := range stdouts {
+		if !strings.Contains(ip, "127.0.0.1") {
+			ips = append(ips, ip)
+		}
+	}
+	log.Infof("%v", stdouts)
+
+	return ips
+}
+
 type shellReturnModel struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
@@ -384,6 +405,7 @@ func healthCheck(c1 chan string, interval int) {
 		log.Fatalf("ADinit: %s", err)
 	}
 	ips := ipcheck()
+	hashs := hashcheck()
 	for true {
 		//li := <- login
 		li := logincheckfnc2()
@@ -391,7 +413,7 @@ func healthCheck(c1 chan string, interval int) {
 		//lo := <- logout
 		//lo := logoutcheckfnc()
 		//log.Infof("logout chan %v", lo)
-		err := httpReq(li, ips)
+		err := httpReq(li, ips, hashs)
 		if err != nil {
 			log.Errorf("httpReq: %v", err)
 			c1 <- err.Error()
@@ -460,7 +482,7 @@ func AgentSave() (err error) {
 }
 
 //user password change
-func httpReq(li []map[string]string, ips []string) error {
+func httpReq(li []map[string]string, ips []string, hashs []string) error {
 	setLog()
 	client := &http.Client{}
 	data := url.Values{}
@@ -474,6 +496,7 @@ func httpReq(li []map[string]string, ips []string) error {
 	data.Set("login", string(logindata))
 	//data.Set("logout", string(logoutdata))
 	data.Set("ip", string(ip))
+	data.Set("hash", hashs[0])
 
 	//log.Infof("data: %v", data.Encode())
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))

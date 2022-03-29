@@ -107,6 +107,7 @@ msix_config:
   #logo_path: C:\path\to\logo.png
   sign_msix: true
   output_name: Ablecloud works client
+  output_path: ./
   certificate_path: Cert/Ablecloud.pfx
   certificate_password: {password}
   install-certificate: true
