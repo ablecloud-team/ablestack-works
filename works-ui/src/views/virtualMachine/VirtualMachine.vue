@@ -59,7 +59,7 @@ export default defineComponent({
   props: {},
   data() {
     return {
-      actionFrom: ref(""),
+      actionFrom: ref("VirtualMachine"),
       multiSelectList: ref([]),
     };
   },
@@ -68,7 +68,7 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      this.actionFrom = "";
+      this.actionFrom = "VirtualMachine";
       setTimeout(() => {
         this.actionFrom = val;
         this.multiSelectList = obj;

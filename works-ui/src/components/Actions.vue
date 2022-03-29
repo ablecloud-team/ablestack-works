@@ -317,9 +317,11 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
+    console.log(this.multiSelectList);
   },
   methods: {
     fetchData() {
+      
       if (this.callComponent.includes("Workspace")) {
         if (this.workspaceInfo) {
           this.eventList = [this.workspaceInfo];
