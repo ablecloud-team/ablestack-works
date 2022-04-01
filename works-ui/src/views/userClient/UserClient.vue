@@ -22,60 +22,76 @@
     :height="120"
     v-model:visible="drawerVisible"
   >
-    <guac-client-setting
+    <user-client-setting
       ref="setting"
       :client="client"
       :display="display"
       :mouse="mouse"
       :keyboard="keyboard"
+      :defaultScale="defaultScale"
       @windowScale="windowScale"
       @inputModeChange="inputModeChange"
       @mouseModeChange="mouseModeChange"
-    ></guac-client-setting>
+    />
   </a-drawer>
   <!-- <div ref="viewport" id="viewport" style="position: relative"> -->
   <div id="display" class="display software-cursor"></div>
-  <div class="client-bottom">
-    <!-- <div id="nestedInputText" class="footer-panel">
-      <a-input v-model:value="inputTextUse" class="target" id="inputTextUse" />
-    </div> -->
-    <!-- <transition name="footer" v-if="inputText"> -->
-    <!-- <div id ="nestedInputText" class="footer-panel">
+  <div v-show="inputText" id="footer" class="footer">
+    <a-row type="flex" justify="center">
+      <a-col flex="1 1 10px">
+        <div class="sent-history">
+          <div class="sent-text">{{ inputTextValff }}</div>
+        </div>
         <a-input
-          v-model:value="inputTextUse"
-          class="target"
-          id="inputTextUse"
+          v-model:value="inputTextVal"
+          id="inputTextTarget"
+          class="input-text-target"
+          @change="inputTextChange()"
         />
-        <a-button danger>Ctrl</a-button>
-        <a-button danger>Alt</a-button>
-        <a-button danger>Esc</a-button>
-        <a-button danger>Tab</a-button>
-      </div> -->
-    <!-- </transition> -->
-    <!-- <transition name="footer" v-if="iuputOsk">
-      <div class="footer-panel">
-        <a-input v-model:value="vbvb" class="target1" />
-      </div>
-    </transition> -->
+      </a-col>
+      <a-col flex="0 1 270px">
+        <a-button
+          id="ctrl"
+          @click="ctrlPressed = !ctrlPressed"
+          class="button-stickey"
+          :style="ctrlPressed ? altCtrlStyle : ''"
+        >
+          Ctrl
+        </a-button>
+        <a-button
+          id="alt"
+          @click="altPressed = !altPressed"
+          class="button-stickey"
+          :style="altPressed ? altCtrlStyle : ''"
+        >
+          Alt
+        </a-button>
+
+        <a-button id="del" @click="sendKeysym(65535)" class="button-stickey">
+          Del
+        </a-button>
+        <a-button id="esc" @click="sendKeysym(65307)" class="button-stickey">
+          Esc
+        </a-button>
+        <a-button id="tab" @click="sendKeysym(65289)" class="button-stickey">
+          Tab
+        </a-button>
+      </a-col>
+    </a-row>
   </div>
   <!-- </div> -->
 
   <div class="modal" v-if="alertShow">
-    <!-- <h2>{{ title[status] }}</h2>
-    <p>{{ message ? message : text[status] }}</p>
-    <span class="rct" @click="$emit('reconnect')" v-if="canReconnect">
-      Reconnect
-    </span> -->
-
     <a-result
       :status="resultStatus"
       :title="title[status]"
       :sub-title="text[status]"
     >
-      <template #extra v-if="resultStatus == 'error'">
-        <a-button v-if="ableReconnect" type="primary" @click="connect()">
-          재접속
-        </a-button>
+      <template #icon v-if="spinner">
+        <LoadingOutlined />
+      </template>
+      <template #extra v-if="ableReconnect">
+        <a-button type="primary" @click="connect()"> 재접속 </a-button>
       </template>
     </a-result>
   </div>
@@ -84,14 +100,13 @@
 
 <script>
 import { ref } from "vue";
-import axios from "axios";
 import Guacamole from "guacamole-common-js";
 import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/lib/encrypt";
 import dis from "@/lib/display";
 import states from "@/lib/states";
-import clipboard from "@/lib/clipboard";
-import GuacClientSetting from "./GuacClientSetting";
+import UserClientSetting from "./UserClientSetting";
+import store from "@/store/index";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
@@ -99,12 +114,14 @@ const hostname =
 const wsUrl = "ws://" + hostname + ":8088/";
 export default {
   components: {
-    GuacClientSetting,
+    UserClientSetting,
   },
   setup() {},
   props: {},
   data() {
     return {
+      html: ref(""),
+      inputTextTarget: ref(null),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       client: ref(null),
       keyboard: ref(null),
@@ -115,9 +132,18 @@ export default {
       errorMessage: ref(""),
       inputText: ref(false),
       inputOsk: ref(false),
-      inputTextUse: ref(""),
+      inputTextVal: ref(""),
+      altPressed: ref(false),
+      ctrlPressed: ref(false),
+      delPressed: ref(false),
+      altCtrlStyle: {
+        backgroundColor: "#40a9ff",
+        color: "white",
+        border: "1px solid #a3d2f8",
+      },
       drawerVisible: ref(false),
       sentText: ref([]),
+      inputTextValff: ref(""),
       arguments: {},
       token: {
         connection: {
@@ -151,70 +177,31 @@ export default {
   },
   created() {},
   mounted() {
-    // this.connectionState = states.CONNECTING;
     this.connect();
   },
   computed: {
     ableReconnect() {
       return ["DISCONNECTED", "CLIENT_ERROR"].includes(this.status);
     },
+    spinner() {
+      return ["CONNECTING", "WAITING"].includes(this.status);
+    },
   },
   watch: {
     connectionState(state) {
       this.alertShow = true;
-      console.log("connectionState ", state);
       this.alertShowHandle(state, this.errorMessage);
     },
-    childScale(val) {
-      //console.log("childScale ::::::::: ", val);
+    childScale(val) {},
+    client(val) {},
+    keyboard(val) {},
+    mouse(val) {},
+    inputText(val) {
+      if (val)
+        this.inputTextTarget = document.getElementById("inputTextTarget");
+      console.log(document.getElementById("inputTextTarget"));
     },
-    client(val) {
-      //console.log("client ::::::::: ", val);
-    },
-    keyboard(val) {
-      //console.log("keyboard ::::::::: ", val);
-    },
-    mouse(val) {
-      //console.log("mouse ::::::::: ", val);
-    },
-    inputTextUse(val) {
-      //console.log("inputTextUse ::::::::: ", val);
-      this.target = document.getElementById("inputTextUse");
-
-      console.log("target.selectionStart", this.target.selectionStart);
-      if (this.composingText) return;
-
-      var i;
-      var content = val;
-      var TEXT_INPUT_PADDING = 4;
-      var expectedLength = TEXT_INPUT_PADDING * 2;
-
-      // If content removed, update
-      if (content.length < 2) {
-        // Calculate number of backspaces and send
-        var backspaceCount = TEXT_INPUT_PADDING - this.target.selectionStart;
-        for (i = 0; i < backspaceCount; i++) this.sendKeysym(0xff08);
-
-        // Calculate number of deletes and send
-        var deleteCount = expectedLength - content.length - backspaceCount;
-        for (i = 0; i < deleteCount; i++) this.sendKeysym(0xffff);
-      } else {
-        this.sendString(content);
-      }
-
-      this.resetTextInputTarget(TEXT_INPUT_PADDING);
-      //e.preventDefault();
-
-      // 한글 입력인경우
-      this.target.addEventListener("compositionstart", (event) => {
-        // console.log(`generated characters were: ${event}`, event);
-        this.composingText = true;
-      });
-      this.target.addEventListener("compositionend", (event) => {
-        console.log("한글 입력 :: ", event);
-        this.composingText = false;
-      });
-    },
+    inputTextVal(val) {},
   },
   methods: {
     connect() {
@@ -274,6 +261,7 @@ export default {
       this.display = this.client.getDisplay();
       this.appEl = document.getElementById("app");
       this.displayEl = document.getElementById("display");
+      this.footerEl = document.getElementById("footer");
 
       if (this.displayEl !== null) this.displayEl.innerHTML = "";
       this.displayEl.appendChild(this.display.getElement());
@@ -335,16 +323,19 @@ export default {
       //   }
       //   e.returnValue = false;
       // });
-
       //데스크탑 마우스 설정
-      this.keyboard = new Guacamole.Keyboard(document);
+      this.sink = new Guacamole.InputSink();
+      this.displayEl.appendChild(this.sink.getElement());
+      this.keyboard = new Guacamole.Keyboard(this.displayEl);
+      this.keyboard.listenTo(this.sink.getElement());
+
       this.keyboard.onkeydown = (keysym) => {
         this.isMenuShortcutPressed(keysym);
         if (this.isMenuShortcutPressed(keysym)) {
           this.keyboard.reset();
           setTimeout(() => {
             this.drawerVisible = true;
-          }, 400);
+          }, 100);
         }
         this.client.sendKeyEvent(1, keysym);
       };
@@ -353,25 +344,15 @@ export default {
       };
 
       this.touch = new Guacamole.Touch(this.displayEl);
-      // console.log(this.touch);
-      // this.touch.onEach(
-      //   ["touchstart', 'touchmove', 'touchend"],
-      //   this.handleTouchEvent
-      // );
-
-      // this.touch.touchstart = (event) => {
-      //   //alert(111);
-      // };
-
       this.touchScreen = new Guacamole.Mouse.Touchscreen(this.displayEl);
-      this.touchScreen.onmousedown = (state) => {
-        // console.log(this.display.getWidth(), this.display.getHeight());
-        // console.log(
-        //   this.appEl.offsetWidth,
-        //   this.appEl.offsetHeight
-        // );
-        //this.resize();
-      };
+      // this.touchScreen.onmousedown = (state) => {
+      //   alert(222);
+      //   // console.log(this.display.getWidth(), this.display.getHeight());
+      //   // console.log(
+      //   //   this.appEl.offsetWidth,
+      //   //   this.appEl.offsetHeight
+      //   // );
+      // };
       this.touchPad = new Guacamole.Mouse.Touchpad(this.displayEl);
 
       this.mouse = new Guacamole.Mouse(this.displayEl);
@@ -380,41 +361,40 @@ export default {
         this.display.showCursor(false);
       };
 
-      this.mouse.on("mousedown", document.body.focus.bind(document.body));
+      //this.mouse.on("mousedown", document.body.focus.bind(document.body));
       this.mouse.onEach(["mousedown", "mousemove", "mouseup"], (event) => {
         if (!this.client || !this.display) return;
-
         event.stopPropagation();
         event.preventDefault();
-
         // Send mouse state, show cursor if necessary
         this.display.showCursor(this.localCursor);
         this.client.sendMouseState(event.state, true);
       });
       this.mouse.onmousedown = (state) => {
+        this.displayEl.focus();
+        if (this.inputTextTarget !== null) this.inputTextTarget.blur();
         // console.log(this.display.getWidth(), this.display.getHeight());
-        // console.log(this.appEl.offsetWidth,this.appEl.offsetHeight);
-        this.resizeWindowEvent();
+        // console.log(this.appEl.offsetWidth, this.appEl.offsetHeight);
+        // this.resizeWindowEvent();
       };
       this.display.onresize = (x, y) => {
-        //console.log("onresize event :::::::: ", x, y);
+        //console.log(this.appEl.offsetWidth, this.appEl.offsetHeight);
+        console.log("Display 리사이즈 하고난 후 사이즈 :::::::: ", x, y);
         //this.client.sendSize(x, y);
         //this.resize();
       };
 
-      this.displayEl.onclick = () => {
-        this.displayEl.focus();
-      };
-      // this.displayEl.onfocus = () => {
-      //   this.displayEl.className = "focus";
-      // };
-      // this.displayEl.onblur = () => {
-      //   this.displayEl.className = "";
-      // };
-
-      window.addEventListener("resize", this.resizeWindowEvent);
-      this.mouseModeChange("touchscreen");
+      window.addEventListener("resize", (e) => {
+        console.log(
+          "window resize 이벤트 발생 후 바로 크기 :::::: ",
+          e.target.innerWidth,
+          e.target.innerHeight
+        );
+        this.resizeWindowEvent();
+      });
       this.inputModeChange("none");
+      this.mouseModeChange("touchscreen");
+      this.setDefaultScale();
     },
     isMenuShortcutPressed(keysym) {
       var SHIFT_KEYS = ["65505", "65506"],
@@ -437,88 +417,79 @@ export default {
 
       if (!MENU_KEYS.includes(keysym.toString())) return false;
 
-      //console.log("::::::::::::::::::::::", Object.keys(this.keyboard.pressed));
+      console.log("::::::::::::::::::::::", Object.keys(this.keyboard.pressed));
       const arr = Object.keys(this.keyboard.pressed);
 
       return !!(
         SHIFT_KEYS.filter((x) => arr.includes(x)).length > 0 &&
-        (ALT_KEYS.filter((x) => arr.includes(x)).length > 0 ||
-          CTRL_KEYS.filter((x) => arr.includes(x)).length > 0)
+        ALT_KEYS.filter((x) => arr.includes(x)).length > 0 &&
+        CTRL_KEYS.filter((x) => arr.includes(x)).length > 0
       );
     },
     inputModeChange(inputMethod) {
       this.drawerVisible = false;
-      // Remove current keyboard
-      if (this.onScreenKeyboard) {
-        this.$refs.display.removeChild(this.onScreenKeyboard.getElement());
-        this.onScreenKeyboard = null;
-      }
-      if (document.getElementById("nestedInputText")) {
-        document.getElementById("nestedInputText").remove();
-      }
 
       if (inputMethod == "none") {
+        // this.inputOsk = false;
         this.inputText = false;
-        this.inputOsk = false;
-      } else if (inputMethod == "text") {
-        this.inputText = true;
-        this.inputOsk = false;
-
-        let div = document.createElement("div");
-        div.id = "nestedInputText";
-        div.className = "target";
-        div.innerHTML =
-          "<a-input v-model:value='inputTextUse' class='target' id='inputTextUse' />" +
-          "<a-button danger>Ctrl</a-button>" +
-          "<a-button danger>Alt</a-button>" +
-          "<a-button danger>Esc</a-button>" +
-          "<a-button danger>Tab</a-button>";
-        this.displayEl.appendChild(div);
-      } else if (inputMethod == "osk") {
-        this.inputOsk = true;
-        this.inputText = false;
-
-        var layout = onScreenKeyboardLayout;
-        this.onScreenKeyboard = new Guacamole.OnScreenKeyboard(layout);
-        //console.log(this.onScreenKeyboard.getElement());
-        this.$refs.display.appendChild(this.onScreenKeyboard.getElement());
-
-        this.onScreenKeyboard.onkeydown = (keysym) => {
+        this.keyboard = new Guacamole.Keyboard(this.displayEl);
+        this.keyboard.onkeydown = (keysym) => {
+          this.isMenuShortcutPressed(keysym);
+          if (this.isMenuShortcutPressed(keysym)) {
+            this.keyboard.reset();
+            setTimeout(() => {
+              this.drawerVisible = true;
+            }, 100);
+          }
           this.client.sendKeyEvent(1, keysym);
         };
-
-        // Broadcast keydown for each key released
-        this.onScreenKeyboard.onkeyup = (keysym) => {
+        this.keyboard.onkeyup = (keysym) => {
           this.client.sendKeyEvent(0, keysym);
         };
+      } else if (inputMethod == "text") {
+        // this.inputOsk = false;
+        this.inputText = true;
       }
-      setTimeout(() => {
-        this.resizeWindowEvent();
-      }, 1000);
+      this.resizeWindowEvent();
+      //  else if (inputMethod == "osk") { 가상키보드 주석처리
+      //   this.inputOsk = true;
+      //   this.inputText = false;
+
+      //   var layout = onScreenKeyboardLayout;
+      //   this.onScreenKeyboard = new Guacamole.OnScreenKeyboard(layout);
+      //   //console.log(this.onScreenKeyboard.getElement());
+      //   this.$refs.display.appendChild(this.onScreenKeyboard.getElement());
+
+      //   this.onScreenKeyboard.onkeydown = (keysym) => {
+      //     this.client.sendKeyEvent(1, keysym);
+      //   };
+
+      //   // Broadcast keydown for each key released
+      //   this.onScreenKeyboard.onkeyup = (keysym) => {
+      //     this.client.sendKeyEvent(0, keysym);
+      //   };
+      // }
     },
     mouseModeChange(absolute) {
       this.drawerVisible = false;
       // this.touch.offEach(
-      //   ["touchstart', 'touchmove', 'touchend"],
+      //   ["touchstart", "touchmove", "touchend"],
       //   this.handleTouchEvent
       // );
-
-      // this.touch.onEach(
-      //   ["touchstart', 'touchmove', 'touchend"],
-      //   this.handleTouchEvent
-      // );
-
       this.touchScreen.offEach(
         ["mousedown", "mousemove", "mouseup"],
         this.handleEmulatedMouseEvent
       );
-
       this.touchPad.offEach(
         ["mousedown", "mousemove", "mouseup"],
         this.handleEmulatedMouseEvent
       );
 
       if (absolute == "touchscreen") {
+        this.touch.onEach(
+          ["touchstart", "touchmove", "touchend"],
+          this.handleTouchEvent
+        );
         this.touchScreen.onEach(
           ["mousedown", "mousemove", "mouseup"],
           this.handleEmulatedMouseEvent
@@ -527,8 +498,13 @@ export default {
         this.touchScreen.mousedown = (event) => {
           // console.log(event);
           //this.resize();
+          this.resizeWindowEvent();
         };
       } else {
+        this.touch.onEach(
+          ["touchstart", "touchmove", "touchend"],
+          this.handleTouchEvent
+        );
         this.touchPad.onEach(
           ["mousedown", "mousemove", "mouseup"],
           this.handleEmulatedMouseEvent
@@ -546,7 +522,6 @@ export default {
       // or display are not yet available
       if (!this.client || !this.display) return;
       event.preventDefault();
-
       // Send touch state, hiding local cursor
       this.display.showCursor(false);
       this.client.sendTouchState(event.state, true);
@@ -598,64 +573,97 @@ export default {
       main.scrollTop += scroll_amount_y;
     },
     resizeWindowEvent() {
-      const pixelDensity = window.devicePixelRatio || 1;
+      // const pixelDensity = window.devicePixelRatio || 1;
+      // const width = this.appEl.offsetWidth * pixelDensity;
+      // const height = this.appEl.offsetHeight * pixelDensity;
 
-      const width = this.appEl.offsetWidth * pixelDensity;
-      const height = this.appEl.offsetHeight * pixelDensity;
-
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      if (this.inputText) height -= 30;
       this.client.sendSize(width, height);
 
-      if (this.onScreenKeyboard) {
-        this.onScreenKeyboard.resize(this.$refs.display.offsetWidth);
+      // if (this.onScreenKeyboard) {
+      //   this.onScreenKeyboard.resize(this.$refs.display.offsetWidth);
+      // }
+    },
+    setDefaultScale() {
+      setTimeout(() => {
+        store.state.client.minScale = Math.min(
+          this.appEl.offsetWidth / Math.max(this.display.getWidth(), 1),
+          this.appEl.offsetHeight / Math.max(this.display.getHeight(), 1)
+        );
+
+        store.state.client.maxScale = Math.max(store.state.client.minScale, 3);
+
+        if (this.display.getScale() > store.state.client.minScale)
+          store.state.client.scale = store.state.client.minScale;
+        else if (this.display.getScale() > store.state.client.maxScale)
+          store.state.client.scale = store.state.client.maxScale;
+
+        // console.log(
+        //   store.state.client.scale,
+        //   store.state.client.minScale,
+        //   store.state.client.maxScale,
+        //   this.display.getScale()
+        // );
+        if (store.state.client.minScale < 1) {
+          this.display.scale(store.state.client.minScale);
+        }
+      }, 2500);
+    },
+    inputTextChange() {
+      if (this.composingText) return;
+
+      var i;
+      var content = this.inputTextVal;
+      var TEXT_INPUT_PADDING = 4;
+      var expectedLength = TEXT_INPUT_PADDING * 2;
+
+      // If content removed, update
+      if (content.length < 2) {
+        // Calculate number of backspaces and send
+        var backspaceCount =
+          TEXT_INPUT_PADDING - this.inputTextTarget.selectionStart;
+
+        for (i = 0; i < backspaceCount; i++) this.sendKeysym(0xff08);
+
+        // Calculate number of deletes and send
+        var deleteCount = expectedLength - content.length - backspaceCount;
+        for (i = 0; i < deleteCount; i++) this.sendKeysym(0xffff);
+      } else {
+        this.sendString(content);
       }
-    },
 
-    // setWindowSize() {
-    //   // console.log("resize ::: this.childScale", this.childScale);
-    //   setTimeout(() => {
-    //     if (this.childScale > 0) {
-    //       console.log(this.childScale, this.display.getScale());
-    //       this.display.scale(this.childScale * 0.01);
-    //       this.windowScale(this.childScale);
-    //     } else {
-    //       const scale = Math.min(
-    //         document.getElementById("viewport").offsetWidth /
-    //           Math.max(this.display.getWidth(), 1),
-    //         document.getElementById("viewport").offsetHeight /
-    //           Math.max(this.display.getHeight(), 1)
-    //       );
+      this.resetTextInputTarget(TEXT_INPUT_PADDING);
+      //e.preventDefault();
 
-    //       this.defaultScale =
-    //         Math.round(scale * 100) > 300 ? 100 : Math.round(scale * 100);
-    //       //console.log(this.defaultScale);
-    //     }
-    //   }, 1000);
-    // },
-    windowScale(curScale, defaultScale) {
-      this.display.scale(curScale * 0.01);
+      // 한글 입력인경우
+      this.inputTextTarget.addEventListener("compositionstart", (event) => {
+        // console.log(`generated characters were: ${event}`, event);
+        this.composingText = true;
+      });
+      this.inputTextTarget.addEventListener("compositionend", (event) => {
+        console.log("한글 입력 :: ", event);
+        this.composingText = false;
+      });
 
-      //확대시 스크롤 생성 및 해제
-      if (curScale > defaultScale) this.appEl.style.overflow = "auto";
-      else this.appEl.style.overflow = "hidden";
-    },
-    sendKeysym(keysym) {
-      // console.log("sendKeysym [keysym] :::::::::", keysym);
-      this.client.sendKeyEvent(1, keysym);
-      this.client.sendKeyEvent(0, keysym);
-      // $rootScope.$broadcast("guacSyntheticKeydown", keysym);
-      // $rootScope.$broadcast("guacSyntheticKeyup", keysym);
+      this.inputTextTarget.onfocus = (e) => {
+        console.log(e);
+        e.preventDefault();
+      };
     },
     sendCodepoint(codepoint) {
+      console.log(codepoint);
       if (codepoint === 10) {
         this.sendKeysym(0xff0d);
-        // this.releaseStickyKeys();
+        this.releaseStickyKeys();
         return;
       }
 
       var keysym = this.keysymFromCodepoint(codepoint);
       if (keysym) {
         this.sendKeysym(keysym);
-        // this.releaseStickyKeys();
+        this.releaseStickyKeys();
       }
     },
     keysymFromCodepoint(codepoint) {
@@ -674,32 +682,56 @@ export default {
     },
     sendString(content) {
       var sentText = "";
-
+      console.log(content);
       // Send each codepoint within the string
       for (var i = 0; i < content.length; i++) {
         var codepoint = content.charCodeAt(i);
         if (codepoint !== 0x200b) {
           sentText += String.fromCharCode(codepoint);
+
           this.sendCodepoint(codepoint);
         }
       }
-
       // // Display the text that was sent
-
       this.sentText.push(sentText);
 
       // // Remove text after one second
       setTimeout(() => {
         this.sentText.shift();
-      }, 1000);
-      // console.log(this.sentText);
+
+        this.inputTextValff = Object.values(this.sentText).join("");
+        console.log(this.sentText, this.inputTextValff);
+      }, 800);
+    },
+    sendCodepoint(codepoint) {
+      if (codepoint === 10) {
+        this.sendKeysym(0xff0d);
+        this.releaseStickyKeys();
+        return;
+      }
+
+      var keysym = this.keysymFromCodepoint(codepoint);
+      if (keysym) {
+        this.sendKeysym(keysym);
+        this.releaseStickyKeys();
+      }
+    },
+    sendKeysym(keysym) {
+      console.log("keysym ::: " + keysym);
+      this.client.sendKeyEvent(1, keysym);
+      this.client.sendKeyEvent(0, keysym);
+    },
+    releaseStickyKeys() {
+      // Reset all sticky keys
+      this.altPressed = false;
+      this.ctrlPressed = false;
     },
     resetTextInputTarget(padding) {
       var TEXT_INPUT_PADDING_CODEPOINT = 0x200b;
       var paddingChar = String.fromCharCode(TEXT_INPUT_PADDING_CODEPOINT);
 
-      this.inputTextUse = new Array(padding * 2 + 1).join(paddingChar);
-      this.target.setSelectionRange(padding, padding);
+      this.inputTextVal = new Array(padding * 2 + 1).join(paddingChar);
+      this.inputTextTarget.setSelectionRange(padding, padding);
     },
     alertShowHandle(state, message) {
       // console.log(state, message);
@@ -760,6 +792,6 @@ export default {
 };
 </script>
 
-<style lang="css">
-@import "../assets/css/client.css";
+<style>
+@import "../../assets/css/client.css";
 </style>
