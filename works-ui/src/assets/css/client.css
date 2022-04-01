@@ -22,6 +22,9 @@
   top: 0;
   z-index: 999;
 } */
+html {
+  overflow: hidden;
+}
 
 .modal {
   position: fixed;
@@ -47,11 +50,11 @@
   text-align: center;
   width: 100%;
 }
-
-.footer-panel {
-  position: relative;
+.footer {
+  overflow: hidden;
+  position: absolute;
   bottom: 0;
-  text-align: center;
+  text-align: left;
   width: 100%;
 }
 .setting-btn {
@@ -59,31 +62,51 @@
   font-size: 1px;
   vertical-align: top;
 }
-
-.client-bottom {
-  position: relative;
-  bottom: 0;
-  -ms-flex: 0 0 auto;
-  -moz-box-flex: 0;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0 0 auto;
-  flex: 0 0 auto;
+.button-stickey {
+  border-radius: 3px;
+  background-color: white;
+  color: black;
+  border: 1px solid #40a9ff;
 }
-.target {
-  border-radius: 0;
+.button-stickey:hover {
+  background-color: #40a9ff; /* Green */
+  color: white;
+  border: 1px solid #40a9ff;
+}
+.input-text-target {
+  width: 100%;
+  border: 2px solid #40a9ff;
+  border-radius: 3px;
   display: inline-block;
   vertical-align: middle;
-  align-items: center;
-  width: 82%;
-  /* background: #222;
-  color: #fff; */
-  font-size: 12pt;
+  font-size: 10pt;
   resize: none;
   outline: none;
   margin: 0;
   padding: 0.25em 0.25em 0.25em 0;
   overflow: hidden;
 }
+
+.sent-history {
+  z-index: 999;
+  position: absolute;
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0.25em;
+  padding-right: 0;
+  /* top: -30px; */
+}
+
+.sent-history .sent-text {
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: pre;
+  font-size: 12pt;
+  animation: fadeout 1s linear;
+  -webkit-animation: fadeout 1s linear;
+  /* opacity: 0; */
+}
+
 /* .slide-enter-active,
   .slide-leave-active {
     transition: transform 0.2s ease;
