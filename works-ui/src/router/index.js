@@ -18,7 +18,7 @@ import VirtualMachine from "../views/virtualMachine/VirtualMachine.vue";
 import VirtualMachineDetail from "../views/virtualMachine/VirtualMachineDetail.vue";
 import Workspace from "../views/workSpace/WorkSpace.vue";
 import WorkspaceDetail from "../views/workSpace/WorkSpaceDetail.vue";
-import GuacClient from "@/components/GuacClient"
+import UserClient from "@/views/userClient/UserClient.vue";
 
 // import Audit from "../views/audit/Audit.vue";
 // import AuditDetail from "../views/audit/AuditDetail.vue";
@@ -29,14 +29,30 @@ import GuacClient from "@/components/GuacClient"
 let menukey = "";
 const adminAuthCheck = (to, from, next) => {
   //console.log("adminAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
-  if (to.name.includes("Dashboard")) { menukey = "1"; }
-  if (to.name.includes("Workspace")) { menukey = "2"; }
-  if (to.name.includes("VirtualMachine")) { menukey = "3"; }
-  if (to.name.includes("Account")) { menukey = "4"; }
-  if (to.name.includes("GroupPolicy")) { menukey = "5"; }
-  if (to.name.includes("Audit")) { menukey = "6"; }
-  if (to.name.includes("Community")) { menukey = "7"; }
-  if (to.name.includes("Configuration")) { menukey = "8"; }
+  if (to.name.includes("Dashboard")) {
+    menukey = "1";
+  }
+  if (to.name.includes("Workspace")) {
+    menukey = "2";
+  }
+  if (to.name.includes("VirtualMachine")) {
+    menukey = "3";
+  }
+  if (to.name.includes("Account")) {
+    menukey = "4";
+  }
+  if (to.name.includes("GroupPolicy")) {
+    menukey = "5";
+  }
+  if (to.name.includes("Audit")) {
+    menukey = "6";
+  }
+  if (to.name.includes("Community")) {
+    menukey = "7";
+  }
+  if (to.name.includes("Configuration")) {
+    menukey = "8";
+  }
   sessionStorage.setItem("menukey", menukey);
 
   tokenCheck(to, from, next, true);
@@ -44,8 +60,15 @@ const adminAuthCheck = (to, from, next) => {
 
 const userAuthCheck = (to, from, next) => {
   //console.log("userAuthCheck  : : : : : " + to.name + " :: " + from.name + " :: " + next);
-  if (to.name.includes("Favorite")) { menukey = "1"; }
-  if (to.name.includes("UserDesktop")) { menukey = "2"; }
+  if (to.name.includes("Favorite")) {
+    menukey = "1";
+  }
+  if (to.name.includes("UserDesktop")) {
+    menukey = "2";
+  }
+  if (to.name.includes("UserClient")) {
+    menukey = "3";
+  }
   sessionStorage.setItem("menukey", menukey);
 
   tokenCheck(to, from, next, false);
@@ -54,7 +77,10 @@ const userAuthCheck = (to, from, next) => {
 const tokenCheck = (to, from, next, isAdmin) => {
   const isToken = sessionStorage.getItem("token");
   if (isToken && isToken !== "") {
-    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
+    if (
+      (to.name === "UserFavorite" || to.name === "Dashboard") &&
+      from.name === "Login"
+    ) {
       goRoute(0, next);
     } else {
       worksApi
@@ -139,11 +165,6 @@ const routes = [
       // }
     ],
   }, // 정의된 routes값 외 path 요청이 올 경우 자동 로그인 페이지로 이동
-  {
-    path: "/client",
-    name: "Client",
-    component: GuacClient,
-  },
   {
     path: "/",
     name: "Root",
@@ -283,6 +304,11 @@ const routes = [
         beforeEnter: userAuthCheck,
       },
     ],
+  },
+  {
+    path: "/client",
+    name: "Client",
+    component: UserClient,
   },
 ];
 
