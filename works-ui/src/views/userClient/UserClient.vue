@@ -126,6 +126,9 @@ export default {
       client: ref(null),
       keyboard: ref(null),
       mouse: ref(null),
+      scrollTop: ref(0),
+      scrollLeft: ref(0),
+      emulateAbsoluteMouse: ref(true),
       localCursor: ref(true),
       scale: ref(0),
       connectionState: ref(states.IDLE),
@@ -136,6 +139,7 @@ export default {
       altPressed: ref(false),
       ctrlPressed: ref(false),
       delPressed: ref(false),
+      dropPending: ref(false),
       altCtrlStyle: {
         backgroundColor: "#40a9ff",
         color: "white",
@@ -194,14 +198,31 @@ export default {
     },
     childScale(val) {},
     client(val) {},
-    keyboard(val) {},
-    mouse(val) {},
+    scrollTop(val) {
+      console.log(val);
+      this.appEl.scrollTop = val;
+    },
+    scrollLeft(val) {
+      console.log(val);
+      this.appEl.scrollLeft = val;
+    },
     inputText(val) {
       if (val)
         this.inputTextTarget = document.getElementById("inputTextTarget");
-      console.log(document.getElementById("inputTextTarget"));
     },
     inputTextVal(val) {},
+    ctrlPressed(val) {
+      if (val) this.keyboard.press(65507);
+      else this.keyboard.release(65507);
+    },
+    altPressed(val) {
+      if (val) this.keyboard.press(65513);
+      else this.keyboard.release(65513);
+    },
+    dropPending(val) {
+      if (val) this.displayEl.classList.add("drop-pending");
+      else this.displayEl.className.remove("drop-pending");
+    },
   },
   methods: {
     connect() {
@@ -257,7 +278,7 @@ export default {
         }
       };
       this.client.onsync = () => {};
-
+      this.display = this.client.getDisplay();
       this.display = this.client.getDisplay();
       this.appEl = document.getElementById("app");
       this.displayEl = document.getElementById("display");
@@ -268,6 +289,7 @@ export default {
 
       //display 현재 창 크기로 적용
       const browerSize = dis();
+      console.log(browerSize[0], browerSize[1], browerSize[2]);
       this.token.connection.settings.width = browerSize[0];
       this.token.connection.settings.height = browerSize[1];
       this.token.connection.settings.dpi = browerSize[2];
@@ -330,7 +352,6 @@ export default {
       this.keyboard.listenTo(this.sink.getElement());
 
       this.keyboard.onkeydown = (keysym) => {
-        this.isMenuShortcutPressed(keysym);
         if (this.isMenuShortcutPressed(keysym)) {
           this.keyboard.reset();
           setTimeout(() => {
@@ -384,40 +405,67 @@ export default {
         //this.resize();
       };
 
+      // this.display.addEventListener("dragenter", (e) => {
+      //   this.notifyDragStart(e);
+      // });
+      // this.display.addEventListener("dragover", (e) => {
+      //   this.notifyDragStart(e);
+      // });
+      // this.display.addEventListener(
+      //   "dragleave",
+      //   (e) => {
+      //     this.notifyDragEnd(e);
+      //   },
+      //   false
+      // );
+
+      // // File drop event handler
+      // this.display.addEventListener("drop", (e) => {
+      //   notifyDragEnd(e);
+
+      //   // Ignore file drops if no attached client
+      //   if (!$scope.client) return;
+
+      //   // Upload each file
+      //   const files = e.dataTransfer.files;
+      //   for (let i = 0; i < files.length; i++)
+      //     ManagedClient.uploadFile(this.client, files[i]);
+      // });
+
       window.addEventListener("resize", (e) => {
-        console.log(
-          "window resize 이벤트 발생 후 바로 크기 :::::: ",
-          e.target.innerWidth,
-          e.target.innerHeight
-        );
+        // console.log(
+        //   "window resize 이벤트 발생 후 바로 크기 :::::: ",
+        //   e.target.innerWidth,
+        //   e.target.innerHeight
+        // );
         this.resizeWindowEvent();
       });
       this.inputModeChange("none");
-      this.mouseModeChange("touchscreen");
+      this.mouseModeChange(this.emulateAbsoluteMouse);
       this.setDefaultScale();
     },
     isMenuShortcutPressed(keysym) {
-      var SHIFT_KEYS = ["65505", "65506"],
-        ALT_KEYS = ["65513", "65514", "65027", "65511", "65512"],
-        CTRL_KEYS = ["65507", "65508"],
-        //F12 = ["65481"],
-        MENU_KEYS = [
-          "65505",
-          "65506",
-          "65507",
-          "65508",
-          "65511",
-          "65512",
-          "65513",
-          "65514",
-          //"65481",
-        ];
+      //console.log("isMenuShortcutPressed", keysym);
+      const SHIFT_KEYS = ["65505", "65506"];
+      const ALT_KEYS = ["65513", "65514", "65027", "65511", "65512"];
+      const CTRL_KEYS = ["65507", "65508"];
+      //F12 = ["65481"],
+      const MENU_KEYS = [
+        "65505",
+        "65506",
+        "65507",
+        "65508",
+        "65511",
+        "65512",
+        "65513",
+        "65514",
+        //"65481",
+      ];
       // Ctrl+Alt+Shift has NOT been pressed if any key is currently held
       // down that isn't Ctrl, Alt, or Shift
-
       if (!MENU_KEYS.includes(keysym.toString())) return false;
 
-      console.log("::::::::::::::::::::::", Object.keys(this.keyboard.pressed));
+      //console.log("::::::::::::::::::::::", Object.keys(this.keyboard.pressed));
       const arr = Object.keys(this.keyboard.pressed);
 
       return !!(
@@ -432,20 +480,6 @@ export default {
       if (inputMethod == "none") {
         // this.inputOsk = false;
         this.inputText = false;
-        this.keyboard = new Guacamole.Keyboard(this.displayEl);
-        this.keyboard.onkeydown = (keysym) => {
-          this.isMenuShortcutPressed(keysym);
-          if (this.isMenuShortcutPressed(keysym)) {
-            this.keyboard.reset();
-            setTimeout(() => {
-              this.drawerVisible = true;
-            }, 100);
-          }
-          this.client.sendKeyEvent(1, keysym);
-        };
-        this.keyboard.onkeyup = (keysym) => {
-          this.client.sendKeyEvent(0, keysym);
-        };
       } else if (inputMethod == "text") {
         // this.inputOsk = false;
         this.inputText = true;
@@ -470,7 +504,8 @@ export default {
       //   };
       // }
     },
-    mouseModeChange(absolute) {
+    mouseModeChange(emulateAbsoluteMouse) {
+      this.emulateAbsoluteMouse = emulateAbsoluteMouse;
       this.drawerVisible = false;
       // this.touch.offEach(
       //   ["touchstart", "touchmove", "touchend"],
@@ -485,26 +520,95 @@ export default {
         this.handleEmulatedMouseEvent
       );
 
-      if (absolute == "touchscreen") {
-        this.touch.onEach(
-          ["touchstart", "touchmove", "touchend"],
-          this.handleTouchEvent
-        );
+      if (emulateAbsoluteMouse) {
+        // this.touch.onEach(
+        //   ["touchstart", "touchmove", "touchend"],
+        //   this.handleTouchEvent
+        // );
         this.touchScreen.onEach(
           ["mousedown", "mousemove", "mouseup"],
           this.handleEmulatedMouseEvent
         );
-        // console.log(this.touchScreen);
+
         this.touchScreen.mousedown = (event) => {
-          // console.log(event);
-          //this.resize();
+          console.log(event);
+
           this.resizeWindowEvent();
         };
-      } else {
-        this.touch.onEach(
-          ["touchstart", "touchmove", "touchend"],
-          this.handleTouchEvent
+
+        var inProgress = false;
+        var startX = null;
+        var startY = null;
+        var currentX = null;
+        var currentY = null;
+        var deltaX = 0;
+        var deltaY = 0;
+        this.displayEl.addEventListener(
+          "touchmove",
+          (e) => {
+            console.log(e);
+            if (e.touches.length === 1) {
+              // Get touch location
+              var x = e.touches[0].clientX;
+              var y = e.touches[0].clientY;
+
+              console.log(x, y);
+
+              // Init start location and deltas if gesture is starting
+              if (!startX || !startY) {
+                startX = currentX = x;
+                startY = currentY = y;
+                deltaX = 0;
+                deltaY = 0;
+                inProgress = true;
+              }
+
+              // Update deltas if gesture is in progress
+              else if (inProgress) {
+                deltaX = x - currentX;
+                deltaY = y - currentY;
+                currentX = x;
+                currentY = y;
+              }
+
+              // Signal start/change in drag gesture
+              if (inProgress) {
+                this.scrollLeft -= deltaX;
+                this.scrollTop -= deltaY;
+                e.preventDefault();
+              }
+            }
+          },
+          false
         );
+
+        // Reset monitoring and fire end event when done
+        this.displayEl.addEventListener(
+          "touchend",
+          (e) => {
+            console.log(e);
+            if (startX && startY && e.touches.length === 0) {
+              // Signal end of drag gesture
+              if (inProgress) {
+                this.scrollLeft -= deltaX;
+                this.scrollTop -= deltaY;
+                e.preventDefault();
+              }
+
+              startX = currentX = null;
+              startY = currentY = null;
+              deltaX = 0;
+              deltaY = 0;
+              inProgress = false;
+            }
+          },
+          false
+        );
+      } else {
+        // this.touch.onEach(
+        //   ["touchstart", "touchmove", "touchend"],
+        //   this.handleTouchEvent
+        // );
         this.touchPad.onEach(
           ["mousedown", "mousemove", "mouseup"],
           this.handleEmulatedMouseEvent
@@ -512,8 +616,140 @@ export default {
         // console.log(this.touchPad);
         this.touchPad.mousedown = (event) => {
           // console.log(event);
-          //this.resize();
         };
+
+        // var guacTouchPinch = $scope.$eval($attrs.guacTouchPinch);
+        // var element = $element[0];
+        // var startLength = null;
+        // var currentLength = null;
+        // var centerX = 0;
+        // var centerY = 0;
+
+        // var pinchDistance = (e) => {
+        //   var touchA = e.touches[0];
+        //   var touchB = e.touches[1];
+
+        //   var deltaX = touchA.clientX - touchB.clientX;
+        //   var deltaY = touchA.clientY - touchB.clientY;
+
+        //   return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        // };
+
+        // var pinchCenterX = (e) => {
+        //   var touchA = e.touches[0];
+        //   var touchB = e.touches[1];
+
+        //   return (touchA.clientX + touchB.clientX) / 2;
+        // };
+
+        // var pinchCenterY = (e) => {
+        //   var touchA = e.touches[0];
+        //   var touchB = e.touches[1];
+
+        //   return (touchA.clientY + touchB.clientY) / 2;
+        // };
+        // var clientPinch = (
+        //   inProgress,
+        //   startLength,
+        //   currentLength,
+        //   centerX,
+        //   centerY
+        // ) => {
+        //   let initialScale = null;
+        //   let initialCenterX = 0;
+        //   let initialCenterY = 0;
+
+        //   if (!this.emulateAbsoluteMouse) return false;
+
+        //   // Stop gesture if not in progress
+        //   if (!inProgress) {
+        //     initialScale = null;
+        //     return false;
+        //   }
+
+        //   // Set initial scale if gesture has just started
+        //   if (!initialScale) {
+        //     initialScale = store.state.client.scale;
+        //     initialCenterX = (centerX + this.scrollLeft) / initialScale;
+        //     initialCenterY = (centerY + this.scrollTop) / initialScale;
+        //   }
+
+        //   // Determine new scale absolutely
+        //   let currentScale = (initialScale * currentLength) / startLength;
+
+        //   // Fix scale within limits - scroll will be miscalculated otherwise
+        //   currentScale = Math.max(
+        //     currentScale,
+        //     $scope.client.clientProperties.minScale
+        //   );
+        //   currentScale = Math.min(
+        //     currentScale,
+        //     $scope.client.clientProperties.maxScale
+        //   );
+
+        //   store.state.client.scale = currentScale;
+
+        //   // Scroll display to keep original pinch location centered within current pinch
+        //   $scope.client.clientProperties.scrollLeft =
+        //     initialCenterX * currentScale - centerX;
+        //   $scope.client.clientProperties.scrollTop =
+        //     initialCenterY * currentScale - centerY;
+
+        //   return false;
+        // };
+        // element.addEventListener("touchmove", (e) => {
+        //   if (e.touches.length === 2) {
+        //     // Calculate current zoom level
+        //     currentLength = pinchDistance(e);
+
+        //     // Calculate center
+        //     centerX = pinchCenterX(e);
+        //     centerY = pinchCenterY(e);
+
+        //     // Init start length if pinch is not in progress
+        //     if (!startLength) startLength = currentLength;
+
+        //     // Notify of pinch status
+
+        //     if (
+        //       clientPinch(
+        //         true,
+        //         startLength,
+        //         currentLength,
+        //         centerX,
+        //         centerY
+        //       ) === false
+        //     )
+        //       e.preventDefault();
+        //   }
+        // });
+
+        // // Reset monitoring and fire end event when done
+        // element.addEventListener(
+        //   "touchend",
+        //   function pinchTouchEnd(e) {
+        //     if (startLength && e.touches.length < 2) {
+        //       // Notify of pinch end
+        //       if (guacTouchPinch) {
+        //         $scope.$apply(function pinchComplete() {
+        //           if (
+        //             guacTouchPinch(
+        //               false,
+        //               startLength,
+        //               currentLength,
+        //               centerX,
+        //               centerY
+        //             ) === false
+        //           )
+        //             e.preventDefault();
+        //         });
+        //       }
+
+        //       startLength = null;
+        //     }
+        //   },
+        //   false
+        // );
       }
     },
     handleTouchEvent(event) {
@@ -573,13 +809,13 @@ export default {
       main.scrollTop += scroll_amount_y;
     },
     resizeWindowEvent() {
-      // const pixelDensity = window.devicePixelRatio || 1;
+      const pixelDensity = window.devicePixelRatio || 1;
       // const width = this.appEl.offsetWidth * pixelDensity;
       // const height = this.appEl.offsetHeight * pixelDensity;
 
-      let width = window.innerWidth;
-      let height = window.innerHeight;
-      if (this.inputText) height -= 30;
+      let width = window.innerWidth * pixelDensity;
+      let height = window.innerHeight * pixelDensity;
+      if (this.inputText) height -= 32 * window.devicePixelRatio;
       this.client.sendSize(width, height);
 
       // if (this.onScreenKeyboard) {
@@ -592,24 +828,28 @@ export default {
           this.appEl.offsetWidth / Math.max(this.display.getWidth(), 1),
           this.appEl.offsetHeight / Math.max(this.display.getHeight(), 1)
         );
+        if (store.state.client.minScale < 1) {
+          console.log(window.innerWidth);
+
+          this.display.scale(store.state.client.minScale);
+          this.client.sendSize(window.innerWidth, window.innerHeight);
+        }
 
         store.state.client.maxScale = Math.max(store.state.client.minScale, 3);
-
         if (this.display.getScale() > store.state.client.minScale)
           store.state.client.scale = store.state.client.minScale;
         else if (this.display.getScale() > store.state.client.maxScale)
           store.state.client.scale = store.state.client.maxScale;
+        else store.state.client.scale = store.state.client.minScale;
 
         // console.log(
-        //   store.state.client.scale,
+        //   this.display.getScale(),
         //   store.state.client.minScale,
+        //   "  :::::::::: ",
         //   store.state.client.maxScale,
-        //   this.display.getScale()
+        //   store.state.client.scale
         // );
-        if (store.state.client.minScale < 1) {
-          this.display.scale(store.state.client.minScale);
-        }
-      }, 2500);
+      }, 2000);
     },
     inputTextChange() {
       if (this.composingText) return;
@@ -648,7 +888,6 @@ export default {
       });
 
       this.inputTextTarget.onfocus = (e) => {
-        console.log(e);
         e.preventDefault();
       };
     },
@@ -656,14 +895,12 @@ export default {
       console.log(codepoint);
       if (codepoint === 10) {
         this.sendKeysym(0xff0d);
-        this.releaseStickyKeys();
         return;
       }
 
       var keysym = this.keysymFromCodepoint(codepoint);
       if (keysym) {
         this.sendKeysym(keysym);
-        this.releaseStickyKeys();
       }
     },
     keysymFromCodepoint(codepoint) {
@@ -718,6 +955,7 @@ export default {
     },
     sendKeysym(keysym) {
       console.log("keysym ::: " + keysym);
+      this.releaseStickyKeys();
       this.client.sendKeyEvent(1, keysym);
       this.client.sendKeyEvent(0, keysym);
     },
@@ -762,6 +1000,37 @@ export default {
           this.resultStatus = "error";
           break;
       }
+    },
+    uploadFile(managedClient, file, filesystem, directory) {
+      // Use generic Guacamole file streams by default
+      var object = null;
+      var streamName = null;
+
+      // If a filesystem is given, determine the destination object and stream
+      if (filesystem) {
+        object = filesystem.object;
+        streamName =
+          (directory || filesystem.currentDirectory).streamName +
+          "/" +
+          file.name;
+      }
+
+      // Start and manage file upload
+      managedClient.uploads.push(
+        ManagedFileUpload.getInstance(managedClient, file, object, streamName)
+      );
+    },
+
+    notifyDragStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.dropPending = true;
+    },
+    notifyDragEnd(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.dropPending = false;
     },
     // send(cmd) {
     //   if (!this.client) {

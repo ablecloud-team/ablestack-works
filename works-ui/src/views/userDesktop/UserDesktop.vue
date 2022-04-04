@@ -410,10 +410,10 @@ export default defineComponent({
       liteParamArr["port"] = 3389;
       liteParamArr["username"] = sessionStorage.getItem("userName");
       liteParamArr["domain"] = sessionStorage.getItem("domainName");
-      liteParamArr["enable-wallpaper"] = true;
-      liteParamArr["enable-font-smoothing"] = true;
-      liteParamArr["enable-theming"] = true;
-      liteParamArr["enable-menu-animations"] = true;
+      liteParamArr["enable-wallpaper"] = false;
+      liteParamArr["enable-font-smoothing"] = false;
+      liteParamArr["enable-theming"] = false;
+      liteParamArr["enable-menu-animations"] = false;
       liteParamArr["resize-method"] = "display-update";
       liteParamArr["disable-upload"] = false;
       liteParamArr["create-drive-path"] = true;
