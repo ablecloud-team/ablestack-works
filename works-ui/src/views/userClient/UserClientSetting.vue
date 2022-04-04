@@ -46,13 +46,13 @@
           placement="bottom"
           title="탭하여 클릭합니다. 클릭은 터치 위치에서 발생합니다."
         >
-          <a-radio-button :value="'touchscreen'">터치 스크린</a-radio-button>
+          <a-radio-button :value="true">터치 스크린</a-radio-button>
         </a-tooltip>
         <a-tooltip
           placement="bottom"
           title="드래그하여 마우스 포인터를 움직이고 탭하여 클릭합니다. 클릭은 마우스 포인터 위치에서 발생합니다."
         >
-          <a-radio-button :value="'touchpad'">터치 패드</a-radio-button>
+          <a-radio-button :value="false">터치 패드</a-radio-button>
         </a-tooltip>
       </a-radio-group>
     </a-col>
@@ -113,7 +113,7 @@ export default {
       mouse: ref(props.mouse),
       keyboard: ref(props.keyboard),
       setText: ref("none"),
-      setMouse: ref("touchscreen"),
+      setMouse: ref(true),
       scale: ref(store.state.client.scale * 100),
     };
   },
