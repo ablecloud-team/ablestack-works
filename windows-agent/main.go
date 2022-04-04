@@ -189,20 +189,29 @@ func hashcheck() []string {
 	if err != nil {
 		log.Errorf("setupShell error: %v", err)
 	}
-	stdout, err := shell.Exec("Get-ChildItem \"Cert:\\LocalMachine\\Remote Desktop\\\"")
+	stdout, err := shell.Exec("hostname")
+	if err != nil {
+		log.Errorf("hostname error: %v", err)
+	}
+	hostname1 := strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1)
+
+	hostname2, _ := os.Hostname()
+	log.Infof("hostname: %v, %v", hostname1, hostname2)
+	stdout, err = shell.Exec("Get-ChildItem \"Cert:\\LocalMachine\\Remote Desktop\\\"")
 	if err != nil {
 		log.Errorf("Get-ChildItem error: %v", err)
 	}
-	stdouts := strings.Split(strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1), "\n")[2:]
-	ips := []string{}
-	for _, ip := range stdouts {
-		if !strings.Contains(ip, "127.0.0.1") {
-			ips = append(ips, ip)
+	stdouts := strings.Split(strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1), "\n")[4:]
+	log.Infof("cert output: %v", stdouts)
+	var hashes []string
+	for _, hash := range stdouts {
+		if strings.Contains(hash, hostname2) {
+			hashes = append(hashes, strings.Split(hash, " ")[0])
 		}
 	}
 	log.Infof("%v", stdouts)
 
-	return ips
+	return hashes
 }
 
 type shellReturnModel struct {
@@ -417,7 +426,7 @@ func healthCheck(c1 chan string, interval int) {
 		if err != nil {
 			log.Errorf("httpReq: %v", err)
 			c1 <- err.Error()
-			return
+			//return
 		}
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
@@ -498,8 +507,10 @@ func httpReq(li []map[string]string, ips []string, hashs []string) error {
 	data.Set("ip", string(ip))
 	data.Set("hash", hashs[0])
 
-	//log.Infof("data: %v", data.Encode())
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))
+	dataEncoded := strings.NewReader(data.Encode())
+	log.Infof("data: %v", dataEncoded)
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), dataEncoded)
 	if err != nil {
 		panic(err)
 	}
