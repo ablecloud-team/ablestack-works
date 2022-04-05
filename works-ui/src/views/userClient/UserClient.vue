@@ -5,7 +5,7 @@
         class="setting-btn"
         @click="
           (e) => {
-            drawerVisible = true;
+            drawerShow = true;
           }
         "
       >
@@ -20,7 +20,7 @@
     placement="top"
     :closable="true"
     :height="120"
-    v-model:visible="drawerVisible"
+    v-model:visible="drawerShow"
   >
     <user-client-setting
       ref="setting"
@@ -40,11 +40,15 @@
     <a-row type="flex" justify="center">
       <a-col flex="1 1 10px">
         <div class="sent-history">
-          <div class="sent-text">{{ inputTextValff }}</div>
+          <div class="sent-text">{{ inputTextValDisplay }}</div>
         </div>
-        <a-input
+        <a-textarea
           v-model:value="inputTextVal"
           id="inputTextTarget"
+          autocorrect="off"
+          autocapitalize="off"
+          autofocus
+          :rows="1"
           class="input-text-target"
           @change="inputTextChange()"
         />
@@ -85,7 +89,7 @@
     <a-result
       :status="resultStatus"
       :title="title[status]"
-      :sub-title="text[status]"
+      :sub-title="text[status] || errorMessage"
     >
       <template #icon v-if="spinner">
         <LoadingOutlined />
@@ -101,7 +105,7 @@
 <script>
 import { ref } from "vue";
 import Guacamole from "guacamole-common-js";
-import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
+// import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/lib/encrypt";
 import dis from "@/lib/display";
 import states from "@/lib/states";
@@ -121,7 +125,7 @@ export default {
   data() {
     return {
       html: ref(""),
-      inputTextTarget: ref(null),
+
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       client: ref(null),
       keyboard: ref(null),
@@ -135,7 +139,7 @@ export default {
       errorMessage: ref(""),
       inputText: ref(false),
       inputOsk: ref(false),
-      inputTextVal: ref(""),
+      inputTextVal: ref("         "),
       altPressed: ref(false),
       ctrlPressed: ref(false),
       delPressed: ref(false),
@@ -145,9 +149,9 @@ export default {
         color: "white",
         border: "1px solid #a3d2f8",
       },
-      drawerVisible: ref(false),
+      drawerShow: ref(false),
       sentText: ref([]),
-      inputTextValff: ref(""),
+      inputTextValDisplay: ref(""),
       arguments: {},
       token: {
         connection: {
@@ -199,16 +203,17 @@ export default {
     childScale(val) {},
     client(val) {},
     scrollTop(val) {
-      console.log(val);
+      // console.log(val);
       this.appEl.scrollTop = val;
     },
     scrollLeft(val) {
-      console.log(val);
+      // console.log(val);
       this.appEl.scrollLeft = val;
     },
     inputText(val) {
       if (val)
         this.inputTextTarget = document.getElementById("inputTextTarget");
+      console.log(this.inputTextTarget);
     },
     inputTextVal(val) {},
     ctrlPressed(val) {
@@ -289,7 +294,6 @@ export default {
 
       //display 현재 창 크기로 적용
       const browerSize = dis();
-      console.log(browerSize[0], browerSize[1], browerSize[2]);
       this.token.connection.settings.width = browerSize[0];
       this.token.connection.settings.height = browerSize[1];
       this.token.connection.settings.dpi = browerSize[2];
@@ -355,7 +359,7 @@ export default {
         if (this.isMenuShortcutPressed(keysym)) {
           this.keyboard.reset();
           setTimeout(() => {
-            this.drawerVisible = true;
+            this.drawerShow = true;
           }, 100);
         }
         this.client.sendKeyEvent(1, keysym);
@@ -400,7 +404,7 @@ export default {
       };
       this.display.onresize = (x, y) => {
         //console.log(this.appEl.offsetWidth, this.appEl.offsetHeight);
-        console.log("Display 리사이즈 하고난 후 사이즈 :::::::: ", x, y);
+        // console.log("Display 리사이즈 하고난 후 사이즈 :::::::: ", x, y);
         //this.client.sendSize(x, y);
         //this.resize();
       };
@@ -475,7 +479,7 @@ export default {
       );
     },
     inputModeChange(inputMethod) {
-      this.drawerVisible = false;
+      this.drawerShow = false;
 
       if (inputMethod == "none") {
         // this.inputOsk = false;
@@ -506,7 +510,7 @@ export default {
     },
     mouseModeChange(emulateAbsoluteMouse) {
       this.emulateAbsoluteMouse = emulateAbsoluteMouse;
-      this.drawerVisible = false;
+      this.drawerShow = false;
       // this.touch.offEach(
       //   ["touchstart", "touchmove", "touchend"],
       //   this.handleTouchEvent
@@ -531,8 +535,7 @@ export default {
         );
 
         this.touchScreen.mousedown = (event) => {
-          console.log(event);
-
+          // console.log(event);
           this.resizeWindowEvent();
         };
 
@@ -546,13 +549,10 @@ export default {
         this.displayEl.addEventListener(
           "touchmove",
           (e) => {
-            console.log(e);
             if (e.touches.length === 1) {
               // Get touch location
               var x = e.touches[0].clientX;
               var y = e.touches[0].clientY;
-
-              console.log(x, y);
 
               // Init start location and deltas if gesture is starting
               if (!startX || !startY) {
@@ -586,7 +586,6 @@ export default {
         this.displayEl.addEventListener(
           "touchend",
           (e) => {
-            console.log(e);
             if (startX && startY && e.touches.length === 0) {
               // Signal end of drag gesture
               if (inProgress) {
@@ -829,7 +828,7 @@ export default {
           this.appEl.offsetHeight / Math.max(this.display.getHeight(), 1)
         );
         if (store.state.client.minScale < 1) {
-          console.log(window.innerWidth);
+          // console.log(window.innerWidth);
 
           this.display.scale(store.state.client.minScale);
           this.client.sendSize(window.innerWidth, window.innerHeight);
@@ -859,12 +858,14 @@ export default {
       var TEXT_INPUT_PADDING = 4;
       var expectedLength = TEXT_INPUT_PADDING * 2;
 
+      // console.log(
+      //   "content :: " + content,
+      //   "content.length :: " + content.length
+      // );
       // If content removed, update
-      if (content.length < 2) {
+      if (content.length > 7 && content.length < expectedLength) {
         // Calculate number of backspaces and send
-        var backspaceCount =
-          TEXT_INPUT_PADDING - this.inputTextTarget.selectionStart;
-
+        var backspaceCount = TEXT_INPUT_PADDING - 3;
         for (i = 0; i < backspaceCount; i++) this.sendKeysym(0xff08);
 
         // Calculate number of deletes and send
@@ -883,7 +884,7 @@ export default {
         this.composingText = true;
       });
       this.inputTextTarget.addEventListener("compositionend", (event) => {
-        console.log("한글 입력 :: ", event);
+        // console.log("한글 입력 :: ", event);
         this.composingText = false;
       });
 
@@ -892,7 +893,6 @@ export default {
       };
     },
     sendCodepoint(codepoint) {
-      console.log(codepoint);
       if (codepoint === 10) {
         this.sendKeysym(0xff0d);
         return;
@@ -919,13 +919,11 @@ export default {
     },
     sendString(content) {
       var sentText = "";
-      console.log(content);
       // Send each codepoint within the string
       for (var i = 0; i < content.length; i++) {
         var codepoint = content.charCodeAt(i);
         if (codepoint !== 0x200b) {
           sentText += String.fromCharCode(codepoint);
-
           this.sendCodepoint(codepoint);
         }
       }
@@ -933,12 +931,15 @@ export default {
       this.sentText.push(sentText);
 
       // // Remove text after one second
+      this.inputTextValDisplay = Object.values(this.sentText).join(""); //시간차때문 먼저 입력필요
       setTimeout(() => {
         this.sentText.shift();
-
-        this.inputTextValff = Object.values(this.sentText).join("");
-        console.log(this.sentText, this.inputTextValff);
-      }, 800);
+        this.inputTextValDisplay = Object.values(this.sentText).join("");
+        // console.log(
+        //   "this.sentText :: " + this.sentText,
+        //   "this.inputTextValDisplay :: " + this.inputTextValDisplay
+        // );
+      }, 1000);
     },
     sendCodepoint(codepoint) {
       if (codepoint === 10) {
@@ -954,7 +955,7 @@ export default {
       }
     },
     sendKeysym(keysym) {
-      console.log("keysym ::: " + keysym);
+      // console.log("keysym ::: " + keysym);
       this.releaseStickyKeys();
       this.client.sendKeyEvent(1, keysym);
       this.client.sendKeyEvent(0, keysym);
@@ -965,16 +966,14 @@ export default {
       this.ctrlPressed = false;
     },
     resetTextInputTarget(padding) {
-      var TEXT_INPUT_PADDING_CODEPOINT = 0x200b;
-      var paddingChar = String.fromCharCode(TEXT_INPUT_PADDING_CODEPOINT);
-
+      var paddingChar = String.fromCharCode(0x200b);
       this.inputTextVal = new Array(padding * 2 + 1).join(paddingChar);
+      this.inputTextTarget.focus();
       this.inputTextTarget.setSelectionRange(padding, padding);
     },
     alertShowHandle(state, message) {
       // console.log(state, message);
       this.status = state;
-
       switch (state) {
         case states.CONNECTING:
           this.resultStatus = "info";

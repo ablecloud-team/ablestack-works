@@ -25,6 +25,13 @@
 html {
   overflow: hidden;
 }
+.drop-pending {
+  background: #3161a9;
+}
+
+.drop-pending > *{
+  opacity: 0.5;
+}
 
 .modal {
   position: fixed;
