@@ -139,7 +139,7 @@ export default {
       errorMessage: ref(""),
       inputText: ref(false),
       inputOsk: ref(false),
-      inputTextVal: ref("         "),
+      inputTextVal: ref(""),
       altPressed: ref(false),
       ctrlPressed: ref(false),
       delPressed: ref(false),
@@ -200,22 +200,16 @@ export default {
       this.alertShow = true;
       this.alertShowHandle(state, this.errorMessage);
     },
-    childScale(val) {},
-    client(val) {},
     scrollTop(val) {
-      // console.log(val);
       this.appEl.scrollTop = val;
     },
     scrollLeft(val) {
-      // console.log(val);
       this.appEl.scrollLeft = val;
     },
     inputText(val) {
       if (val)
         this.inputTextTarget = document.getElementById("inputTextTarget");
-      console.log(this.inputTextTarget);
     },
-    inputTextVal(val) {},
     ctrlPressed(val) {
       if (val) this.keyboard.press(65507);
       else this.keyboard.release(65507);
@@ -395,9 +389,9 @@ export default {
         this.display.showCursor(this.localCursor);
         this.client.sendMouseState(event.state, true);
       });
-      this.mouse.onmousedown = (state) => {
+      this.mouse.onmousedown = (e) => {
         this.displayEl.focus();
-        if (this.inputTextTarget !== null) this.inputTextTarget.blur();
+        if (this.inputTextTarget !== undefined) this.inputTextTarget.blur();
         // console.log(this.display.getWidth(), this.display.getHeight());
         // console.log(this.appEl.offsetWidth, this.appEl.offsetHeight);
         // this.resizeWindowEvent();
@@ -858,12 +852,8 @@ export default {
       var TEXT_INPUT_PADDING = 4;
       var expectedLength = TEXT_INPUT_PADDING * 2;
 
-      // console.log(
-      //   "content :: " + content,
-      //   "content.length :: " + content.length
-      // );
       // If content removed, update
-      if (content.length > 7 && content.length < expectedLength) {
+      if (content.length > 1 && content.length < expectedLength) {
         // Calculate number of backspaces and send
         var backspaceCount = TEXT_INPUT_PADDING - 3;
         for (i = 0; i < backspaceCount; i++) this.sendKeysym(0xff08);
