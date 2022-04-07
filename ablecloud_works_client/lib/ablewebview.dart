@@ -40,7 +40,6 @@ class ExampleBrowser extends StatefulWidget {
 
 class _ExampleBrowser extends State<ExampleBrowser> {
   final _controller = WebviewController();
-  final _textController = TextEditingController();
   bool _isWebviewSuspended = true;
 
   @override

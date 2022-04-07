@@ -3,7 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -36,7 +36,9 @@ class LocalStorage {
     if (Platform.isWindows) {
       final uri = Uri.parse(path);
       for (var query in uri.queryParameters.entries) {
-        print("${query.key}: ${query.value}");
+        if (kDebugMode) {
+          print("${query.key}: ${query.value}");
+        }
         switch (query.key) {
           case "hash":
             hashString = query.value;
@@ -59,8 +61,8 @@ class LocalStorage {
         hasht = hasht.substring(2);
       }
       hash2 += hasht;
-
-      regString = """
+      if(uri.queryParameters.containsKey("hash")) {
+        regString = """
             Windows Registry Editor Version 5.00
             
             [HKEY_CURRENT_USER\\Software\\Microsoft\\Terminal Server Client\\LocalDevices]
@@ -71,8 +73,8 @@ class LocalStorage {
             "CertHash"=hex:$hash2
             "UsernameHint"="$userString@$domString"
         """
-          .trim();
-
+            .trim();
+      }
       // String cmd0 =
       //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\LocalDevices\" /f /v \"$addrString\" /d REG_DWORD 0000004c";
       // String cmd1 =
@@ -139,26 +141,26 @@ rdgiskdcproxy:i:0
 kdcproxyname:s:
 prompt for credentials:i:0
 ''';
-    var shell = Shell();
-    var stdout2 = '';
-    var stderr2 = '';
-    var hashString;
     if (Platform.isWindows) {
       final uri = Uri.parse(path);
       for (var query in uri.queryParameters.entries) {
-        print("${query.key}: ${query.value}");
-        if (query.key == "hash") {
-          hashString = query.value;
-        } else if (query.key == "password 51") {
+        if (kDebugMode) {
+          print("${query.key}: ${query.value}");
+        }
+        if (query.key == "password 51") {
           rdpstring += "${query.key}:b:${query.value}\n";
         } else {
           try {
             var i = int.parse(query.value, radix: 10);
-            print("i: $i");
+            if (kDebugMode) {
+              print("i: $i");
+            }
             rdpstring += "${query.key}:i:${query.value}\n";
           } catch (e) {
-            print("s: $e");
-            print("s: $query.value");
+            if (kDebugMode) {
+              print("s: $e");
+              print("s: $query.value");
+            }
             rdpstring += "${query.key}:s:${query.value}\n";
           }
         }
@@ -187,10 +189,14 @@ prompt for credentials:i:0
     final file = await _localRDPFile;
     try {
       file.delete();
-      print("deleted rdp");
+      if (kDebugMode) {
+        print("deleted rdp");
+      }
       return true;
     } catch (e) {
-      print("delete rdp failed");
+      if (kDebugMode) {
+        print("delete rdp failed");
+      }
       return false;
     }
   }
@@ -198,10 +204,14 @@ prompt for credentials:i:0
     final file = await _localRegFile;
     try {
       file.delete();
-      print("deleted reg");
+      if (kDebugMode) {
+        print("deleted reg");
+      }
       return true;
     } catch (e) {
-      print("delete reg failed");
+      if (kDebugMode) {
+        print("delete reg failed");
+      }
       return false;
     }
   }
@@ -220,10 +230,13 @@ Future<void> rdpLaunch(LocalStorage ls) async {
       shell.start('mstsc', arguments: [path])
     ]);
 
-    var ret =
-        await open[0].expectExitCode(Iterable<int>.generate(255).toList());
-    var pwd = await open[0].stdout.readAsString();
-    print("ret: ${await open[0].exitCode}");
+    //var ret =
+    await open[0].expectExitCode(Iterable<int>.generate(255).toList());
+    //var pwd =
+    await open[0].stdout.readAsString();
+    if (kDebugMode) {
+      print("ret: ${await open[0].exitCode}");
+    }
     await ls.deleteRDP();
 
     // print('cwd: $pwd, ret: $ret');
@@ -235,7 +248,7 @@ Future<void> rdpLaunch(LocalStorage ls) async {
 }
 Future<void> regAdd(LocalStorage ls) async {
   //var fs = const LocalFileSystem();
-  var shell = Shell();
+  // var shell = Shell();
 
   if (Platform.isWindows) {
     //windows
@@ -265,7 +278,7 @@ Future<void> regAdd(LocalStorage ls) async {
       print("arg reg: ${open.stderr}");
       print("str reg: ${open.toString()}");
 
-      print("ret reg: ${await open.exitCode}");
+      print("ret reg: ${open.exitCode}");
     }
 
     // print('cwd: $pwd, ret: $ret');

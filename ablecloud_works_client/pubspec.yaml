@@ -104,7 +104,7 @@ msix_config:
   capabilities: internetClient, location, microphone, webcam
   languages: ko-KR, en-US
   protocol_activation: worksapp,
-  #logo_path: C:\path\to\logo.png
+  logo_path: assets/ablestack.png
   sign_msix: true
   output_name: Ablecloud works client
   output_path: ./
