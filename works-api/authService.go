@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"net/http"
 	"os"
 )
 
@@ -53,4 +54,31 @@ func selectUserDBDetail(userName string) User {
 	}
 
 	return user
+}
+
+func deleteUserDB(userName string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+	}
+	defer db.Close()
+	log.Info("DB connect success")
+	returnValue := map[string]interface{}{}
+	result, err := db.Exec("UPDATE users SET removed=NOW() WHERE user_name=? WHERE removed IS NULL ", userName)
+	if err != nil {
+		log.Errorf("유저 삭제중 에러가 발생했습니다.\n")
+		log.Errorf("%v\n", err)
+		returnValue["status"] = BaseErrorCode
+		returnValue["message"] = "An error occurred while registering Async Job."
+	}
+	n, _ := result.RowsAffected()
+	if n == 1 {
+		log.Infof("%v\n", result)
+		log.Infof("유저가 정상적으로 삭제 되였습니다.\n")
+		returnValue["status"] = http.StatusOK
+		returnValue["message"] = "async job has been updated normally."
+	}
+
+	return returnValue
 }
