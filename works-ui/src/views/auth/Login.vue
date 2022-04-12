@@ -1,6 +1,6 @@
 <template>
   <div class="user-layout desktop">
-    <span>
+    <div style="position: relative z-index: 999;">
       <a-alert
         v-if="serverStatus"
         :message="statusMessage"
@@ -15,84 +15,86 @@
           <frown-outlined v-else /> -->
         <!-- </template> -->
       </a-alert>
-    </span>
-    <div class="user-layout-container">
-      <div class="user-layout-container">
+    </div>
+    <div
+      class="user-layout-container"
+      style="position: absolute; top: 50%; z-index: 1"
+    >
+      <div class="user-layout-header">
         <img
           src="@/assets/ablestack-logo.png"
           alt="logo"
           class="user-layout-logo"
         />
-        <div v-if="disabled" style="text-align: center">
-          <a-spin />
-        </div>
       </div>
 
-      <a-form
-        ref="formRef"
-        layout="horizontal"
-        :model="formState"
-        :rules="rules"
-        @finish="onSubmit"
-        class="user-layout-login"
-      >
-        <a-form-item has-feedback name="id">
-          <a-input
-            :disabled="disabled"
-            v-model:value="formState.id"
-            :placeholder="$t('label.user.id')"
-            size="large"
-          >
-            <template #prefix>
-              <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
-            </template>
-          </a-input>
-        </a-form-item>
-
-        <a-form-item has-feedback name="password">
-          <a-input-password
-            :disabled="disabled"
-            v-model:value="formState.password"
-            type="password"
-            :placeholder="$t('label.password')"
-            size="large"
-          >
-            <template #prefix>
-              <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
-            </template>
-          </a-input-password>
-        </a-form-item>
-        <a-form-item style="margin-bottom: 0">
-          <a-button
-            :disabled="disabled"
-            type="primary"
-            block
-            class="login-button"
-            html-type="submit"
-          >
-            {{ $t("label.login") }}
-          </a-button>
-        </a-form-item>
-        <!--   언어변환 버튼 start     -->
-        <a-dropdown placement="bottomRight">
-          <a-button type="text" shape="circle" class="header-notice-button">
-            <font-awesome-icon icon="language" class="login-icon" />
-            <!-- <GlobalOutlined /> -->
-          </a-button>
-          <template #overlay>
-            <a-menu
-              v-model:selected-keys="language"
-              @click="setLocaleClick"
-              style="width: 100px"
-              mode="vertical"
+      <a-spin :spinning="spinning">
+        <a-form
+          ref="formRef"
+          layout="horizontal"
+          :model="formState"
+          :rules="rules"
+          @finish="onSubmit"
+          class="user-layout-login"
+        >
+          <a-form-item has-feedback name="id">
+            <a-input
+              :disabled="disabled"
+              v-model:value="formState.id"
+              :placeholder="$t('label.user.id')"
+              size="large"
             >
-              <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
-              <a-menu-item key="en" value="enUS"> English </a-menu-item>
-            </a-menu>
-          </template>
-        </a-dropdown>
-        <!--   언어변환 버튼 끝     -->
-      </a-form>
+              <template #prefix>
+                <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
+              </template>
+            </a-input>
+          </a-form-item>
+
+          <a-form-item has-feedback name="password">
+            <a-input-password
+              :disabled="disabled"
+              v-model:value="formState.password"
+              type="password"
+              :placeholder="$t('label.password')"
+              size="large"
+            >
+              <template #prefix>
+                <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
+              </template>
+            </a-input-password>
+          </a-form-item>
+          <a-form-item style="margin-bottom: 0">
+            <a-button
+              :disabled="disabled"
+              type="primary"
+              block
+              class="login-button"
+              html-type="submit"
+            >
+              {{ $t("label.login") }}
+            </a-button>
+          </a-form-item>
+          <!--   언어변환 버튼 start     -->
+          <a-dropdown placement="bottomRight">
+            <a-button type="text" shape="circle" class="header-notice-button">
+              <font-awesome-icon icon="language" class="login-icon" />
+              <!-- <GlobalOutlined /> -->
+            </a-button>
+            <template #overlay>
+              <a-menu
+                v-model:selected-keys="language"
+                @click="setLocaleClick"
+                style="width: 100px"
+                mode="vertical"
+              >
+                <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
+                <a-menu-item key="en" value="enUS"> English </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <!--   언어변환 버튼 끝     -->
+        </a-form>
+      </a-spin>
     </div>
   </div>
   <!-- </a-spin> -->
@@ -136,7 +138,6 @@ export default defineComponent({
       timer: ref(null),
       spinning: ref(true),
       loadedLanguage: ref[""],
-      disabled: ref(true),
       serverStatus: ref(true),
       statusMessage: ref(this.$t("message.status.check.worksapi")),
       statusDescription: ref(this.$t("message.status.check.desc.wait")),
@@ -144,9 +145,6 @@ export default defineComponent({
     };
   },
   created() {
-    this.serverStatus = true;
-    this.statusType = "info";
-    this.disabled = true;
     this.serverCheck();
     this.timer = setInterval(() => {
       this.serverCheck();
@@ -283,7 +281,7 @@ export default defineComponent({
                             this.statusType = "success";
                             clearInterval(this.timer);
                             setTimeout(() => {
-                              this.disabled = false;
+                              this.spinning = false;
                               this.serverStatus = false;
                             }, 1500);
                           }, 500);
@@ -338,6 +336,19 @@ export default defineComponent({
 .user-layout {
   height: 100%;
 
+  &-container {
+    padding: 3rem 0;
+    width: 100%;
+
+    @media (min-height: 600px) {
+      padding: 0;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: -50px;
+    }
+  }
+
   button.login-button {
     margin-top: 8px;
     padding: 0 15px;
@@ -368,10 +379,6 @@ export default defineComponent({
       float: right;
     }
   }
-}
-.user-layout-container {
-  padding: 3rem 0;
-  width: 100%;
 }
 
 .user-layout-login {
