@@ -6,11 +6,11 @@ on:
     paths:
       - '.github/workflows/works-api.yml'
       - 'works-api/**'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - '.github/workflows/works-api.yml'
-      - 'works-api/**'
+  #pull_request:
+  #  branches: [ master ]
+  #  paths:
+  #    - '.github/workflows/works-api.yml'
+  #    - 'works-api/**'
       
 jobs:
   build:

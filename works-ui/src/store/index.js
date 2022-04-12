@@ -20,6 +20,11 @@ export default createStore({
       guac: 0,
     },
     menukey: 0,
+    client: {
+      scale: 1,
+      minScale: 0,
+      maxScale: 3,
+    },
   },
   getters: {},
   mutations: {

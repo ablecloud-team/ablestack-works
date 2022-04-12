@@ -13,6 +13,12 @@
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
+    <a-tooltip v-if="state.buttonBoolean.vmRestart" placement="bottom">
+      <template #title>{{ $t("tooltip.vmRestart") }}</template>
+      <a-button shape="circle" @click="setCircleButtonModal('vmRestart')">
+        <ReloadOutlined />
+      </a-button>
+    </a-tooltip>
     <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.userAllocate") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userAllocate')">
@@ -87,7 +93,12 @@
         <PoweroffOutlined /> {{ $t("tooltip.multiVmStop") }}
       </a-button>
     </a-tooltip>
-
+    <a-tooltip v-if="state.buttonBoolean.multiVmRestart" placement="bottom">
+      <template #title>{{ $t("tooltip.multiVmStop") }}</template>
+      <a-button shape="round" @click="setCircleButtonModal('vmRestart')">
+        <ReloadOutlined /> {{ $t("tooltip.multiVmRestart") }}
+      </a-button>
+    </a-tooltip>
     <a-tooltip v-if="state.buttonBoolean.multiUserAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.multiUserAllocate") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('userAllocate')">
@@ -251,6 +262,7 @@ export default defineComponent({
         showModal: ref(false),
         vmStart: ref(false),
         vmStop: ref(false),
+        vmRestart: ref(false),
         vmDestroy: ref(false),
         userAllocate: ref(false),
         userUnlock: ref(false),
@@ -259,6 +271,7 @@ export default defineComponent({
         accountDestroy: ref(false),
         multiVmStart: ref(false),
         multiVmStop: ref(false),
+        multiVmRestart: ref(false),
         multiVmDestroy: ref(false),
         multiUserAllocate: ref(false),
         multiUserUnlock: ref(false),
@@ -304,9 +317,11 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
+    console.log(this.multiSelectList);
   },
   methods: {
     fetchData() {
+      
       if (this.callComponent.includes("Workspace")) {
         if (this.workspaceInfo) {
           this.eventList = [this.workspaceInfo];
@@ -340,8 +355,13 @@ export default defineComponent({
         let res = null;
         res = this.eventList.filter((it) => it.mold_status === "Running");
         if (this.eventList.length === res.length) {
-          if (this.vmInfo) this.state.buttonBoolean.vmStop = true;
-          else this.state.buttonBoolean.multiVmStop = true;
+          if (this.vmInfo) {
+            this.state.buttonBoolean.vmStop = true;
+            this.state.buttonBoolean.vmRestart = true;
+          } else {
+            this.state.buttonBoolean.multiVmStop = true;
+            this.state.buttonBoolean.multiVmRestart = true;
+          }
         }
 
         //정지 버튼 체크
@@ -450,6 +470,11 @@ export default defineComponent({
       }
       if (value == "vmStop") {
         this.modalConfirm = this.$t("modal.confirm.vmStop", {
+          count: this.eventList.length,
+        });
+      }
+      if (value == "vmRestart") {
+        this.modalConfirm = this.$t("modal.confirm.vmRestart", {
           count: this.eventList.length,
         });
       }
@@ -615,6 +640,12 @@ export default defineComponent({
         this.sucMessage = "message.vm.status.stop.ok";
         this.failMessage = "message.vm.status.stop.fail";
       }
+      if (this.modalTitle.includes("vmRestart")) {
+        message.loading(this.$t("message.vm.status.restarting"), 100);
+        this.worksUrl = "/api/v1/instance/VMReboot/";
+        this.sucMessage = "message.vm.status.restart.ok";
+        this.failMessage = "message.vm.status.restart.fail";
+      }
       if (this.modalTitle.includes("vmDestroy")) {
         message.loading(this.$t("message.vm.status.destroying"), 100);
         this.worksUrl = "/api/v1/instance/VMDestroy/";
@@ -642,7 +673,7 @@ export default defineComponent({
       } else {
         this.$emit("fetchData");
       }
-      
+
       //workspace 상세화면의 데스크톱 VM탭인지 여부를 확인하기 위함.
       if (this.wsName.length > 0) {
         await this.funcDelay(2000);

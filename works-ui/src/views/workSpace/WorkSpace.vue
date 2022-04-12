@@ -295,7 +295,6 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      // console.log(val, obj);
       this.actionFrom = "Workspace";
       setTimeout(() => {
         this.actionFrom = val;
