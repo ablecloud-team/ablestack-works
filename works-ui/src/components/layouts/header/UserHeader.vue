@@ -48,11 +48,11 @@
         <template #overlay>
           <a-menu selected-keys="" mode="inline" style="hover">
             <a-menu-item key="1" @click="userinfo">
-              <UserOutlined />{{ $t("label.profile") }}
+              <UserOutlined /> {{ $t("label.profile") }}
             </a-menu-item>
             <a-menu-divider />
             <a-menu-item key="2" @click="logoutSubmit">
-              <LogoutOutlined />{{ $t("label.logout") }}
+              <LogoutOutlined /> {{ $t("label.logout") }}
             </a-menu-item>
           </a-menu>
         </template>
