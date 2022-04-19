@@ -13,9 +13,8 @@
                 size="small"
                 @click="fetchRefresh()"
               >
-                <template #icon>
-                  <ReloadOutlined /> {{ $t("label.refresh") }}
-                </template>
+                <template #icon><ReloadOutlined /></template>
+                {{ $t("label.refresh") }}
               </a-button>
             </a-col>
           </a-row>
@@ -32,7 +31,7 @@
               <a-card
                 :title="workspace.name + '(' + workspace.description + ')'"
                 bodyStyle="margin: 1px;"
-                ><font-awesome-icon :icon="['fa-chrome']" />
+                >
                 <a-row :gutter="4">
                   <a-col
                     v-for="vm in workspace.instanceList"
@@ -50,7 +49,7 @@
                         }"
                       />
 
-                      <template class="ant-card-actions" #actions>
+                      <template #actions>
                         <a-popconfirm
                           :title="
                             vm.favorite == true
@@ -83,48 +82,87 @@
                             />
                           </a-tooltip>
                         </a-popconfirm>
-                        <!-- 
-                        <a-popconfirm
-                          :title="'RDP 파일을 다운로드 하시겠습니까?'"
-                          :ok-text="$t('label.ok')"
-                          :cancel-text="$t('label.cancel')"
-                          @confirm="downloadRDP(vm.name)"
-                        > -->
+
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             $t("label.rdp.connect")
                           }}</template>
-                          <CloudDownloadOutlined
-                            :style="{ color: '#292929' }"
-                            @click="downloadRDP(vm.name)"
-                          />
+                          <Icon>
+                            <template #component>
+                              <svg
+                                id="remote-desktop"
+                                width="24"
+                                height="24"
+                                :fill="
+                                  workspace.policy.rdp_access_allow == '1'
+                                    ? ''
+                                    : '#d9dbdf'
+                                "
+                                viewBox="0 0 24 24"
+                                @click="
+                                  workspace.policy.rdp_access_allow == '1'
+                                    ? connectRdp(workspace.uuid, vm.uuid)
+                                    : false
+                                "
+                              >
+                                <path
+                                  d="M3,2A2,2 0 0,0 1,4V16C1,17.11 1.9,18 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4A2,2 0 0,0 21,2M3,4H21V16H3M15,5L11.5,8.5L15,12L16.4,10.6L14.3,8.5L16.4,6.4M9,8L7.6,9.4L9.7,11.5L7.6,13.6L9,15L12.5,11.5"
+                                />
+                              </svg>
+                              <!-- <svg
+                                fill="none"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                width="24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                @click="connectRdp(workspace.uuid, vm.uuid)"
+                              >
+                                <path
+                                  d="M17.0514 4.32178L18.4656 5.73599L14.223 9.97863L18.4656 14.2213L17.0514 15.6355L11.3946 9.97863L17.0514 4.32178Z"
+                                  fill="currentColor"
+                                />
+                                <path
+                                  d="M6.94864 19.6785L5.53442 18.2643L9.77706 14.0216L5.53442 9.77897L6.94864 8.36476L12.6055 14.0216L6.94864 19.6785Z"
+                                  fill="currentColor"
+                                />
+                              </svg> -->
+                            </template>
+                          </Icon>
                         </a-tooltip>
-                        <!-- </a-popconfirm> -->
 
-                        <!-- <a-popconfirm
-                          :title="'데스크톱에 접속하시겠습니까?'"
-                          :ok-text="$t('label.ok')"
-                          :cancel-text="$t('label.cancel')"
-                          @confirm="connectConsole(vm.id)"
-                          :disabled="
-                            vm.handshake_status == 'Ready' ? false : true
-                          "
-                        > -->
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             vm.handshake_status === "Ready"
                               ? $t("label.desktop.console.connect.ready")
                               : $t("label.desktop.console.connect.notready")
                           }}</template>
-
-                          <CodeFilled
+                          <Icon>
+                            <template #component>
+                              <svg
+                                id="mdi-console"
+                                width="24"
+                                height="24"
+                                :fill="
+                                  vm.handshake_status == 'Ready'
+                                    ? ''
+                                    : '#d9dbdf'
+                                "
+                                viewBox="0 0 24 24"
+                                @click="connectConsole(workspace.uuid, vm.uuid)"
+                              >
+                                <path
+                                  d="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 2.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z"
+                                />
+                              </svg>
+                            </template>
+                          </Icon>
+                          <!-- <CodeFilled
                             v-if="vm.handshake_status == 'Ready'"
                             :style="{ color: '#333' }"
                             @click="connectConsole(workspace.uuid, vm.uuid)"
-                          />
-                          <CodeFilled v-else :style="{ color: '#d9dbdf' }" />
+                          /> -->
+                          <!-- <CodeFilled v-else :style="{ color: '#d9dbdf' }" /> -->
                         </a-tooltip>
-                        <!-- </a-popconfirm> -->
 
                         <a-Popover placement="topLeft" trigger="click">
                           <template #content>
@@ -242,14 +280,17 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, TrackOpTypes } from "vue";
+import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
+import axios from "axios";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
 export default defineComponent({
   name: "UserDesktop",
   components: {
+    Icon,
     Apath,
     Actions,
   },
@@ -326,82 +367,83 @@ export default defineComponent({
       // document.getElementById(val).style.display = "none";
       // document.getElementById(val).style.display = "none";
     },
-    downloadRDP(vmName) {
-      let rdpConfig =
-        "targetisaadjoined:i:0\n" +
-        "hubdiscoverygeourl:s:\n" +
-        "redirected video capture encoding quality:i:0\n" +
-        "camerastoredirect:s:\n" +
-        "gatewaybrokeringtype:i:0\n" +
-        "use redirection server name:i:0\n" +
-        "alternate shell:s:\n" +
-        "disable themes:i:0\n" +
-        "disable cursor setting:i:1\n" +
-        "remoteapplicationname:s:\n" +
-        "resourceprovider:s:\n" +
-        "disable menu anims:i:1\n" +
-        "remoteapplicationcmdline:s:\n" +
-        "promptcredentialonce:i:0\n" +
-        "gatewaycertificatelogonauthority:s:\n" +
-        "audiocapturemode:i:0\n" +
-        "prompt for credentials on client:i:0\n" +
-        "gatewayhostname:s:\n" +
-        "remoteapplicationprogram:s:\n" +
-        "gatewayusagemethod:i:2\n" +
-        "screen mode id:i:2\n" +
-        "use multimon:i:0\n" +
-        "authentication level:i:3\n" +
-        "desktopwidth:i:0\n" +
-        "desktopheight:i:0\n" +
-        "redirectsmartcards:i:0\n" +
-        "redirectclipboard:i:1\n" +
-        "forcehidpioptimizations:i:0\n" +
-        "full address:s:10.10.1.110:3389\n" +
-        "username:s:user1\n" +
-        "password 51:01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f7d63b57853e464ab1d317a8417beae70000000002000000000003660000c000000010000000bb23d3b56c695c0006389b38891c5b1a0000000004800000a00000001000000031421b3dbd931cda62251dd2120d53e4180000008240be3347e4a17740eadf42040e72b26f63d948260d626814000000be3e14b3083cb81535647a6a5d7755daf9f06dc1\n" +
-        "domain:s:able\n" +
-        "drivestoredirect:s:\n" +
-        "loadbalanceinfo:s:\n" +
-        "networkautodetect:i:1\n" +
-        "enablecredsspsupport:i:2\n" +
-        "redirectprinters:i:0\n" +
-        "autoreconnection enabled:i:1\n" +
-        "session bpp:i:32\n" +
-        "administrative session:i:0\n" +
-        "audiomode:i:0\n" +
-        "bandwidthautodetect:i:1\n" +
-        "authoring tool:s:\n" +
-        "connection type:i:7\n" +
-        "remoteapplicationmode:i:0\n" +
-        "disable full window drag:i:0\n" +
-        "gatewayusername:s:\n" +
-        "shell working directory:s:\n" +
-        "wvd endpoint pool:s:\n" +
-        "remoteapplicationappid:s:\n" +
-        "allow font smoothing:i:1\n" +
-        "connect to console:i:0\n" +
-        "disable wallpaper:i:0\n" +
-        "gatewayaccesstoken:s:\n" +
-        "promptcredentialonce:i:0\n";
+    async connectRdp(workspaceUuid, vmUuid) {
+      await worksApi
+        .get(
+          "/api/v1/connection/rdp/" +
+            vmUuid +
+            "/" +
+            sessionStorage.getItem("userName")
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            console.log(response.data.instance.public_port);
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error(this.$t("message.response.data.fail"));
+        })
+        .finally(() => {});
 
-      var element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:text/plain;charset=utf-8," + encodeURIComponent(rdpConfig)
-      );
+      const paramArr = this.dataList
+        .filter((dl) => dl.uuid === workspaceUuid)[0]
+        .instanceList.filter((il) => il.uuid === vmUuid)[0];
+      console.log(paramArr);
 
-      element.setAttribute("download", vmName + ".rdp");
-      element.style.display = "none";
-      document.body.appendChild(element);
-      element.click();
+      // const agent = navigator.userAgent.toLowerCase();
+      // // console.log(navigator);
+      // // console.log(window);
+      // if (
+      //   (navigator.appName == "Netscape" &&
+      //     navigator.userAgent.search("Trident") != -1) ||
+      //   agent.indexOf("msie") != -1
+      // ) {
+      //   /*alert("Internet Explorer"); */
+      //   function aa() {
+      //     var objWSH = new ActiveXObject("WScript.Shell");
+      //     var retval = objWSH.Run("C:/Windows/SysWOW64/notepad.exe", 1, true);
+      //   }
+      // } else if (agent.indexOf("chrome") != -1) {
+      //   function aa() {
+      //     /*alert("HAVE TO INSTALL."); */
+      //     var objWSH = new ActiveXObject("WScript.Shell");
+      //     var retval = objWSH.Run("C:/Windows/SysWOW64/notepad.exe", 1, true);
+      //   }
+      // }
 
-      document.body.removeChild(element);
+      // let rdpParam = new URLSearchParams();
+      // rdpParam.append("full address", paramArr.ipaddress);
+      // rdpParam.append("port", paramArr.port || 3389);
+      // rdpParam.append("domain", sessionStorage.getItem("domainName"));
+      // rdpParam.append("username", sessionStorage.getItem("userName"));
+      // rdpParam.append("password 51", paramArr.password);
+
+      // await axios
+      //   .get("worksapp://works/", rdpParam)
+      //   .then((response) => {})
+      //   .catch((error) => {})
+      //   .finally(() => {});
+
+      // try {
+      //   const link = document.createElement("a");
+      //   link.setAttribute("href", "worksapp://aa.aaa.com");
+      //   // link.setAttribute("download", "");
+      //   link.style.display = "none";
+      //   document.body.appendChild(link);
+      //   link.click();
+      //   document.body.removeChild(link);
+      // } catch (error) {
+      //   console.log(error);
+      // }
     },
-    connectConsole(worksId, vmId) {
+    connectConsole(workspaceUuid, vmUuid) {
       // console.log(worksId, vmId);
       const liteParamArr = this.dataList
-        .filter((dl) => dl.uuid === worksId)[0]
-        .instanceList.filter((il) => il.uuid === vmId)[0];
+        .filter((dl) => dl.uuid === workspaceUuid)[0]
+        .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
       liteParamArr["hostname"] = liteParamArr.ipaddress;
       delete liteParamArr.ipaddress;
@@ -410,20 +452,24 @@ export default defineComponent({
       liteParamArr["port"] = 3389;
       liteParamArr["username"] = sessionStorage.getItem("userName");
       liteParamArr["domain"] = sessionStorage.getItem("domainName");
+
       liteParamArr["enable-wallpaper"] = false;
       liteParamArr["enable-font-smoothing"] = false;
       liteParamArr["enable-theming"] = false;
       liteParamArr["enable-menu-animations"] = false;
       liteParamArr["resize-method"] = "display-update";
-      liteParamArr["disable-upload"] = false;
+
       liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "Z";
-      liteParamArr["drive-path"] = "/";
+      liteParamArr["drive-name"] = "GUACD";
+      liteParamArr["drive-path"] = "/share";
       liteParamArr["enable-drive"] = true;
+      liteParamArr["disable-upload"] = false;
+      liteParamArr["disable-download"] = false;
+
+      liteParamArr["enable-touch"] = true;
+
       liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
       //liteParamArr["security"] = "rdp";
-
-      console.log(liteParamArr);
 
       const encrypted = btoa(
         this.$CryptoJS.AES.encrypt(

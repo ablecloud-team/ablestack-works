@@ -317,11 +317,9 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
-    console.log(this.multiSelectList);
   },
   methods: {
     fetchData() {
-      
       if (this.callComponent.includes("Workspace")) {
         if (this.workspaceInfo) {
           this.eventList = [this.workspaceInfo];
@@ -532,6 +530,13 @@ export default defineComponent({
       });
     },
     funcEndMessage() {
+      console.log(
+        this.sucMessage,
+        this.failMessage,
+        this.succCnt,
+        this.failCnt
+      );
+
       message.destroy();
       if (this.succCnt > 0) {
         message.success(
@@ -574,9 +579,9 @@ export default defineComponent({
       }
 
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      //await this.funcDelay(2000);
     },
     async vmUserAllocateAction() {
       if (this.selectedUser.length == 0) return false;
@@ -600,9 +605,9 @@ export default defineComponent({
       }
 
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      // await this.funcDelay(1000);
     },
     async vmUserUnlockAction() {
       this.sucMessage = "message.user.vm.unlock.ok";
@@ -623,9 +628,9 @@ export default defineComponent({
         }
       }
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      // await this.funcDelay(2000);
     },
     async vmAction() {
       if (this.modalTitle.includes("vmStart")) {
@@ -697,10 +702,9 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-
-      await this.funcDelay(1000);
       this.funcEndMessage();
       this.handleCancel();
+      // await this.funcDelay(1000);
       if (this.callComponent == "WorkspaceDetail") {
         router.push({ name: "Workspace" });
       } else {
@@ -723,7 +727,7 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-      await this.funcDelay(1000);
+      // await this.funcDelay(1000);
       this.funcEndMessage();
       this.handleCancel();
       if (this.callComponent == "AccountDetail") {

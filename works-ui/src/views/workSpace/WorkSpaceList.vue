@@ -18,92 +18,107 @@
   >
     <!-- 검색 필터링 template-->
     <template
-      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
+      #customFilterDropdown="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
     >
       <div style="padding: 8px">
-        <a-input-search
+        <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
+          style="width: 188px; margin-bottom: 8px; display: block"
           @change="
             (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
           "
-          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
+          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <!-- <a-button
+        <a-button
           type="primary"
           size="small"
           style="width: 90px; margin-right: 8px"
           @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
-          <template #icon><SearchOutlined /></template>
-          {{ $t("label.search")}}
+          <template #icon><search-outlined /></template>
+          {{ $t("label.search") }}
         </a-button>
-        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
-          {{ $t("label.reset")}}
-        </a-button> -->
+        <a-button
+          size="small"
+          style="width: 90px"
+          @click="handleReset(clearFilters)"
+        >
+          {{ $t("label.reset") }}
+        </a-button>
       </div>
     </template>
-    <template #filterIcon="filtered">
-      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    <template #customFilterIcon="filtered">
+      <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
     </template>
     <!-- 검색 필터링 template-->
-    <template #nameRender="{ record }">
-      <router-link :to="{ path: '/workspaceDetail/' + record.uuid }">
-        {{ record.name }}
-      </router-link>
-    </template>
-    <template #actionRender="{ record }">
-      <a-Popover placement="topLeft">
-        <template #content>
-          <Actions
-            v-if="actionFrom == 'WorkspaceList'"
-            :action-from="actionFrom"
-            :workspace-info="record"
-            @fetchData="fetchRefresh"
+
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'name'">
+        <router-link :to="{ path: '/workspaceDetail/' + record.uuid }">
+          {{ text }}
+        </router-link>
+      </template>
+      <template v-if="column.dataIndex === 'action'">
+        <a-Popover placement="topLeft">
+          <template #content>
+            <Actions
+              v-if="actionFrom == 'WorkspaceList'"
+              :action-from="actionFrom"
+              :workspace-info="record"
+              @fetchData="fetchRefresh"
+            />
+          </template>
+          <MoreOutlined />
+        </a-Popover>
+      </template>
+      <template v-if="column.dataIndex === 'state'">
+        <a-tooltip placement="bottom">
+          <template #title>{{ record.template_ok_check }}</template>
+          <a-badge
+            class="head-example"
+            :color="
+              record.template_ok_check === 'Not Ready' ||
+              record.template_ok_check === 'Pending'
+                ? 'red'
+                : record.template_ok_check === 'Joining' ||
+                  record.template_ok_check === 'Joined'
+                ? 'yellow'
+                : record.template_ok_check === 'Ready'
+                ? 'green'
+                : 'red'
+            "
+            :text="
+              record.template_ok_check === 'Not Ready' ||
+              record.template_ok_check === 'Pending'
+                ? $t('label.vm.status.initializing') +
+                  '(' +
+                  record.template_ok_check +
+                  ')'
+                : record.template_ok_check === 'Joining' ||
+                  record.template_ok_check === 'Joined'
+                ? $t('label.vm.status.configuring') +
+                  '(' +
+                  record.template_ok_check +
+                  ')'
+                : record.template_ok_check === 'Ready'
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
+            "
           />
-        </template>
-        <MoreOutlined />
-      </a-Popover>
-    </template>
-    <template #stateRender="{ record }">
-      <a-tooltip placement="bottom">
-        <template #title>{{ record.template_ok_check }}</template>
-        <a-badge
-          class="head-example"
-          :color="
-            record.template_ok_check === 'Not Ready' ||
-            record.template_ok_check === 'Pending'
-              ? 'red'
-              : record.template_ok_check === 'Joining' ||
-                record.template_ok_check === 'Joined'
-              ? 'yellow'
-              : record.template_ok_check === 'Ready'
-              ? 'green'
-              : 'red'
-          "
-          :text="
-            record.template_ok_check === 'Not Ready' ||
-            record.template_ok_check === 'Pending'
-              ? $t('label.vm.status.initializing') +
-                '(' +
-                record.template_ok_check +
-                ')'
-              : record.template_ok_check === 'Joining' ||
-                record.template_ok_check === 'Joined'
-              ? $t('label.vm.status.configuring') +
-                '(' +
-                record.template_ok_check +
-                ')'
-              : record.template_ok_check === 'Ready'
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
-          "
-        />
-      </a-tooltip>
-    </template>
-    <template #typeRender="{ record }">
-      {{ record.workspace_type.toUpperCase() }}
+        </a-tooltip>
+      </template>
+
+      <template v-if="column.dataIndex === 'workspace_type'">
+        {{ record.workspace_type.toUpperCase() }}
+      </template>
     </template>
   </a-table>
 </template>
@@ -149,12 +164,12 @@ export default defineComponent({
     return {
       timer: ref(null),
       pagination: {
-        pageSize: 10,
+        // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
         showTotal: (total) =>
           this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+        // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       wsDataList: ref([]),
       listColumns: [
@@ -163,14 +178,10 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           width: "37%",
-          slots: {
-            customRender: "nameRender",
-            filterDropdown: "filterDropdown",
-            filterIcon: "filterIcon",
-          },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
+          customFilterDropdown: true,
           onFilter: (value, record) =>
             record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
@@ -187,7 +198,6 @@ export default defineComponent({
           dataIndex: "action",
           align: "right",
           width: "3%",
-          slots: { customRender: "actionRender" },
         },
         {
           title: this.$t("label.state"),
@@ -197,18 +207,12 @@ export default defineComponent({
           sorter: (a, b) =>
             a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "stateRender" },
         },
         {
           title: this.$t("label.type"),
           dataIndex: "workspace_type",
           key: "workspace_type",
           width: "20%",
-          slots: {
-            customRender: "typeRender",
-            filterDropdown: "filterDropdown",
-            filterIcon: "filterIcon",
-          },
           sorter: (a, b) =>
             a.workspace_type < b.workspace_type
               ? -1
@@ -216,23 +220,22 @@ export default defineComponent({
               ? 1
               : 0,
           sortDirections: ["descend", "ascend"],
-          //onFilter: (value, record) => record.Type.toUpperCase().indexOf(value) === 0,
-          //filterMultiple: false,
           // filters: [
           //   {
-          //     text: 'DESKTOP',
-          //     value: 'DESKTOP',
+          //     text: "DESKTOP",
+          //     value: "DESKTOP",
           //   },
           //   {
-          //     text: 'APP',
-          //     value: 'APP',
+          //     text: "APP",
+          //     value: "APP",
           //   },
-          // ]
+          // ],
+          customFilterDropdown: true,
           onFilter: (value, record) =>
             record.workspace_type
               .toString()
-              .toLowerCase()
-              .includes(value.toLowerCase()),
+              .toUpperCase()
+              .includes(value.toUpperCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -250,36 +253,6 @@ export default defineComponent({
             a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0,
           sortDirections: ["descend", "ascend"],
         },
-        // {
-        //   title: this.$t("label.desktop.connection.quantity"),
-        //   dataIndex: "NoC",
-        //   key: "NoC",
-        //   sorter: (a, b) => (a.NoC < b.NoC ? -1 : a.NoC > b.NoC ? 1 : 0),
-        //   sortDirections: ["descend", "ascend"],
-        // },
-        // {
-        //   title: this.$t("label.network.type"),
-        //   dataIndex: "NetType",
-        //   key: "NetType",
-        //   sorter: (a, b) =>
-        //     a.NetType < b.NetType ? -1 : a.NetType > b.NetType ? 1 : 0,
-        //   sortDirections: ["descend", "ascend"],
-        // },
-        // {
-        //   title: this.$t("label.restrict"),
-        //   dataIndex: "Restrict",
-        //   key: "Restrict",
-        //   sorter: (a, b) =>
-        //     a.Restrict < b.Restrict ? -1 : a.Restrict > b.Restrict ? 1 : 0,
-        //   sortDirections: ["descend", "ascend"],
-        // },
-        // ,
-        // {
-        //     title: 'Tags',
-        //     key: 'tags',
-        //     dataIndex: 'tag',
-        //     slots: {customRender: 'tags'},
-        // }
       ],
     };
   },

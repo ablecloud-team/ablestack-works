@@ -18,140 +18,146 @@
   >
     <!-- 검색 필터링 template-->
     <template
-      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
+      #customFilterDropdown="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
     >
       <div style="padding: 8px">
-        <a-input-search
+        <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
+          style="width: 188px; margin-bottom: 8px; display: block"
           @change="
             (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
           "
-          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
+          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <!-- <a-button
+        <a-button
           type="primary"
           size="small"
           style="width: 90px; margin-right: 8px"
           @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
-          <template #icon><SearchOutlined /></template>
-          {{ $t("label.search")}}
+          <template #icon><search-outlined /></template>
+          {{ $t("label.search") }}
         </a-button>
-        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
-          {{ $t("label.reset")}}
-        </a-button> -->
+        <a-button
+          size="small"
+          style="width: 90px"
+          @click="handleReset(clearFilters)"
+        >
+          {{ $t("label.reset") }}
+        </a-button>
       </div>
     </template>
-    <template #filterIcon="filtered">
-      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    <template #customFilterIcon="{ filtered }">
+      <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
     </template>
     <!-- 검색 필터링 template-->
 
-    <template #nameRender="{ record }">
-      <router-link
-        :to="{
-          path: '/virtualMachineDetail/' + record.uuid,
-        }"
-        >{{ record.name }}</router-link
-      >
-    </template>
-    <template #workspaceRender="{ record }">
-      <router-link
-        :to="{
-          path: '/workspaceDetail/' + record.workspace_uuid,
-        }"
-        >{{ record.workspace_name }}</router-link
-      >
-    </template>
-
-    <template #actionRender="{ record }">
-      <a-Popover placement="topLeft">
-        <template #content>
-          <Actions
-            v-if="actionFrom === 'VirtualMachineList'"
-            :action-from="actionFrom"
-            :vm-info="record"
-            @fetchData="fetchRefresh"
-          />
-        </template>
-        <MoreOutlined />
-      </a-Popover>
-    </template>
-    <template #typeRender="{ record }">
-      {{ record.workspace_type.toUpperCase() }}
-    </template>
-    <template #vmStateRender="{ record }">
-      <a-badge
-        class="head-example"
-        :color="
-          record.mold_status === 'Running'
-            ? 'green'
-            : record.mold_status === 'Stopping' ||
-              record.mold_status === 'Starting'
-            ? 'blue'
-            : record.mold_status === 'Stopped'
-            ? 'red'
-            : ''
-        "
-        :text="
-          record.mold_status === 'Running'
-            ? $t('label.vm.status.running')
-            : record.mold_status === 'Starting'
-            ? $t('label.vm.status.starting')
-            : record.mold_status === 'Stopping'
-            ? $t('label.vm.status.stopping')
-            : record.mold_status === 'Stopped'
-            ? $t('label.vm.status.stopped')
-            : ''
-        "
-      />
-    </template>
-    <template #vmReadyStateRender="{ record }">
-      <a-tooltip placement="bottom">
-        <template #title>{{ record.handshake_status }}</template>
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'name'">
+        <router-link :to="{ path: '/virtualMachineDetail/' + record.uuid }">
+          {{ text }}
+        </router-link>
+      </template>
+      <template v-if="column.dataIndex === 'workspace_name'">
+        <router-link
+          :to="{ path: '/workspaceDetail/' + record.workspace_uuid }"
+        >
+          {{ text }}
+        </router-link>
+      </template>
+      <template v-if="column.dataIndex === 'action'">
+        <a-Popover placement="topLeft">
+          <template #content>
+            <Actions
+              v-if="actionFrom === 'VirtualMachineList'"
+              :action-from="actionFrom"
+              :vm-info="record"
+              @fetchData="fetchRefresh"
+            />
+          </template>
+          <MoreOutlined />
+        </a-Popover>
+      </template>
+      <template v-if="column.dataIndex === 'workspace_type'">
+        {{ record.workspace_type.toUpperCase() }}
+      </template>
+      <template v-if="column.dataIndex === 'status'">
         <a-badge
           class="head-example"
           :color="
-            record.handshake_status === 'Not Ready' ||
-            record.handshake_status === 'Pending'
-              ? 'red'
-              : record.handshake_status === 'Joining' ||
-                record.handshake_status === 'Joined'
-              ? 'yellow'
-              : record.handshake_status === 'Ready'
+            record.mold_status === 'Running'
               ? 'green'
-              : 'red'
+              : record.mold_status === 'Stopping' ||
+                record.mold_status === 'Starting'
+              ? 'blue'
+              : record.mold_status === 'Stopped'
+              ? 'red'
+              : ''
           "
           :text="
-            record.handshake_status === 'Not Ready' ||
-            record.handshake_status === 'Pending'
-              ? $t('label.vm.status.initializing') +
-                '(' +
-                record.handshake_status +
-                ')'
-              : record.handshake_status === 'Joining' ||
-                record.handshake_status === 'Joined'
-              ? $t('label.vm.status.configuring') +
-                '(' +
-                record.handshake_status +
-                ')'
-              : record.handshake_status === 'Ready'
-              ? $t('label.vm.status.ready')
-              : $t('label.vm.status.notready')
+            record.mold_status === 'Running'
+              ? $t('label.vm.status.running')
+              : record.mold_status === 'Starting'
+              ? $t('label.vm.status.starting')
+              : record.mold_status === 'Stopping'
+              ? $t('label.vm.status.stopping')
+              : record.mold_status === 'Stopped'
+              ? $t('label.vm.status.stopped')
+              : ''
           "
         />
-      </a-tooltip>
-    </template>
-    <template #userRender="{ record }">
-      <router-link
-        :to="{ path: '/accountDetail/' + record.owner_account_id }"
-        >{{ record.owner_account_id }}</router-link
-      >
-    </template>
-    <template #sessionRender="{ record }">
-      {{ record.connected }}
+      </template>
+      <template v-if="column.dataIndex === 'handshake_status'">
+        <a-tooltip placement="bottom">
+          <template #title>{{ record.handshake_status }}</template>
+          <a-badge
+            class="head-example"
+            :color="
+              record.handshake_status === 'Not Ready' ||
+              record.handshake_status === 'Pending'
+                ? 'red'
+                : record.handshake_status === 'Joining' ||
+                  record.handshake_status === 'Joined'
+                ? 'yellow'
+                : record.handshake_status === 'Ready'
+                ? 'green'
+                : 'red'
+            "
+            :text="
+              record.handshake_status === 'Not Ready' ||
+              record.handshake_status === 'Pending'
+                ? $t('label.vm.status.initializing') +
+                  '(' +
+                  record.handshake_status +
+                  ')'
+                : record.handshake_status === 'Joining' ||
+                  record.handshake_status === 'Joined'
+                ? $t('label.vm.status.configuring') +
+                  '(' +
+                  record.handshake_status +
+                  ')'
+                : record.handshake_status === 'Ready'
+                ? $t('label.vm.status.ready')
+                : $t('label.vm.status.notready')
+            "
+          />
+        </a-tooltip>
+      </template>
+      <template v-if="column.dataIndex === 'owner_account_id'">
+        <router-link
+          :to="{ path: '/accountDetail/' + record.owner_account_id }"
+        >
+          {{ text }}
+        </router-link>
+      </template>
     </template>
   </a-table>
 </template>
@@ -198,12 +204,12 @@ export default defineComponent({
     return {
       timer: ref(null),
       pagination: {
-        pageSize: 10,
+        // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
         showTotal: (total) =>
           this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+        // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       vmDataList: [],
       vmListColumns: [
@@ -212,14 +218,15 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           width: "22%",
-          slots: {
-            customRender: "nameRender",
-            filterDropdown: "filterDropdown",
-            filterIcon: "filterIcon",
-          },
+          // slots: {
+          //   customRender: "nameRender",
+          //   filterDropdown: "filterDropdown",
+          //   filterIcon: "filterIcon",
+          // },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
+          customFilterDropdown: true,
           onFilter: (value, record) =>
             record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
@@ -236,7 +243,7 @@ export default defineComponent({
           dataIndex: "action",
           align: "right",
           width: "3%",
-          slots: { customRender: "actionRender" },
+          // slots: { customRender: "actionRender" },
         },
         {
           title: this.$t("label.workspace"),
@@ -251,18 +258,18 @@ export default defineComponent({
               : 0,
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
-          slots: { customRender: "workspaceRender" },
+          // slots: { customRender: "workspaceRender" },
         },
         {
           title: this.$t("label.workspacetype"),
           dataIndex: "workspace_type",
           key: "workspace_type",
           width: "20%",
-          slots: {
-            customRender: "typeRender",
-            filterDropdown: "filterDropdown",
-            filterIcon: "filterIcon",
-          },
+          // slots: {
+          //   customRender: "typeRender",
+          //   filterDropdown: "filterDropdown",
+          //   filterIcon: "filterIcon",
+          // },
           sorter: (a, b) =>
             a.workspace_type < b.workspace_type
               ? -1
@@ -282,6 +289,7 @@ export default defineComponent({
           //     value: 'APP',
           //   },
           // ]
+          customFilterDropdown: true,
           onFilter: (value, record) =>
             record.workspace_type
               .toString()
@@ -307,7 +315,7 @@ export default defineComponent({
               ? 1
               : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "userRender" },
+          // slots: { customRender: "userRender" },
         },
         {
           title: this.$t("label.vm.state"),
@@ -317,7 +325,7 @@ export default defineComponent({
           sorter: (a, b) =>
             a.state < b.state ? -1 : a.status > b.status ? 1 : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "vmStateRender" },
+          // slots: { customRender: "vmStateRender" },
         },
         {
           title: this.$t("label.vm.ready.state"),
@@ -331,7 +339,7 @@ export default defineComponent({
               ? 1
               : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "vmReadyStateRender" },
+          // slots: { customRender: "vmReadyStateRender" },
         },
         {
           title: this.$t("label.vm.network.ip"),
@@ -350,7 +358,7 @@ export default defineComponent({
           sorter: (a, b) =>
             a.connected < b.connected ? -1 : a.connected > b.connected ? 1 : 0,
           sortDirections: ["descend", "ascend"],
-          slots: { customRender: "sessionRender" },
+          // slots: { customRender: "sessionRender" },
         },
       ],
     };

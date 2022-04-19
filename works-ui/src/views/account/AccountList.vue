@@ -18,54 +18,67 @@
   >
     <!-- 검색 필터링 template-->
     <template
-      #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, column }"
+      #customFilterDropdown="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
     >
       <div style="padding: 8px">
-        <a-input-search
+        <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
+          style="width: 188px; margin-bottom: 8px; display: block"
           @change="
             (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
           "
-          @search="handleSearch(selectedKeys, confirm, column.dataIndex)"
+          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <!-- <a-button
+        <a-button
           type="primary"
           size="small"
           style="width: 90px; margin-right: 8px"
           @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
         >
-          <template #icon><SearchOutlined /></template>
-          {{ $t("label.search")}}
+          <template #icon><search-outlined /></template>
+          {{ $t("label.search") }}
         </a-button>
-        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
-          {{ $t("label.reset")}}
-        </a-button> -->
+        <a-button
+          size="small"
+          style="width: 90px"
+          @click="handleReset(clearFilters)"
+        >
+          {{ $t("label.reset") }}
+        </a-button>
       </div>
     </template>
-    <template #filterIcon="filtered">
-      <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+    <template #customFilterIcon="{ filtered }">
+      <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
     </template>
     <!-- 검색 필터링 template-->
 
-    <template #nameRender="{ record }">
-      <router-link :to="{ path: '/accountDetail/' + record.name }">{{
-        record.name
-      }}</router-link>
-    </template>
-    <template #actionRender="{ record }">
-      <a-Popover placement="topLeft">
-        <template #content>
-          <Actions
-            v-if="actionFrom == 'AccountList'"
-            :action-from="actionFrom"
-            :account-info="record"
-            @fetchData="fetchRefresh"
-          />
-        </template>
-        <MoreOutlined />
-      </a-Popover>
+    <template #bodyCell="{ column, text, record }">
+      <template v-if="column.dataIndex === 'name'">
+        <router-link :to="{ path: '/accountDetail/' + text }">
+          {{ text }}
+        </router-link>
+      </template>
+      <template v-if="column.dataIndex === 'action'">
+        <a-Popover placement="topLeft">
+          <template #content>
+            <Actions
+              v-if="actionFrom == 'AccountList'"
+              :action-from="actionFrom"
+              :account-info="record"
+              @fetchData="fetchRefresh"
+            />
+          </template>
+          <MoreOutlined />
+        </a-Popover>
+      </template>
     </template>
   </a-table>
 </template>
@@ -80,7 +93,7 @@ export default defineComponent({
     Actions,
   },
   props: {},
-  emits: ["actionFromChange"],
+  emits: ["actionFromChange", "downloadListSetting"],
   setup() {
     const state = reactive({
       searchText: "",
@@ -112,12 +125,15 @@ export default defineComponent({
     return {
       timer: ref(null),
       pagination: {
-        pageSize: 10,
+        // pageSize: ref(20),
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
         showTotal: (total) =>
           this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
-        showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+        // showSizeChange: (current, pageSize) => {
+        //   console.log(current, pageSize);
+        //   this.pageSize = pageSize;
+        // }, // update display when changing the number of pages per page
       },
       userDataList: ref([]),
       UserListColumns: [
@@ -126,14 +142,15 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           width: "22%",
-          slots: {
-            customRender: "nameRender",
-            filterDropdown: "filterDropdown",
-            filterIcon: "filterIcon",
-          },
+          // slots: {
+          //   customRender: "nameRender",
+          //   filterDropdown: "filterDropdown",
+          //   filterIcon: "filterIcon",
+          // },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
-          sortDirections: ["descend", "ascend"],
+          defaultSortOrder: "ascend",
           ellipsis: true,
+          customFilterDropdown: true,
           onFilter: (value, record) =>
             record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
@@ -150,7 +167,7 @@ export default defineComponent({
           dataIndex: "action",
           align: "right",
           width: "3%",
-          slots: { customRender: "actionRender" },
+          // slots: { customRender: "actionRender" },
         },
         {
           title: this.$t("label.lastname"),
@@ -253,6 +270,10 @@ export default defineComponent({
               response.data.result !== undefined
             ) {
               this.userDataList = response.data.result;
+              this.userDataList = this.userDataList.filter(
+                (map) =>
+                  !["Administrator", "Guest", "krbtgt"].includes(map.name)
+              );
               this.userDataList.forEach((value, index, array) => {
                 this.userDataList[index].key = index;
               });
@@ -272,6 +293,8 @@ export default defineComponent({
           this.loading = false;
         });
       this.actionFrom = "AccountList";
+
+      this.$emit("downloadListSetting", this.userDataList);
     },
   },
 });
