@@ -74,6 +74,7 @@ import {
   MinusOutlined,
   PlusCircleOutlined,
   LoadingOutlined,
+  TranslationOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -137,5 +138,6 @@ app.component("CaretDownFilled", CaretDownFilled);
 app.component("MinusOutlined", MinusOutlined);
 app.component("PlusCircleOutlined", PlusCircleOutlined);
 app.component("LoadingOutlined", LoadingOutlined);
+app.component("TranslationOutlined", TranslationOutlined);
 
 app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

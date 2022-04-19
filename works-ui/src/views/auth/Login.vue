@@ -75,17 +75,18 @@
             </a-button>
           </a-form-item>
           <!--   언어변환 버튼 start     -->
-          <a-dropdown placement="bottomRight">
-            <a-button type="text" shape="circle" class="header-notice-button">
-              <font-awesome-icon icon="language" class="login-icon" />
-              <!-- <GlobalOutlined /> -->
-            </a-button>
+          <a-dropdown placement="bottomLeft">
+            <span>
+              <TranslationOutlined
+                class="login-translation"
+                style="font-size: 20px"
+              />
+            </span>
             <template #overlay>
               <a-menu
-                v-model:selected-keys="language"
+                v-model:selected-keys="formState.language"
+                class="header-dropdown-menu"
                 @click="setLocaleClick"
-                style="width: 100px"
-                mode="vertical"
               >
                 <a-menu-item key="ko" value="koKR"> 한국어 </a-menu-item>
                 <a-menu-item key="en" value="enUS"> English </a-menu-item>
@@ -115,7 +116,11 @@ export default defineComponent({
     const formState = reactive({
       id: ref(""),
       password: ref(""),
-      language: [],
+      language: [
+        sessionStorage.getItem("locale") == null
+          ? "ko"
+          : sessionStorage.getItem("locale"),
+      ],
     });
     const rules = {
       id: {
@@ -153,6 +158,7 @@ export default defineComponent({
     this.rules.id.message = this.$t("message.please.enter.your.id");
     this.rules.password.message = this.$t("message.please.enter.your.password");
     this.onClear();
+    this.setLocale(this.formState.language[0]);
   },
   beforeUnmount() {
     clearInterval(this.timer);
@@ -168,7 +174,7 @@ export default defineComponent({
     setLocale(localeValue) {
       this.$locale = localeValue;
       this.$i18n.locale = localeValue;
-      this.formState.language = localeValue;
+      this.formState.language = [localeValue];
       sessionStorage.setItem("locale", localeValue);
       //this.loadLanguageAsync(localeValue);
     },
@@ -195,6 +201,12 @@ export default defineComponent({
               ) {
                 store.dispatch("loginCommit", response.data);
                 sessionStorage.setItem("token", response.data.result.token);
+                sessionStorage.setItem(
+                  "locale",
+                  sessionStorage.getItem("locale") == null
+                    ? process.env.VUE_APP_I18N_LOCALE
+                    : sessionStorage.getItem("locale")
+                );
                 sessionStorage.setItem(
                   "userName",
                   response.data.result.username
@@ -380,13 +392,11 @@ export default defineComponent({
     }
   }
 }
-
 .user-layout-login {
   min-width: 260px;
   width: 368px;
   margin: 0 auto;
 }
-
 .user-layout-logo {
   width: 600px;
   height: 80px;
@@ -394,20 +404,8 @@ export default defineComponent({
   border-style: none;
   display: block;
 }
-// .user-layout-logo {
-//   margin: 0 auto 2rem;
-//   border-style: none;
-//   display: block;
-// }
-.login-button {
-  margin-top: 8px;
-  padding: 0 15px;
-  font-size: 16px;
-  height: 40px;
-  width: 100%;
-}
-
-.login-icon {
-  font-size: 30px;
+.login-translation {
+  font-size: 20px;
+  margin-top: 10px;
 }
 </style>
