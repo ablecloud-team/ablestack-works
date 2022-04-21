@@ -11,7 +11,7 @@ import 'package:shell/shell.dart';
 
 class LocalStorage {
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getTemporaryDirectory();
 
     return directory.path;
   }
@@ -26,43 +26,43 @@ class LocalStorage {
     return File('$path/tmp.reg');
   }
 
-  Future<File> writeReg(String path) async {
-    final file = await _localRegFile;
-    String hashString = "";
-    String addrString = "";
-    String userString = "";
-    String domString = "";
-    String regString = "";
-    if (Platform.isWindows) {
-      final uri = Uri.parse(path);
-      for (var query in uri.queryParameters.entries) {
-        if (kDebugMode) {
-          print("${query.key}: ${query.value}");
+  void writeReg(String path) {
+    _localRegFile.then((file) {
+      String hashString = "";
+      String addrString = "";
+      String userString = "";
+      String domString = "";
+      String regString = "";
+      if (Platform.isWindows) {
+        final uri = Uri.parse(path);
+        for (var query in uri.queryParameters.entries) {
+          // if (kDebugMode) {
+          //   print("${query.key}: ${query.value}");
+          // }
+          switch (query.key) {
+            case "hash":
+              hashString = query.value;
+              break;
+            case "full address":
+              addrString = query.value;
+              break;
+            case "username":
+              userString = query.value;
+              break;
+            case "domain":
+              domString = query.value;
+              break;
+          }
         }
-        switch (query.key) {
-          case "hash":
-            hashString = query.value;
-            break;
-          case "full address":
-            addrString = query.value;
-            break;
-          case "username":
-            userString = query.value;
-            break;
-          case "domain":
-            domString = query.value;
-            break;
+        String hasht = hashString;
+        String hash2 = "";
+        while (hasht.length > 2) {
+          hash2 += hasht.substring(0, 2) + ",";
+          hasht = hasht.substring(2);
         }
-      }
-      String hasht = hashString;
-      String hash2 = "";
-      while (hasht.length > 2) {
-        hash2 += hasht.substring(0, 2) + ",";
-        hasht = hasht.substring(2);
-      }
-      hash2 += hasht;
-      if(uri.queryParameters.containsKey("hash")) {
-        regString = """
+        hash2 += hasht;
+        if (uri.queryParameters.containsKey("hash")) {
+          regString = """
             Windows Registry Editor Version 5.00
             
             [HKEY_CURRENT_USER\\Software\\Microsoft\\Terminal Server Client\\LocalDevices]
@@ -73,27 +73,29 @@ class LocalStorage {
             "CertHash"=hex:$hash2
             "UsernameHint"="$userString@$domString"
         """
-            .trim();
+              .trim();
+        }
+        // String cmd0 =
+        //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\LocalDevices\" /f /v \"$addrString\" /d REG_DWORD 0000004c";
+        // String cmd1 =
+        //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f ";
+        // String cmd2 =
+        //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v CertHash /t REG_BINARY /d $hashString";
+        // String cmd3 =
+        //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v UsernameHint /t REG_SZ /d $userString@$domString";
+        // String cmd4 =
+        //     "import ${_localRegFile.then((value) => value.absolute)}";
       }
-      // String cmd0 =
-      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\LocalDevices\" /f /v \"$addrString\" /d REG_DWORD 0000004c";
-      // String cmd1 =
-      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f ";
-      // String cmd2 =
-      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v CertHash /t REG_BINARY /d $hashString";
-      // String cmd3 =
-      //     "add \"HKCU\\Software\\Microsoft\\Terminal Server Client\\Servers\\$addrString\" /f /v UsernameHint /t REG_SZ /d $userString@$domString";
-      // String cmd4 =
-      //     "import ${_localRegFile.then((value) => value.absolute)}";
-    }
-    // 파일 쓰기
-    return file.writeAsString(regString);
+      // 파일 쓰기
+      file.writeAsString(regString);
+    });
+    return;
   }
 
-  Future<File> writeRDP(String path) async {
-    final file = await _localRDPFile;
-    // String password = path;
-    var rdpstring = '''screen mode id:i:2
+  void writeRDP(String path) {
+    _localRDPFile.then((file) {
+      // String password = path;
+      var rdpstring = '''screen mode id:i:2
 use multimon:i:0
 desktopwidth:i:1884
 desktopheight:i:1027
@@ -141,48 +143,50 @@ rdgiskdcproxy:i:0
 kdcproxyname:s:
 prompt for credentials:i:0
 ''';
-    if (Platform.isWindows) {
-      final uri = Uri.parse(path);
-      for (var query in uri.queryParameters.entries) {
-        if (kDebugMode) {
-          print("${query.key}: ${query.value}");
-        }
-        if (query.key == "password 51") {
-          rdpstring += "${query.key}:b:${query.value}\n";
-        } else {
-          try {
-            var i = int.parse(query.value, radix: 10);
-            if (kDebugMode) {
-              print("i: $i");
+      if (Platform.isWindows) {
+        final uri = Uri.parse(path);
+        for (var query in uri.queryParameters.entries) {
+          // if (kDebugMode) {
+          //   print("${query.key}: ${query.value}");
+          // }
+          if (query.key == "password 51") {
+            rdpstring += "${query.key}:b:${query.value}\n";
+          } else {
+            try {
+              var i = int.parse(query.value, radix: 10);
+              // if (kDebugMode) {
+              //   print("i: $i");
+              // }
+              rdpstring += "${query.key}:i:${query.value}\n";
+            } catch (e) {
+              // if (kDebugMode) {
+              //   print("s: $e");
+              //   print("s: $query.value");
+              // }
+              rdpstring += "${query.key}:s:${query.value}\n";
             }
-            rdpstring += "${query.key}:i:${query.value}\n";
-          } catch (e) {
-            if (kDebugMode) {
-              print("s: $e");
-              print("s: $query.value");
-            }
-            rdpstring += "${query.key}:s:${query.value}\n";
           }
+          // if (!int.parse(query.value, radix: 16).isNaN){
+          //   rdpstring += "${query.key}:b:${query.value}\n";
+          // } else if (!int.parse(query.value, radix: 10).isNaN){
+          //   rdpstring += "${query.key}:i:${query.value}";
+          // } else{
+          //   rdpstring += "${query.key}:s:${query.value}";
+          // }
         }
-        // if (!int.parse(query.value, radix: 16).isNaN){
-        //   rdpstring += "${query.key}:b:${query.value}\n";
-        // } else if (!int.parse(query.value, radix: 10).isNaN){
-        //   rdpstring += "${query.key}:i:${query.value}";
-        // } else{
-        //   rdpstring += "${query.key}:s:${query.value}";
-        // }
+        if (kDebugMode) {
+          //   print("uri: $uri");
+          //   print("scheme: " + uri.scheme);
+          //   print("path: " + uri.path);
+          //   print("query: " + uri.query);
+          print("queries: " + uri.queryParameters.toString());
+          //   print("rdpstring: " + rdpstring);
+        }
       }
-      if (kDebugMode) {
-        print("uri: $uri");
-        print("scheme: " + uri.scheme);
-        print("path: " + uri.path);
-        print("query: " + uri.query);
-        print("queries: " + uri.queryParameters.toString());
-        print("rdpstring: " + rdpstring);
-      }
-    }
-    // 파일 쓰기
-    return file.writeAsString(rdpstring);
+      // 파일 쓰기
+      file.writeAsString(rdpstring);
+    });
+    return;
   }
 
   Future<bool> deleteRDP() async {
@@ -200,6 +204,7 @@ prompt for credentials:i:0
       return false;
     }
   }
+
   Future<bool> deleteReg() async {
     final file = await _localRegFile;
     try {
@@ -217,74 +222,98 @@ prompt for credentials:i:0
   }
 }
 
-Future<void> rdpLaunch(LocalStorage ls) async {
+void rdpLaunch(LocalStorage ls) {
   //var fs = const LocalFileSystem();
   var shell = Shell();
 
   if (Platform.isWindows) {
     //windows
 
-    final file = await ls._localRDPFile;
-    var path = file.path;
-    var open = await Future.wait([
-      shell.start('mstsc', arguments: [path])
-    ]);
+    ls._localRDPFile.then((file) {
+      var path = file.path;
+      shell.start('mstsc', arguments: [path]).then((open) {
+        //var ret =
+        open.expectExitCode(Iterable<int>.generate(255).toList());
+        //var pwd =
+        open.stdout.readAsString();
+        if (kDebugMode) {
+          print("ret: ${open.exitCode}");
+        }
 
-    //var ret =
-    await open[0].expectExitCode(Iterable<int>.generate(255).toList());
-    //var pwd =
-    await open[0].stdout.readAsString();
-    if (kDebugMode) {
-      print("ret: ${await open[0].exitCode}");
-    }
-    await ls.deleteRDP();
+        ls.deleteRDP().then((value){
+            exit(0);
+        });
 
-    // print('cwd: $pwd, ret: $ret');
-
+        // print('cwd: $pwd, ret: $ret');
+      });
+    });
   } else if (Platform.isAndroid) {
     //Android
     return;
   }
 }
-Future<void> regAdd(LocalStorage ls) async {
+
+void regAdd(LocalStorage ls) {
   //var fs = const LocalFileSystem();
   // var shell = Shell();
 
   if (Platform.isWindows) {
     //windows
 
+    ls._localRegFile.then((file) {
+      var path = file.path;
+      // var open = await Future.wait([
+      //   Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
+      // stdoutEncoding: const Utf8Codec(allowMalformed: true),
+      // stderrEncoding: const Utf8Codec(allowMalformed: true)).then((value) => ls.deleteReg())
+      // ]);
+      Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
+              stdoutEncoding: const Utf8Codec(allowMalformed: true),
+              stderrEncoding: const Utf8Codec(allowMalformed: true),
+              runInShell: true)
+          .then((open) {
+        // open.then((value) => ls.deleteReg());
+        // var ret =
+        //await open[0].expectExitCode(Iterable<int>.generate(255).toList());
+        // await ls.deleteReg();
 
-    final file = await ls._localRegFile;
-    var path = file.path;
-    // var open = await Future.wait([
-    //   Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
-    // stdoutEncoding: const Utf8Codec(allowMalformed: true),
-    // stderrEncoding: const Utf8Codec(allowMalformed: true)).then((value) => ls.deleteReg())
-    // ]);
-    ProcessResult open = await Process.run('C:\\Windows\\System32\\reg.exe', ['import', path],
-        stdoutEncoding: const Utf8Codec(allowMalformed: true),
-        stderrEncoding: const Utf8Codec(allowMalformed: true),
-        runInShell: true
-    );
-    // open.then((value) => ls.deleteReg());
-    // var ret =
-    //await open[0].expectExitCode(Iterable<int>.generate(255).toList());
-    // await ls.deleteReg();
+        if (kDebugMode) {
+          print("stdout reg: ${open.stdout}");
+          print("stderr reg: ${open.stderr}");
+          print("arg reg: ${open.stderr}");
+          // print("str reg: ${open.toString()}");
 
-
-    if (kDebugMode) {
-      print("stdout reg: ${await open.stdout}");
-      print("stderr reg: ${await open.stderr}");
-      print("arg reg: ${open.stderr}");
-      print("str reg: ${open.toString()}");
-
-      print("ret reg: ${open.exitCode}");
-    }
-
-    // print('cwd: $pwd, ret: $ret');
-
+          // print("ret reg: ${open.exitCode}");
+        }
+      });
+      // print('cwd: $pwd, ret: $ret');
+    });
   } else if (Platform.isAndroid) {
     //Android
     return;
   }
+}
+
+Future<String> rdpPassword(String password) async {
+  var shell = Shell();
+  String ret = '';
+
+  if (Platform.isWindows) {
+    //windows
+    var open = await Process.run('%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe', ["(\"$password\" | ConvertTo-SecureString -AsPlainText -Force) | ConvertFrom-SecureString;"],
+        stdoutEncoding: const Utf8Codec(allowMalformed: true),
+        stderrEncoding: const Utf8Codec(allowMalformed: true),
+        runInShell: true);
+        // .then((open) {
+      ret =  open.stdout;
+      print("password1: $ret");
+    // });
+    return ret;
+
+  }
+  if (kDebugMode) {
+    print("password: $ret");
+  }
+
+  return "not yet";
 }
