@@ -53,7 +53,7 @@
     </div>
 
     <div id="ID" class="CardItem">
-      <div class="ItemName">ID</div>
+      <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
         {{ workspaceInfo.uuid }}
       </div>
@@ -116,8 +116,6 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   components: {},
   props: {

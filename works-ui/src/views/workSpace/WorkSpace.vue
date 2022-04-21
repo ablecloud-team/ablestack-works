@@ -204,7 +204,6 @@ import WorkSpaceList from "./WorkSpaceList";
 import { defineComponent, reactive, ref } from "vue";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
-
 export default defineComponent({
   name: "WorkSpace",
   components: {
@@ -296,7 +295,6 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      // console.log(val, obj);
       this.actionFrom = "Workspace";
       setTimeout(() => {
         this.actionFrom = val;

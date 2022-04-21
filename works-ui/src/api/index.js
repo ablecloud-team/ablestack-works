@@ -34,8 +34,9 @@ function setInterceptors(instance) {
 function worksApiAuth() {
   const instance = axios.create({
     //baseURL: process.env.VUE_APP_API_URL,
-    baseURL: process.env.VUE_APP_API_URL == "" ? "http://" + window.location.hostname + ":8082" : process.env.VUE_APP_API_URL,
+    baseURL: "http://" + (process.env.VUE_APP_API_URL == "" ? window.location.hostname : process.env.VUE_APP_API_URL) + ":" + process.env.VUE_APP_API_PORT,
     withCredentials: true,
+    timeout: 5000,
   });
   return setInterceptors(instance);
 }

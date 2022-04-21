@@ -1,24 +1,19 @@
 import { createApp } from "vue";
-import VueCryptojs from "vue-cryptojs"
+import VueCryptojs from "vue-cryptojs";
 import Antd from "ant-design-vue";
 import "ant-design-vue/dist/antd.css";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-import {
-  faCameraRetro,
-  faUserSecret,
-  faLanguage,
-} from "@fortawesome/free-solid-svg-icons";
-import { faUbuntu, faCentos } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-library.add(faCameraRetro);
-library.add(faUbuntu);
-library.add(faCentos);
-library.add(faUserSecret);
-library.add(faLanguage);
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { fas } from "@fortawesome/free-solid-svg-icons";
+import { far } from "@fortawesome/free-regular-svg-icons";
+import { fab } from "@fortawesome/free-brands-svg-icons";
+library.add(far);
+library.add(fas);
+library.add(fab);
 import {
   BackwardFilled,
   HomeFilled,
@@ -74,6 +69,11 @@ import {
   CloseCircleOutlined,
   SmileOutlined,
   FrownOutlined,
+  UploadOutlined,
+  CaretDownFilled,
+  MinusOutlined,
+  PlusCircleOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -132,5 +132,10 @@ app.component("CheckCircleOutlined", CheckCircleOutlined);
 app.component("CloseCircleOutlined", CloseCircleOutlined);
 app.component("SmileOutlined", SmileOutlined);
 app.component("FrownOutlined", FrownOutlined);
+app.component("UploadOutlined", UploadOutlined);
+app.component("CaretDownFilled", CaretDownFilled);
+app.component("MinusOutlined", MinusOutlined);
+app.component("PlusCircleOutlined", PlusCircleOutlined);
+app.component("LoadingOutlined", LoadingOutlined);
 
 app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

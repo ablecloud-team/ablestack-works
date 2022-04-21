@@ -360,7 +360,7 @@ export default defineComponent({
     this.timer = setInterval(() => {
       //60초 자동 갱신
       this.fetchData();
-    }, 30000);
+    }, 60000);
   },
   beforeUnmount() {
     clearInterval(this.timer);

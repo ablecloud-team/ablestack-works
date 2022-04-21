@@ -18,6 +18,7 @@ const (
 	WorksDc    = "Works-DC"
 	WorksSamba = "Works-Samba"
 	Mold       = "Mold"
+	Guacamole  = "Guacamole"
 
 	Trace = "Trace"
 	Debug = "Debug"
@@ -27,6 +28,7 @@ const (
 
 	VMStart   = "VMStart"
 	VMStop    = "VMStop"
+	VMReboot  = "VMReboot"
 	VMsDeploy = "VMsDeploy"
 	VMDestroy = "VMDestroy"
 

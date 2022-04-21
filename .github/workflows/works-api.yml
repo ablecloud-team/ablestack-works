@@ -1,0 +1,45 @@
+name: works-api workflow
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - '.github/workflows/works-api.yml'
+      - 'works-api/**'
+  #pull_request:
+  #  branches: [ master ]
+  #  paths:
+  #    - '.github/workflows/works-api.yml'
+  #    - 'works-api/**'
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # working 위치
+      working-directory: ./works-api
+      GOARCH: arm64
+      GOOS: linux
+      
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Go Build
+      run: env GOOS=${{ env.GOOS }};GOARCH=${{ env.GOARCH }} go build -o dist/works-api -v 
+      working-directory: ${{ env.working-directory }}
+
+    - name: Go Test
+      run: env GOOS=${{ env.GOOS }};GOARCH=${{ env.GOARCH }} go test .
+      working-directory: ${{ env.working-directory }}
+      
+    # build된 소스를 다운로드 할수 있도록 artifact upload 수행
+    - name: Build file upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: Build-Artifact(works-api)
+        path: works-api/dist/works-api

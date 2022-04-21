@@ -57,3 +57,4 @@ app.*.map.json
 **/android/app/profile
 **/android/app/release
 
+works-api/docs/docs.go

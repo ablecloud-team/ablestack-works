@@ -79,7 +79,7 @@ func main() {
 
 			v1.GET("/workspace", getWorkspaces)
 			v1.GET("/workspace/:workspaceUuid", getWorkspacesDetail)
-			v1.POST("/workspace", putWorkspaces)
+			v1.POST("/workspace", postWorkspaces)
 			v1.DELETE("/workspace/:workspaceUuid", deleteWorkspaces)
 
 			v1.GET("/offering", getOffering)
@@ -109,6 +109,8 @@ func main() {
 			v1.DELETE("/group/:groupName", delGroupDetail)
 			v1.DELETE("/group/:groupName/:userName", delDeleteUserToGroup)
 			v1.PUT("/group/:groupName/:userName", putAddUserToGroup)
+
+			v1.GET("/userdesktop/:userName", getUserDesktop)
 		}
 		test := api.Group("/test")
 		{

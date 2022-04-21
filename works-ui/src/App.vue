@@ -4,6 +4,12 @@
 
 <style lang="less">
 #app {
-  height: 100%;
+  overflow: "hidden";
+  position: relative;
+  width: calc(100%);
+  height: calc(100%);
+}
+body {
+  width: calc(100%) !important;
 }
 </style>

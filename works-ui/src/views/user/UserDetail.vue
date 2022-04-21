@@ -71,7 +71,7 @@ export default defineComponent({
     },
     async fetchData() {
       await worksApi
-        .get("/api/v1/user/" + sessionStorage.getItem("username"))
+        .get("/api/v1/user/" + sessionStorage.getItem("userName"))
         .then((response) => {
           if (response.status == 200) {
             this.accountInfo = response.data.result;
