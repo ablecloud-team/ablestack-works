@@ -19,6 +19,10 @@ var rdp;
 String Status = "";
 
 void main(List<String> args) async {
+  if (args.isEmpty){
+    print("need args");
+    exit(0);
+  }
   WidgetsFlutterBinding.ensureInitialized();
   //runApp(const MyApp());
   // doWhenWindowReady(() {
