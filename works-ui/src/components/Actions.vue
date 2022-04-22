@@ -530,13 +530,6 @@ export default defineComponent({
       });
     },
     funcEndMessage() {
-      console.log(
-        this.sucMessage,
-        this.failMessage,
-        this.succCnt,
-        this.failCnt
-      );
-
       message.destroy();
       if (this.succCnt > 0) {
         message.success(

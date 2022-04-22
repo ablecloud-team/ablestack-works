@@ -7,3 +7,9 @@ works-ui/dist
 .DS_Store
 .gitignore
 works-ui/target
+samba-ad.zip
+*.exe
+*.log
+*.msi
+*.zip
+works-api/docs/docs.go
