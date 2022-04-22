@@ -12,18 +12,21 @@ import 'package:shell/shell.dart';
 class LocalStorage {
   Future<String> get _localPath async {
     final directory = await getTemporaryDirectory();
+    final abledirectory = Directory('${directory.path}\\ablecloud');
 
-    return directory.path;
+      abledirectory.createSync(recursive: true);
+
+    return abledirectory.path;
   }
 
   Future<File> get _localRDPFile async {
     final path = await _localPath;
-    return File('$path/tmp.rdp');
+    return File('$path\\tmp.rdp');
   }
 
   Future<File> get _localRegFile async {
     final path = await _localPath;
-    return File('$path/tmp.reg');
+    return File('$path\\tmp.reg');
   }
 
   void writeReg(String path) {
@@ -87,7 +90,8 @@ class LocalStorage {
         //     "import ${_localRegFile.then((value) => value.absolute)}";
       }
       // 파일 쓰기
-      file.writeAsString(regString);
+      file.writeAsStringSync(regString);
+
     });
     return;
   }
@@ -184,7 +188,7 @@ prompt for credentials:i:0
         }
       }
       // 파일 쓰기
-      file.writeAsString(rdpstring);
+      file.writeAsStringSync(rdpstring);
     });
     return;
   }
@@ -192,7 +196,7 @@ prompt for credentials:i:0
   Future<bool> deleteRDP() async {
     final file = await _localRDPFile;
     try {
-      file.delete();
+      file.deleteSync();
       if (kDebugMode) {
         print("deleted rdp");
       }
@@ -208,7 +212,7 @@ prompt for credentials:i:0
   Future<bool> deleteReg() async {
     final file = await _localRegFile;
     try {
-      file.delete();
+      file.deleteSync();
       if (kDebugMode) {
         print("deleted reg");
       }
@@ -231,20 +235,24 @@ void rdpLaunch(LocalStorage ls) {
 
     ls._localRDPFile.then((file) {
       var path = file.path;
-      shell.start('mstsc', arguments: [path]).then((open) {
+      shell.start('mstsc', arguments: [path]).then((open) async {
         //var ret =
-        open.expectExitCode(Iterable<int>.generate(255).toList());
-        //var pwd =
-        open.stdout.readAsString();
-        if (kDebugMode) {
-          print("ret: ${open.exitCode}");
-        }
+        await open
+            .expectExitCode(Iterable<int>.generate(255).toList())
+            .then((value) {
+          //var pwd =
+          open.stdout.readAsString();
+          if (kDebugMode) {
+            print("ret: ${value}");
+          }
 
-        ls.deleteRDP().then((value){
-            exit(0);
         });
-
         // print('cwd: $pwd, ret: $ret');
+        ls.deleteRDP().then((value) {
+          ls.deleteReg().then((value) {
+            exit(0);
+          });
+        });
       });
     });
   } else if (Platform.isAndroid) {
@@ -300,16 +308,19 @@ Future<String> rdpPassword(String password) async {
 
   if (Platform.isWindows) {
     //windows
-    var open = await Process.run('%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe', ["(\"$password\" | ConvertTo-SecureString -AsPlainText -Force) | ConvertFrom-SecureString;"],
+    var open = await Process.run(
+        '%SystemRoot%\\system32\\WindowsPowerShell\\v1.0\\powershell.exe',
+        [
+          "(\"$password\" | ConvertTo-SecureString -AsPlainText -Force) | ConvertFrom-SecureString;"
+        ],
         stdoutEncoding: const Utf8Codec(allowMalformed: true),
         stderrEncoding: const Utf8Codec(allowMalformed: true),
         runInShell: true);
-        // .then((open) {
-      ret =  open.stdout;
-      print("password1: $ret");
+    // .then((open) {
+    ret = open.stdout;
+    print("password1: $ret");
     // });
     return ret;
-
   }
   if (kDebugMode) {
     print("password: $ret");
