@@ -39,7 +39,6 @@
         >
           <a-form-item has-feedback name="id">
             <a-input
-              :disabled="disabled"
               v-model:value="formState.id"
               :placeholder="$t('label.user.id')"
               size="large"
@@ -52,11 +51,11 @@
 
           <a-form-item has-feedback name="password">
             <a-input-password
-              :disabled="disabled"
               v-model:value="formState.password"
               type="password"
               :placeholder="$t('label.password')"
               size="large"
+              autocomplete="off"
             >
               <template #prefix>
                 <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
@@ -65,7 +64,6 @@
           </a-form-item>
           <a-form-item style="margin-bottom: 0">
             <a-button
-              :disabled="disabled"
               type="primary"
               block
               class="login-button"

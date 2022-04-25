@@ -415,12 +415,7 @@ export default defineComponent({
   data(props) {
     return {
       actionRef: ref(""),
-      workspaceInfo: ref(props.workspaceInfo),
       workspaceName: ref(""),
-      networkList: ref(props.networkList),
-      vmDiskInfo: ref(props.vmDiskInfo),
-      vmList: ref(props.vmList),
-      groupInfo: ref(props.groupInfo),
       dataList: ref([]),
       loading: ref(false),
       addAbleUserList: ref([]),

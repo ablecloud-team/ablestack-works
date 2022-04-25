@@ -1,3 +1,6 @@
+
+
+
 <template>
   <div id="content-layout">
     <a-layout>
@@ -30,8 +33,8 @@
             >
               <a-card
                 :title="workspace.name + '(' + workspace.description + ')'"
-                bodyStyle="margin: 1px;"
-                >
+                :bodyStyle="{ margin: '1px' }"
+              >
                 <a-row :gutter="4">
                   <a-col
                     v-for="vm in workspace.instanceList"
@@ -101,7 +104,7 @@
                                 viewBox="0 0 24 24"
                                 @click="
                                   workspace.policy.rdp_access_allow == '1'
-                                    ? connectRdp(workspace.uuid, vm.uuid)
+                                    ? connectRdpClient(workspace.uuid, vm.uuid)
                                     : false
                                 "
                               >
@@ -281,12 +284,17 @@
 
 <script>
 import { defineComponent, ref, TrackOpTypes } from "vue";
+import customProtocolCheck from "custom-protocol-check";
 import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
 import axios from "axios";
 import { worksApi } from "@/api/index";
 import { message } from "ant-design-vue";
+const hostname =
+  process.env.VUE_APP_API_URL == ""
+    ? window.location.hostname
+    : process.env.VUE_APP_API_URL;
 export default defineComponent({
   name: "UserDesktop",
   components: {
@@ -312,6 +320,7 @@ export default defineComponent({
       dataList: ref([]),
       succCnt: ref(0),
       failCnt: ref(0),
+      osPass: ref(false),
     };
   },
   created() {
@@ -320,6 +329,9 @@ export default defineComponent({
       //60초 자동 갱신
       this.fetchData();
     }, 60000);
+  },
+  mounted() {
+    this.funcOsCheck();
   },
   methods: {
     fetchRefresh() {
@@ -367,7 +379,15 @@ export default defineComponent({
       // document.getElementById(val).style.display = "none";
       // document.getElementById(val).style.display = "none";
     },
-    async connectRdp(workspaceUuid, vmUuid) {
+    async connectRdpClient(workspaceUuid, vmUuid) {
+      if (!this.osPass) {
+        message.warning(this.$t("message.userdesktop.rdp.connect.os.limit"));
+        return false;
+      }
+      const paramArr = this.dataList
+        .filter((dl) => dl.uuid === workspaceUuid)[0]
+        .instanceList.filter((il) => il.uuid === vmUuid)[0];
+
       await worksApi
         .get(
           "/api/v1/connection/rdp/" +
@@ -375,69 +395,54 @@ export default defineComponent({
             "/" +
             sessionStorage.getItem("userName")
         )
-        .then((response) => {
-          if (response.status == 200) {
-            console.log(response.data.instance.public_port);
+        .then((res) => {
+          if (res.status == 200) {
+            const url =
+              "worksapp://works/?" +
+              "full address=" +
+              hostname +
+              "&server port=" +
+              res.data.instance.public_port +
+              "&domain=" +
+              sessionStorage.getItem("domainName") +
+              "&username=" +
+              sessionStorage.getItem("userName") +
+              "&password=" +
+              res.data.instance.password +
+              "&hash=" +
+              res.data.instance.hash;
+
+            console.log(url);
+            customProtocolCheck(
+              url,
+              () => {
+                //worksapp 프로토콜이 설치안됨
+                message.warning(
+                  this.$t("message.userdesktop.rdp.connect.client.notinstall")
+                );
+                this.downloadRdpClient("works-client.zip");
+              },
+              () => {},
+              100
+            );
           } else {
             message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
           console.log(error);
-          message.error(this.$t("message.response.data.fail"));
+          message.error(this.$t("fail"));
         })
         .finally(() => {});
-
-      const paramArr = this.dataList
-        .filter((dl) => dl.uuid === workspaceUuid)[0]
-        .instanceList.filter((il) => il.uuid === vmUuid)[0];
-      console.log(paramArr);
-
-      // const agent = navigator.userAgent.toLowerCase();
-      // // console.log(navigator);
-      // // console.log(window);
-      // if (
-      //   (navigator.appName == "Netscape" &&
-      //     navigator.userAgent.search("Trident") != -1) ||
-      //   agent.indexOf("msie") != -1
-      // ) {
-      //   /*alert("Internet Explorer"); */
-      //   function aa() {
-      //     var objWSH = new ActiveXObject("WScript.Shell");
-      //     var retval = objWSH.Run("C:/Windows/SysWOW64/notepad.exe", 1, true);
-      //   }
-      // } else if (agent.indexOf("chrome") != -1) {
-      //   function aa() {
-      //     /*alert("HAVE TO INSTALL."); */
-      //     var objWSH = new ActiveXObject("WScript.Shell");
-      //     var retval = objWSH.Run("C:/Windows/SysWOW64/notepad.exe", 1, true);
-      //   }
-      // }
-
-      // let rdpParam = new URLSearchParams();
-      // rdpParam.append("full address", paramArr.ipaddress);
-      // rdpParam.append("port", paramArr.port || 3389);
-      // rdpParam.append("domain", sessionStorage.getItem("domainName"));
-      // rdpParam.append("username", sessionStorage.getItem("userName"));
-      // rdpParam.append("password 51", paramArr.password);
-
-      // await axios
-      //   .get("worksapp://works/", rdpParam)
-      //   .then((response) => {})
-      //   .catch((error) => {})
-      //   .finally(() => {});
-
-      // try {
-      //   const link = document.createElement("a");
-      //   link.setAttribute("href", "worksapp://aa.aaa.com");
-      //   // link.setAttribute("download", "");
-      //   link.style.display = "none";
-      //   document.body.appendChild(link);
-      //   link.click();
-      //   document.body.removeChild(link);
-      // } catch (error) {
-      //   console.log(error);
-      // }
+    },
+    downloadRdpClient(filename) {
+      const downlink = document.createElement("a");
+      downlink.setAttribute("href", "/client/" + filename);
+      downlink.setAttribute("download", filename);
+      downlink.style.display = "none";
+      document.body.appendChild(downlink);
+      downlink.click();
+      document.body.removeChild(downlink);
     },
     connectConsole(workspaceUuid, vmUuid) {
       // console.log(worksId, vmId);
@@ -543,6 +548,102 @@ export default defineComponent({
       this.failCnt = 0;
       this.succCnt = 0;
     },
+    funcOsCheck() {
+      var os,
+        ua = navigator.userAgent;
+
+      if (ua.indexOf("Windows") != -1) {
+        os = "Windows";
+        this.osPass = true;
+      } else if (
+        ua.indexOf("iPad") != -1 ||
+        ua.indexOf("iPhone") != -1 ||
+        ua.indexOf("iPod") != -1
+      ) {
+        os = "Apple iOS";
+        this.osPass = false;
+      } else if (ua.indexOf("Android" != -1)) {
+        os = "Android OS";
+        this.osPass = false;
+      } else if (ua.match(/Mac|PPC/)) {
+        os = "Mac";
+        this.osPass = false;
+      } else if (ua.match(/Linux/)) {
+        os = "Linux";
+        this.osPass = false;
+      } else if (ua.match(/(Free|Net|Open)BSD/)) {
+        os = RegExp.$1 + "BSD";
+        this.osPass = false;
+      } else if (ua.match(/SunOS/)) {
+        os = "Solaris";
+        this.osPass = false;
+      }
+      //자세한 os 분류가 필요할때 사용
+      // if (ua.match(/Win(dows )?NT 6\.0/)) {
+      //   os = "Windows Vista";
+      //   this.osPass = true;
+      // } else if (ua.match(/Win(dows )?(NT 5\.1|XP)/)) {
+      //   os = "Windows XP";
+      //   this.osPass = true;
+      // } else {
+      //   if (
+      //     ua.indexOf("Windows NT 5.1") != -1 ||
+      //     ua.indexOf("Windows XP") != -1
+      //   ) {
+      //     os = "Windows XP";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 7.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.1") != -1
+      //   ) {
+      //     os = "Windows 7";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 8.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.2") != -1
+      //   ) {
+      //     os = "Windows 8";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 8.1") != -1 ||
+      //     ua.indexOf("Windows NT 6.3") != -1
+      //   ) {
+      //     os = "Windows 8.1";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 10.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.4") != -1
+      //   ) {
+      //     os = "Windows 10";
+      //     this.osPass = true;
+      //   } else if (ua.match(/Win(dows )?NT( 4\.0)?/)) {
+      //     os = "Windows NT";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("iPad") != -1 ||
+      //     ua.indexOf("iPhone") != -1 ||
+      //     ua.indexOf("iPod") != -1
+      //   ) {
+      //     os = "Apple iOS";
+      //     this.osPass = false;
+      //   } else if (ua.indexOf("Android" != -1)) {
+      //     os = "Android OS";
+      //     this.osPass = false;
+      //   } else if (ua.match(/Mac|PPC/)) {
+      //     os = "Mac";
+      //     this.osPass = false;
+      //   } else if (ua.match(/Linux/)) {
+      //     os = "Linux";
+      //     this.osPass = false;
+      //   } else if (ua.match(/(Free|Net|Open)BSD/)) {
+      //     os = RegExp.$1 + "BSD";
+      //     this.osPass = false;
+      //   } else if (ua.match(/SunOS/)) {
+      //     os = "Solaris";
+      //     this.osPass = false;
+      //   }
+      // }
+    },
   },
 });
 </script>
@@ -591,3 +692,4 @@ export default defineComponent({
   margin-right: 8px;
 }
 </style>
+

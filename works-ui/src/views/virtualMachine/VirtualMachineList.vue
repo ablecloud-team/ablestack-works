@@ -8,7 +8,6 @@
     :row-class-name="
       (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
     "
-    :bordered="bordered ? bordered : false"
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
     :row-selection="{

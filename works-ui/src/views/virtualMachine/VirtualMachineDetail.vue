@@ -97,10 +97,11 @@ export default defineComponent({
           this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
           this.vmDiskInfo =
             response.data.result.instanceInstanceVolumeInfo.volume[0];
-          this.cpuused =
+          this.cpuused = parseFloat(
             response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
               "%"
-            )[0];
+            )[0]
+          );
         } else {
           message.error(this.$t("message.response.data.fail"));
         }
