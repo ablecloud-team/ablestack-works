@@ -69,9 +69,6 @@ func setup() {
 
 }
 
-
-
-
 // @title Ablecloud Works Domain-Controller API
 // @version 1.0
 // @description 이 API는 Ablecloud Works의 Domain Controller(DC)를 제어하는 역할을 합니다.
@@ -104,7 +101,6 @@ func main() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-
 	checkStatus()
 	//testLDAP()
 
@@ -128,7 +124,7 @@ func main() {
 		v1 := api.Group("/v1")
 		{
 			v1.GET("/version", func(c *gin.Context) {
-				c.JSON(http.StatusOK, gin.H{"version": Version, "Bootstraped":ADconfig.BootStraped})
+				c.JSON(http.StatusOK, gin.H{"version": Version, "Bootstraped": ADconfig.BootStraped})
 			})
 			v1.POST("/login", loginHandler)
 
@@ -163,21 +159,22 @@ func main() {
 			v1.DELETE("/computer/:computername/:groupname", delComputerFromGroupHandler)
 			v1.GET("/computer/", listComputerHandler)
 			v1.GET("/computer/:computername", getComputerHandler)
+			v1.DELETE("/computer/:computername", delComputerHandler)
 			/*
-			backup-gpo usb_block
-			import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded
+				backup-gpo usb_block
+				import-gpo -BackupGpoName usb_block -TargetName usb_block_ -Path 'C:\reports\' -CreateIfNeeded
 
-			New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
-			Remove-GPLink  -name usb_block -target "ou=dev3,dc=dc1,dc=local"
-			Get-GPInheritance -Target "ou=dev3,dc=dc1,dc=local"
+				New-GPLink -name usb_block -Target "ou=dev3,dc=dc1,dc=local"
+				Remove-GPLink  -name usb_block -target "ou=dev3,dc=dc1,dc=local"
+				Get-GPInheritance -Target "ou=dev3,dc=dc1,dc=local"
 
-			clipboard_block:{2020CB72-2E18-420A-97FC-887557FB916A}
-			usb_block:{4ACB1953-468E-4AA1-9203-CF8417197981}
-			share_block:{05df62ba-64f1-4b73-be1c-b63e76bf3075}
-			remotefx:{0f35f16e-9eaf-4b1a-9507-fa9dfe0e0028}
-			install_block:{91ad635c-2486-4dd4-ba0c-7a361ba947d8}
-			update_block:{142cae05-9f35-4a33-8da5-ce00af5d2af0}
-			 */
+				clipboard_block:{2020CB72-2E18-420A-97FC-887557FB916A}
+				usb_block:{4ACB1953-468E-4AA1-9203-CF8417197981}
+				share_block:{05df62ba-64f1-4b73-be1c-b63e76bf3075}
+				remotefx:{0f35f16e-9eaf-4b1a-9507-fa9dfe0e0028}
+				install_block:{91ad635c-2486-4dd4-ba0c-7a361ba947d8}
+				update_block:{142cae05-9f35-4a33-8da5-ce00af5d2af0}
+			*/
 
 			//초기화
 			v1.PATCH("/", bootStrapHandler)
@@ -195,7 +192,6 @@ func main() {
 
 			//그룹에 해제
 			v1.DELETE("/policy/:policyname/:groupname", detachPolicyHandler)
-
 
 			v1.GET("/status", statusHandler)
 			/* TODO:
@@ -222,4 +218,3 @@ func main() {
 	err = router.Run("0.0.0.0:8083")
 	fmt.Println(err)
 }
-

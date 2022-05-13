@@ -24,13 +24,16 @@ var doc = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/login": {
-            "put": {
+            "post": {
                 "description": "사용자 로그인 하는 API 입니다.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Login"
                 ],
                 "summary": "사용자 로그인 하는 API",
                 "parameters": [
@@ -90,6 +93,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Connection"
+                ],
                 "summary": "instance 에 사용자를 할당하는 API",
                 "parameters": [
                     {
@@ -118,6 +124,231 @@ var doc = `{
                 }
             }
         },
+        "/api/v1/application": {
+            "post": {
+                "description": "워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Application 가상화를 등록하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace 의 Uuid",
+                        "name": "workspaceUuid",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application 이름",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application 경로",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application workingDirectory",
+                        "name": "workingDirectory",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application RegApplicationServer",
+                        "name": "RegApplicationServer",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Application 가상화를 등록하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Application 이름",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application 경로",
+                        "name": "path",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application workingDirectory",
+                        "name": "workingDirectory",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Application RegApplicationServer",
+                        "name": "RegApplicationServer",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/application/:workspaceUuid": {
+            "get": {
+                "description": "Application List 를 조회하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Application List  조회하는 API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/applicationServer/:workspaceUuid": {
+            "get": {
+                "description": "Application List 를 조회하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Application"
+                ],
+                "summary": "Application List  조회하는 API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/configuration": {
+            "get": {
+                "description": "Works 의 환경 설정을 조회하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Configurationt"
+                ],
+                "summary": "Works 의 환경 설정을 조회하는 API",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/configuration/:id": {
+            "patch": {
+                "description": "Works 의 환경 설정을 변경하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Configuration"
+                ],
+                "summary": "Works 의 환경 설정을 변경하는 API",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "설정 값 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "변경될 설정 값",
+                        "name": "value",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/connection/:instanceUuid": {
             "delete": {
                 "description": "instance 에 사용자를 할당하는 API 입니다.",
@@ -126,6 +357,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Connection"
                 ],
                 "summary": "instance 에 사용자를 할당하는 API",
                 "parameters": [
@@ -156,6 +390,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Connection"
                 ],
                 "summary": "instance 에 사용자를 할당하는 API",
                 "parameters": [
@@ -194,6 +431,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Dashboard"
+                ],
                 "summary": "dashboard 조회하는 API",
                 "responses": {
                     "200": {
@@ -215,6 +455,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Group"
+                ],
                 "summary": "그룹 리스트를 조회 하는 API",
                 "responses": {
                     "200": {
@@ -233,6 +476,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Group"
                 ],
                 "summary": "그룹을 삭제하는 API",
                 "parameters": [
@@ -264,6 +510,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Group"
+                ],
                 "summary": "그룹 리스트를 조회 하는 API",
                 "parameters": [
                     {
@@ -293,6 +542,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Group"
                 ],
                 "summary": "그룹을 삭제하는 API",
                 "parameters": [
@@ -328,6 +580,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Group"
                 ],
                 "summary": "그룹에서 유저를 삭제하는 API",
                 "parameters": [
@@ -366,6 +621,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Handshake"
+                ],
                 "summary": "instance 의 handshake 를 재실행 하는 API",
                 "parameters": [
                     {
@@ -402,6 +660,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Instances"
                 ],
                 "summary": "워크스페이스의 instance 를 추가하는 API",
                 "parameters": [
@@ -440,6 +701,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Instances"
+                ],
                 "summary": "instance 의 상태 변경하는 API",
                 "parameters": [
                     {
@@ -477,6 +741,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Instances"
+                ],
                 "summary": "워크스페이스의 instance 를 조회하는 API",
                 "parameters": [
                     {
@@ -506,6 +773,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "Instances"
                 ],
                 "summary": "워크스페이스의 instance 를 추가하는 API",
                 "parameters": [
@@ -537,6 +807,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Login"
+                ],
                 "summary": "사용자 로그아웃 하는 API",
                 "responses": {
                     "200": {
@@ -557,6 +830,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "offering"
                 ],
                 "summary": "템플릿 및 각종 오퍼링을 조회하는 API",
                 "responses": {
@@ -579,6 +855,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "User"
+                ],
                 "summary": "사용자 토큰을 조회하는 API",
                 "responses": {
                     "200": {
@@ -600,6 +879,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "User"
+                ],
                 "summary": "사용자 리스트를 조회 하는 API",
                 "responses": {
                     "200": {
@@ -618,6 +900,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "User"
                 ],
                 "summary": "사용자 생성하는 하는 API",
                 "parameters": [
@@ -695,6 +980,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "User"
+                ],
                 "summary": "사용자 상세조회 하는 API",
                 "parameters": [
                     {
@@ -722,6 +1010,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "User"
                 ],
                 "summary": "사용자 리스트를 조회 하는 API",
                 "parameters": [
@@ -753,6 +1044,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "workspaces"
+                ],
                 "summary": "워크스페이스 리스트를 조회하는 API",
                 "responses": {
                     "200": {
@@ -764,13 +1058,16 @@ var doc = `{
                     }
                 }
             },
-            "put": {
+            "post": {
                 "description": "워크스페이를 추가하는 API 입니다.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "workspaces"
                 ],
                 "summary": "워크스페이스를 추가하는 API",
                 "parameters": [
@@ -835,6 +1132,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "workspaces"
+                ],
                 "summary": "워크스페이스를 추가하는 API",
                 "parameters": [
                     {
@@ -864,6 +1164,9 @@ var doc = `{
                 ],
                 "produces": [
                     "application/json"
+                ],
+                "tags": [
+                    "workspaces"
                 ],
                 "summary": "워크스페이스 리스트를 조회하는 API",
                 "parameters": [
@@ -895,6 +1198,9 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "workspacesAgent"
+                ],
                 "summary": "워크스페이스를 추가하는 API",
                 "parameters": [
                     {
@@ -919,6 +1225,30 @@ var doc = `{
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/serverCheck": {
+            "get": {
+                "description": "Works 서비스와 관련된 서버의 상태를 조회하는 API 입니다.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ServerCheck"
+                ],
+                "summary": "Works 서비스와 관련된 서버의 상태를 조회하는 API",
                 "responses": {
                     "200": {
                         "description": "OK",

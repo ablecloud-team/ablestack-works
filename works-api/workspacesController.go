@@ -138,11 +138,11 @@ func getOffering(c *gin.Context) {
 	paramsComputerOffering := []MoldParams{}
 	paramsTemplate := []MoldParams{}
 	//{"templatefilter": "all"},
-	result := map[string]interface{}{}
+	//result := map[string]interface{}{}
 	templateResult := getListDesktopMasterVersions(paramsTemplate)
 	serviceOfferingResult := getComputeOffering(paramsComputerOffering)
 	c.JSON(returnCode, gin.H{
-		"result":              result,
+		//"result":              result,
 		"templateList":        templateResult,
 		"serviceOfferingList": serviceOfferingResult,
 	})
@@ -588,7 +588,7 @@ func deleteConnection(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Tags Instances
-// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다."
+// @Param action path string true "action 해당 값은 [VMStart, VMStop, VMDestroy, VMReboot] 으로 보내야 합니다."
 // @Param instanceUuid path string true "Instance UUID"
 // @Router /api/v1/instance/:action/:instanceUuid [PATCH]
 // @Success 200 {object} map[string]interface{}

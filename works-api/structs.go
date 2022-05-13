@@ -28,6 +28,7 @@ const (
 
 	VMStart   = "VMStart"
 	VMStop    = "VMStop"
+	VMReboot  = "VMReboot"
 	VMsDeploy = "VMsDeploy"
 	VMDestroy = "VMDestroy"
 
