@@ -160,6 +160,8 @@ func getOffering(c *gin.Context) {
 // @Param computeOfferingUuid path string true "워크스페이스에서 사용할 Compute offering UUID"
 // @Param templateUuid path string true "워크스페이스에서 사용할 Template UUID"
 // @Param shared path bool true "워크스페이스에서 Shard 여부 전용이면 'false', 공용이면 'true'"
+// @Param rdpPort path int true "워크스페이스의 데스크탑의 RDP 접속 Port"
+// @Param rdpAccessAllow path int true "워크스페이스의 RDP 접속 허용 여부"
 // @Router /api/v1/workspace [POST]
 // @Success 200 {object} map[string]interface{}
 func postWorkspaces(c *gin.Context) {
@@ -176,6 +178,11 @@ func postWorkspaces(c *gin.Context) {
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
 	workspace.Postfix = 0
+	workspace.Policy.RdpPort, _ = strconv.Atoi(c.PostForm("rdpPort"))
+	if workspace.Policy.RdpPort == 0 {
+		workspace.Policy.RdpPort = 3389
+	}
+	workspace.Policy.RdpAccessAllow, _ = strconv.Atoi(c.PostForm("rdpAccessAllow"))
 	resultInsertGroup, err := insertGroup(workspace.Name)
 	if resultInsertGroup.Status == Created201 {
 		resultInsertPolicyRemotefx, _ := insertPolicyRemotefx(workspace.Name)
@@ -263,6 +270,7 @@ func deleteWorkspaces(c *gin.Context) {
 		log.Errorf("%v", errDeleteGroup)
 	} else {
 		resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
+		deleteWorkspacePolicy(workspaceUuid)
 		if resultDeleteWorkspace["status"] == http.StatusOK {
 			returnData["message"] = "workspace delete success"
 			resultCode = http.StatusOK

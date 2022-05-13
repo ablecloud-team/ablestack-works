@@ -452,15 +452,15 @@ func getListApis() (*http.Response, error) {
 	return resp, err
 }
 
-func getCreatePortForwardingRule(params1 []MoldParams) (*http.Response, error) {
+func getCreatePortForwardingRule(params []MoldParams) (*http.Response, error) {
 	var baseurl = os.Getenv("MoldUrl")
-	params := []MoldParams{
+	params1 := []MoldParams{
 		{"command": "createPortForwardingRule"},
 	}
 	client := http.Client{
 		Timeout: 60 * time.Second,
 	}
-
+	params = append(params, params1...)
 	log.WithFields(logrus.Fields{
 		"communicationMold.go": "getCreatePortForwardingRule",
 	}).Infof("createPortForwardingRule params [%v]", params)
@@ -478,14 +478,16 @@ func getCreatePortForwardingRule(params1 []MoldParams) (*http.Response, error) {
 	return resp, err
 }
 
-func getDeletePortForwardingRule() (*http.Response, error) {
+func getDeletePortForwardingRule(params []MoldParams) (*http.Response, error) {
 	var baseurl = os.Getenv("MoldUrl")
-	params := []MoldParams{
+	params1 := []MoldParams{
 		{"command": "deletePortForwardingRule"},
 	}
 	client := http.Client{
 		Timeout: 60 * time.Second,
 	}
+
+	params = append(params, params1...)
 
 	log.WithFields(logrus.Fields{
 		"communicationMold.go": "getDeletePortForwardingRule",
@@ -504,14 +506,16 @@ func getDeletePortForwardingRule() (*http.Response, error) {
 	return resp, err
 }
 
-func getListPublicIpAddresses(params1 []MoldParams) (*http.Response, error) {
+func getListPublicIpAddresses(params []MoldParams) (*http.Response, error) {
 	var baseurl = os.Getenv("MoldUrl")
-	params := []MoldParams{
+	params1 := []MoldParams{
 		{"command": "listPublicIpAddresses"},
 	}
 	client := http.Client{
 		Timeout: 60 * time.Second,
 	}
+
+	params = append(params, params1...)
 
 	log.WithFields(logrus.Fields{
 		"communicationMold.go": "getDeletePortForwardingRule",
@@ -524,6 +528,32 @@ func getListPublicIpAddresses(params1 []MoldParams) (*http.Response, error) {
 	log.WithFields(logrus.Fields{
 		"communicationMold.go": "getDeletePortForwardingRule",
 	}).Infof("deletePortForwardingRule endUrl [%v]", endUrl)
+
+	resp, err := client.Get(endUrl)
+
+	return resp, err
+}
+
+func getCreateFirewallRule(params []MoldParams) (*http.Response, error) {
+	var baseurl = os.Getenv("MoldUrl")
+	params1 := []MoldParams{
+		{"command": "createFirewallRule"},
+	}
+	client := http.Client{
+		Timeout: 60 * time.Second,
+	}
+	params = append(params, params1...)
+	log.WithFields(logrus.Fields{
+		"communicationMold.go": "getCreateFirewallRule",
+	}).Infof("createFirewallRule params [%v]", params)
+
+	stringParams := makeStringParams(params)
+	sig := makeSignature(stringParams)
+	endUrl := baseurl + "?" + stringParams + "&signature=" + sig
+
+	log.WithFields(logrus.Fields{
+		"communicationMold.go": "getCreateFirewallRule",
+	}).Infof("createFirewallRule endUrl [%v]", endUrl)
 
 	resp, err := client.Get(endUrl)
 
