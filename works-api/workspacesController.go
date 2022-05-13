@@ -98,21 +98,24 @@ func getWorkspacesDetail(c *gin.Context) {
 
 		}
 
-		workspacePolicy, err := selectWorkspacePolicyList(workspaceInfo)
-		log.Warnf("[%v] [%v]", workspacePolicy, workspacePolicy.Body)
-		var workspacePolicyData []map[string]interface{}
-		err = json.NewDecoder(workspacePolicy.Body).Decode(&workspacePolicyData)
-		if err != nil {
-			log.Errorf("workspacePolicy error [%v]", err)
-		}
-
+		workspacePolicy, _ := selectWorkspacePolicyList(workspaceInfo.Uuid)
+		log.Debugf("[%v] [%v]", workspacePolicy, workspacePolicy)
+		//var workspacePolicyData []map[string]interface{}
+		//err = json.NewDecoder(workspacePolicy.Body).Decode(&workspacePolicyData)
+		//if err != nil {
+		//	log.Errorf("workspacePolicy error [%v]", err)
+		//}
+		workspaceInfo.Policy.WorkspaceUuid = workspacePolicy[0].Policy.WorkspaceUuid
+		workspaceInfo.Policy.Id = workspacePolicy[0].Policy.Id
+		workspaceInfo.Policy.RdpPort = workspacePolicy[0].Policy.RdpPort
+		workspaceInfo.Policy.RdpAccessAllow = workspacePolicy[0].Policy.RdpAccessAllow
 		resultReturn["workspaceInfo"] = workspaceInfo
 		resultReturn["templateInfo"] = templateResult["listtemplatesresponse"]
 		resultReturn["serviceOfferingInfo"] = serviceOfferingResult["listserviceofferingsresponse"]
 		resultReturn["networkInfo"] = networkResult["listnetworksresponse"]
 		resultReturn["instanceList"] = instanceList
 		resultReturn["groupDetail"] = groupData
-		resultReturn["workspacePolicy"] = workspacePolicyData
+		//resultReturn["workspacePolicy"] = workspacePolicyData
 		returnCode = http.StatusOK
 	} else {
 		resultReturn["message"] = fmt.Sprintf("There is no workspace for that UUID. [%v]", workspaceUuid)
@@ -198,6 +201,7 @@ func postWorkspaces(c *gin.Context) {
 	result["resultInsertGroup"] = res
 	if resultInsertGroup.Status == Created201 {
 		resultInsertWorkspace, _ := insertWorkspace(workspace)
+		insertWorkspacePolicy(workspace)
 		log.Info(resultInsertWorkspace)
 		result["insertWorkspace"] = resultInsertWorkspace
 		if resultInsertWorkspace["status"] == http.StatusOK {
@@ -294,16 +298,18 @@ func deleteWorkspaces(c *gin.Context) {
 // @Param type path string true "workspace or instance"
 // @Router /api/v1/workspaceAgent [POST]
 // @Success 200 {object} map[string]interface{}
-func putWorkspacesAgent(c *gin.Context) {
+func postWorkspacesAgent(c *gin.Context) {
+	instanceUuid := c.Param("instanceUuid")
 	paramsUuid := c.PostForm("uuid")
 	paramsType := c.PostForm("type")
 	paramsLogin := c.PostForm("login")
-	paramsLogout := c.PostForm("logout")
-	log.Debugf("paramsUuid [%v], paramsType [%v], paramsLogin [%v], paramsLogout [%v]", paramsUuid, paramsType, paramsLogin, paramsLogout)
+	//paramsLogout := c.PostForm("logout")
+	paramsHash := c.PostForm("hash")
+	log.Debugf("instanceUuid [%v], paramsType [%v], paramsLogin [%v], paramsHash [%v]", instanceUuid, paramsType, paramsLogin, paramsHash)
 	resultReturn := map[string]interface{}{}
 	returnCode := http.StatusUnauthorized
 	if paramsType == WorkspaceString {
-		instanceList, _ := selectInstanceList(paramsUuid, InstanceString)
+		instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
 		if instanceList == nil {
 			log.Errorf("Instance 조회결과가 없습니다.")
 			returnCode = http.StatusNotFound
@@ -326,10 +332,46 @@ func putWorkspacesAgent(c *gin.Context) {
 		}
 
 	} else if paramsType == InstanceString {
-		instanceCheck := updateInstanceCheck(paramsUuid, paramsLogin, paramsLogout)
-		if instanceCheck["status"] == http.StatusOK {
-			returnCode = http.StatusOK
-			resultReturn["message"] = MessageAgentUpdateOK
+		instanceList, _ := selectInstanceList(instanceUuid, InstanceString)
+		if instanceList == nil {
+			log.Errorf("Instance 조회결과가 없습니다.")
+			returnCode = http.StatusNotFound
+			resultReturn["message"] = "There are no instance search results."
+		} else {
+			instanceInfo := instanceList[0]
+
+			loginInfoMap := []map[string]string{}
+			//logoutInfoMap := map[string]interface{}{}
+			//layout := "2006/01/02 15:04:05"
+
+			err1 := json.Unmarshal([]byte(paramsLogin), &loginInfoMap)
+			if err1 != nil {
+			}
+
+			userCheck := false
+
+			for i, v := range loginInfoMap {
+
+				if v["id"] == instanceInfo.OwnerAccountId || v["id"] == instanceInfo.OwnerAccountId+"@"+os.Getenv("SambaDomain") {
+					instanceCheck := updateInstanceCheck(paramsUuid, paramsLogin, paramsHash, 1)
+					if instanceCheck["status"] == http.StatusOK {
+						returnCode = http.StatusOK
+						resultReturn["message"] = MessageAgentUpdateOK
+					}
+					userCheck = true
+				}
+				log.Errorf("i [%v], v [%v], instanceInfo [%v]", i, v, instanceInfo)
+
+			}
+
+			if !userCheck {
+				instanceCheck := updateInstanceCheck(paramsUuid, paramsLogin, paramsHash, 0)
+				if instanceCheck["status"] == http.StatusOK {
+					returnCode = http.StatusOK
+					resultReturn["message"] = MessageAgentUpdateOK
+				}
+			}
+
 		}
 	}
 
@@ -460,6 +502,52 @@ func putInstances(c *gin.Context) {
 	resultReturn["message"] = strconv.Itoa(quantity) + " virtual machines have been created and registered in async job."
 	c.JSON(returnCode, gin.H{
 		"result": resultReturn,
+	})
+}
+
+// getConnectionRdp godoc
+// @Summary instance 에 사용자를 할당하는 API
+// @Description instance 에 사용자를 할당하는 API 입니다.
+// @Accept  json
+// @Produce  json
+// @Tags Connection
+// @Param instanceUuid path string true "Instance UUID"
+// @Param userName path string true "Instance 에 할당할 userName"
+// @Router /api/v1/connection/:instanceUuid/:username [GET]
+// @Success 200 {object} map[string]interface{}
+func getConnectionRdp(c *gin.Context) {
+	returnCode := http.StatusNotFound
+	instanceUuid := c.Param("instanceUuid")
+	userName := c.Param("userName")
+	instanceInfo, err := selectConnectionRdpDesktop(instanceUuid, userName)
+	workspaceInfo := selectWorkspaceInfo(instanceInfo.WorkspaceUuid)
+	//workspaceInfo := workspaceList[0]
+	//var workspaceList []Workspace
+	if err != nil {
+
+	} else {
+		returnCode = http.StatusOK
+		userPassword, _ := selectUserPassword(userName)
+		resp, _ := selectPasswordConvert(userPassword)
+
+		var res map[string]string
+
+		err = json.NewDecoder(resp.Body).Decode(&res)
+
+		log.WithFields(logrus.Fields{
+			"workspaceController": "getConnectionRdp",
+		}).Infof("res [%v], userName [%v], userPassword [%v], res2 [%v]", res, userName, userPassword, strings.TrimSpace(res["stdout"]))
+
+		instanceInfo.Password = userPassword
+		instanceInfo.PublicPort = selectPublicPort(instanceInfo, workspaceInfo)
+		instanceInfo.PrivatePort = workspaceInfo.Policy.RdpPort
+
+		updateRdpConnected(instanceInfo, 1)
+
+		go checkRdpConnect(instanceInfo)
+	}
+	c.JSON(returnCode, gin.H{
+		"instance": instanceInfo,
 	})
 }
 
