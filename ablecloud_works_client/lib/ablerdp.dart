@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 // import 'package:flutter/cupertino.dart';
+import 'package:ablecloud_works_client/main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -250,7 +251,9 @@ void rdpLaunch(LocalStorage ls) {
         // print('cwd: $pwd, ret: $ret');
         ls.deleteRDP().then((value) {
           ls.deleteReg().then((value) {
-            exit(0);
+            deleteHttpJson(uri, UUID).then((value) {
+              exit(0);
+            });
           });
         });
       });

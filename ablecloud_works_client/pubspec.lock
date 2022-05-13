@@ -172,6 +172,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.2.0"
+  http:
+    dependency: "direct main"
+    description:
+      name: http
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.13.4"
+  http_parser:
+    dependency: transitive
+    description:
+      name: http_parser
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   image:
     dependency: transitive
     description:
@@ -241,7 +255,7 @@ packages:
       name: path_provider_android
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.12"
+    version: "2.0.13"
   path_provider_ios:
     dependency: transitive
     description:
@@ -386,7 +400,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.1"
+    version: "2.5.2"
   xdg_directories:
     dependency: transitive
     description:
@@ -410,4 +424,4 @@ packages:
     version: "3.1.0"
 sdks:
   dart: ">=2.16.1 <3.0.0"
-  flutter: ">=2.8.0"
+  flutter: ">=2.8.1"

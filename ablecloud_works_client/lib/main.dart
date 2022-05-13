@@ -3,23 +3,28 @@
 // found in the LICENSE file.
 
 // import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'ablerdp.dart';
 
 // import 'ablewebview.dart';
 // import 'package:system_tray/system_tray.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 
-String uri = "";
+Uri uri = Uri();
+String uriString = '';
 var reg;
 var rdp;
 String Status = "";
+String UUID = "";
 
 void main(List<String> args) async {
-  if (args.isEmpty){
+  if (args.isEmpty) {
     print("need args");
     exit(0);
   }
@@ -37,50 +42,54 @@ void main(List<String> args) async {
   // });
   appWindow.hide();
   var ls = LocalStorage();
-  uri = args.join(" ");
+  uriString = args.join(" ");
   // var file = File('c:\\ablecloud\\file.txt');
   // var sink = file.openWrite();
   // sink.write('FILE ACCESSED ${DateTime.now()}\n');
   Status += 'FILE ACCESSED ${DateTime.now()}\n';
 
-  ls.writeReg(uri);
+  ls.writeReg(uriString);
   Status += 'reg writed ${DateTime.now()}\n';
 
-  final path = Uri.parse(uri);
+  uri = Uri.parse(uriString);
   String hashedpassword = 'qwer';
-  if (path.queryParameters.containsKey('password')){
-    var password = path.queryParameters['password'];
+  if (uri.queryParameters.containsKey('password')) {
+    var password = uri.queryParameters['password'];
     rdpPassword(password!).then((value) {
-      hashedpassword=value;
+      hashedpassword = value.trim();
       Status += 'password $hashedpassword ${DateTime.now()}\n';
       //if(path.queryParameters.containsKey('password 51')){
-      Map<String,List<String>> map = Map.from(path.queryParametersAll);
+      Map<String, List<String>> map = Map.from(uri.queryParametersAll);
+      if (map.containsKey('instanceUuid')) {
+        UUID = map['instanceUuid']!.join();
+      }
       print("map: $map");
       map.remove('password');
       print("map: $map");
       map['password 51'] = [hashedpassword];
       Uri p = Uri(
-        scheme: path.scheme,
-        path: path.path,
-        queryParameters: map,
-        host: path.host
-      );
+          scheme: uri.scheme,
+          path: uri.path,
+          queryParameters: map,
+          host: uri.host,
+          port: uri.port);
       //uri += '&password 51=$hashedpassword';
-      uri = p.toString();
+      uriString = p.toString();
       print("p: $p");
-      ls.writeRDP(uri);
+      ls.writeRDP(uriString);
       Status += 'rdp writed ${DateTime.now()}\n';
 
       regAdd(ls);
       Status += 'reg added ${DateTime.now()}\n';
 
+      postHttpJson(p, UUID);
       rdpLaunch(ls);
       Status += 'rdp launched ${DateTime.now()}\n';
+
       // ls.deleteRDP();
     });
-  }
-  else{
-    ls.writeRDP(uri);
+  } else {
+    ls.writeRDP(uriString);
     Status += 'rdp writed ${DateTime.now()}\n';
 
     regAdd(ls);
@@ -115,6 +124,57 @@ void main(List<String> args) async {
   // for (var val in args) {
   //   uri += val + "
   // }
+}
+
+Future<Map> fetchHttpJson() async {
+  var response = await http
+      .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+  return json.decode(response.body);
+}
+
+// ignore: non_constant_identifier_names
+Future<Map> postHttpJson(Uri uri, String UUID) async {
+  var client = http.Client();
+  Uri uriWorks = Uri(scheme:'http', host:uri.host, port: uri.port,
+      path: '/api/client');
+
+  Map ret = {'return': ''};
+  try {
+    var response = await client.post(uriWorks,
+        headers: <String, String> {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+        body: {
+      'instanceUuid': UUID,
+      'userName': uri.queryParameters['username']
+    });
+    ret = json.decode(response.body);
+  } finally {
+    client.close();
+  }
+  return ret;
+}
+
+// ignore: non_constant_identifier_names
+Future<Map> deleteHttpJson(Uri uri, String UUID) async {
+  var client = http.Client();
+  Uri uriWorks = Uri(scheme:'http', host:uri.host, port: uri.port,
+      path: '/api/client/$UUID/${uri.queryParameters['username']}');
+  Map ret = {'return': ''};
+  try {
+    var response = await client.delete(uriWorks,
+        headers: <String, String> {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'instanceUuid': UUID,
+          'userName': uri.queryParameters['username']
+        });
+    ret = json.decode(response.body);
+  } finally {
+    client.close();
+  }
+  return ret;
 }
 
 class MyApp extends StatefulWidget {
