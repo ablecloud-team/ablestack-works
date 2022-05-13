@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	//"works-api/workspaces"
 )
 
@@ -282,7 +283,7 @@ func deleteWorkspaces(c *gin.Context) {
 	})
 }
 
-// putWorkspacesAgent godoc
+// postWorkspacesAgent godoc
 // @Summary 워크스페이스를 추가하는 API
 // @Description 워크스페이를 추가하는 API 입니다.
 // @Accept  json
