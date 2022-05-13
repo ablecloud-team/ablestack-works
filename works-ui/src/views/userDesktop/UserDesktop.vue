@@ -51,9 +51,7 @@
                           color: vm.mold_status == 'Running' ? 'black' : 'pink',
                         }"
                       />
-
-                      <template #actions>
-                        <a-popconfirm
+                      <!-- <a-popconfirm
                           :title="
                             vm.favorite == true
                               ? '즐겨찾기 해제하시겠습니까?'
@@ -84,51 +82,24 @@
                               :style="{ color: '#d9dbdf' }"
                             />
                           </a-tooltip>
-                        </a-popconfirm>
-
+                        </a-popconfirm> -->
+                      <template #actions>
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             $t("label.rdp.connect")
                           }}</template>
                           <Icon>
                             <template #component>
-                              <svg
-                                id="remote-desktop"
-                                width="24"
-                                height="24"
-                                :fill="
-                                  workspace.policy.rdp_access_allow == '1'
-                                    ? ''
-                                    : '#d9dbdf'
-                                "
-                                viewBox="0 0 24 24"
+                              <img
+                                src="@/assets/icons8-remote-desktop-97.png"
+                                width="30"
+                                height="30"
                                 @click="
                                   workspace.policy.rdp_access_allow == '1'
                                     ? connectRdpClient(workspace.uuid, vm.uuid)
                                     : false
                                 "
-                              >
-                                <path
-                                  d="M3,2A2,2 0 0,0 1,4V16C1,17.11 1.9,18 3,18H10V20H8V22H16V20H14V18H21A2,2 0 0,0 23,16V4A2,2 0 0,0 21,2M3,4H21V16H3M15,5L11.5,8.5L15,12L16.4,10.6L14.3,8.5L16.4,6.4M9,8L7.6,9.4L9.7,11.5L7.6,13.6L9,15L12.5,11.5"
-                                />
-                              </svg>
-                              <!-- <svg
-                                fill="none"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                width="24"
-                                xmlns="http://www.w3.org/2000/svg"
-                                @click="connectRdp(workspace.uuid, vm.uuid)"
-                              >
-                                <path
-                                  d="M17.0514 4.32178L18.4656 5.73599L14.223 9.97863L18.4656 14.2213L17.0514 15.6355L11.3946 9.97863L17.0514 4.32178Z"
-                                  fill="currentColor"
-                                />
-                                <path
-                                  d="M6.94864 19.6785L5.53442 18.2643L9.77706 14.0216L5.53442 9.77897L6.94864 8.36476L12.6055 14.0216L6.94864 19.6785Z"
-                                  fill="currentColor"
-                                />
-                              </svg> -->
+                              />
                             </template>
                           </Icon>
                         </a-tooltip>
@@ -141,30 +112,18 @@
                           }}</template>
                           <Icon>
                             <template #component>
-                              <svg
-                                id="mdi-console"
-                                width="24"
-                                height="24"
-                                :fill="
-                                  vm.handshake_status == 'Ready'
-                                    ? ''
-                                    : '#d9dbdf'
+                              <img
+                                src="@/assets/icons8-internet-64.png"
+                                width="30"
+                                height="30"
+                                @click="
+                                  workspace.policy.rdp_access_allow == '1'
+                                    ? connectConsole(workspace.uuid, vm.uuid)
+                                    : false
                                 "
-                                viewBox="0 0 24 24"
-                                @click="connectConsole(workspace.uuid, vm.uuid)"
-                              >
-                                <path
-                                  d="M20,19V7H4V19H20M20,3A2,2 0 0,1 22,5V19A2,2 0 0,1 20,21H4A2,2 0 0,1 2,19V5C2,3.89 2.9,3 4,3H20M13,17V15H18V17H13M9.58,13L5.57,9H8.4L11.7,12.3C12.09,12.69 12.09,13.33 11.7,13.72L8.42,17H5.59L9.58,13Z"
-                                />
-                              </svg>
+                              />
                             </template>
                           </Icon>
-                          <!-- <CodeFilled
-                            v-if="vm.handshake_status == 'Ready'"
-                            :style="{ color: '#333' }"
-                            @click="connectConsole(workspace.uuid, vm.uuid)"
-                          /> -->
-                          <!-- <CodeFilled v-else :style="{ color: '#d9dbdf' }" /> -->
                         </a-tooltip>
 
                         <a-Popover placement="topLeft" trigger="click">
@@ -189,7 +148,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -214,7 +172,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -238,7 +195,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -247,7 +203,11 @@
                             </a-popconfirm>
                           </template>
                           <MoreOutlined
-                            :style="{ color: '#333', fontSize: '18px' }"
+                            :style="{
+                              color: '#333',
+                              fontSize: '24px',
+                              marginTop: '5px',
+                            }"
                           />
                         </a-Popover>
                       </template>
@@ -283,18 +243,19 @@
 </template>
 
 <script>
-import { defineComponent, ref, TrackOpTypes } from "vue";
+import { defineComponent, ref, h } from "vue";
 import customProtocolCheck from "custom-protocol-check";
 import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
-import axios from "axios";
 import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { notification, message, Button } from "ant-design-vue";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
     : process.env.VUE_APP_API_URL;
+const apiPort =
+  process.env.VUE_APP_API_PORT == "" ? "8082" : process.env.VUE_APP_API_PORT;
 export default defineComponent({
   name: "UserDesktop",
   components: {
@@ -398,8 +359,11 @@ export default defineComponent({
         .then((res) => {
           if (res.status == 200) {
             const url =
-              "worksapp://works/?" +
-              "full address=" +
+              "worksapp://" +
+              hostname +
+              ":" +
+              apiPort +
+              "/?full address=" +
               hostname +
               "&server port=" +
               res.data.instance.public_port +
@@ -409,6 +373,8 @@ export default defineComponent({
               sessionStorage.getItem("userName") +
               "&password=" +
               res.data.instance.password +
+              "&instanceUuid=" +
+              vmUuid +
               "&hash=" +
               res.data.instance.hash;
 
@@ -416,11 +382,38 @@ export default defineComponent({
             customProtocolCheck(
               url,
               () => {
-                //worksapp 프로토콜이 설치안됨
+                this.downloadRdpClient("works-client.zip");
                 message.warning(
                   this.$t("message.userdesktop.rdp.connect.client.notinstall")
                 );
-                this.downloadRdpClient("works-client.zip");
+                //worksapp 프로토콜이 설치안됨
+                const key = `open${Date.now()}`;
+                notification.info({
+                  message: "RDP 클라이언트 설치 안내",
+                  description: h("div", [
+                    this.$t("message.userdesktop.client.install.notice1"),
+                    h("br"),
+                    this.$t("message.userdesktop.client.install.notice2"),
+                    h("br"),
+                    this.$t("message.userdesktop.client.install.notice3"),
+                  ]),
+                  duration: 0,
+                  style: {
+                    width: "500px",
+                  },
+                  btn: () =>
+                    h(
+                      Button,
+                      {
+                        type: "primary",
+                        size: "small",
+                        onClick: () => notification.close(key),
+                      },
+                      { default: () => this.$t("label.ok") }
+                    ),
+                  key,
+                  onClose: close,
+                });
               },
               () => {},
               100
@@ -458,18 +451,20 @@ export default defineComponent({
       liteParamArr["username"] = sessionStorage.getItem("userName");
       liteParamArr["domain"] = sessionStorage.getItem("domainName");
 
-      liteParamArr["enable-wallpaper"] = false;
-      liteParamArr["enable-font-smoothing"] = false;
+      liteParamArr["enable-wallpaper"] = true;
+      liteParamArr["enable-font-smoothing"] = true;
       liteParamArr["enable-theming"] = false;
       liteParamArr["enable-menu-animations"] = false;
       liteParamArr["resize-method"] = "display-update";
 
-      liteParamArr["create-drive-path"] = true;
+      //liteParamArr["create-drive-path"] = true;
       liteParamArr["drive-name"] = "GUACD";
       liteParamArr["drive-path"] = "/share";
       liteParamArr["enable-drive"] = true;
       liteParamArr["disable-upload"] = false;
       liteParamArr["disable-download"] = false;
+      liteParamArr["enable-printing"] = true;
+      liteParamArr["printer-name"] = "VDI-PRINTER";
 
       liteParamArr["enable-touch"] = true;
 
