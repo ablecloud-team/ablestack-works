@@ -331,3 +331,18 @@ func delConnection(connectName string) *http.Response {
 
 	return resp
 }
+
+func selectPasswordConvert(password string) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	aaa := DCInfo + "/v1/cmd/?cmd="
+	bbb := url.QueryEscape("(\"" + password + "\" | ConvertTo-SecureString -AsPlainText -Force) | ConvertFrom-SecureString")
+	resp, err := client.Get(aaa + bbb + "&timeout=20")
+
+	log.Infof("resp [%v], err [%v]", resp, err)
+
+	return resp, err
+}
