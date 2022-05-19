@@ -12,22 +12,20 @@ import (
 )
 
 type shellReturnModel struct {
-	Stdout string `json:"stdout"`
-	Stderr string `json:"stderr"`
+	Stdout string `json:"stdout" example:"Hello World!"`
+	Stderr string `json:"stderr" example:"Hello World!"`
 }
 
 // exeShellHandler godoc
-// @Summary powershell 명령 처리기
-// @Description powershell 명령 처리기
-// @Accept  multipart/form-data
-// @Produce  json
-// @Param cmd query string true "명령어"
-// @Param arg query string false "인자"
-// @Param timeout query int false "시간제한, 기본값"
-// @Success 200 {object} shellReturnModel "명령 성공"
-// @Failure 401 {object} errorModel "명령 실패"
-// @Failure default {objects} string
-// @Router /cmd/ [get]
+// @Summary      powershell 명령 처리기
+// @Description  powershell 을 사용하여 명령을 처리 합니다.
+// @Accept       html
+// @Produce      application/json
+// @Param        cmd      query     string            true   "명령어"
+// @Param        timeout  query     int               false  "시간제한, 기본값"
+// @Success      200      {object}  shellReturnModel  "명령 성공"
+// @Failure      401      {object}  errorModel        "명령 실패"
+// @Router       /api/v1/cmd [get]
 func exeShellHandler(c *gin.Context) {
 
 	var (
@@ -51,7 +49,7 @@ func exeShellHandler(c *gin.Context) {
 	go func() {
 
 		shell, _ := setupShell()
-		stdout, err := shell.Exec(fmt.Sprintf("%v %v", pscmd.CMD, pscmd.ARG))
+		stdout, err := shell.Exec(fmt.Sprintf("%v", pscmd.CMD))
 
 		if err == nil {
 			c1 <- []string{stdout, ""}
@@ -76,13 +74,12 @@ func exeShellHandler(c *gin.Context) {
 }
 
 // appListHandler godoc
-// @Summary 윈도우 앱 목록
-// @Description 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
-// @Produce  json
-// @Success 200 {object} []APPVAL "목록 표시"
-// @Failure 401 {object} errorModel "명령 실패"
-// @Failure default {objects} string
-// @Router /app [get]
+// @Summary      윈도우 앱 목록
+// @Description  윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
+// @Produce      application/json
+// @Success      200  {array}   APPVAL      "목록 표시"
+// @Failure      401  {object}  errorModel  "명령 실패"
+// @Router       /app [get]
 func appListHandler(c *gin.Context) {
 	setLog()
 	shell, _ := setupShell()
@@ -110,21 +107,20 @@ type policyModel struct {
 	Description string `json:"description"`
 }
 type errorModel struct {
-	Msg    string `json:"msg"`
-	Target string `json:"target"`
+	Msg    string `json:"msg" example:"Command not found"`
+	Target string `json:"target" example:"Powershell"`
 }
 
 // loginHandler godoc
-// @Summary List accounts
-// @Description 사용자 로그인 체크
-// @Accept  multipart/form-data
-// @Produce  json
-// @Param username formData string true "사용자 이름"
-// @Param password formData string true "사용자 암호"
-// @Success 200 {object} loginModel "로그인 성공"
-// @Failure 401 {object} loginModel "로그인 실패"
-// @Failure default {objects} string
-// @Router /login [post]
+// @Summary      List accounts
+// @Description  사용자 로그인 체크
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Param        username  formData  string      true  "사용자 이름"
+// @Param        password  formData  string      true  "사용자 암호"
+// @Success      200       {object}  loginModel  "로그인 성공"
+// @Failure      401       {object}  loginModel  "로그인 실패"
+// @Router       /login [post]
 func loginHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -158,22 +154,21 @@ func loginHandler(c *gin.Context) {
 }
 
 // addUserHandler godoc
-// @Summary add New User account
-// @Description 사용자 생성
-// @Accept  multipart/form-data
-// @Produce  json
-// @Param username formData string true "사용자 이름"
-// @Param password formData string true "사용자 암호"
-// @Param phone formData string false "전화번호"
-// @Param email formData string false "이메일"
-// @Param givenName formData string true "이름"
-// @Param sn formData string true "성"
-// @Param title formData string false "직급"
-// @Param department formData string false "부서"
-// @Success 200 {object} userModel "사용자 생성 성공"
-// @Failure 401 {object} userModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user [post]
+// @Summary      add New User account
+// @Description  사용자 생성
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Param        username    formData  string     true   "사용자 이름"
+// @Param        password    formData  string     true   "사용자 암호"
+// @Param        phone       formData  string     false  "전화번호"
+// @Param        email       formData  string     false  "이메일"
+// @Param        givenName   formData  string     true   "이름"
+// @Param        sn          formData  string     true   "성"
+// @Param        title       formData  string     false  "직급"
+// @Param        department  formData  string     false  "부서"
+// @Success      200         {object}  userModel  "사용자 생성 성공"
+// @Failure      401         {object}  userModel  "사용자 생성 실패"
+// @Router       /user [post]
 func addUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -256,14 +251,13 @@ func addUserHandler(c *gin.Context) {
 }
 
 // listUserHandler godoc
-// @Summary 사용자 목록 조회
-// @Description 사용자 목록 조회
-// @Accept  multipart/form-data
-// @Produce  json
-// @Success 200 {object} []ADUser "사용자 생성 성공"
-// @Failure 401 {object} errorModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user [get]
+// @Summary      사용자 목록 조회
+// @Description  사용자 목록 조회
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Success      200  {array}   ADUser      "사용자 목록 조회 성공"
+// @Failure      401  {object}  errorModel  "사용자 목록 조회 실패"
+// @Router       /user [get]
 func listUserHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -290,15 +284,15 @@ func listUserHandler(c *gin.Context) {
 }
 
 // getUserHandler godoc
-// @Summary 사용자 목록 조회
-// @Description 사용자 목록 조회
-// @Accept  multipart/form-data
-// @Produce  json
-// @Param username path string true "사용자 이름"
-// @Success 200 {object} ADUser "사용자 생성 성공"
-// @Failure 401 {object} errorModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user/{username} [get]
+// @Summary      사용자 정보 조회
+// @Description  ldap에서 사용자의 정보를 조회합니다.
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Param        username  path      string      true   "사용자 이름"
+// @Success      200       {object}  ADUser      "사용자 정보 조회 성공"
+// @Failure      401       {object}  errorModel  "사용자 정보 조회 실패"
+// @Failure      default   {object}  string
+// @Router       /user/{username} [get]
 func getUserHandler(c *gin.Context) {
 
 	setLog()
@@ -328,6 +322,17 @@ func getUserHandler(c *gin.Context) {
 
 }
 
+// setUserHandler godoc
+// @Summary      사용자 정보 수정
+// @Description  ldap에서 사용자의 정보를 수정합니다.
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Param        username  path      string      true  "사용자 이름"
+// @Param        Userdata  formData  ADUser      false "사용자정보"
+// @Success      200       {object}  ADUser      "사용자 정보 조회 성공"
+// @Failure      401       {object}  errorModel  "사용자 정보 조회 실패"
+// @Failure      default   {object}  string
+// @Router       /user/{username} [put]
 func setUserHandler(c *gin.Context) {
 
 	setLog()
@@ -360,6 +365,18 @@ func setUserHandler(c *gin.Context) {
 	c.JSON(http.StatusAccepted, aduser)
 	return
 }
+
+// setUserPasswordHandler godoc
+// @Summary      사용자 비밀번호 수정
+// @Description  사용자의 비밀번호를 수정합니다.
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Param        username  path      string      true  "사용자 이름"
+// @Param        password  formData  string      false  "흠"
+// @Success      200       {object}  ADUser      "사용자 비밀번호 변경 성공"
+// @Failure      401       {object}  errorModel  "사용자 비밀번호 변경 실패"
+// @Failure      default   {object}  string
+// @Router       /user/{username} [patch]
 func setUserPasswordHandler(c *gin.Context) {
 
 	setLog()
@@ -553,7 +570,7 @@ func addConnectionHandler(c *gin.Context) {
 	guacparameterval := c.PostForm("parameter")
 	log.Infof("%v, %v", username, guacparameterval)
 	guacparameter := strings.Split(guacparameterval, ",")
-	user := ADUser{username: username}
+	user := ADUser{Username: username}
 	connection := Connection.Connectionname
 
 	conn, status, err := ConnectAD()
@@ -566,7 +583,7 @@ func addConnectionHandler(c *gin.Context) {
 	}
 	l := conn.Conn
 
-	if user.username != "" && connection != "" && guacparameterval != "" {
+	if user.Username != "" && connection != "" && guacparameterval != "" {
 		err = addConnection(l, user, connection, guacparameter)
 		if err != nil {
 			log.Infof("%v", err.Error())
@@ -576,7 +593,7 @@ func addConnectionHandler(c *gin.Context) {
 			})
 			return
 		}
-	} else if user.username == "" {
+	} else if user.Username == "" {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"err": "username is not provided",
 		})
@@ -1158,14 +1175,14 @@ func delComputerFromGroupHandler(c *gin.Context) {
 }
 
 // listComputerHandler godoc
-// @Summary 사용자 목록 조회
-// @Description 사용자 목록 조회
-// @Accept  multipart/form-data
-// @Produce  json
-// @Success 200 {object} []ADUser "사용자 생성 성공"
-// @Failure 401 {object} errorModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user [get]
+// @Summary      사용자 목록 조회
+// @Description  사용자 목록 조회
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Success      200      {object}  []ADUser    "사용자 생성 성공"
+// @Failure      401      {object}  errorModel  "사용자 생성 실패"
+// @Failure      default  {object}  string
+// @Router       /computer [get]
 func listComputerHandler(c *gin.Context) {
 	setLog()
 	conn, status, err := ConnectAD()
@@ -1192,14 +1209,15 @@ func listComputerHandler(c *gin.Context) {
 }
 
 // getComputerHandler godoc
-// @Summary 사용자 목록 조회
-// @Description 사용자 목록 조회
-// @Accept  multipart/form-data
-// @Produce  json
-// @Success 200 {object} []ADUser "사용자 생성 성공"
-// @Failure 401 {object} errorModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user [get]
+// @Summary      사용자 목록 조회
+// @Description  사용자 목록 조회
+// @Accept       multipart/form-data
+// @Param        computername  path  string  true  "Computer name"
+// @Produce      application/json
+// @Success      200      {object}  []ADUser    "사용자 생성 성공"
+// @Failure      401      {object}  errorModel  "사용자 생성 실패"
+// @Failure      default  {object}  string
+// @Router       /computer/{computername} [get]
 func getComputerHandler(c *gin.Context) {
 	setLog()
 
@@ -1233,14 +1251,14 @@ func getComputerHandler(c *gin.Context) {
 }
 
 // delComputerHandler godoc
-// @Summary 사용자 목록 조회
-// @Description 사용자 목록 조회
-// @Accept  multipart/form-data
-// @Produce  json
-// @Success 200 {object} []ADUser "사용자 생성 성공"
-// @Failure 401 {object} errorModel "사용자 생성 실패"
-// @Failure default {objects} string
-// @Router /user [get]
+// @Summary      사용자 목록 조회
+// @Description  사용자 목록 조회
+// @Accept       multipart/form-data
+// @Produce      application/json
+// @Success      200      {object}  []ADUser    "사용자 생성 성공"
+// @Failure      401      {object}  errorModel  "사용자 생성 실패"
+// @Failure      default  {object}  string
+// @Router       /computer [delete]
 func delComputerHandler(c *gin.Context) {
 	setLog()
 

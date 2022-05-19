@@ -430,7 +430,7 @@ func addConnection(l *ldap.Conn, user ADUser, connection string, guacparameter [
 		err error
 	)
 	//guacparameter = []string{"hostname=10.1.1.18", "port=3389", "ignore-cert=true", "enable-drive=true ", "create-drive-path=true ", "username=Administrator", "password=Ablecloud1!", "domain=TEST", "drive-name=G", "drive-path=/share"}
-	retuser, err := getUser(l, &USER{Username: user.username})
+	retuser, err := getUser(l, &USER{Username: user.Username})
 	//ou add
 	addReq := ldap.NewAddRequest(fmt.Sprintf("cn=%v,cn=Users,%v", connection, ADconfig.ADbasedn), []ldap.Control{})
 	addReq.Attribute("objectClass", []string{"top", "guacConfigGroup", "groupOfNames"})

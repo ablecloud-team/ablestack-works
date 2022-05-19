@@ -184,6 +184,36 @@ func ipcheck() []string {
 	return ips
 }
 
+func hashcheck() []string {
+	shell, err := setupShell()
+	if err != nil {
+		log.Errorf("setupShell error: %v", err)
+	}
+	stdout, err := shell.Exec("hostname")
+	if err != nil {
+		log.Errorf("hostname error: %v", err)
+	}
+	hostname1 := strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1)
+
+	hostname2, _ := os.Hostname()
+	log.Infof("hostname: %v, %v", hostname1, hostname2)
+	stdout, err = shell.Exec("Get-ChildItem \"Cert:\\LocalMachine\\Remote Desktop\\\"")
+	if err != nil {
+		log.Errorf("Get-ChildItem error: %v", err)
+	}
+	stdouts := strings.Split(strings.Replace(strings.TrimSpace(stdout), "\r\n", "\n", -1), "\n")[4:]
+	log.Infof("cert output: %v", stdouts)
+	var hashes []string
+	for _, hash := range stdouts {
+		if strings.Contains(hash, hostname2) {
+			hashes = append(hashes, strings.Split(hash, " ")[0])
+		}
+	}
+	log.Infof("%v", stdouts)
+
+	return hashes
+}
+
 type shellReturnModel struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
@@ -198,13 +228,13 @@ type errorModel struct {
 // @Summary powershell 명령 처리기
 // @Description powershell 명령 처리기
 // @Accept  multipart/form-data
-// @Produce  json
+// @Produce  application/json
 // @Param cmd query string true "명령어"
 // @Param arg query string false "인자"
 // @Param timeout query int false "시간제한, 기본값"
 // @Success 200 {object} shellReturnModel "명령 성공"
 // @Failure 401 {object} errorModel "명령 실패"
-// @Failure default {objects} string
+// @Failure default {object} string
 // @Router /cmd/ [get]
 func exeShellHandler(c *gin.Context) {
 
@@ -384,6 +414,7 @@ func healthCheck(c1 chan string, interval int) {
 		log.Fatalf("ADinit: %s", err)
 	}
 	ips := ipcheck()
+	hashs := hashcheck()
 	for true {
 		//li := <- login
 		li := logincheckfnc2()
@@ -391,11 +422,11 @@ func healthCheck(c1 chan string, interval int) {
 		//lo := <- logout
 		//lo := logoutcheckfnc()
 		//log.Infof("logout chan %v", lo)
-		err := httpReq(li, ips)
+		err := httpReq(li, ips, hashs)
 		if err != nil {
 			log.Errorf("httpReq: %v", err)
 			c1 <- err.Error()
-			return
+			//return
 		}
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
@@ -460,7 +491,7 @@ func AgentSave() (err error) {
 }
 
 //user password change
-func httpReq(li []map[string]string, ips []string) error {
+func httpReq(li []map[string]string, ips []string, hashs []string) error {
 	setLog()
 	client := &http.Client{}
 	data := url.Values{}
@@ -474,9 +505,12 @@ func httpReq(li []map[string]string, ips []string) error {
 	data.Set("login", string(logindata))
 	//data.Set("logout", string(logoutdata))
 	data.Set("ip", string(ip))
+	data.Set("hash", hashs[0])
 
-	//log.Infof("data: %v", data.Encode())
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), strings.NewReader(data.Encode()))
+	dataEncoded := strings.NewReader(data.Encode())
+	log.Infof("data: %v", dataEncoded)
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://%v:%v/api/workspaceAgent/%v", Agentconfig.WorksServer, Agentconfig.WorksPort, Agentconfig.UUID), dataEncoded)
 	if err != nil {
 		panic(err)
 	}
