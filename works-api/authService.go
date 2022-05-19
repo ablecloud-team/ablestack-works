@@ -65,7 +65,7 @@ func deleteUserDB(userName string) map[string]interface{} {
 	defer db.Close()
 	log.Info("DB connect success")
 	returnValue := map[string]interface{}{}
-	result, err := db.Exec("UPDATE users SET removed=NOW() WHERE user_name=? WHERE removed IS NULL ", userName)
+	result, err := db.Exec("UPDATE users SET removed=NOW() WHERE user_name=? ", userName)
 	if err != nil {
 		log.Errorf("유저 삭제중 에러가 발생했습니다.\n")
 		log.Errorf("%v\n", err)

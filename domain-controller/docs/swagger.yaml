@@ -2,15 +2,148 @@ basePath: /api/v1
 definitions:
   main.ADUser:
     properties:
-      i:
+      I:
         description: 구/군/시
+        example: user
+        type: string
+      accountname:
+        description: 어카운트명
+        example: user
+        type: string
+      c:
+        description: 주소->국가영문코드명(한국:KR,일본:JP,미국:US)
+        example: user
+        type: string
+      co:
+        description: :=c
+        example: user
+        type: string
+      company:
+        description: AD회사명
+        example: user
+        type: string
+      countryCode:
+        description: 주소->국가숫자코드(한국:410,일본:392.미국:840)
+        example: 1
+        type: integer
+      department:
+        description: 부서
+        example: user
+        type: string
+      description:
+        description: 설명
+        example: user
+        type: string
+      distinguishedName:
+        example: user
+        type: string
+      facsimileTelephoneNumber:
+        description: 전화->팩스
+        example: user
+        type: string
+      givenName:
+        description: 이름
+        example: user
+        type: string
+      homePhone:
+        description: 전화->집
+        example: user
+        type: string
+      info:
+        description: 참고내용
+        example: user
+        type: string
+      initials:
+        description: 이니셜
+        example: user
+        type: string
+      ipPhone:
+        description: 전화->ip전화
+        example: user
+        type: string
+      mail:
+        description: 메일주소
+        example: user
+        type: string
+      manager:
+        description: 상사dn("CN=User3,CN=Users,DC=dc1,DC=local")
+        example: user
+        type: string
+      memberOf:
+        description: 그룹dn목록
+        example:
+        - user
+        items:
+          type: string
+        type: array
+      mobile:
+        description: 전화->휴대폰
+        example: user
+        type: string
+      o:
+        description: ldap회사명
+        example: user
+        type: string
+      pager:
+        description: 전화->호출기
+        example: user
+        type: string
+      physicalDeliveryOfficeName:
+        description: 사무실주소
+        example: user
+        type: string
+      postOfficeBox:
+        description: 사서함주소
+        example: user
+        type: string
+      postalCode:
+        description: 주소->우편번호
+        example: user
+        type: string
+      sAMAccountName:
+        description: windows2000이전사용자로그온이름(ADdomain\sAMAccountName형식)
+        example: user
+        type: string
+      sn:
+        description: 성
+        example: user
+        type: string
+      st:
+        description: 시/도
+        example: user
+        type: string
+      streetAddress:
+        description: 주소
+        example: user
+        type: string
+      telephoneNumber:
+        description: 일반->전화
+        example: user
+        type: string
+      title:
+        description: 직함
+        example: user
+        type: string
+      userPrincipalName:
+        description: 로그온이름(accountname@ADdomain형식)
+        example: user
+        type: string
+      username:
+        description: works로그인명
+        example: user
+        type: string
+      wWWHomePage:
+        description: 홈페이지주소
+        example: user
         type: string
     type: object
   main.APPVAL:
     properties:
       desc:
+        example: 메모장
         type: string
       name:
+        example: notepad.exe
         type: string
       path:
         type: string
@@ -18,8 +151,10 @@ definitions:
   main.errorModel:
     properties:
       msg:
+        example: Command not found
         type: string
       target:
+        example: Powershell
         type: string
     type: object
   main.loginModel:
@@ -38,8 +173,10 @@ definitions:
   main.shellReturnModel:
     properties:
       stderr:
+        example: Hello World!
         type: string
       stdout:
+        example: Hello World!
         type: string
     type: object
   main.userModel:
@@ -63,41 +200,16 @@ info:
   title: Ablecloud Works Domain-Controller API
   version: "1.0"
 paths:
-  /app:
-    get:
-      description: 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 목록 표시
-          schema:
-            items:
-              $ref: '#/definitions/main.APPVAL'
-            type: array
-        "401":
-          description: 명령 실패
-          schema:
-            $ref: '#/definitions/main.errorModel'
-        default:
-          description: ""
-          schema:
-            type: objects
-      summary: 윈도우 앱 목록
-  /cmd/:
+  /api/v1/cmd:
     get:
       consumes:
-      - multipart/form-data
-      description: powershell 명령 처리기
+      - text/html
+      description: powershell 을 사용하여 명령을 처리 합니다.
       parameters:
       - description: 명령어
         in: query
         name: cmd
         required: true
-        type: string
-      - description: 인자
-        in: query
-        name: arg
         type: string
       - description: 시간제한, 기본값
         in: query
@@ -114,11 +226,98 @@ paths:
           description: 명령 실패
           schema:
             $ref: '#/definitions/main.errorModel'
+      summary: powershell 명령 처리기
+  /app:
+    get:
+      description: 윈도우 시작메뉴에 등록된 프로그램의 정보를 출력하는 API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 목록 표시
+          schema:
+            items:
+              $ref: '#/definitions/main.APPVAL'
+            type: array
+        "401":
+          description: 명령 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+      summary: 윈도우 앱 목록
+  /computer:
+    delete:
+      consumes:
+      - multipart/form-data
+      description: 사용자 목록 조회
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 생성 성공
+          schema:
+            items:
+              $ref: '#/definitions/main.ADUser'
+            type: array
+        "401":
+          description: 사용자 생성 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
         default:
           description: ""
           schema:
-            type: objects
-      summary: powershell 명령 처리기
+            type: string
+      summary: 사용자 목록 조회
+    get:
+      consumes:
+      - multipart/form-data
+      description: 사용자 목록 조회
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 생성 성공
+          schema:
+            items:
+              $ref: '#/definitions/main.ADUser'
+            type: array
+        "401":
+          description: 사용자 생성 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: 사용자 목록 조회
+  /computer/{computername}:
+    get:
+      consumes:
+      - multipart/form-data
+      description: 사용자 목록 조회
+      parameters:
+      - description: Computer name
+        in: path
+        name: computername
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 생성 성공
+          schema:
+            items:
+              $ref: '#/definitions/main.ADUser'
+            type: array
+        "401":
+          description: 사용자 생성 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: 사용자 목록 조회
   /login:
     post:
       consumes:
@@ -146,10 +345,6 @@ paths:
           description: 로그인 실패
           schema:
             $ref: '#/definitions/main.loginModel'
-        default:
-          description: ""
-          schema:
-            type: objects
       summary: List accounts
   /user:
     get:
@@ -160,19 +355,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: 사용자 생성 성공
+          description: 사용자 목록 조회 성공
           schema:
             items:
               $ref: '#/definitions/main.ADUser'
             type: array
         "401":
-          description: 사용자 생성 실패
+          description: 사용자 목록 조회 실패
           schema:
             $ref: '#/definitions/main.errorModel'
-        default:
-          description: ""
-          schema:
-            type: objects
       summary: 사용자 목록 조회
     post:
       consumes:
@@ -192,12 +383,10 @@ paths:
       - description: 전화번호
         in: formData
         name: phone
-        required: true
         type: string
       - description: 이메일
         in: formData
         name: email
-        required: true
         type: string
       - description: 이름
         in: formData
@@ -212,7 +401,10 @@ paths:
       - description: 직급
         in: formData
         name: title
-        required: true
+        type: string
+      - description: 부서
+        in: formData
+        name: department
         type: string
       produces:
       - application/json
@@ -225,16 +417,12 @@ paths:
           description: 사용자 생성 실패
           schema:
             $ref: '#/definitions/main.userModel'
-        default:
-          description: ""
-          schema:
-            type: objects
       summary: add New User account
   /user/{username}:
     get:
       consumes:
       - multipart/form-data
-      description: 사용자 목록 조회
+      description: ldap에서 사용자의 정보를 조회합니다.
       parameters:
       - description: 사용자 이름
         in: path
@@ -245,18 +433,242 @@ paths:
       - application/json
       responses:
         "200":
-          description: 사용자 생성 성공
+          description: 사용자 정보 조회 성공
           schema:
             $ref: '#/definitions/main.ADUser'
         "401":
-          description: 사용자 생성 실패
+          description: 사용자 정보 조회 실패
           schema:
             $ref: '#/definitions/main.errorModel'
         default:
           description: ""
           schema:
-            type: objects
-      summary: 사용자 목록 조회
+            type: string
+      summary: 사용자 정보 조회
+    patch:
+      consumes:
+      - multipart/form-data
+      description: 사용자의 비밀번호를 수정합니다.
+      parameters:
+      - description: 사용자 이름
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 흠
+        in: formData
+        name: password
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 비밀번호 변경 성공
+          schema:
+            $ref: '#/definitions/main.ADUser'
+        "401":
+          description: 사용자 비밀번호 변경 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: 사용자 비밀번호 수정
+    put:
+      consumes:
+      - multipart/form-data
+      description: ldap에서 사용자의 정보를 수정합니다.
+      parameters:
+      - description: 사용자 이름
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 구/군/시
+        example: user
+        in: formData
+        name: I
+        type: string
+      - description: 어카운트명
+        example: user
+        in: formData
+        name: accountname
+        type: string
+      - description: 주소->국가영문코드명(한국:KR,일본:JP,미국:US)
+        example: user
+        in: formData
+        name: c
+        type: string
+      - description: :=c
+        example: user
+        in: formData
+        name: co
+        type: string
+      - description: AD회사명
+        example: user
+        in: formData
+        name: company
+        type: string
+      - description: 주소->국가숫자코드(한국:410,일본:392.미국:840)
+        example: 1
+        in: formData
+        name: countryCode
+        type: integer
+      - description: 부서
+        example: user
+        in: formData
+        name: department
+        type: string
+      - description: 설명
+        example: user
+        in: formData
+        name: description
+        type: string
+      - example: user
+        in: formData
+        name: distinguishedName
+        type: string
+      - description: 전화->팩스
+        example: user
+        in: formData
+        name: facsimileTelephoneNumber
+        type: string
+      - description: 이름
+        example: user
+        in: formData
+        name: givenName
+        type: string
+      - description: 전화->집
+        example: user
+        in: formData
+        name: homePhone
+        type: string
+      - description: 참고내용
+        example: user
+        in: formData
+        name: info
+        type: string
+      - description: 이니셜
+        example: user
+        in: formData
+        name: initials
+        type: string
+      - description: 전화->ip전화
+        example: user
+        in: formData
+        name: ipPhone
+        type: string
+      - description: 메일주소
+        example: user
+        in: formData
+        name: mail
+        type: string
+      - description: 상사dn("CN=User3,CN=Users,DC=dc1,DC=local")
+        example: user
+        in: formData
+        name: manager
+        type: string
+      - collectionFormat: multi
+        description: 그룹dn목록
+        example:
+        - user
+        in: formData
+        items:
+          type: string
+        name: memberOf
+        type: array
+      - description: 전화->휴대폰
+        example: user
+        in: formData
+        name: mobile
+        type: string
+      - description: ldap회사명
+        example: user
+        in: formData
+        name: o
+        type: string
+      - description: 전화->호출기
+        example: user
+        in: formData
+        name: pager
+        type: string
+      - description: 사무실주소
+        example: user
+        in: formData
+        name: physicalDeliveryOfficeName
+        type: string
+      - description: 사서함주소
+        example: user
+        in: formData
+        name: postOfficeBox
+        type: string
+      - description: 주소->우편번호
+        example: user
+        in: formData
+        name: postalCode
+        type: string
+      - description: windows2000이전사용자로그온이름(ADdomain\sAMAccountName형식)
+        example: user
+        in: formData
+        name: sAMAccountName
+        type: string
+      - description: 성
+        example: user
+        in: formData
+        name: sn
+        type: string
+      - description: 시/도
+        example: user
+        in: formData
+        name: st
+        type: string
+      - description: 주소
+        example: user
+        in: formData
+        name: streetAddress
+        type: string
+      - description: 일반->전화
+        example: user
+        in: formData
+        name: telephoneNumber
+        type: string
+      - description: 직함
+        example: user
+        in: formData
+        name: title
+        type: string
+      - description: 로그온이름(accountname@ADdomain형식)
+        example: user
+        in: formData
+        name: userPrincipalName
+        type: string
+      - description: works로그인명
+        example: user
+        in: formData
+        name: username
+        type: string
+      - description: 홈페이지주소
+        example: user
+        in: formData
+        name: wWWHomePage
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 사용자 정보 조회 성공
+          schema:
+            $ref: '#/definitions/main.ADUser'
+        "401":
+          description: 사용자 정보 조회 실패
+          schema:
+            $ref: '#/definitions/main.errorModel'
+        default:
+          description: ""
+          schema:
+            type: string
+      summary: 사용자 정보 수정
 swagger: "2.0"
 x-extension-openapi:
   example: value on a json format

@@ -166,3 +166,92 @@ type InstanceInstanceVolumeInfo struct {
 		Zonename                   string        `json:"zonename"`
 	} `json:"volume"`
 }
+
+type ListNetworksResponse struct {
+	Count   int `json:"count"`
+	Network []struct {
+		Id                          string `json:"id"`
+		Name                        string `json:"name"`
+		Displaytext                 string `json:"displaytext"`
+		Broadcastdomaintype         string `json:"broadcastdomaintype"`
+		Traffictype                 string `json:"traffictype"`
+		Gateway                     string `json:"gateway"`
+		Netmask                     string `json:"netmask"`
+		Cidr                        string `json:"cidr"`
+		Zoneid                      string `json:"zoneid"`
+		Zonename                    string `json:"zonename"`
+		Networkofferingid           string `json:"networkofferingid"`
+		Networkofferingname         string `json:"networkofferingname"`
+		Networkofferingdisplaytext  string `json:"networkofferingdisplaytext"`
+		Networkofferingconservemode bool   `json:"networkofferingconservemode"`
+		Networkofferingavailability string `json:"networkofferingavailability"`
+		Issystem                    bool   `json:"issystem"`
+		State                       string `json:"state"`
+		Related                     string `json:"related"`
+		Broadcasturi                string `json:"broadcasturi"`
+		Dns1                        string `json:"dns1"`
+		Type                        string `json:"type"`
+		Vlan                        string `json:"vlan"`
+		Acltype                     string `json:"acltype"`
+		Account                     string `json:"account"`
+		Domainid                    string `json:"domainid"`
+		Domain                      string `json:"domain"`
+		Service                     []struct {
+			Name     string `json:"name"`
+			Provider []struct {
+				Name string `json:"name"`
+			} `json:"provider"`
+			Capability []struct {
+				Name                       string `json:"name"`
+				Value                      string `json:"value"`
+				Canchooseservicecapability bool   `json:"canchooseservicecapability"`
+			} `json:"capability"`
+		} `json:"service"`
+		Networkdomain     string        `json:"networkdomain"`
+		Physicalnetworkid string        `json:"physicalnetworkid"`
+		Restartrequired   bool          `json:"restartrequired"`
+		Specifyipranges   bool          `json:"specifyipranges"`
+		Canusefordeploy   bool          `json:"canusefordeploy"`
+		Ispersistent      bool          `json:"ispersistent"`
+		Tags              []interface{} `json:"tags"`
+		Details           struct {
+		} `json:"details"`
+		Displaynetwork      bool   `json:"displaynetwork"`
+		Strechedl2Subnet    bool   `json:"strechedl2subnet"`
+		Redundantrouter     bool   `json:"redundantrouter"`
+		Created             string `json:"created"`
+		Receivedbytes       int64  `json:"receivedbytes"`
+		Sentbytes           int64  `json:"sentbytes"`
+		Egressdefaultpolicy bool   `json:"egressdefaultpolicy"`
+		Hasannotations      bool   `json:"hasannotations"`
+	} `json:"network"`
+}
+
+type ListPublicIpAddressesResponse struct {
+	Count           int `json:"count"`
+	Publicipaddress []struct {
+		Id                    string        `json:"id"`
+		Ipaddress             string        `json:"ipaddress"`
+		Allocated             string        `json:"allocated"`
+		Zoneid                string        `json:"zoneid"`
+		Zonename              string        `json:"zonename"`
+		Issourcenat           bool          `json:"issourcenat"`
+		Account               string        `json:"account"`
+		Domainid              string        `json:"domainid"`
+		Domain                string        `json:"domain"`
+		Forvirtualnetwork     bool          `json:"forvirtualnetwork"`
+		Vlanid                string        `json:"vlanid"`
+		Vlanname              string        `json:"vlanname"`
+		Isstaticnat           bool          `json:"isstaticnat"`
+		Issystem              bool          `json:"issystem"`
+		Associatednetworkid   string        `json:"associatednetworkid"`
+		Associatednetworkname string        `json:"associatednetworkname"`
+		Networkid             string        `json:"networkid"`
+		State                 string        `json:"state"`
+		Physicalnetworkid     string        `json:"physicalnetworkid"`
+		Tags                  []interface{} `json:"tags"`
+		Isportable            bool          `json:"isportable"`
+		Fordisplay            bool          `json:"fordisplay"`
+		Hasannotations        bool          `json:"hasannotations"`
+	} `json:"publicipaddress"`
+}

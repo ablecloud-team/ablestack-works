@@ -120,13 +120,11 @@ type GuacamoleConnections struct {
 
 func getGuacamoleToken() (*http.Response, error) {
 	//var guacamoleUrl = os.Getenv("GuacamoleUrl")
-	//TODO 과카몰리 URL을 works URL을 이용하여 통신함
 	var guacamoleUrl = "http://" + os.Getenv("WorksIp") + ":8080"
 	//var guacamoleUsername = os.Getenv("GuacamoleUsername")
 	resource := "/api/tokens"
 
 	params := url.Values{}
-	//TODO 과카몰리 계정 및 패스워드 하드코딩
 
 	params.Set("username", "administrator")
 	params.Set("password", "Ablecloud1!")
