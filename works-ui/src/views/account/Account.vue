@@ -13,12 +13,10 @@
                 size="small"
                 @click="refresh()"
               >
-                <template #icon>
-                  <ReloadOutlined /> {{ $t("label.refresh") }}
-                </template>
+                <template #icon><ReloadOutlined /></template>
+                {{ $t("label.refresh") }}
               </a-button>
             </a-col>
-
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
               <div>
@@ -28,11 +26,36 @@
                   :multi-select-list="multiSelectList"
                   @fetchData="refresh"
                 />
+                <!-- <a-tooltip placement="bottom">
+                  <template #title>{{
+                    $t("tooltip.account.download.csv")
+                  }}</template>
+                  <a-button
+                    v-show="dataLoadSucc"
+                    shape="circle"
+                    style="margin-left: 10px"
+                    @click="downloadCSV"
+                  >
+                    <DownloadOutlined />
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip placement="bottom">
+                  <template #title>{{
+                    $t("tooltip.account.upload.csv")
+                  }}</template>
+                  <a-button
+                    shape="circle"
+                    style="margin-left: 10px"
+                    @click="showUploadModal(true)"
+                  >
+                    <UploadOutlined />
+                  </a-button>
+                </a-tooltip> -->
                 <a-button
                   type="primary"
                   shape="round"
                   style="margin-left: 10px"
-                  @click="showModal(true)"
+                  @click="showAddModal(true)"
                   >{{ addModalTitle }}
                   <template #icon>
                     <PlusOutlined />
@@ -48,14 +71,15 @@
           <AccountList
             ref="listRefreshCall"
             @actionFromChange="actionFromChange"
+            @downloadListSetting="downloadListSetting"
           />
         </div>
       </a-layout-content>
     </a-layout>
     <!-- ADD WORKSPACE MODAL START  -->
-    <a-modal v-model:visible="visible" :title="addModalTitle">
+    <a-modal v-model:visible="addVisible" :title="addModalTitle">
       <template #footer>
-        <a-button key="close" @click="showModal(false)">{{
+        <a-button key="close" @click="showAddModal(false)">{{
           $t("label.cancel")
         }}</a-button>
         <a-button
@@ -170,6 +194,43 @@
       </a-form>
     </a-modal>
     <!-- ADD WORKSPACE MODAL END  -->
+    <a-modal
+      v-model:visible="uploadVisible"
+      width="70%"
+      :title="$t(uploadModalTitle)"
+      :ok-text="$t('label.ok')"
+      :cancel-text="$t('label.cancel')"
+      @cancel="showUploadModal(false)"
+      @ok="handleSubmit()"
+    >
+      <a-alert
+        :message="modalConfirm"
+        :description="modalDescription"
+        type="info"
+        show-icon
+      />
+      <a-upload-dragger
+        :file-list="fileList"
+        :remove="handleRemove"
+        :before-upload="beforeUpload"
+        sytle="height: 400px"
+      >
+        <!-- <a-button> -->
+        <upload-outlined></upload-outlined>
+        {{ $t("input.file.upload.dragdrop") }}
+        <!-- </a-button> -->
+      </a-upload-dragger>
+      <br />
+      <a-table
+        size="small"
+        :loading="uploadCsvTableLoading"
+        :columns="UserListColumns"
+        :pagination="pagination"
+        :data-source="dataList"
+        :scroll="{ y: 780 }"
+      >
+      </a-table>
+    </a-modal>
   </div>
 </template>
 
@@ -189,10 +250,14 @@ export default defineComponent({
   },
   props: {},
   setup() {
-    const visible = ref(false);
+    const addVisible = ref(false);
+    const uploadVisible = ref(false);
     const checkDupl = ref(false);
-    const showModal = (state) => {
-      visible.value = state;
+    const showAddModal = (state) => {
+      addVisible.value = state;
+    };
+    const showUploadModal = (state) => {
+      uploadVisible.value = state;
     };
     const formRef = ref();
     const formState = reactive({
@@ -266,16 +331,78 @@ export default defineComponent({
       formRef,
       formState,
       rules,
-      visible,
-      showModal,
+      addVisible,
+      uploadVisible,
+      showAddModal,
+      showUploadModal,
       checkDupl,
     };
   },
   data() {
     return {
       addModalTitle: this.$t("label.user.add"),
+      uploadModalTitle: this.$t("label.user.csv.upload"),
       actionFrom: ref("Account"),
       multiSelectList: ref([]),
+      fileList: ref([]),
+      dataList: ref([]),
+      downloadList: ref([]),
+      dataLoadSucc: ref(false),
+      uploadCsvTableLoading: ref(false),
+      modalConfirm: this.$t("message.account.file.upload.confirm"),
+      modalDescription: this.$t("message.account.file.upload.description"),
+      pagination: {
+        // pageSize: 10,
+        showSizeChanger: true, // display can change the number of pages per page
+        pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
+        showTotal: (total) =>
+          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
+      },
+      UserListColumns: [
+        {
+          title: this.$t("label.account"),
+          dataIndex: "계정",
+          key: "계정",
+          width: "15%",
+        },
+        {
+          title: this.$t("label.lastname"),
+          dataIndex: "이름(성)",
+          key: "이름(성)",
+          width: "10%",
+        },
+        {
+          title: this.$t("label.firstname"),
+          dataIndex: "이름(명)",
+          key: "이름(명)",
+          width: "10%",
+        },
+        {
+          title: this.$t("label.title"),
+          dataIndex: "직급",
+          key: "직급",
+          width: "10%",
+        },
+        {
+          title: this.$t("label.department"),
+          dataIndex: "부서",
+          key: "부서",
+          width: "15%",
+        },
+        {
+          title: this.$t("label.phone"),
+          dataIndex: "전화번호",
+          key: "전화번호",
+          width: "20%",
+        },
+        {
+          title: this.$t("label.email"),
+          dataIndex: "이메일",
+          key: "이메일",
+          width: "20%",
+        },
+      ],
     };
   },
   created() {
@@ -296,6 +423,89 @@ export default defineComponent({
     this.rules.department[1].message = this.$t("input.max.32");
   },
   methods: {
+    handleRemove(file) {
+      console.log(file);
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+      this.dataList = null;
+    },
+    beforeUpload(file) {
+      this.dataList = null;
+      this.uploadCsvTableLoading = true;
+
+      this.fileList = [file];
+      let thisJson = "";
+      const reader = new FileReader();
+      reader.readAsText(file);
+      reader.onload = () => {
+        let lines = reader.result.split("\r");
+        for (let i = 0; i < lines.length; i++) {
+          lines[i] = lines[i].replace(/\s/, ""); //빈 공간 삭제하기
+        }
+        let result = [];
+        let headers = lines[0].split(",");
+
+        for (let i = 1; i < lines.length; i++) {
+          let obj = {};
+          let currentline = lines[i].split(",");
+
+          for (let j = 0; j < headers.length; j++) {
+            obj[headers[j]] = currentline[j];
+          }
+          result.push(obj);
+        }
+        thisJson = result;
+      };
+
+      setTimeout(() => {
+        this.dataList = thisJson;
+        this.uploadCsvTableLoading = false;
+      }, 2000);
+
+      return false;
+    },
+    downloadListSetting(obj) {
+      this.downloadList = obj;
+      this.dataLoadSucc = true;
+    },
+    downloadCSV() {
+      const date = new Date();
+
+      // "\ufeff" => 한글 깨짐 방지
+      let csv =
+        "\ufeff" + "계정,이름(성),이름(명),직급,부서,전화번호,이메일\n";
+      this.downloadList.forEach((el) => {
+        var line =
+          el["name"] +
+          "," +
+          el["givenName"] +
+          "," +
+          el["sn"] +
+          "," +
+          el["title"] +
+          "," +
+          el["department"] +
+          "," +
+          el["telephoneNumber"] +
+          "," +
+          el["mail"] +
+          "\n";
+        csv += line;
+      });
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      let link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download =
+        "사용자 목록(" +
+        new Date(+new Date() + 3240 * 10000)
+          .toISOString()
+          .replace("T", " ")
+          .replace(/\..*/, "") +
+        ").csv";
+      link.click();
+    },
     refresh() {
       this.$refs.listRefreshCall.fetchRefresh();
     },
@@ -347,7 +557,7 @@ export default defineComponent({
                   console.log("error", error);
                 })
                 .finally(() => {
-                  this.showModal(false);
+                  this.showAddModal(false);
                   this.$refs.listRefreshCall.fetchRefresh();
                 });
             });

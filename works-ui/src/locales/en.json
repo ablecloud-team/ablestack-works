@@ -80,7 +80,12 @@
     "message.workspace.test": " We are currently creating a Test VM and checking whether normal communication with the controller server and directory server is in progress. The test is performed for about 10 to 15 minutes, and the final check is normal. Test VM will be deleted automatically. Please wait.",
     "message.account.file.upload.confirm": "After uploading the file, please check that all items are entered correctly.",
     "message.account.file.upload.description": "If the data does not appear in the table below, the file format or data was not entered correctly, so please rewrite and upload.",
-    
+    "message.userdesktop.rdp.connect.os.limit": "RDP access is limited in the operating system you are currently using.",
+    "message.userdesktop.rdp.connect.client.notinstall": "The Works client for RDP connection is not currently installed. The required installer will be downloaded.",
+    "message.userdesktop.client.install.notice1": "1. First install the Cert.exe file.",
+    "message.userdesktop.client.install.notice2": "2. After that, install the Ablecloud works client.msix file.",
+    "message.userdesktop.client.install.notice3": "3. After the two programs are installed normally, proceed with RDP connection.",
+
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",
     "tooltip.vmRestart": "Restart",
@@ -169,7 +174,7 @@
     "label.password": "Password",
     "label.passwordCheck": "Password Check",
     "label.profile": "Profile",
-    "label.logout": "LogOut",
+    "label.logout": "Log Out",
     "label.workspace.add": "Add Workspace",
     "label.dedicated.shared": "Dedicated/Shared",
     "label.network": "Network",

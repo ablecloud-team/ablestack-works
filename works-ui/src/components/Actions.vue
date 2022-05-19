@@ -293,11 +293,6 @@ export default defineComponent({
     return {
       selectedUser: ref(undefined),
       callComponent: ref(props.actionFrom),
-      multiSelectList: props.multiSelectList,
-      vmInfo: ref(props.vmInfo),
-      accountInfo: ref(props.accountInfo),
-      workspaceInfo: ref(props.workspaceInfo),
-      wsName: ref(props.wsName),
       eventList: [],
       alertType: ref("info"),
       succCnt: ref(0),
@@ -317,11 +312,9 @@ export default defineComponent({
   },
   created() {
     this.fetchData();
-    console.log(this.multiSelectList);
   },
   methods: {
     fetchData() {
-      
       if (this.callComponent.includes("Workspace")) {
         if (this.workspaceInfo) {
           this.eventList = [this.workspaceInfo];
@@ -371,7 +364,11 @@ export default defineComponent({
           else this.state.buttonBoolean.multiVmStart = true;
         }
         //사용자 할당 해제 버튼 체크
-        res = this.eventList.filter((it) => it.owner_account_id !== "");
+        res = this.eventList.filter(
+          (it) =>
+            it.owner_account_id !== undefined && it.owner_account_id !== ""
+        );
+        console.log(res.length);
         if (res.length > 0) {
           if (this.vmInfo) this.state.buttonBoolean.userUnlock = true;
           else this.state.buttonBoolean.multiUserUnlock = true;
@@ -382,7 +379,10 @@ export default defineComponent({
         else this.state.buttonBoolean.multiVmDestroy = true;
 
         //사용자 할당 버튼 체크
-        res = this.eventList.filter((it) => it.owner_account_id === "");
+        res = this.eventList.filter(
+          (it) =>
+            it.owner_account_id === undefined || it.owner_account_id === ""
+        );
         if (this.eventList.length === res.length) {
           //같은 워크스페이스면 할당 버튼 활성화, 아니면 비활성화
           res = this.eventList.filter(function (obj, i, s) {
@@ -574,9 +574,9 @@ export default defineComponent({
       }
 
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      //await this.funcDelay(2000);
     },
     async vmUserAllocateAction() {
       if (this.selectedUser.length == 0) return false;
@@ -600,9 +600,9 @@ export default defineComponent({
       }
 
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      // await this.funcDelay(1000);
     },
     async vmUserUnlockAction() {
       this.sucMessage = "message.user.vm.unlock.ok";
@@ -623,9 +623,9 @@ export default defineComponent({
         }
       }
       this.$emit("fetchData");
-      await this.funcDelay(2000);
-      this.handleCancel();
       this.funcEndMessage();
+      this.handleCancel();
+      // await this.funcDelay(2000);
     },
     async vmAction() {
       if (this.modalTitle.includes("vmStart")) {
@@ -697,10 +697,9 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-
-      await this.funcDelay(1000);
       this.funcEndMessage();
       this.handleCancel();
+      // await this.funcDelay(1000);
       if (this.callComponent == "WorkspaceDetail") {
         router.push({ name: "Workspace" });
       } else {
@@ -723,7 +722,7 @@ export default defineComponent({
           this.failCnt = this.failCnt + 1;
         }
       }
-      await this.funcDelay(1000);
+      // await this.funcDelay(1000);
       this.funcEndMessage();
       this.handleCancel();
       if (this.callComponent == "AccountDetail") {

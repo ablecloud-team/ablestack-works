@@ -58,6 +58,9 @@ export default defineComponent({
 </script>
 
 <style>
+.ant-layout {
+  overflow: auto;
+}
 .admin-sider-layout {
   min-width: 10px !important;
   background: white;

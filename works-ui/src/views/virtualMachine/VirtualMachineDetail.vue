@@ -18,9 +18,8 @@
                 size="small"
                 @click="refresh()"
               >
-                <template #icon>
-                  <ReloadOutlined /> {{ $t("label.refresh") }}
-                </template>
+                <template #icon><ReloadOutlined /></template>
+                {{ $t("label.refresh") }}
               </a-button>
             </a-col>
             <!-- 우측 액션 -->
@@ -98,10 +97,11 @@ export default defineComponent({
           this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
           this.vmDiskInfo =
             response.data.result.instanceInstanceVolumeInfo.volume[0];
-          this.cpuused =
+          this.cpuused = parseFloat(
             response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
               "%"
-            )[0];
+            )[0]
+          );
         } else {
           message.error(this.$t("message.response.data.fail"));
         }

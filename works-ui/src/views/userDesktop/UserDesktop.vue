@@ -1,3 +1,6 @@
+
+
+
 <template>
   <div id="content-layout">
     <a-layout>
@@ -13,9 +16,8 @@
                 size="small"
                 @click="fetchRefresh()"
               >
-                <template #icon>
-                  <ReloadOutlined /> {{ $t("label.refresh") }}
-                </template>
+                <template #icon><ReloadOutlined /></template>
+                {{ $t("label.refresh") }}
               </a-button>
             </a-col>
           </a-row>
@@ -31,8 +33,8 @@
             >
               <a-card
                 :title="workspace.name + '(' + workspace.description + ')'"
-                bodyStyle="margin: 1px;"
-                ><font-awesome-icon :icon="['fa-chrome']" />
+                :bodyStyle="{ margin: '1px' }"
+              >
                 <a-row :gutter="4">
                   <a-col
                     v-for="vm in workspace.instanceList"
@@ -49,9 +51,7 @@
                           color: vm.mold_status == 'Running' ? 'black' : 'pink',
                         }"
                       />
-
-                      <template class="ant-card-actions" #actions>
-                        <a-popconfirm
+                      <!-- <a-popconfirm
                           :title="
                             vm.favorite == true
                               ? '즐겨찾기 해제하시겠습니까?'
@@ -82,49 +82,49 @@
                               :style="{ color: '#d9dbdf' }"
                             />
                           </a-tooltip>
-                        </a-popconfirm>
-                        <!-- 
-                        <a-popconfirm
-                          :title="'RDP 파일을 다운로드 하시겠습니까?'"
-                          :ok-text="$t('label.ok')"
-                          :cancel-text="$t('label.cancel')"
-                          @confirm="downloadRDP(vm.name)"
-                        > -->
+                        </a-popconfirm> -->
+                      <template #actions>
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             $t("label.rdp.connect")
                           }}</template>
-                          <CloudDownloadOutlined
-                            :style="{ color: '#292929' }"
-                            @click="downloadRDP(vm.name)"
-                          />
+                          <Icon>
+                            <template #component>
+                              <img
+                                src="@/assets/icons8-remote-desktop-97.png"
+                                width="30"
+                                height="30"
+                                @click="
+                                  workspace.policy.rdp_access_allow == '1'
+                                    ? connectRdpClient(workspace.uuid, vm.uuid)
+                                    : false
+                                "
+                              />
+                            </template>
+                          </Icon>
                         </a-tooltip>
-                        <!-- </a-popconfirm> -->
 
-                        <!-- <a-popconfirm
-                          :title="'데스크톱에 접속하시겠습니까?'"
-                          :ok-text="$t('label.ok')"
-                          :cancel-text="$t('label.cancel')"
-                          @confirm="connectConsole(vm.id)"
-                          :disabled="
-                            vm.handshake_status == 'Ready' ? false : true
-                          "
-                        > -->
                         <a-tooltip placement="bottom">
                           <template #title>{{
                             vm.handshake_status === "Ready"
                               ? $t("label.desktop.console.connect.ready")
                               : $t("label.desktop.console.connect.notready")
                           }}</template>
-
-                          <CodeFilled
-                            v-if="vm.handshake_status == 'Ready'"
-                            :style="{ color: '#333' }"
-                            @click="connectConsole(workspace.uuid, vm.uuid)"
-                          />
-                          <CodeFilled v-else :style="{ color: '#d9dbdf' }" />
+                          <Icon>
+                            <template #component>
+                              <img
+                                src="@/assets/icons8-internet-64.png"
+                                width="30"
+                                height="30"
+                                @click="
+                                  workspace.policy.rdp_access_allow == '1'
+                                    ? connectConsole(workspace.uuid, vm.uuid)
+                                    : false
+                                "
+                              />
+                            </template>
+                          </Icon>
                         </a-tooltip>
-                        <!-- </a-popconfirm> -->
 
                         <a-Popover placement="topLeft" trigger="click">
                           <template #content>
@@ -148,7 +148,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -173,7 +172,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -197,7 +195,6 @@
                                       :style="{
                                         color: '#333',
                                         fontSize: '18px',
-                                        marginTop: '3px',
                                       }"
                                     />
                                   </template>
@@ -206,7 +203,11 @@
                             </a-popconfirm>
                           </template>
                           <MoreOutlined
-                            :style="{ color: '#333', fontSize: '18px' }"
+                            :style="{
+                              color: '#333',
+                              fontSize: '24px',
+                              marginTop: '5px',
+                            }"
                           />
                         </a-Popover>
                       </template>
@@ -242,14 +243,23 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, h } from "vue";
+import customProtocolCheck from "custom-protocol-check";
+import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
 import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { notification, message, Button } from "ant-design-vue";
+const hostname =
+  process.env.VUE_APP_API_URL == ""
+    ? window.location.hostname
+    : process.env.VUE_APP_API_URL;
+const apiPort =
+  process.env.VUE_APP_API_PORT == "" ? "8082" : process.env.VUE_APP_API_PORT;
 export default defineComponent({
   name: "UserDesktop",
   components: {
+    Icon,
     Apath,
     Actions,
   },
@@ -271,6 +281,7 @@ export default defineComponent({
       dataList: ref([]),
       succCnt: ref(0),
       failCnt: ref(0),
+      osPass: ref(false),
     };
   },
   created() {
@@ -279,6 +290,9 @@ export default defineComponent({
       //60초 자동 갱신
       this.fetchData();
     }, 60000);
+  },
+  mounted() {
+    this.funcOsCheck();
   },
   methods: {
     fetchRefresh() {
@@ -326,82 +340,108 @@ export default defineComponent({
       // document.getElementById(val).style.display = "none";
       // document.getElementById(val).style.display = "none";
     },
-    downloadRDP(vmName) {
-      let rdpConfig =
-        "targetisaadjoined:i:0\n" +
-        "hubdiscoverygeourl:s:\n" +
-        "redirected video capture encoding quality:i:0\n" +
-        "camerastoredirect:s:\n" +
-        "gatewaybrokeringtype:i:0\n" +
-        "use redirection server name:i:0\n" +
-        "alternate shell:s:\n" +
-        "disable themes:i:0\n" +
-        "disable cursor setting:i:1\n" +
-        "remoteapplicationname:s:\n" +
-        "resourceprovider:s:\n" +
-        "disable menu anims:i:1\n" +
-        "remoteapplicationcmdline:s:\n" +
-        "promptcredentialonce:i:0\n" +
-        "gatewaycertificatelogonauthority:s:\n" +
-        "audiocapturemode:i:0\n" +
-        "prompt for credentials on client:i:0\n" +
-        "gatewayhostname:s:\n" +
-        "remoteapplicationprogram:s:\n" +
-        "gatewayusagemethod:i:2\n" +
-        "screen mode id:i:2\n" +
-        "use multimon:i:0\n" +
-        "authentication level:i:3\n" +
-        "desktopwidth:i:0\n" +
-        "desktopheight:i:0\n" +
-        "redirectsmartcards:i:0\n" +
-        "redirectclipboard:i:1\n" +
-        "forcehidpioptimizations:i:0\n" +
-        "full address:s:10.10.1.110:3389\n" +
-        "username:s:user1\n" +
-        "password 51:01000000d08c9ddf0115d1118c7a00c04fc297eb01000000f7d63b57853e464ab1d317a8417beae70000000002000000000003660000c000000010000000bb23d3b56c695c0006389b38891c5b1a0000000004800000a00000001000000031421b3dbd931cda62251dd2120d53e4180000008240be3347e4a17740eadf42040e72b26f63d948260d626814000000be3e14b3083cb81535647a6a5d7755daf9f06dc1\n" +
-        "domain:s:able\n" +
-        "drivestoredirect:s:\n" +
-        "loadbalanceinfo:s:\n" +
-        "networkautodetect:i:1\n" +
-        "enablecredsspsupport:i:2\n" +
-        "redirectprinters:i:0\n" +
-        "autoreconnection enabled:i:1\n" +
-        "session bpp:i:32\n" +
-        "administrative session:i:0\n" +
-        "audiomode:i:0\n" +
-        "bandwidthautodetect:i:1\n" +
-        "authoring tool:s:\n" +
-        "connection type:i:7\n" +
-        "remoteapplicationmode:i:0\n" +
-        "disable full window drag:i:0\n" +
-        "gatewayusername:s:\n" +
-        "shell working directory:s:\n" +
-        "wvd endpoint pool:s:\n" +
-        "remoteapplicationappid:s:\n" +
-        "allow font smoothing:i:1\n" +
-        "connect to console:i:0\n" +
-        "disable wallpaper:i:0\n" +
-        "gatewayaccesstoken:s:\n" +
-        "promptcredentialonce:i:0\n";
+    async connectRdpClient(workspaceUuid, vmUuid) {
+      if (!this.osPass) {
+        message.warning(this.$t("message.userdesktop.rdp.connect.os.limit"));
+        return false;
+      }
+      const paramArr = this.dataList
+        .filter((dl) => dl.uuid === workspaceUuid)[0]
+        .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
-      var element = document.createElement("a");
-      element.setAttribute(
-        "href",
-        "data:text/plain;charset=utf-8," + encodeURIComponent(rdpConfig)
-      );
+      await worksApi
+        .get(
+          "/api/v1/connection/rdp/" +
+            vmUuid +
+            "/" +
+            sessionStorage.getItem("userName")
+        )
+        .then((res) => {
+          if (res.status == 200) {
+            const url =
+              "worksapp://" +
+              hostname +
+              ":" +
+              apiPort +
+              "/?full address=" +
+              hostname +
+              "&server port=" +
+              res.data.instance.public_port +
+              "&domain=" +
+              sessionStorage.getItem("domainName") +
+              "&username=" +
+              sessionStorage.getItem("userName") +
+              "&password=" +
+              res.data.instance.password +
+              "&instanceUuid=" +
+              vmUuid +
+              "&hash=" +
+              res.data.instance.hash;
 
-      element.setAttribute("download", vmName + ".rdp");
-      element.style.display = "none";
-      document.body.appendChild(element);
-      element.click();
-
-      document.body.removeChild(element);
+            console.log(url);
+            customProtocolCheck(
+              url,
+              () => {
+                this.downloadRdpClient("works-client.zip");
+                message.warning(
+                  this.$t("message.userdesktop.rdp.connect.client.notinstall")
+                );
+                //worksapp 프로토콜이 설치안됨
+                const key = `open${Date.now()}`;
+                notification.info({
+                  message: "RDP 클라이언트 설치 안내",
+                  description: h("div", [
+                    this.$t("message.userdesktop.client.install.notice1"),
+                    h("br"),
+                    this.$t("message.userdesktop.client.install.notice2"),
+                    h("br"),
+                    this.$t("message.userdesktop.client.install.notice3"),
+                  ]),
+                  duration: 0,
+                  style: {
+                    width: "500px",
+                  },
+                  btn: () =>
+                    h(
+                      Button,
+                      {
+                        type: "primary",
+                        size: "small",
+                        onClick: () => notification.close(key),
+                      },
+                      { default: () => this.$t("label.ok") }
+                    ),
+                  key,
+                  onClose: close,
+                });
+              },
+              () => {},
+              100
+            );
+          } else {
+            message.error(this.$t("message.response.data.fail"));
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          message.error(this.$t("fail"));
+        })
+        .finally(() => {});
     },
-    connectConsole(worksId, vmId) {
+    downloadRdpClient(filename) {
+      const downlink = document.createElement("a");
+      downlink.setAttribute("href", "/client/" + filename);
+      downlink.setAttribute("download", filename);
+      downlink.style.display = "none";
+      document.body.appendChild(downlink);
+      downlink.click();
+      document.body.removeChild(downlink);
+    },
+    connectConsole(workspaceUuid, vmUuid) {
       // console.log(worksId, vmId);
       const liteParamArr = this.dataList
-        .filter((dl) => dl.uuid === worksId)[0]
-        .instanceList.filter((il) => il.uuid === vmId)[0];
+        .filter((dl) => dl.uuid === workspaceUuid)[0]
+        .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
       liteParamArr["hostname"] = liteParamArr.ipaddress;
       delete liteParamArr.ipaddress;
@@ -410,20 +450,26 @@ export default defineComponent({
       liteParamArr["port"] = 3389;
       liteParamArr["username"] = sessionStorage.getItem("userName");
       liteParamArr["domain"] = sessionStorage.getItem("domainName");
-      liteParamArr["enable-wallpaper"] = false;
-      liteParamArr["enable-font-smoothing"] = false;
+
+      liteParamArr["enable-wallpaper"] = true;
+      liteParamArr["enable-font-smoothing"] = true;
       liteParamArr["enable-theming"] = false;
       liteParamArr["enable-menu-animations"] = false;
       liteParamArr["resize-method"] = "display-update";
-      liteParamArr["disable-upload"] = false;
-      liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "Z";
-      liteParamArr["drive-path"] = "/";
+
+      //liteParamArr["create-drive-path"] = true;
+      liteParamArr["drive-name"] = "GUACD";
+      liteParamArr["drive-path"] = "/share";
       liteParamArr["enable-drive"] = true;
+      liteParamArr["disable-upload"] = false;
+      liteParamArr["disable-download"] = false;
+      liteParamArr["enable-printing"] = true;
+      liteParamArr["printer-name"] = "VDI-PRINTER";
+
+      liteParamArr["enable-touch"] = true;
+
       liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
       //liteParamArr["security"] = "rdp";
-
-      console.log(liteParamArr);
 
       const encrypted = btoa(
         this.$CryptoJS.AES.encrypt(
@@ -497,6 +543,102 @@ export default defineComponent({
       this.failCnt = 0;
       this.succCnt = 0;
     },
+    funcOsCheck() {
+      var os,
+        ua = navigator.userAgent;
+
+      if (ua.indexOf("Windows") != -1) {
+        os = "Windows";
+        this.osPass = true;
+      } else if (
+        ua.indexOf("iPad") != -1 ||
+        ua.indexOf("iPhone") != -1 ||
+        ua.indexOf("iPod") != -1
+      ) {
+        os = "Apple iOS";
+        this.osPass = false;
+      } else if (ua.indexOf("Android" != -1)) {
+        os = "Android OS";
+        this.osPass = false;
+      } else if (ua.match(/Mac|PPC/)) {
+        os = "Mac";
+        this.osPass = false;
+      } else if (ua.match(/Linux/)) {
+        os = "Linux";
+        this.osPass = false;
+      } else if (ua.match(/(Free|Net|Open)BSD/)) {
+        os = RegExp.$1 + "BSD";
+        this.osPass = false;
+      } else if (ua.match(/SunOS/)) {
+        os = "Solaris";
+        this.osPass = false;
+      }
+      //자세한 os 분류가 필요할때 사용
+      // if (ua.match(/Win(dows )?NT 6\.0/)) {
+      //   os = "Windows Vista";
+      //   this.osPass = true;
+      // } else if (ua.match(/Win(dows )?(NT 5\.1|XP)/)) {
+      //   os = "Windows XP";
+      //   this.osPass = true;
+      // } else {
+      //   if (
+      //     ua.indexOf("Windows NT 5.1") != -1 ||
+      //     ua.indexOf("Windows XP") != -1
+      //   ) {
+      //     os = "Windows XP";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 7.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.1") != -1
+      //   ) {
+      //     os = "Windows 7";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 8.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.2") != -1
+      //   ) {
+      //     os = "Windows 8";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 8.1") != -1 ||
+      //     ua.indexOf("Windows NT 6.3") != -1
+      //   ) {
+      //     os = "Windows 8.1";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("Windows NT 10.0") != -1 ||
+      //     ua.indexOf("Windows NT 6.4") != -1
+      //   ) {
+      //     os = "Windows 10";
+      //     this.osPass = true;
+      //   } else if (ua.match(/Win(dows )?NT( 4\.0)?/)) {
+      //     os = "Windows NT";
+      //     this.osPass = true;
+      //   } else if (
+      //     ua.indexOf("iPad") != -1 ||
+      //     ua.indexOf("iPhone") != -1 ||
+      //     ua.indexOf("iPod") != -1
+      //   ) {
+      //     os = "Apple iOS";
+      //     this.osPass = false;
+      //   } else if (ua.indexOf("Android" != -1)) {
+      //     os = "Android OS";
+      //     this.osPass = false;
+      //   } else if (ua.match(/Mac|PPC/)) {
+      //     os = "Mac";
+      //     this.osPass = false;
+      //   } else if (ua.match(/Linux/)) {
+      //     os = "Linux";
+      //     this.osPass = false;
+      //   } else if (ua.match(/(Free|Net|Open)BSD/)) {
+      //     os = RegExp.$1 + "BSD";
+      //     this.osPass = false;
+      //   } else if (ua.match(/SunOS/)) {
+      //     os = "Solaris";
+      //     this.osPass = false;
+      //   }
+      // }
+    },
   },
 });
 </script>
@@ -545,3 +687,4 @@ export default defineComponent({
   margin-right: 8px;
 }
 </style>
+

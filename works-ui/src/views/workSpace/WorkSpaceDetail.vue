@@ -18,9 +18,8 @@
                 size="small"
                 @click="refresh(true)"
               >
-                <template #icon>
-                  <ReloadOutlined /> {{ $t("label.refresh") }}
-                </template>
+                <template #icon><ReloadOutlined /></template>
+                {{ $t("label.refresh") }}
               </a-button>
             </a-col>
             <!-- 우측 액션 -->

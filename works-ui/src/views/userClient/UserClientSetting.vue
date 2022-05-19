@@ -1,6 +1,6 @@
 <template>
-  <a-row :gutter="16" type="flex" justify="center" align="top">
-    <a-col flex="215px">
+  <a-row :gutter="[8,24]" type="flex" justify="center" align="top">
+    <a-col flex="250px">
       <h3>1. 입력 방법</h3>
       <a-radio-group
         v-model:value="setText"
@@ -31,7 +31,7 @@
         </a-tooltip> -->
       </a-radio-group>
     </a-col>
-    <a-col flex="215px">
+    <a-col flex="250px">
       <h3>2. 마우스 에뮬레이션 모드</h3>
       <a-radio-group
         v-model:value="setMouse"
@@ -56,7 +56,7 @@
         </a-tooltip>
       </a-radio-group>
     </a-col>
-    <a-col flex="215px">
+    <a-col flex="250px">
       <h3>3. 디스플레이</h3>
       <a-button @click="zoomHandle(-10)" shape="circle">
         <template #icon><MinusOutlined /></template>

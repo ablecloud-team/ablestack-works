@@ -1,7 +1,12 @@
-works-api/works-api
-works-shell/works-shell.exe
-works-shell/works-shell
 .idea/
+.history
+node_modules
+target/*
+works-ui/.vscode
+works-ui/dist
+.DS_Store
+.gitignore
+works-ui/target
 samba-ad.zip
 *.exe
 *.log

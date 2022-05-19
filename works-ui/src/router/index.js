@@ -140,7 +140,6 @@ const routes = [
     name: "Exception",
     hidden: true,
     component: Exception404,
-    redirect: "/exception/404",
     children: [
       // {
       //   path: '/exception/403',
@@ -149,13 +148,13 @@ const routes = [
       //   component: () => import('@/views/exception/403'),
       //   meta: { title: '403' },
       // },
-      {
-        path: "/exception/404",
-        name: "404",
-        hidden: true,
-        component: () => import("@/views/exception/404"),
-        meta: { title: "404" },
-      },
+      // {
+      //   path: "/404",
+      //   name: "404",
+      //   hidden: true,
+      //   component: () => import("@/views/exception/404"),
+      //   meta: { title: "404" },
+      // },
       // {
       //   path: '/exception/500',
       //   name: '500',

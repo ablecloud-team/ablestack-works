@@ -9,9 +9,8 @@
           size="medium"
           @click="refresh(true)"
         >
-          <template #icon>
-            <ReloadOutlined /> {{ $t("label.fetch.latest") }}
-          </template>
+          <template #icon><ReloadOutlined /></template>
+          {{ $t("label.fetch.latest") }}
         </a-button>
       </a-col>
     </a-row>
