@@ -91,7 +91,7 @@
                           <Icon>
                             <template #component>
                               <img
-                                src="@/assets/icons8-remote-desktop-97.png"
+                                src="@/assets/icon-remote-desktop.png"
                                 width="30"
                                 height="30"
                                 @click="
@@ -113,7 +113,7 @@
                           <Icon>
                             <template #component>
                               <img
-                                src="@/assets/icons8-internet-64.png"
+                                src="@/assets/icons-internet.png"
                                 width="30"
                                 height="30"
                                 @click="
@@ -465,6 +465,7 @@ export default defineComponent({
       liteParamArr["disable-download"] = false;
       liteParamArr["enable-printing"] = true;
       liteParamArr["printer-name"] = "VDI-PRINTER";
+      liteParamArr["console"] = true;
 
       liteParamArr["enable-touch"] = true;
 
