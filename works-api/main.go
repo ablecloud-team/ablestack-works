@@ -59,14 +59,18 @@ func main() {
 	api := router.Group("/api")
 	{
 		api.POST("/login", getLogin)
-		api.POST("/workspaceAgent/:instanceUuid", putWorkspacesAgent)
-		api.POST("/workspaceAgent", putWorkspacesAgent)
+		api.POST("/workspaceAgent/:instanceUuid", postWorkspacesAgent)
+		//api.POST("/workspaceAgent", putWorkspacesAgent)
 
 		api.GET("/serverCheck", getServerCheck)
 
 		api.GET("/version", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"version": Version})
 		})
+
+		api.GET("/client", getClient)
+		api.POST("/client", postClient)
+		api.DELETE("/client/:instanceUuid/:userName", deleteClient)
 		v1 := api.Group("/v1")
 		v1.Use(checkToken)
 		//v1.Use(updateInstanceChecked0)
@@ -90,6 +94,7 @@ func main() {
 			//v1.POST("/instance", postInstances) // VDI 에 유저 할당
 			v1.PATCH("/instance/:action/:instanceUuid", patchInstances)
 
+			v1.GET("/connection/rdp/:instanceUuid/:userName", getConnectionRdp)
 			v1.POST("/connection/:instanceUuid/:username/:connection", putAppConnection)
 			v1.PUT("/connection/:instanceUuid/:username", putConnection)
 			v1.DELETE("/connection/:instanceUuid", deleteConnection)
