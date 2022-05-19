@@ -2,7 +2,9 @@
   <div class="footer">
     <div class="line">Copyright (c) 2021-2022, ABLECLOUD.Co.Ltd</div>
     <div class="line">
-      ABLESTACK Works Cerato(3.0.0- {{ buildDate + "-" + buildSeq + "-dev" }} )
+      ABLESTACK Bronto(v{{
+        buildVersion + "-" + buildDate + "-" + buildRelease + buildDev
+      }})
     </div>
   </div>
 </template>
@@ -12,8 +14,10 @@ export default {
   name: "Footer",
   data() {
     return {
-      buildDate: process.env.VUE_APP_RELEASE_DATE,
-      buildSeq: process.env.VUE_APP_VERSION_CODE,
+      buildDate: process.env.VUE_APP_BUILD_DATE,
+      buildVersion: process.env.VUE_APP_VERSION,
+      buildRelease: process.env.VUE_APP_RELEASE,
+      buildDev: process.env.VUE_APP_API_URL == "" ? "" : "-dev",
     };
   },
 };
