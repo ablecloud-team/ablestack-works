@@ -69,22 +69,22 @@ func setup() {
 
 }
 
-// @title Ablecloud Works Domain-Controller API
-// @version 1.0
-// @description 이 API는 Ablecloud Works의 Domain Controller(DC)를 제어하는 역할을 합니다.
-// @termsOfService http://swagger.io/terms/
-// @contact.name API Support
-// @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @title           Ablecloud Works Domain-Controller API
+// @version         1.0
+// @description     이 API는 Ablecloud Works의 Domain Controller(DC)를 제어하는 역할을 합니다.
+// @termsOfService  http://swagger.io/terms/
+// @contact.name    API Support
+// @contact.url     http://www.swagger.io/support
+// @contact.email   support@swagger.io
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host ad-api.ablecloud.io
-// @BasePath /api/v1
-// @query.collection.format multi
+// @host                     ad-api.ablecloud.io
+// @BasePath                 /api/v1
+// @query.collection.format  multi
 
-// @x-extension-openapi {"example": "value on a json format"}
+// @x-extension-openapi  {"example": "value on a json format"}
 func main() {
 	var (
 		err error

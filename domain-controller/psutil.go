@@ -8,15 +8,15 @@ import (
 )
 
 type PSCMD struct {
-	CMD     string `form:"cmd"`
-	ARG     string `form:"arg"`
-	TIMEOUT int    `form:"timeout"`
+	CMD     string `form:"cmd" example:"echo"`
+	ARG     string `form:"arg" example:"Hello World!"`
+	TIMEOUT int    `form:"timeout" example:"3"`
 }
 
 type APPVAL struct {
-	Name string `json:"name"`
-	Path string `json:"path"`
-	Desc string `json:"desc"`
+	Name string `json:"name" example:"notepad.exe"`
+	Path string `json:"path" example:"C:\Windows\System32\notepad.exe"`
+	Desc string `json:"desc" example:"메모장"`
 }
 
 func setupShell() (shell *powershell.Shell, err error) {
@@ -29,21 +29,21 @@ func setupShell() (shell *powershell.Shell, err error) {
 	return shell, err
 }
 
-func PowershellOut2map(stdout string) (output []map[string]string){
+func PowershellOut2map(stdout string) (output []map[string]string) {
 	setLog()
-	std3:=strings.TrimSpace(stdout)
-	std2:=strings.Split(std3, "\n")
+	std3 := strings.TrimSpace(stdout)
+	std2 := strings.Split(std3, "\n")
 	log.Infof("3\n%v\n", std3)
 	dict := map[string]string{}
 	log.Infof("2\n%v\n", std2[0])
 	defer log.Errorf("error\n")
-	for _, j := range std2{
+	for _, j := range std2 {
 
 		if strings.TrimSpace(j) != "" {
 			splited := strings.SplitN(j, ":", 2)
 			key := strings.TrimSpace(splited[0])
 			val := strings.TrimSpace(splited[1])
-			dict[key]=val
+			dict[key] = val
 			//fmt.Println(dict)
 			//fmt.Printf("%v, %v: %v, %v\n", i, j, key, val)
 		} else {

@@ -228,3 +228,40 @@ func dcBootstrap() {
 		}
 	}
 }
+
+//
+//func instanceCreatePortForwardingRule(instanceInfo Instance, workspaceInfo Workspace) {
+//	var res map[string]interface{}
+//
+//	paramsNetwork := []MoldParams{
+//		{"id": workspaceInfo.NetworkUuid},
+//	}
+//	networkResult := getNetwork(paramsNetwork)
+//
+//	listNetworksResponse := ListNetworksResponse{}
+//	networksResponseInfo, _ := json.Marshal(networkResult["listnetworksresponse"])
+//	json.Unmarshal([]byte(networksResponseInfo), &listNetworksResponse)
+//
+//	paramsListPublicIpAddresses := []MoldParams{
+//		{"id": listNetworksResponse.Network[0].Id},
+//	}
+//
+//	listPublicIpqAddressesResponse := ListPublicIpAddressesResponse{}
+//	resultListPublicIpAddress, _ := getListPublicIpAddresses(paramsListPublicIpAddresses)
+//	json.NewDecoder(resultListPublicIpAddress.Body).Decode(&res)
+//
+//	listPublicIpqAddressesResponseByte, _ := json.Marshal(res["listpublicipaddressesresponse"])
+//	json.Unmarshal([]byte(listPublicIpqAddressesResponseByte), &listPublicIpqAddressesResponse)
+//
+//	portForwardingNumber := selectPortForwardingNumber()
+//
+//	paramsCreatePortForwardingRule := []MoldParams{
+//		{"ipaddressid": listPublicIpqAddressesResponse.Publicipaddress[0].Ipaddress},
+//		{"privateport": strconv.Itoa(workspaceInfo.Policy.RdpPort)},
+//		{"protocol": "TCP"},
+//		{"publicport": strconv.Itoa(portForwardingNumber)},
+//		{"virtualmachineid": instanceInfo.MoldUuid},
+//	}
+//
+//	getCreatePortForwardingRule(paramsCreatePortForwardingRule)
+//}

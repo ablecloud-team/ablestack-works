@@ -28,27 +28,37 @@ type Workspace struct {
 	CreateDate          string     `json:"create_date"`
 	Removed             *string    `json:"removed"`
 	InstanceList        []Instance `json:"instanceList"`
+	Policy              struct {
+		Id             int    `json:"id"`
+		WorkspaceUuid  string `json:"workspace_uuid"`
+		RdpPort        int    `json:"rdp_port"`
+		RdpAccessAllow int    `json:"rdp_access_allow"`
+	} `json:"policy"`
 }
 
 type Instance struct {
-	Id              int     `json:"id"`
-	Name            string  `json:"name"`
-	Uuid            string  `json:"uuid"`
-	WorkspaceUuid   string  `json:"workspace_uuid"`
-	WorkspaceName   string  `json:"workspace_name"`
-	MoldUuid        string  `json:"mold_uuid"`
-	Status          string  `json:"status"`
-	HandshakeStatus string  `json:"handshake_status"`
-	OwnerAccountId  *string `json:"owner_account_id,omitempty"`
-	Ipaddress       string  `json:"ipaddress"`
-	Checked         bool    `json:"checked"`
-	Connected       int     `json:"connected"`
-	CreateDate      string  `json:"create_date"`
-	CheckedDate     *string `json:"checked_date"`
-	Removed         string  `json:"removed"`
-	MoldStatus      string  `json:"mold_status"`
-	WorkspaceType   string  `json:"workspace_type"`
-	Password        string  `json:"password"`
+	Id                int     `json:"id"`
+	Name              string  `json:"name"`
+	Uuid              string  `json:"uuid"`
+	WorkspaceUuid     string  `json:"workspace_uuid"`
+	WorkspaceName     string  `json:"workspace_name"`
+	MoldUuid          string  `json:"mold_uuid"`
+	Status            string  `json:"status"`
+	HandshakeStatus   string  `json:"handshake_status"`
+	OwnerAccountId    string  `json:"owner_account_id,omitempty"`
+	Ipaddress         string  `json:"ipaddress"`
+	Checked           bool    `json:"checked"`
+	Connected         int     `json:"connected"`
+	CreateDate        string  `json:"create_date"`
+	CheckedDate       *string `json:"checked_date"`
+	Removed           string  `json:"removed"`
+	MoldStatus        string  `json:"mold_status"`
+	WorkspaceType     string  `json:"workspace_type"`
+	Password          string  `json:"password"`
+	PrivatePort       int     `json:"private_port"`
+	PublicPort        int     `json:"public_port"`
+	Hash              string  `json:"hash"`
+	RdpConnectedCheck int     `json:"rdp_connected_check"`
 }
 
 func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
@@ -105,6 +115,60 @@ func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
 	log.WithFields(logrus.Fields{
 		"workspaceImpl": "selectWorkspaceList",
 	}).Infof("selectWorkspaceList Query result [%v]", workspaceList)
+
+	return workspaceList, err
+}
+
+func selectWorkspacePolicyList(workspaceUuid string) ([]Workspace, error) {
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectWorkspacePolicyList",
+	}).Infof("payload workspaceUuid [%v]", workspaceUuid)
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectWorkspacePolicyList",
+		}).Errorf("selectWorkspacePolicyList DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectWorkspacePolicyList",
+	}).Infof("select selectWorkspacePolicyList DB Connect success")
+
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectWorkspacePolicyList",
+	}).Warnf("payload workspaceUuid [%v]", workspaceUuid)
+	queryString := "SELECT" +
+		" id, workspaces_uuid, rdp_port, rdp_access_allow" +
+		" FROM workspaces_policy" +
+		" WHERE removed IS NULL" +
+		" AND workspaces_uuid = '" + workspaceUuid + "'" +
+		" ORDER BY id DESC"
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectWorkspacePolicyList",
+	}).Infof("select WorkspacePolicyList Query [%v]", queryString)
+	rows, err := db.Query(queryString)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "selectWorkspacePolicyList",
+		}).Errorf("WorkspacePolicyList Select Query FAILED [%v]", err)
+	}
+	var workspaceList []Workspace
+	defer rows.Close()
+	for rows.Next() {
+		workspace := Workspace{}
+		err = rows.Scan(
+			&workspace.Policy.Id, &workspace.Policy.WorkspaceUuid, &workspace.Policy.RdpPort, &workspace.Policy.RdpAccessAllow)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"workspaceImpl": "selectWorkspacePolicyList",
+			}).Errorf("WorkspacePolicy Select Query 이후 Scan 중 에러가 발생했습니다. [%v]", err)
+		}
+
+		workspaceList = append(workspaceList, workspace)
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "selectWorkspacePolicyList",
+	}).Infof("selectWorkspacePolicyList Query result [%v]", workspaceList)
 
 	return workspaceList, err
 }
@@ -299,6 +363,37 @@ func insertWorkspace(workspace Workspace) (map[string]interface{}, error) {
 	return resultData, err
 }
 
+func insertWorkspacePolicy(workspace Workspace) (map[string]interface{}, error) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultData := map[string]interface{}{}
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "insertWorkspacePolicy",
+		}).Errorf("insertWorkspacePolicy DB connect error [%v]", err)
+		resultData["message"] = "DB connect error"
+		resultData["status"] = BaseErrorCode
+	}
+	defer db.Close()
+
+	result, err := db.Exec("INSERT INTO workspaces_policy(workspaces_uuid, rdp_port, rdp_access_allow) VALUES (?, ?, ?)",
+		workspace.Uuid, workspace.Policy.RdpPort, workspace.Policy.RdpAccessAllow)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspaceImpl": "insertWorkspacePolicy",
+		}).Errorf("워크스페이스 정 DB Insert 중 오류가 발생하였습니다. [%v]", err)
+		resultData["message"] = "An error occurred while inserting the DB after generating the UUID."
+		resultData["status"] = BaseErrorCode
+	}
+	n, err := result.RowsAffected()
+	if n == 1 {
+		log.Info("워크스페이스가 정상적으로 생성되었습니다.")
+		resultData["message"] = "The workspace has been successfully created."
+		resultData["status"] = http.StatusOK
+	}
+
+	return resultData, err
+}
+
 func insertInstance(instance Instance) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultData := map[string]interface{}{}
@@ -443,7 +538,7 @@ func updateWorkspaceTemplateCheck(uuid string, workspaceStatus string) map[strin
 	return resultReturn
 }
 
-func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[string]interface{} {
+func updateInstanceCheck(uuid string, loginInfo string, paramsHash string, connected int) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
 	resultReturn := map[string]interface{}{}
 	resultReturn["status"] = http.StatusUnauthorized
@@ -458,29 +553,29 @@ func updateInstanceCheck(uuid string, loginInfo string, logoutInfo string) map[s
 	}).Debugf("uuid [%v]", uuid)
 	defer db.Close()
 
-	loginInfoMap := map[string]interface{}{}
-	logoutInfoMap := map[string]interface{}{}
-	layout := "2006/01/02 15:04:05"
-	connected := 0
+	//paramsLogin [{"day":"22","domain":"ASD-000","hour":"13","id":"User","logonid":"680024399","min":"28","month":"04","sec":"43","time":"20220422132843","year":"2022"}]
+	loginInfoMap := []map[string]string{}
+	//logoutInfoMap := map[string]interface{}{}
+	//layout := "2006/01/02 15:04:05"
 	err1 := json.Unmarshal([]byte(loginInfo), &loginInfoMap)
 	if err1 != nil {
 		return nil
 	}
-	err2 := json.Unmarshal([]byte(logoutInfo), &logoutInfoMap)
-	if err2 != nil {
-		return nil
-	}
-	logInTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
-	logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
-	log.Debugf("loginInfoMap [%v], logoutInfoMap [%v]", loginInfoMap, logoutInfoMap)
-	if logOutTime.Before(logInTime) {
-		connected = 0
-		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
-	} else if !logOutTime.Before(logInTime) {
-		connected = 1
-		log.Debugf("connected [%v]", logOutTime.Before(logInTime))
-	}
-	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Ready' where uuid=?", connected, uuid)
+	//err2 := json.Unmarshal([]byte(logoutInfo), &logoutInfoMap)
+	//if err2 != nil {
+	//	return nil
+	//}
+	//logInTime, _ := time.Parse(layout, loginInfoMap["time"].(string))
+	//logOutTime, _ := time.Parse(layout, logoutInfoMap["time"].(string))
+	log.Debugf("loginInfoMap [%v]", loginInfoMap)
+	//if logOutTime.Before(logInTime) {
+	//	connected = 0
+	//	log.Debugf("connected [%v]", logOutTime.Before(logInTime))
+	//} else if !logOutTime.Before(logInTime) {
+	//	connected = 1
+	//	log.Debugf("connected [%v]", logOutTime.Before(logInTime))
+	//}
+	result, err := db.Exec("UPDATE vm_instances set checked=1, connected=?, checked_date=NOW(), status='Ready', hash=? where uuid=?", connected, paramsHash, uuid)
 	if err != nil {
 		log.Error(MsgDBConnectError)
 		log.Error(err)
@@ -639,4 +734,221 @@ func deleteWorkspace(workspaceUuid string) map[string]interface{} {
 	}
 
 	return resultReturn
+}
+
+func deleteWorkspacePolicy(workspaceUuid string) map[string]interface{} {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "deleteWorkspacePolicy",
+	}).Infof("workspaceUuid [%v]", workspaceUuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE workspaces_policy SET removed=NOW() WHERE workspaces_uuid=?", workspaceUuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+	return resultReturn
+}
+
+func selectPortForwardingNumber() int {
+
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	//log.WithFields(logrus.Fields{
+	//	"workspaceImpl": "selectPortForwardingNumber",
+	//}).Infof("workspaceUuid [%v]", workspaceUuid)
+	defer db.Close()
+
+	var portForwardingNumber int
+
+	err = db.QueryRow("SELECT port_forwarding FROM port_forwarding_map WHERE instance_uuid IS NULL ORDER BY RAND() LIMIT 1").Scan(&portForwardingNumber)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+
+	return portForwardingNumber
+}
+
+func updatePortForwardingNumber() int {
+
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	//log.WithFields(logrus.Fields{
+	//	"workspaceImpl": "selectPortForwardingNumber",
+	//}).Infof("workspaceUuid [%v]", workspaceUuid)
+	defer db.Close()
+
+	var portForwardingNumber int
+
+	err = db.QueryRow("SELECT port_forwarding FROM port_forwarding_map WHERE instance_uuid IS NULL ORDER BY RAND() LIMIT 1").Scan(&portForwardingNumber)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+
+	return portForwardingNumber
+}
+
+//updateInstanceChecked
+func updatePortForwardingInstanceUuid(instanceUuid string, portForwarding int, portForwardingRuleId string) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updatePortForwardingInstanceUuid",
+	}).Infof("instanceUuid [%v]", instanceUuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE port_forwarding_map SET instance_uuid=?, port_forwarding_rule_id=? WHERE port_forwarding=?", instanceUuid, portForwardingRuleId, portForwarding)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+}
+
+//updateInstanceChecked
+func updatePortForwardingInstanceUuidDelete(instanceUuid string) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updatePortForwardingInstanceUuid",
+	}).Infof("instanceUuid [%v]", instanceUuid)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE port_forwarding_map SET instance_uuid=?, port_forwarding_rule_id=? WHERE instance_uuid=?", nil, nil, instanceUuid)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+}
+
+//updateRdpConnected
+func updateRdpConnected(instanceInfo Instance, rdpConnectedCheck int) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	resultReturn := map[string]interface{}{}
+	if err != nil {
+		log.Error("DB connect error")
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = BaseErrorCode
+	}
+	log.WithFields(logrus.Fields{
+		"workspaceImpl": "updateRdpConnected",
+	}).Infof("instanceInfo [%v], rdpConnectedCheck [%v]", instanceInfo, rdpConnectedCheck)
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE vm_instances SET rdp_connected_check=? WHERE uuid=? AND owner_account_id=?", rdpConnectedCheck, instanceInfo.Uuid, instanceInfo.OwnerAccountId)
+	if err != nil {
+		log.Error(MsgDBConnectError)
+		log.Error(err)
+		resultReturn["message"] = MsgDBConnectError
+		resultReturn["status"] = SQLQueryError
+	}
+	n1, _ := result.RowsAffected()
+	if n1 == 1 {
+		resultReturn["status"] = http.StatusOK
+	}
+
+}
+
+func selectCountRdpConnectInstances(instance Instance) (int, error) {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspacesDao": "selectRdpConnectInstances",
+		}).Errorf("selectCountWorkspace DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspacesDao": "selectRdpConnectInstances",
+	}).Info("selectCountWorkspace DB connect success")
+	var countRdpConnectInstances int
+	err = db.QueryRow("SELECT count(*) FROM vm_instances where removed IS NULL AND rdp_connected_check=1 AND uuid=? AND owner_account_id=?", instance.Uuid, instance.OwnerAccountId).
+		Scan(&countRdpConnectInstances)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspacesDao": "selectRdpConnectInstances",
+		}).Errorf("RdpConnectInstances Count Select Query FAILED [%v]", err)
+	}
+
+	return countRdpConnectInstances, err
+}
+
+func selectPortForwardingRuleId(instance Instance) string {
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspacesDao": "selectRdpConnectInstances",
+		}).Errorf("selectCountWorkspace DB Connect Error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"workspacesDao": "selectRdpConnectInstances",
+	}).Info("selectCountWorkspace DB connect success")
+	var portForwardingRuleId string
+	err = db.QueryRow("SELECT port_forwarding_rule_id FROM port_forwarding_map where instance_uuid=?", instance.Uuid).Scan(&portForwardingRuleId)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"workspacesDao": "selectRdpConnectInstances",
+		}).Errorf("RdpConnectInstances Count Select Query FAILED [%v]", err)
+	}
+
+	return portForwardingRuleId
 }

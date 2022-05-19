@@ -59,6 +59,7 @@ func makeStringParams(params []MoldParams) string {
 func makeSignature(payload string) string {
 	secretkey := os.Getenv("MoldSecretKey")
 	strurl := strings.Replace(strings.ToLower(payload), "+", "%20", -1)
+	//strurl = strings.Replace(strings.ToLower(strurl), "/", "%2F", -1)
 	log.Infof("makeSignature payload [%v]\n", payload)
 	secret := []byte(secretkey)
 	message := []byte(strurl)

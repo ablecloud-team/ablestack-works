@@ -160,3 +160,61 @@ func selectUserPassword(userName string) (string, error) {
 
 	return userPassword, err
 }
+
+func selectConnectionRdpDesktop(instanceUuid string, userName string) (Instance, error) {
+	log.WithFields(logrus.Fields{
+		"userDesktopDao": "selectConnectionRdpDesktop",
+	}).Infof("payload instanceUuid [%v], userName [%v]", instanceUuid, userName)
+	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"userDesktopDao": "selectConnectionRdpDesktop",
+		}).Errorf("selectInstanceList DB connect error [%v]", err)
+	}
+	defer db.Close()
+	log.WithFields(logrus.Fields{
+		"userDesktopDao": "selectConnectionRdpDesktop",
+	}).Info("selectConnectionRdpDesktop DB connect success")
+	queryString := "SELECT" +
+		" vi.id, vi.name, vi.uuid, vi.workspace_uuid, vi.mold_uuid," +
+		" IFNULL(vi.owner_account_id, '') as owner_account_id, vi.checked, vi.connected, vi.status, vi.create_date," +
+		" vi.checked_date, vi.workspace_name, vi.handshake_status, vi.ipaddress, w.workspace_type," +
+		" vi.hash" +
+		" FROM vm_instances AS vi" +
+		" LEFT JOIN workspaces w on vi.workspace_uuid = w.uuid" +
+		" WHERE vi.removed IS NULL" +
+		" AND vi.uuid = '" + instanceUuid + "'" +
+		" AND vi.owner_account_id = '" + userName + "'"
+	queryString = queryString + " ORDER BY vi.id DESC"
+	log.WithFields(logrus.Fields{
+		"userDesktopDao": "selectConnectionRdpDesktop",
+	}).Infof("selectUserDesktopListForWorkspace Query [%v]", queryString)
+	rows, err := db.Query(queryString)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"userDesktopDao": "selectConnectionRdpDesktop",
+		}).Errorf("selectUserDesktopListForWorkspace query FAILED [%v]", err)
+	}
+	defer rows.Close()
+	var instanceList []Instance
+	for rows.Next() {
+		instance := Instance{}
+		err = rows.Scan(
+			&instance.Id, &instance.Name, &instance.Uuid, &instance.WorkspaceUuid, &instance.MoldUuid,
+			&instance.OwnerAccountId, &instance.Checked, &instance.Connected, &instance.Status, &instance.CreateDate,
+			&instance.CheckedDate, &instance.WorkspaceName, &instance.HandshakeStatus, &instance.Ipaddress, &instance.WorkspaceType,
+			&instance.Hash)
+		if err != nil {
+			log.WithFields(logrus.Fields{
+				"userDesktopDao": "selectUserDesktopListForWorkspace",
+			}).Errorf("Instance Select Query 이후 Scan 중 에러가 발생했습니다. [%v]", err)
+		}
+
+		instanceList = append(instanceList, instance)
+	}
+	log.WithFields(logrus.Fields{
+		"userDesktopDao": "selectConnectionRdpDesktop",
+	}).Infof("selectUserDesktopListForWorkspace Query result [%v]", instanceList)
+
+	return instanceList[0], err
+}
