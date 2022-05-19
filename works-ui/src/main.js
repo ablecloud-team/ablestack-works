@@ -6,14 +6,6 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
-import { far } from "@fortawesome/free-regular-svg-icons";
-import { fab } from "@fortawesome/free-brands-svg-icons";
-library.add(far);
-library.add(fas);
-library.add(fab);
 import {
   BackwardFilled,
   HomeFilled,
@@ -78,7 +70,6 @@ import {
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
-app.component("font-awesome-icon", FontAwesomeIcon);
 app.component("BackwardFilled", BackwardFilled);
 app.component("HomeFilled", HomeFilled);
 app.component("DeleteFilled", DeleteFilled);
