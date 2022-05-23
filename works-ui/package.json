@@ -3,7 +3,6 @@
   "version": "3.0.0",
   "private": true,
   "scripts": {
-    "prebuild": "node build.js",
     "serve": "vue-cli-service serve --mode production",
     "dev": "vue-cli-service serve --port 8081 --mode development",
     "build": "vue-cli-service build --mode production",
