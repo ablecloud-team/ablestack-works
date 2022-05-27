@@ -85,6 +85,7 @@
     "message.userdesktop.client.install.notice1": "1. First install the Cert.exe file.",
     "message.userdesktop.client.install.notice2": "2. After that, install the Ablecloud works client.msix file.",
     "message.userdesktop.client.install.notice3": "3. After the two programs are installed normally, proceed with RDP connection.",
+    "message.file.upload.success": "Upload Complete",
 
     "tooltip.vmStart": "Start",
     "tooltip.vmStop": "Stop",
@@ -266,6 +267,7 @@
     "label.rdp.connect": "RDP connection",
     "label.desktop.console.connect.ready":"Desktop Connection",
     "label.desktop.console.connect.notready":"Desktop not accessible",
+    "label.file.upload": "File Upload",
 
     "input.workspace.name": "Input workspace name(except Korean, 7 characters or less).",
     "input.workspace.description": "Input workspace description.(32 characters or less)",

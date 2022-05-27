@@ -17,8 +17,8 @@ export default {
     //젠킨스를 이용한 빌드가 아닐 경우 버전 및 빌드 날짜 표시하기 위함.
     if (this.buildVersion === "") {
       let version = "Bronto-v2.0.0";
-      let m = new Date();
-      let date =
+      const m = new Date();
+      const date =
         m.getFullYear() +
         ("0" + (m.getMonth() + 1)).slice(-2) +
         ("0" + m.getDate()).slice(-2);

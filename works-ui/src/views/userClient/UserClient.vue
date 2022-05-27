@@ -16,7 +16,7 @@
     :visible="showDrawerVisible"
     @close="closeDrawer"
   >
-    <user-client-setting
+    <UserClientSetting
       ref="setting"
       :client="client"
       :display="display"
@@ -92,23 +92,52 @@
       </template>
     </a-result>
   </div>
+  <a-modal
+    v-model:visible="uploadMadal"
+    :title="$t('label.file.upload')"
+    centered
+    :ok-text="$t('label.ok')"
+    :cancel-text="$t('label.cancel')"
+    @cancel="closeUploadModal"
+    @ok="closeUploadModal"
+  >
+    <a-list item-layout="horizontal" :data-source="uploadList">
+      <template #renderItem="{ item }">
+        <a-list-item>
+          {{ item.filename }}<br />
+          <a-progress :percent="item.progress" />
+        </a-list-item>
+      </template>
+    </a-list>
+    <!-- <a-table
+      size="small"
+      :columns="listColumns"
+      :pagination="{ pageSize: 10 }"
+      :data-source="uploads"
+    >
+    </a-table> -->
+    <!-- {{ managedFileUpload.filename }}<br />
+    <a-progress :percent="managedFileUpload.progress" /> -->
+  </a-modal>
   <!-- <guac-client-modal ref="modal" @reconnect="connect()" /> -->
 </template>
 
 <script>
 import { ref } from "vue";
+import { message, notification } from "ant-design-vue";
 import Guacamole from "guacamole-common-js";
 // import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/client/encrypt";
 import dis from "@/client/display";
 import states from "@/client/states";
-import UserClientSetting from "./UserClientSetting";
+import UserClientSetting from "./UserClientSetting.vue";
 import store from "@/store/index";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
     : process.env.VUE_APP_API_URL;
 const wsUrl = "ws://" + hostname + ":8088/";
+var uploads = [];
 export default {
   components: {
     UserClientSetting,
@@ -132,8 +161,6 @@ export default {
   props: {},
   data() {
     return {
-      html: ref(""),
-      uploads: ref([]),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       client: ref(null),
       keyboard: ref(null),
@@ -160,6 +187,8 @@ export default {
       sentText: ref([]),
       inputTextValDisplay: ref(""),
       arguments: {},
+      uploadList: ref([]),
+      uploadMadal: ref(false),
       managedFileUpload: {
         filename: ref({}),
         mimetype: ref(""),
@@ -167,6 +196,20 @@ export default {
         progress: ref(0),
         transferState: ref(states.IDLE),
       },
+      listColumns: [
+        {
+          title: this.$t("label.name"),
+          dataIndex: "filename",
+          key: "filename",
+          width: "30%",
+        },
+        {
+          title: this.$t("label.progress"),
+          dataIndex: "progress",
+          key: "progress",
+          width: "70%",
+        },
+      ],
       token: {
         connection: {
           type: "rdp",
@@ -438,9 +481,14 @@ export default {
         // Upload each file
         const files = e.dataTransfer.files;
 
+        this.uploadMadal = true;
+        this.timer = setInterval(() => {
+          this.uploadList = [];
+          this.uploadList = uploads;
+        }, 100);
         for (let i = 0; i < files.length; i++) {
-          console.log(files[i]);
-          this.uploadFile(files[i]);
+          // console.log(files[i]);
+          this.uploadFile(files[i], i);
         }
       });
 
@@ -455,9 +503,6 @@ export default {
       this.inputModeChange("none");
       this.mouseModeChange(this.emulateAbsoluteMouse);
       this.setDefaultScale();
-
-      console.log(this.tunnel);
-      console.log(this.client);
     },
     isMenuShortcutPressed(keysym) {
       //console.log("isMenuShortcutPressed", keysym);
@@ -1012,198 +1057,80 @@ export default {
           break;
       }
     },
-    uploadFile(file, filesystem, directory) {
+    uploadFile(file, fileIndex) {
       // Use generic Guacamole file streams by default
       var object = null;
       var streamName = null;
+      this.managedFileUpload.progress = 0;
 
       // If a filesystem is given, determine the destination object and stream
 
-      if (filesystem) {
-        object = filesystem.object;
-        streamName =
-          (directory || filesystem.currentDirectory).streamName +
-          "/" +
-          file.name;
-      }
       // Start and manage file upload
-      this.uploads.push(this.getInstance(file, object, streamName));
+      this.getInstance(file, fileIndex);
     },
-    getInstance(file, object, streamName) {
-      
-      // Open file for writing
-      var stream;
-      if (!object) stream = this.client.createFileStream(file.type, file.name);
-      // If object/streamName specified, upload to that instead of a file
-      // stream
-      else stream = object.createOutputStream(file.type, streamName);
 
-
-      let offset   = 0;
-      let progress = 0;
-
-      
-      console.log(":::::: stream ::::", file);
-      this.managedFileUpload.filename = file.name;
-      this.managedFileUpload.mimetype = file.type;
-      this.managedFileUpload.progress = 0;
-      this.managedFileUpload.length = file.size;
-
-      // Notify that stream is open
-      this.managedFileUpload.transferState = states.OPEN;
-
-      // Notify that the file transfer is pending
-      // Init managed upload
-
-      // Upload file once stream is acknowledged
-      stream.onack = (status) => {
-        // Notify of any errors from the Guacamole server
-
-
-        if (status.isError()) {
-          this.managedFileUpload.transferState = states.STREAM_STATE.ERROR;
-          return;
-        }
-        console.log(file.name, ":::::: 성공! ", this.tunnel.uuid);
-        // Begin upload
-
-
-
-        const slice  = bytes.subarray(offset, offset + file.size);
-        const base64 = getBase64(slice);
-
-        // Write packet
-        stream.sendBlob(base64);
-
-        // Advance to next packet
-        offset += file.size;
-
-        if (offset >= bytes.length) {
-          progress = 100;
-          stream.sendEnd();
-        } else {
-          progress = Math.floor(offset / bytes.length * 100);
-        }
-
-
-
-
-
-
-        // const uploadToStream = this.uploadToStream(
-        //   this.tunnel.uuid,
-        //   stream,
-        //   file,
-        //   (length) => {
-        //     this.managedFileUpload.progress = length;
-        //   }
-        // );
-
-        // uploadToStream
-        //   // Notify if upload succeeds
-        //   .then(() => {
-        //     this.managedFileUpload.progress = file.size;
-        //     this.managedFileUpload.transferState = states.STREAM_STATE.CLOSED;
-        //   })
-        //   .catch((error) => {
-        //     console.log(error);
-        //     if (error === states.STREAM_STATE.ERROR) {
-        //       this.managedFileUpload.transferState = states.STREAM_STATE.ERROR;
-        //     }
-        //     // Fail with internal error for all other causes
-        //     else {
-        //       this.ManagedFileUpload.transferState =
-        //         states.ERROR_TYPE.STREAM_ERROR;
-        //       this.statusCode = Guacamole.Status.Code.INTERNAL_ERROR;
-        //     }
-        //   });
-
-        // .then(
-        //   (suc) => {
-        // Upload complete
-
-        // Notify of upload completion
-        // $rootScope.$broadcast("guacUploadComplete", file.name);
-        //   },
-
-        //   // Notify if upload fails
-        //   (error) => {
-        //     // // Use provide status code if the error is coming from the stream
-
-        //   }
-        // );
-
-        // Ignore all further acks
-        stream.onack = null;
+    getInstance(file, fileIndex) {
+      const _this = this;
+      const reader = new FileReader();
+      const STREAM_BLOB_SIZE = 6144;
+      var managedFileUpload = {
+        filename: "",
+        mimetype: "",
+        length: "",
+        progress: 0,
       };
 
-      return this.managedFileUpload;
-    },
-    uploadToStream(tunnel, stream, file, progressCallback) {
-      // Work-around for IE missing window.location.origin
-      var streamOrigin = "";
-      if (!window.location.origin)
-        streamOrigin =
-          window.location.protocol +
-          "//" +
-          window.location.hostname +
-          (window.location.port ? ":" + window.location.port : "");
-      else streamOrigin = window.location.origin;
+      reader.onloadend = () => {
+        const stream = this.client.createFileStream(file.type, file.name);
+        const bytes = new Uint8Array(reader.result);
 
-      // Build upload URL
-      var url =
-        streamOrigin +
-        window.location.pathname +
-        "api/session/tunnels/" +
-        encodeURIComponent(tunnel) +
-        "/streams/" +
-        encodeURIComponent(stream.index) +
-        "/" +
-        encodeURIComponent(this.sanitizeFilename(file.name)) +
-        "?token=" +
-        encodeURIComponent(encrypt(this.token));
+        let offset = 0;
+        // let progress = 0;
 
-      var xhr = new XMLHttpRequest();
+        managedFileUpload.index = fileIndex;
+        managedFileUpload.filename = file.name;
+        managedFileUpload.mimetype = file.type;
+        managedFileUpload.length = file.size;
 
-      // Invoke provided callback if upload tracking is supported
-      if (progressCallback && xhr.upload) {
-        xhr.upload.addEventListener("progress", (e) => {
-          progressCallback(e.loaded);
-        });
-      }
+        stream.onack = (status) => {
+          if (status.isError()) {
+            console.log("Error uploading file");
+            return false;
+          }
 
-      // Resolve/reject promise once upload has stopped
-      xhr.onreadystatechange = () => {
-        // Ignore state changes prior to completion
-        if (xhr.readyState !== 4) return;
+          const sliceBytes = bytes.subarray(offset, offset + STREAM_BLOB_SIZE);
+          const base64 = btoa(String.fromCharCode.apply(String, sliceBytes));
 
-        // Resolve if HTTP status code indicates success
-        if (xhr.status >= 200 && xhr.status < 300) return new Promise.resolve();
-        // Parse and reject with resulting JSON error
-        else if (xhr.getResponseHeader("Content-Type") === "application/json")
-          return new Promise((resolve, reject) => {
-            reject(JSON.parse(xhr.responseText));
-          });
-        // Warn of lack of permission of a proxy rejects the upload
-        else if (xhr.status >= 400 && xhr.status < 500)
-          return new Promise((resolve, reject) => {
-            console.log(states.ERROR_TYPE.STREAM_ERROR);
-            reject(states.ERROR_TYPE.STREAM_ERROR);
-          });
-        // Assume internal error for all other cases
-        else
-          return new Promise((resolve, reject) => {
-            reject(states.ERROR_TYPE.STREAM_ERROR);
-          });
+          // Write packet
+          stream.sendBlob(base64);
+          // Advance to next packet
+          offset += STREAM_BLOB_SIZE;
+
+          if (offset >= bytes.length) {
+            managedFileUpload.progress = 100;
+            stream.sendEnd();
+            notification.success({
+              message: this.$t("message.file.upload.success"),
+              description: file.name,
+              placement: "bottomRight",
+            });
+          } else {
+            managedFileUpload.progress = Math.floor(
+              (offset / bytes.length) * 100
+            );
+          }
+          uploads[fileIndex] = managedFileUpload;
+
+          // console.log(file.name, _this.managedFileUpload.progress);
+          // Send progress to file upload's popup
+          // _this.uploadProgress.setProgress({
+          //   name: file.name,
+          //   progress: progress,
+          // });
+        };
       };
 
-      // Perform upload
-      xhr.open("POST", url, true);
-      xhr.send(file);
-
-      return new Promise((resolve, reject) => {
-        resolve("example");
-      });
+      reader.readAsArrayBuffer(file);
     },
     createErrorCallback(callback) {
       return function generatedErrorCallback(error) {
@@ -1253,6 +1180,12 @@ export default {
     //   });
     //   this.client.sendMouseState(scaledMouseState);
     // },
+    closeUploadModal() {
+      this.uploadMadal = false;
+      this.uploadList = [];
+      uploads = [];
+      clearInterval(this.timer);
+    },
   },
 };
 </script>

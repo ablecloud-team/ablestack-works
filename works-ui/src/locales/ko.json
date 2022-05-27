@@ -85,6 +85,7 @@
     "message.userdesktop.client.install.notice1": "1. 먼저 Cert.exe 파일을 설치합니다.",
     "message.userdesktop.client.install.notice2": "2. 이후 Ablecloud works client.msix 파일을 설치하세요.",
     "message.userdesktop.client.install.notice3": "3. 2가지 프로그램이 정상적으로 설치 된 후 RDP 접속을 진행해주세요.",
+    "message.file.upload.success": "업로드 완료",
 
     "tooltip.vmStart": "데스크톱 시작",
     "tooltip.vmStop": "데스크톱 정지",
@@ -266,6 +267,7 @@
     "label.rdp.connect": "RDP 접속",
     "label.desktop.console.connect.ready":"데스크톱 접속",
     "label.desktop.console.connect.notready":"데스크톱 접속 불가",
+    "label.file.upload":"파일 업로드",
 
     "input.workspace.name": "워크스페이스 이름을 입력하세요.(한글 제외, 총 7자 이하)",
     "input.workspace.description": "워크스페이스 설명을 입력하세요.(32자 이하)",
