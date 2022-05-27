@@ -503,7 +503,6 @@ export default defineComponent({
 
       try {
         const res = await worksApi.patch(this.worksUrl + uuid);
-        console.log(res.status);
         if (res.status == 200) {
           this.succCnt = this.succCnt + 1;
         }
