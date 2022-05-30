@@ -14,8 +14,6 @@ RUN dnf -y install nginx
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./dist/ /usr/share/nginx/html/
 
-RUN ls -la /usr/share/nginx/html/*
-
 # COPY ./dist/index.html /usr/share/nginx/html/index.html
 # COPY ./dist/favicon.ico /usr/share/nginx/html/favicon.ico
 # COPY ./dist/js/* /usr/share/nginx/html/js
