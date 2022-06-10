@@ -67,6 +67,16 @@ import {
   PlusCircleOutlined,
   LoadingOutlined,
   TranslationOutlined,
+  InboxOutlined,
+  DeleteOutlined,
+  FolderOutlined,
+  FileOutlined,
+  RollbackOutlined,
+  SwapLeftOutlined,
+  StopFilled,
+  FolderOpenFilled,
+  FolderFilled,
+  FileTextFilled,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
@@ -130,5 +140,15 @@ app.component("MinusOutlined", MinusOutlined);
 app.component("PlusCircleOutlined", PlusCircleOutlined);
 app.component("LoadingOutlined", LoadingOutlined);
 app.component("TranslationOutlined", TranslationOutlined);
+app.component("InboxOutlined", InboxOutlined);
+app.component("DeleteOutlined", DeleteOutlined);
+app.component("FolderOutlined", FolderOutlined);
+app.component("FileOutlined", FileOutlined);
+app.component("RollbackOutlined", RollbackOutlined);
+app.component("SwapLeftOutlined", SwapLeftOutlined);
+app.component("StopFilled", StopFilled);
+app.component("FolderOpenFilled", FolderOpenFilled);
+app.component("FileTextFilled", FileTextFilled);
+app.component("FolderFilled", FolderFilled);
 
 app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

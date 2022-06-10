@@ -1,7 +1,7 @@
 <template>
-  <a-row :gutter="[8,24]" type="flex" justify="center" align="top">
-    <a-col flex="250px">
-      <h3>1. 입력 방법</h3>
+  <a-row :gutter="[8, 8]" type="flex" justify="center" align="top">
+    <a-col flex="214px">
+      <h3>{{ $t("label.input.mode") }}</h3>
       <a-radio-group
         v-model:value="setText"
         button-style="solid"
@@ -11,17 +11,15 @@
           }
         "
       >
-        <a-tooltip
-          placement="bottom"
-          title="사용중인 입력 방법이 없습니다. 키보드 입력은 열결된 물리적 키보드에서 받아들여집니다."
-        >
-          <a-radio-button value="none">없음</a-radio-button>
+        <a-tooltip placement="bottom" :title="$t('tooltip.input.mode.false')">
+          <a-radio-button :value="false">
+            {{ $t("label.input.mode.no") }}
+          </a-radio-button>
         </a-tooltip>
-        <a-tooltip
-          placement="bottom"
-          title="텍스트 입력을 허용하고, 입력된 텍스트를 바탕으로 키보드가 없는 휴대폰과 같은 장치에 필요합니다."
-        >
-          <a-radio-button value="text">텍스트 입력</a-radio-button>
+        <a-tooltip placement="bottom" :title="$t('tooltip.input.mode.true')">
+          <a-radio-button :value="true">
+            {{ $t("label.input.mode.text") }}
+          </a-radio-button>
         </a-tooltip>
         <!-- <a-tooltip
           placement="bottom"
@@ -31,8 +29,8 @@
         </a-tooltip> -->
       </a-radio-group>
     </a-col>
-    <a-col flex="250px">
-      <h3>2. 마우스 에뮬레이션 모드</h3>
+    <a-col flex="214px">
+      <h3>{{ $t("label.mouse.mode") }}</h3>
       <a-radio-group
         v-model:value="setMouse"
         button-style="solid"
@@ -42,22 +40,20 @@
           }
         "
       >
-        <a-tooltip
-          placement="bottom"
-          title="탭하여 클릭합니다. 클릭은 터치 위치에서 발생합니다."
-        >
-          <a-radio-button :value="true">터치 스크린</a-radio-button>
+        <a-tooltip placement="bottom" :title="$t('tooltip.mouse.mode.false')">
+          <a-radio-button :value="true">
+            {{ $t("label.mouse.mode.touchscreen") }}
+          </a-radio-button>
         </a-tooltip>
-        <a-tooltip
-          placement="bottom"
-          title="드래그하여 마우스 포인터를 움직이고 탭하여 클릭합니다. 클릭은 마우스 포인터 위치에서 발생합니다."
-        >
-          <a-radio-button :value="false">터치 패드</a-radio-button>
+        <a-tooltip placement="bottom" :title="$t('tooltip.mouse.mode.true')">
+          <a-radio-button :value="false">
+            {{ $t("label.mouse.mode.touchpad") }}
+          </a-radio-button>
         </a-tooltip>
       </a-radio-group>
     </a-col>
-    <a-col flex="250px">
-      <h3>3. 디스플레이</h3>
+    <a-col flex="214px">
+      <h3>{{ $t("label.display") }}</h3>
       <a-button @click="zoomHandle(-10)" shape="circle">
         <template #icon><MinusOutlined /></template>
       </a-button>
@@ -72,12 +68,160 @@
         <template #icon><PlusOutlined /></template>
       </a-button>
     </a-col>
+    <a-col flex="214px">
+      <h3>{{ $t("label.fullscreen") }}</h3>
+
+      <a-radio-group
+        v-model:value="setFullScreen"
+        button-style="solid"
+        @change="
+          (selected) => {
+            fullscreenModeChange(selected.target.value);
+          }
+        "
+      >
+        <a-tooltip placement="bottom" :title="$t('tooltip.fullscreen.mode.on')">
+          <a-radio-button :value="true">
+            {{ $t("label.fullscreen.mode.on") }}
+          </a-radio-button>
+        </a-tooltip>
+        <a-tooltip
+          placement="bottom"
+          :title="$t('tooltip.fullscreen.mode.off')"
+        >
+          <a-radio-button :value="false">
+            {{ $t("label.fullscreen.mode.off") }}
+          </a-radio-button>
+        </a-tooltip>
+      </a-radio-group>
+    </a-col>
+    <a-col flex="214px">
+      <h3>{{ $t("label.filesystem") }}</h3>
+      <a-tooltip
+        placement="bottom"
+        :title="$t('tooltip.filesystem.mode.download')"
+      >
+        <a-button size="medium" @click="fileDownloadModalVisible">
+          <template #icon>
+            <DownloadOutlined />
+          </template>
+          {{ $t("label.download") }}
+        </a-button>
+      </a-tooltip>
+      &nbsp;
+      <a-tooltip
+        placement="bottom"
+        :title="$t('tooltip.filesystem.mode.upload')"
+      >
+        <a-button size="medium" @click="fileUpladModalVisible">
+          <template #icon>
+            <UploadOutlined />
+          </template>
+          {{ $t("label.upload") }}
+        </a-button>
+      </a-tooltip>
+    </a-col>
+    <a-col flex="214px"></a-col>
   </a-row>
+  <a-modal
+    v-model:visible="uploadModal"
+    :title="$t('label.file.upload')"
+    centered
+    width="600px"
+  >
+    <template #footer>
+      <a-button @click="() => (uploadModal = false)">{{
+        $t("label.close")
+      }}</a-button>
+    </template>
+    <a-upload-dragger
+      v-model:file-list="fileList"
+      :multiple="true"
+      :beforeUpload="beforeUpload"
+      @remove="handleRemove"
+      @change="handleChange"
+    >
+      <p class="ant-upload-drag-icon">
+        <inbox-outlined />
+      </p>
+      <p class="ant-upload-text">
+        {{ $t("input.file.upload.dragdrop") }}
+      </p>
+      <!-- <template #itemRender="{ file, actions }">
+        <a-space>
+          <span :style="file.status === 'error' ? 'color: red' : ''">{{
+            file.name
+          }}</span>
+          <a href="javascript:;" @click="actions.remove">delete</a>
+          <delete-outlined @click="handleClick" />
+        </a-space>
+      </template>
+      <template #removeIcon></template> -->
+    </a-upload-dragger>
+  </a-modal>
+  <a-modal
+    v-model:visible="downloadModal"
+    :title="$t('label.file.download')"
+    centered
+    :width="800"
+  >
+    <template #footer>
+      <a-button @click="() => (downloadModal = false)">
+        {{ $t("label.close") }}
+      </a-button>
+    </template>
+    <!-- <a-list
+      item-layout="horizontal"
+      size="small"
+      :data-source="downloadList"
+      :loading="downloadLoading"
+    > -->
+    <a-button @click="backDirectory" shape="round" :size="small">
+      <template #icon><swap-left-outlined /></template>
+      {{ $t("label.move.parent") }}
+    </a-button>
+    <a-table
+      :columns="dowlloadListCol"
+      :data-source="downloadList"
+      :pagination="false"
+      size="small"
+      :scroll="{ y: 800 }"
+    >
+      <template #headerCell="{ column }">
+        <template v-if="column.key === 'name'">
+          <span> &nbsp;{{ curDir }} </span>
+        </template>
+      </template>
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.key === 'name'">
+          <span @dblclick="fileDblclick(record)" style="cursor: pointer">
+            <folder-open-filled v-if="record.type == 'DIRECTORY'" />
+            <file-outlined v-if="record.type == 'NORMAL'" /> {{ record.name }}
+          </span>
+        </template>
+      </template>
+    </a-table>
+    <!-- <template #renderItem="{ item }">
+        <a-list-item @dblclick="fileDblclick(item)" style="cursor: pointer">
+          <folder-outlined v-if="item.type == 'DIRECTORY'" />
+          <file-outlined v-if="item.type == 'NORMAL'" /> {{ item.name }}
+          <template #actions v-if="item.type == 'NORMAL'">
+            <a key="list-loadmore-edit">다운로드</a>
+          </template>
+        </a-list-item>
+      </template> -->
+    <!-- <template #header>
+        <div>{{ expectedPrefix }}</div>
+      </template> -->
+    <!-- </a-list> -->
+  </a-modal>
 </template>
 <script>
-import { ref } from "vue";
+import { defineComponent, ref } from "vue";
+import { message, notification } from "ant-design-vue";
+import Guacamole from "guacamole-common-js";
 import store from "@/store/index";
-export default {
+export default defineComponent({
   props: {
     client: {
       type: Object,
@@ -106,15 +250,25 @@ export default {
       value,
     };
   },
-  data(props) {
+  data() {
     return {
-      client: ref(props.client),
-      display: ref(props.display),
-      mouse: ref(props.mouse),
-      keyboard: ref(props.keyboard),
-      setText: ref("none"),
+      setText: ref(false),
       setMouse: ref(true),
+      setFullScreen: ref(false),
       scale: ref(store.state.client.scale * 100),
+      fileList: ref([]),
+      uploadModal: ref(false),
+      downloadModal: ref(false),
+      downloadLoading: ref(false),
+      downloadList: ref([]),
+      dowlloadListCol: [
+        {
+          title: this.$t("label.name"),
+          dataIndex: "name",
+          key: "name",
+          width: "70%",
+        },
+      ],
     };
   },
   computed: {},
@@ -137,10 +291,288 @@ export default {
         document.getElementById("app").style.overflow = "hidden";
       else document.getElementById("app").style.overflow = "auto";
     },
+    fileUpladModalVisible() {
+      this.uploadModal = true;
+    },
+    fileDownloadModalVisible() {
+      this.downloadModal = true;
+    },
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = [];
+      this.fileList = newFileList;
+    },
+    beforeUpload(file, fileList) {
+      return false;
+    },
+    handleChange(e) {
+      const index = this.fileList.findIndex((i) => i.uid == e.file.uid);
+      const newFileList = this.fileList.slice();
+
+      setTimeout(() => {
+        this.uploadFile(e.file);
+      }, 1000);
+    },
+    uploadFile(file) {
+      const reader = new FileReader();
+      const STREAM_BLOB_SIZE = 6144;
+
+      var managedFileUpload = {};
+      reader.onloadend = () => {
+        const stream = this.client.createFileStream(file.type, file.name);
+        const bytes = new Uint8Array(reader.result);
+
+        let offset = 0;
+        // let progress = 0;
+
+        managedFileUpload.filename = file.name;
+        managedFileUpload.mimetype = file.type;
+        managedFileUpload.length = file.size;
+
+        stream.onack = (status) => {
+          if (status.isError()) {
+            console.log("Error uploading file");
+            return false;
+          }
+          const index = this.fileList.findIndex((i) => i.uid == file.uid);
+          const sliceBytes = bytes.subarray(offset, offset + STREAM_BLOB_SIZE);
+          const base64 = btoa(String.fromCharCode.apply(String, sliceBytes));
+
+          // Write packet
+          stream.sendBlob(base64);
+          // Advance to next packet
+          offset += STREAM_BLOB_SIZE;
+
+          if (offset >= bytes.length) {
+            managedFileUpload.progress = 100;
+            stream.sendEnd();
+            if (index > -1) {
+              this.fileList[index].percent = 100;
+              this.fileList[index].status = "done";
+
+              setTimeout(() => {
+                this.fileList.splice(
+                  this.fileList.findIndex((i) => i.uid == file.uid),
+                  1
+                );
+              }, 5000);
+            }
+          } else {
+            managedFileUpload.progress = Math.floor(
+              (offset / bytes.length) * 100
+            );
+
+            if (index > -1) {
+              this.fileList[index].percent = managedFileUpload.progress;
+              this.fileList[index].status = "uploading";
+            }
+          }
+        };
+      };
+      // fileReader Call
+      reader.readAsArrayBuffer(file);
+    },
+    downloadFile(url, filename) {
+      const downlink = document.createElement("a");
+      downlink.setAttribute("href", url);
+      downlink.setAttribute("download", filename);
+      downlink.style.display = "none";
+      document.body.appendChild(downlink);
+      downlink.click();
+      document.body.removeChild(downlink);
+    },
+    fullscreenModeChange(setFullScreen) {
+      const dc = document;
+      const dcEl = document.documentElement;
+      if (setFullScreen) {
+        if (dcEl.requestFullscreen) return dcEl.requestFullscreen();
+        if (dcEl.webkitRequestFullscreen) return dcEl.webkitRequestFullscreen();
+        if (dcEl.mozRequestFullScreen) return dcEl.mozRequestFullScreen();
+        if (dcEl.msRequestFullscreen) return dcEl.msRequestFullscreen();
+      } else {
+        if (dc.exitFullscreen) return dc.exitFullscreen();
+        if (dc.webkitCancelFullscreen) return dc.webkitCancelFullscreen();
+        if (dc.mozCancelFullScreen) return dc.mozCancelFullScreen();
+        if (dc.msExitFullscreen) return dc.msExitFullscreen();
+      }
+    },
+    updateDirectory(filesystem, file) {
+      this.filesystem = filesystem;
+      this.downloadLoading = true;
+      const _this = this;
+      // Do not attempt to refresh the contents of directories
+      if (file.mimetype !== Guacamole.Object.STREAM_INDEX_MIMETYPE) return;
+
+      // Request contents of given file
+      this.filesystem.object.requestInputStream(
+        file.streamName,
+        function handleStream(stream, mimetype) {
+          // Ignore stream if mimetype is wrong
+          if (mimetype !== Guacamole.Object.STREAM_INDEX_MIMETYPE) {
+            stream.sendAck(
+              "Unexpected mimetype",
+              Guacamole.Status.Code.UNSUPPORTED
+            );
+            return;
+          }
+
+          // Signal server that data is ready to be received
+          stream.sendAck("Ready", Guacamole.Status.Code.SUCCESS);
+
+          // Read stream as JSON
+          var jsonReader = new Guacamole.JSONReader(stream);
+
+          // Acknowledge received JSON blobs
+          jsonReader.onprogress = (length) => {
+            stream.sendAck("Received", Guacamole.Status.Code.SUCCESS);
+          };
+
+          // Reset contents of directory
+          jsonReader.onend = () => {
+            // Empty contents
+            file.files = [];
+            // Determine the expected filename prefix of each stream
+            _this.curDir = file.streamName;
+            if (_this.curDir.charAt(_this.curDir.length - 1) !== "/")
+              _this.curDir += "/";
+
+            // For each received stream name
+            var mimetypes = jsonReader.getJSON();
+            for (var name in mimetypes) {
+              // Assert prefix is correct
+              if (name.substring(0, _this.curDir.length) !== _this.curDir)
+                continue;
+
+              // Extract filename from stream name
+              var filename = name.substring(_this.curDir.length);
+
+              // Deduce type from mimetype
+              var type = "NORMAL";
+              if (mimetypes[name] === Guacamole.Object.STREAM_INDEX_MIMETYPE)
+                type = "DIRECTORY";
+
+              // Add file entry
+              file.files.push({
+                mimetype: mimetypes[name],
+                streamName: name,
+                type: type,
+                parent: _this.curDir,
+                name: filename,
+              });
+            }
+            _this.downloadList = file.files;
+            _this.downloadLoading = false;
+          };
+        }
+      );
+    },
+    fileDblclick(file) {
+      //하위폴더 이동~
+      if (file.type == "DIRECTORY") {
+        this.filesystem = {
+          client: this.client,
+          object: this.filesystem.object,
+          name: file.name,
+          root: {
+            mimetype: file.mimetype,
+            streamName: file.streamName,
+            parent: file.parent,
+            type: "DIRECTORY",
+          },
+        };
+        this.updateDirectory(this.filesystem, this.filesystem.root);
+      } else {
+        //다운로드 시작~
+        const _this = this;
+        this.filesystem.object.requestInputStream(
+          file.streamName,
+          function downloadStream(stream, mimetype) {
+            // Parse filename from string
+            var filename = file.streamName.match(/(.*[\\/])?(.*)/)[2];
+
+            // Start download
+            stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+
+            const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
+            var chunks = [];
+
+            var siz = 0;
+            const key = filename;
+
+            // stream buffer 데이터 받음
+            arrayBufferReader.ondata = (buffer) => {
+              const bufBlob = new Blob([buffer], { type: mimetype });
+              chunks.push(bufBlob);
+
+              siz = siz + bufBlob.size;
+              notification.open({
+                key,
+                message: _this.$t("label.file.download"),
+                description: "[" + _this.bytesToSize(siz) + "] " + filename,
+                placement: "bottomRight",
+                duration: 0,
+                onClose: () => {
+                  notification.close(key);
+                },
+              });
+
+              stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+            };
+
+            //stream 이 끝났을 시
+            arrayBufferReader.onend = () => {
+              notification.open({
+                key,
+                message: _this.$t("label.file.download"),
+                description: "[" + _this.$t("label.complete") + "] " + filename,
+                placement: "bottomRight",
+                duration: 5,
+                style: {
+                  width: "400px",
+                },
+                onClose: () => {
+                  notification.close(key);
+                },
+              });
+              const blob = new Blob(chunks, { type: mimetype });
+              const url = URL.createObjectURL(blob);
+              _this.downloadFile(url, filename);
+            };
+          }
+        );
+      }
+    },
+    bytesToSize(bytes) {
+      var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+      if (bytes == 0) return "0 Byte";
+      var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+      return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+    },
+    backDirectory() {
+      if (this.filesystem.root.streamName == "/") {
+        return false;
+      } else {
+        const index = this.filesystem.root.streamName.lastIndexOf("/");
+        if (index == 0) this.filesystem.root.streamName = "/";
+        else {
+          this.filesystem.root.streamName =
+            this.filesystem.root.streamName.slice(0, index);
+        }
+        this.updateDirectory(this.filesystem, this.filesystem.root);
+      }
+    },
   },
-};
+});
 </script>
 <style scoped>
+h3 {
+  text-align: center;
+}
+.ant-col {
+  text-align: center;
+}
 .modal {
   position: fixed;
   top: 50%;

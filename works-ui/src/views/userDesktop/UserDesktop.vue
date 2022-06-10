@@ -16,7 +16,7 @@
                 size="small"
                 @click="fetchRefresh()"
               >
-                <template #icon><ReloadOutlined /></template>
+                <template #icon><HeartFilled /></template>
                 {{ $t("label.refresh") }}
               </a-button>
             </a-col>
@@ -266,7 +266,7 @@ export default defineComponent({
   setup() {
     const pagination = {
       onChange: (page) => {
-        console.log(page);
+        //console.log(page);
       },
       pageSize: 20,
     };
@@ -458,7 +458,7 @@ export default defineComponent({
       liteParamArr["resize-method"] = "display-update";
 
       //liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "GUACD";
+      liteParamArr["drive-name"] = "Share";
       liteParamArr["drive-path"] = "/share";
       liteParamArr["enable-drive"] = true;
       liteParamArr["disable-upload"] = false;

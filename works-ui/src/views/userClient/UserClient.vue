@@ -17,15 +17,14 @@
     @close="closeDrawer"
   >
     <UserClientSetting
-      ref="setting"
+      ref="userClientSetting"
       :client="client"
       :display="display"
       :mouse="mouse"
       :keyboard="keyboard"
-      :defaultScale="defaultScale"
-      @windowScale="windowScale"
       @inputModeChange="inputModeChange"
       @mouseModeChange="mouseModeChange"
+      @uploadFile="uploadFile"
     />
   </a-drawer>
   <!-- <div ref="viewport" id="viewport" style="position: relative"> -->
@@ -85,46 +84,22 @@
       :sub-title="text[status] || errorMessage"
     >
       <template #icon v-if="spinner">
-        <LoadingOutlined />
+        <loading-outlined />
       </template>
       <template #extra v-if="ableReconnect">
-        <a-button type="primary" @click="connect()"> 재접속 </a-button>
+        <a-button type="primary" @click="connect()">
+          {{ $t("label.reconnect") }}
+        </a-button>
       </template>
     </a-result>
   </div>
-  <a-modal
-    v-model:visible="uploadMadal"
-    :title="$t('label.file.upload')"
-    centered
-    :ok-text="$t('label.ok')"
-    :cancel-text="$t('label.cancel')"
-    @cancel="closeUploadModal"
-    @ok="closeUploadModal"
-  >
-    <a-list item-layout="horizontal" :data-source="uploadList">
-      <template #renderItem="{ item }">
-        <a-list-item>
-          {{ item.filename }}<br />
-          <a-progress :percent="item.progress" />
-        </a-list-item>
-      </template>
-    </a-list>
-    <!-- <a-table
-      size="small"
-      :columns="listColumns"
-      :pagination="{ pageSize: 10 }"
-      :data-source="uploads"
-    >
-    </a-table> -->
-    <!-- {{ managedFileUpload.filename }}<br />
-    <a-progress :percent="managedFileUpload.progress" /> -->
-  </a-modal>
+
   <!-- <guac-client-modal ref="modal" @reconnect="connect()" /> -->
 </template>
 
 <script>
-import { ref } from "vue";
-import { message, notification } from "ant-design-vue";
+import { defineComponent, ref, h } from "vue";
+import { message, notification, Button } from "ant-design-vue";
 import Guacamole from "guacamole-common-js";
 // import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/client/encrypt";
@@ -137,13 +112,12 @@ const hostname =
     ? window.location.hostname
     : process.env.VUE_APP_API_URL;
 const wsUrl = "ws://" + hostname + ":8088/";
-var uploads = [];
-export default {
+export default defineComponent({
   components: {
     UserClientSetting,
   },
   setup() {
-    const showDrawerVisible = ref(false);
+    const showDrawerVisible = ref(true);
     const drawerHeight = ref(120);
     const showDrawer = () => {
       showDrawerVisible.value = true;
@@ -187,29 +161,6 @@ export default {
       sentText: ref([]),
       inputTextValDisplay: ref(""),
       arguments: {},
-      uploadList: ref([]),
-      uploadMadal: ref(false),
-      managedFileUpload: {
-        filename: ref({}),
-        mimetype: ref(""),
-        filename: ref(""),
-        progress: ref(0),
-        transferState: ref(states.IDLE),
-      },
-      listColumns: [
-        {
-          title: this.$t("label.name"),
-          dataIndex: "filename",
-          key: "filename",
-          width: "30%",
-        },
-        {
-          title: this.$t("label.progress"),
-          dataIndex: "progress",
-          key: "progress",
-          width: "70%",
-        },
-      ],
       token: {
         connection: {
           type: "rdp",
@@ -221,22 +172,22 @@ export default {
       resultStatus: ref(null),
       status: ref(null),
       title: {
-        CONNECTING: "데스크톱 연결 중",
-        DISCONNECTING: "연결 끊김",
-        DISCONNECTED: "연결 끊김",
-        UNSTABLE: "불안정",
-        WAITING: "대기중...",
-        CLIENT_ERROR: "클라이언트 오류",
-        TUNNEL_ERROR: "WebSocket Tunneling 오류",
+        CONNECTING: this.$t("message.userdesktop.status.title.connecting"),
+        DISCONNECTING: this.$t("message.userdesktop.status.title.disconnecting"),
+        DISCONNECTED: this.$t("message.userdesktop.status.title.disconnected"),
+        UNSTABLE: this.$t("message.userdesktop.status.title.unstable"),
+        WAITING: this.$t("message.userdesktop.status.title.waiting"),
+        CLIENT_ERROR: this.$t("message.userdesktop.status.title.clienterror"),
+        TUNNEL_ERROR: this.$t("message.userdesktop.status.title.tunnelerror"),
       },
       text: {
-        CONNECTING: "데스크톱에 연결을 위해 응답을 기다리는 중...",
-        DISCONNECTING: "데스크톱에 접속이 끊어졌습니다.",
-        DISCONNECTED: "데스크톱에 접속이 끊어졌습니다.",
-        UNSTABLE: "서버에 대한 네트워크 연결이 불안정합니다.",
-        WAITING: "서버에 응답을 기다리는 중입니다.",
-        CLIENT_ERROR: "서버에 오류가 발생했습니다.",
-        TUNNEL_ERROR: "WebSocket Tunneling 중 오류가 발생하였습니다.",
+        CONNECTING: this.$t("message.userdesktop.status.text.connecting"),
+        DISCONNECTING: this.$t("message.userdesktop.status.text.disconnecting"),
+        DISCONNECTED: this.$t("message.userdesktop.status.text.disconnected"),
+        UNSTABLE: this.$t("message.userdesktop.status.text.unstable"),
+        WAITING: this.$t("message.userdesktop.status.text.waiting"),
+        CLIENT_ERROR: this.$t("message.userdesktop.status.text.clienterror"),
+        TUNNEL_ERROR: this.$t("message.userdesktop.status.text.tunnelerror"),
       },
     };
   },
@@ -336,7 +287,6 @@ export default {
         }
       };
       this.client.onsync = () => {};
-      this.display = this.client.getDisplay();
       this.display = this.client.getDisplay();
       this.appEl = document.getElementById("app");
       this.displayEl = document.getElementById("display");
@@ -478,20 +428,84 @@ export default {
         // Ignore file drops if no attached client
         if (!this.client) return;
 
-        // Upload each file
-        const files = e.dataTransfer.files;
-
-        this.uploadMadal = true;
-        this.timer = setInterval(() => {
-          this.uploadList = [];
-          this.uploadList = uploads;
-        }, 100);
-        for (let i = 0; i < files.length; i++) {
-          // console.log(files[i]);
-          this.uploadFile(files[i], i);
+        const dragDropFileList = e.dataTransfer.files;
+        for (let i = 0; i < dragDropFileList.length; i++) {
+          this.dropUploadFile(dragDropFileList[i], true);
         }
       });
 
+      //파일 다운로드 이벤트 발생 시
+      this.client.onfile = (stream, mimetype, filename) => {
+        // 서버에 ack 정보 호출 하여 받겠다는 신호 주기
+        stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+
+        const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
+        var chunks = [];
+        var siz = 0;
+        const key = filename;
+        // stream buffer 데이터 받음
+        arrayBufferReader.ondata = (buffer) => {
+          const bufBlob = new Blob([buffer], { type: mimetype });
+          chunks.push(bufBlob);
+
+          siz = siz + bufBlob.size;
+
+          // console.log(this.bytesToSize(siz), chunks.length);
+          notification.open({
+            key,
+            message: this.$t("label.file.download"),
+            description:
+              "[" +
+              this.$refs.userClientSetting.bytesToSize(siz) +
+              "] " +
+              filename,
+            placement: "bottomRight",
+            duration: 0,
+            onClose: () => {
+              notification.close(key);
+            },
+          });
+
+          stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+        };
+
+        //stream 이 끝났을 시
+        arrayBufferReader.onend = () => {
+          notification.open({
+            key,
+            message: this.$t("label.file.download"),
+            description: "[" + this.$t("label.complete") + "] " + filename,
+            placement: "bottomRight",
+            duration: 5,
+            style: {
+              width: "400px",
+            },
+            onClose: () => {
+              notification.close(key);
+            },
+          });
+          const blob = new Blob(chunks, { type: mimetype });
+          const url = URL.createObjectURL(blob);
+          this.$refs.userClientSetting.downloadFile(url, filename);
+        };
+      };
+      this.client.onfilesystem = (object, name) => {
+        // Init new filesystem object
+        const managedFilesystem = {
+          client: this.client,
+          object: object,
+          name: name,
+          root: {
+            mimetype: Guacamole.Object.STREAM_INDEX_MIMETYPE,
+            streamName: Guacamole.Object.ROOT_STREAM,
+            type: "DIRECTORY",
+          },
+        };
+        this.$refs.userClientSetting.updateDirectory(
+          managedFilesystem,
+          managedFilesystem.root
+        );
+      };
       window.addEventListener("resize", (e) => {
         // console.log(
         //   "window resize 이벤트 발생 후 바로 크기 :::::: ",
@@ -875,8 +889,10 @@ export default {
       this.client.sendSize(width, height);
 
       // 세팅 drawer 높이 변경
-      if (width < 800) this.drawerHeight = 320;
-      else this.drawerHeight = 120;
+      if (width > 1125) this.drawerHeight = 120;
+      else if (width > 680 && width <= 1125) this.drawerHeight = 200;
+      else if (width > 467 && width <= 680) this.drawerHeight = 280;
+      else this.drawerHeight = 440;
 
       // if (this.onScreenKeyboard) {
       //   this.onScreenKeyboard.resize(this.$refs.display.offsetWidth);
@@ -1057,47 +1073,28 @@ export default {
           break;
       }
     },
-    uploadFile(file, fileIndex) {
-      // Use generic Guacamole file streams by default
-      var object = null;
-      var streamName = null;
-      this.managedFileUpload.progress = 0;
-
-      // If a filesystem is given, determine the destination object and stream
-
-      // Start and manage file upload
-      this.getInstance(file, fileIndex);
-    },
-
-    getInstance(file, fileIndex) {
-      const _this = this;
+    dropUploadFile(file, notify) {
       const reader = new FileReader();
       const STREAM_BLOB_SIZE = 6144;
-      var managedFileUpload = {
-        filename: "",
-        mimetype: "",
-        length: "",
-        progress: 0,
-      };
+      const key = file.name;
 
+      var managedFileUpload = {};
       reader.onloadend = () => {
         const stream = this.client.createFileStream(file.type, file.name);
         const bytes = new Uint8Array(reader.result);
-
         let offset = 0;
-        // let progress = 0;
 
-        managedFileUpload.index = fileIndex;
         managedFileUpload.filename = file.name;
         managedFileUpload.mimetype = file.type;
         managedFileUpload.length = file.size;
+        managedFileUpload.notification = notify;
 
         stream.onack = (status) => {
           if (status.isError()) {
+            message.error(this.$t("message.file.upload.permission.denied"));
             console.log("Error uploading file");
             return false;
           }
-
           const sliceBytes = bytes.subarray(offset, offset + STREAM_BLOB_SIZE);
           const base64 = btoa(String.fromCharCode.apply(String, sliceBytes));
 
@@ -1109,37 +1106,72 @@ export default {
           if (offset >= bytes.length) {
             managedFileUpload.progress = 100;
             stream.sendEnd();
-            notification.success({
-              message: this.$t("message.file.upload.success"),
-              description: file.name,
-              placement: "bottomRight",
-            });
+
+            // 업로드 완료 정보 표시를 위한 notification
+            if (managedFileUpload.notification) {
+              notification.open({
+                key,
+                message: this.$t("label.file.upload"),
+                description:
+                  "[" +
+                  this.$t("label.complete") +
+                  "] " +
+                  managedFileUpload.filename,
+                placement: "bottomRight",
+                duration: 5,
+                style: {
+                  width: "400px",
+                },
+                onClose: () => {
+                  notification.close(key);
+                  managedFileUpload.notification = false;
+                },
+              });
+            }
           } else {
             managedFileUpload.progress = Math.floor(
               (offset / bytes.length) * 100
             );
-          }
-          uploads[fileIndex] = managedFileUpload;
 
-          // console.log(file.name, _this.managedFileUpload.progress);
-          // Send progress to file upload's popup
-          // _this.uploadProgress.setProgress({
-          //   name: file.name,
-          //   progress: progress,
-          // });
+            //percent정보 갱신을 위한 notification
+            if (managedFileUpload.notification) {
+              notification.open({
+                key,
+                message: this.$t("label.file.upload"),
+                description:
+                  "[" +
+                  managedFileUpload.progress +
+                  "%] " +
+                  managedFileUpload.filename,
+                placement: "bottomRight",
+                duration: 0,
+                style: {
+                  width: "400px",
+                },
+                // btn: () =>
+                //   h(
+                //     Button,
+                //     {
+                //       type: "primary",
+                //       size: "small",
+                //       onClick: () => {
+                //         notification.close(key);
+                //         managedFileUpload.notification = false;
+                //       },
+                //     },
+                //     { default: () => this.$t("label.ok") }
+                //   ),
+                onClose: () => {
+                  notification.close(key);
+                  managedFileUpload.notification = false;
+                },
+              });
+            }
+          }
         };
       };
-
+      // fileReader Call
       reader.readAsArrayBuffer(file);
-    },
-    createErrorCallback(callback) {
-      return function generatedErrorCallback(error) {
-        // Invoke given callback ONLY if due to a legitimate REST error
-        if (error instanceof Error) return callback(error);
-
-        // Log all other errors
-        console.log(error);
-      };
     },
     sanitizeFilename(filename) {
       return filename.replace(/[\\\/]+/g, "_");
@@ -1155,39 +1187,8 @@ export default {
       e.stopPropagation();
       this.dropPending = false;
     },
-    // send(cmd) {
-    //   if (!this.client) {
-    //     return;
-    //   }
-    //   for (const c of cmd.data) {
-    //     this.client.sendKeyEvent(1, c.charCodeAt(0));
-    //   }
-    // },
-    // copy(cmd) {
-    //   if (!this.client) {
-    //     return;
-    //   }
-    //   clipboard.cache = {
-    //     type: "text/plain",
-    //     data: cmd.data,
-    //   };
-    //   clipboard.setRemoteClipboard(this.client);
-    // },
-    // handleMouseState(mouseState) {
-    //   const scaledMouseState = Object.assign({}, mouseState, {
-    //     x: mouseState.x / this.display.getScale(),
-    //     y: mouseState.y / this.display.getScale(),
-    //   });
-    //   this.client.sendMouseState(scaledMouseState);
-    // },
-    closeUploadModal() {
-      this.uploadMadal = false;
-      this.uploadList = [];
-      uploads = [];
-      clearInterval(this.timer);
-    },
   },
-};
+});
 </script>
 
 <style>
