@@ -39,17 +39,29 @@
         />
       </a-tab-pane>
       <a-tab-pane
-        key="4"
-        :tab="$t('label.network.list')"
-        :forceRender="forceRender"
+          key="4"
+          :tab="$t('label.network.list')"
+          :forceRender="forceRender"
       >
         <TableContent
-          ref="listRefreshCall4"
-          :tap-name="'network'"
-          :network-list="networkList"
-          :workspace-info="workspaceInfo"
+            ref="listRefreshCall4"
+            :tap-name="'network'"
+            :network-list="networkList"
+            :workspace-info="workspaceInfo"
         />
       </a-tab-pane>
+<!--      <a-tab-pane-->
+<!--          key="5"-->
+<!--          :tab="$t('label.ad.policy.list')"-->
+<!--          :forceRender="forceRender"-->
+<!--      >-->
+<!--        <TableContent-->
+<!--            ref="listRefreshCall5"-->
+<!--            :tap-name="'policy'"-->
+<!--            :network-list="networkList"-->
+<!--            :workspace-info="workspaceInfo"-->
+<!--        />-->
+<!--      </a-tab-pane>-->
     </a-tabs>
   </div>
 </template>
@@ -66,6 +78,11 @@ export default defineComponent({
       default: null,
     },
     networkList: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    policyList: {
       type: Object,
       required: false,
       default: null,
@@ -107,6 +124,7 @@ export default defineComponent({
       this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall5.fetchRefresh(refreshClick);
       // }, 100);
     },
     parentRefresh() {
