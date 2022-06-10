@@ -664,12 +664,12 @@ export default defineComponent({
           dataIndex: "name",
           key: "name",
           slots: { customRender: "nameRender" },
-          title: this.$t("label.name"),
+          title: this.$t("label.policy.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: this.$t("label.description"),
+          title: this.$t("label.policy.value"),
           dataIndex: "description",
           key: "description",
           width: "60%",
@@ -686,10 +686,32 @@ export default defineComponent({
         this.workspacePolicyList !== undefined &&
         this.workspacePolicyList !== null
       ) {
+        var arr = [];
+        var obj = {};
         this.dataList = this.workspacePolicyList;
-        this.dataList.forEach((value, index, array) => {
-          this.dataList[index].key = index;
+        Object.keys(this.dataList).forEach((index) => {
+          console.log(index, this.dataList[index]);
+          if (index == "id" || index == "workspace_uuid"){
+          } else {
+            obj["name"] = index;
+            obj["description"] = this.dataList[index];
+            arr.push(obj);
+            obj = {};
+
+          }
         });
+        console.log("this.dataList")
+
+        console.log("arr");
+        console.log(arr);
+        this.dataList = arr
+        // console.log(this.dataList)
+        // console.log(this.dataList[0].key)
+        // console.log(this.dataList[0].value)
+
+        // this.dataList.forEach((value, index, array) => {
+        //   this.dataList[index].key = index;
+        // });
       }
     },
     fetchNetwork() {

@@ -114,7 +114,12 @@ export default defineComponent({
               this.groupInfo = response.data.result.groupDetail;
             }
             if (response.data.result.workspacePolicy !== null) {
-              this.workspacePolicyList = response.data.result.workspacePolicy;
+              this.workspacePolicyList = response.data.result.workspaceInfo.policy;
+              console.log("response.data");
+              console.log(response.data.result.workspaceInfo.policy);
+              console.log(response.data.result.workspaceInfo.policy.id);
+              console.log(Object.keys(response.data.result.workspaceInfo.policy));
+              console.log(Object.values(response.data.result.workspaceInfo.policy));
             }
           } else {
             message.error(this.$t("message.response.data.fail"));
