@@ -16,16 +16,15 @@
     :visible="showDrawerVisible"
     @close="closeDrawer"
   >
-    <user-client-setting
-      ref="setting"
+    <UserClientSetting
+      ref="userClientSetting"
       :client="client"
       :display="display"
       :mouse="mouse"
       :keyboard="keyboard"
-      :defaultScale="defaultScale"
-      @windowScale="windowScale"
       @inputModeChange="inputModeChange"
       @mouseModeChange="mouseModeChange"
+      @uploadFile="uploadFile"
     />
   </a-drawer>
   <!-- <div ref="viewport" id="viewport" style="position: relative"> -->
@@ -85,36 +84,40 @@
       :sub-title="text[status] || errorMessage"
     >
       <template #icon v-if="spinner">
-        <LoadingOutlined />
+        <loading-outlined />
       </template>
       <template #extra v-if="ableReconnect">
-        <a-button type="primary" @click="connect()"> 재접속 </a-button>
+        <a-button type="primary" @click="connect()">
+          {{ $t("label.reconnect") }}
+        </a-button>
       </template>
     </a-result>
   </div>
+
   <!-- <guac-client-modal ref="modal" @reconnect="connect()" /> -->
 </template>
 
 <script>
-import { ref } from "vue";
+import { defineComponent, ref, h } from "vue";
+import { message, notification, Button } from "ant-design-vue";
 import Guacamole from "guacamole-common-js";
 // import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/client/encrypt";
 import dis from "@/client/display";
 import states from "@/client/states";
-import UserClientSetting from "./UserClientSetting";
+import UserClientSetting from "./UserClientSetting.vue";
 import store from "@/store/index";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
     : process.env.VUE_APP_API_URL;
 const wsUrl = "ws://" + hostname + ":8088/";
-export default {
+export default defineComponent({
   components: {
     UserClientSetting,
   },
   setup() {
-    const showDrawerVisible = ref(false);
+    const showDrawerVisible = ref(true);
     const drawerHeight = ref(120);
     const showDrawer = () => {
       showDrawerVisible.value = true;
@@ -132,8 +135,6 @@ export default {
   props: {},
   data() {
     return {
-      html: ref(""),
-      uploads: ref([]),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       client: ref(null),
       keyboard: ref(null),
@@ -160,13 +161,6 @@ export default {
       sentText: ref([]),
       inputTextValDisplay: ref(""),
       arguments: {},
-      managedFileUpload: {
-        filename: ref({}),
-        mimetype: ref(""),
-        filename: ref(""),
-        progress: ref(0),
-        transferState: ref(states.IDLE),
-      },
       token: {
         connection: {
           type: "rdp",
@@ -178,22 +172,22 @@ export default {
       resultStatus: ref(null),
       status: ref(null),
       title: {
-        CONNECTING: "데스크톱 연결 중",
-        DISCONNECTING: "연결 끊김",
-        DISCONNECTED: "연결 끊김",
-        UNSTABLE: "불안정",
-        WAITING: "대기중...",
-        CLIENT_ERROR: "클라이언트 오류",
-        TUNNEL_ERROR: "WebSocket Tunneling 오류",
+        CONNECTING: this.$t("message.userdesktop.status.title.connecting"),
+        DISCONNECTING: this.$t("message.userdesktop.status.title.disconnecting"),
+        DISCONNECTED: this.$t("message.userdesktop.status.title.disconnected"),
+        UNSTABLE: this.$t("message.userdesktop.status.title.unstable"),
+        WAITING: this.$t("message.userdesktop.status.title.waiting"),
+        CLIENT_ERROR: this.$t("message.userdesktop.status.title.clienterror"),
+        TUNNEL_ERROR: this.$t("message.userdesktop.status.title.tunnelerror"),
       },
       text: {
-        CONNECTING: "데스크톱에 연결을 위해 응답을 기다리는 중...",
-        DISCONNECTING: "데스크톱에 접속이 끊어졌습니다.",
-        DISCONNECTED: "데스크톱에 접속이 끊어졌습니다.",
-        UNSTABLE: "서버에 대한 네트워크 연결이 불안정합니다.",
-        WAITING: "서버에 응답을 기다리는 중입니다.",
-        CLIENT_ERROR: "서버에 오류가 발생했습니다.",
-        TUNNEL_ERROR: "WebSocket Tunneling 중 오류가 발생하였습니다.",
+        CONNECTING: this.$t("message.userdesktop.status.text.connecting"),
+        DISCONNECTING: this.$t("message.userdesktop.status.text.disconnecting"),
+        DISCONNECTED: this.$t("message.userdesktop.status.text.disconnected"),
+        UNSTABLE: this.$t("message.userdesktop.status.text.unstable"),
+        WAITING: this.$t("message.userdesktop.status.text.waiting"),
+        CLIENT_ERROR: this.$t("message.userdesktop.status.text.clienterror"),
+        TUNNEL_ERROR: this.$t("message.userdesktop.status.text.tunnelerror"),
       },
     };
   },
@@ -293,7 +287,6 @@ export default {
         }
       };
       this.client.onsync = () => {};
-      this.display = this.client.getDisplay();
       this.display = this.client.getDisplay();
       this.appEl = document.getElementById("app");
       this.displayEl = document.getElementById("display");
@@ -435,15 +428,84 @@ export default {
         // Ignore file drops if no attached client
         if (!this.client) return;
 
-        // Upload each file
-        const files = e.dataTransfer.files;
-
-        for (let i = 0; i < files.length; i++) {
-          console.log(files[i]);
-          this.uploadFile(files[i]);
+        const dragDropFileList = e.dataTransfer.files;
+        for (let i = 0; i < dragDropFileList.length; i++) {
+          this.dropUploadFile(dragDropFileList[i], true);
         }
       });
 
+      //파일 다운로드 이벤트 발생 시
+      this.client.onfile = (stream, mimetype, filename) => {
+        // 서버에 ack 정보 호출 하여 받겠다는 신호 주기
+        stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+
+        const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
+        var chunks = [];
+        var siz = 0;
+        const key = filename;
+        // stream buffer 데이터 받음
+        arrayBufferReader.ondata = (buffer) => {
+          const bufBlob = new Blob([buffer], { type: mimetype });
+          chunks.push(bufBlob);
+
+          siz = siz + bufBlob.size;
+
+          // console.log(this.bytesToSize(siz), chunks.length);
+          notification.open({
+            key,
+            message: this.$t("label.file.download"),
+            description:
+              "[" +
+              this.$refs.userClientSetting.bytesToSize(siz) +
+              "] " +
+              filename,
+            placement: "bottomRight",
+            duration: 0,
+            onClose: () => {
+              notification.close(key);
+            },
+          });
+
+          stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+        };
+
+        //stream 이 끝났을 시
+        arrayBufferReader.onend = () => {
+          notification.open({
+            key,
+            message: this.$t("label.file.download"),
+            description: "[" + this.$t("label.complete") + "] " + filename,
+            placement: "bottomRight",
+            duration: 5,
+            style: {
+              width: "400px",
+            },
+            onClose: () => {
+              notification.close(key);
+            },
+          });
+          const blob = new Blob(chunks, { type: mimetype });
+          const url = URL.createObjectURL(blob);
+          this.$refs.userClientSetting.downloadFile(url, filename);
+        };
+      };
+      this.client.onfilesystem = (object, name) => {
+        // Init new filesystem object
+        const managedFilesystem = {
+          client: this.client,
+          object: object,
+          name: name,
+          root: {
+            mimetype: Guacamole.Object.STREAM_INDEX_MIMETYPE,
+            streamName: Guacamole.Object.ROOT_STREAM,
+            type: "DIRECTORY",
+          },
+        };
+        this.$refs.userClientSetting.updateDirectory(
+          managedFilesystem,
+          managedFilesystem.root
+        );
+      };
       window.addEventListener("resize", (e) => {
         // console.log(
         //   "window resize 이벤트 발생 후 바로 크기 :::::: ",
@@ -455,9 +517,6 @@ export default {
       this.inputModeChange("none");
       this.mouseModeChange(this.emulateAbsoluteMouse);
       this.setDefaultScale();
-
-      console.log(this.tunnel);
-      console.log(this.client);
     },
     isMenuShortcutPressed(keysym) {
       //console.log("isMenuShortcutPressed", keysym);
@@ -830,8 +889,10 @@ export default {
       this.client.sendSize(width, height);
 
       // 세팅 drawer 높이 변경
-      if (width < 800) this.drawerHeight = 320;
-      else this.drawerHeight = 120;
+      if (width > 1125) this.drawerHeight = 120;
+      else if (width > 680 && width <= 1125) this.drawerHeight = 200;
+      else if (width > 467 && width <= 680) this.drawerHeight = 280;
+      else this.drawerHeight = 440;
 
       // if (this.onScreenKeyboard) {
       //   this.onScreenKeyboard.resize(this.$refs.display.offsetWidth);
@@ -1012,207 +1073,105 @@ export default {
           break;
       }
     },
-    uploadFile(file, filesystem, directory) {
-      // Use generic Guacamole file streams by default
-      var object = null;
-      var streamName = null;
+    dropUploadFile(file, notify) {
+      const reader = new FileReader();
+      const STREAM_BLOB_SIZE = 6144;
+      const key = file.name;
 
-      // If a filesystem is given, determine the destination object and stream
+      var managedFileUpload = {};
+      reader.onloadend = () => {
+        const stream = this.client.createFileStream(file.type, file.name);
+        const bytes = new Uint8Array(reader.result);
+        let offset = 0;
 
-      if (filesystem) {
-        object = filesystem.object;
-        streamName =
-          (directory || filesystem.currentDirectory).streamName +
-          "/" +
-          file.name;
-      }
-      // Start and manage file upload
-      this.uploads.push(this.getInstance(file, object, streamName));
-    },
-    getInstance(file, object, streamName) {
-      
-      // Open file for writing
-      var stream;
-      if (!object) stream = this.client.createFileStream(file.type, file.name);
-      // If object/streamName specified, upload to that instead of a file
-      // stream
-      else stream = object.createOutputStream(file.type, streamName);
+        managedFileUpload.filename = file.name;
+        managedFileUpload.mimetype = file.type;
+        managedFileUpload.length = file.size;
+        managedFileUpload.notification = notify;
 
+        stream.onack = (status) => {
+          if (status.isError()) {
+            message.error(this.$t("message.file.upload.permission.denied"));
+            console.log("Error uploading file");
+            return false;
+          }
+          const sliceBytes = bytes.subarray(offset, offset + STREAM_BLOB_SIZE);
+          const base64 = btoa(String.fromCharCode.apply(String, sliceBytes));
 
-      let offset   = 0;
-      let progress = 0;
+          // Write packet
+          stream.sendBlob(base64);
+          // Advance to next packet
+          offset += STREAM_BLOB_SIZE;
 
-      
-      console.log(":::::: stream ::::", file);
-      this.managedFileUpload.filename = file.name;
-      this.managedFileUpload.mimetype = file.type;
-      this.managedFileUpload.progress = 0;
-      this.managedFileUpload.length = file.size;
+          if (offset >= bytes.length) {
+            managedFileUpload.progress = 100;
+            stream.sendEnd();
 
-      // Notify that stream is open
-      this.managedFileUpload.transferState = states.OPEN;
+            // 업로드 완료 정보 표시를 위한 notification
+            if (managedFileUpload.notification) {
+              notification.open({
+                key,
+                message: this.$t("label.file.upload"),
+                description:
+                  "[" +
+                  this.$t("label.complete") +
+                  "] " +
+                  managedFileUpload.filename,
+                placement: "bottomRight",
+                duration: 5,
+                style: {
+                  width: "400px",
+                },
+                onClose: () => {
+                  notification.close(key);
+                  managedFileUpload.notification = false;
+                },
+              });
+            }
+          } else {
+            managedFileUpload.progress = Math.floor(
+              (offset / bytes.length) * 100
+            );
 
-      // Notify that the file transfer is pending
-      // Init managed upload
-
-      // Upload file once stream is acknowledged
-      stream.onack = (status) => {
-        // Notify of any errors from the Guacamole server
-
-
-        if (status.isError()) {
-          this.managedFileUpload.transferState = states.STREAM_STATE.ERROR;
-          return;
-        }
-        console.log(file.name, ":::::: 성공! ", this.tunnel.uuid);
-        // Begin upload
-
-
-
-        const slice  = bytes.subarray(offset, offset + file.size);
-        const base64 = getBase64(slice);
-
-        // Write packet
-        stream.sendBlob(base64);
-
-        // Advance to next packet
-        offset += file.size;
-
-        if (offset >= bytes.length) {
-          progress = 100;
-          stream.sendEnd();
-        } else {
-          progress = Math.floor(offset / bytes.length * 100);
-        }
-
-
-
-
-
-
-        // const uploadToStream = this.uploadToStream(
-        //   this.tunnel.uuid,
-        //   stream,
-        //   file,
-        //   (length) => {
-        //     this.managedFileUpload.progress = length;
-        //   }
-        // );
-
-        // uploadToStream
-        //   // Notify if upload succeeds
-        //   .then(() => {
-        //     this.managedFileUpload.progress = file.size;
-        //     this.managedFileUpload.transferState = states.STREAM_STATE.CLOSED;
-        //   })
-        //   .catch((error) => {
-        //     console.log(error);
-        //     if (error === states.STREAM_STATE.ERROR) {
-        //       this.managedFileUpload.transferState = states.STREAM_STATE.ERROR;
-        //     }
-        //     // Fail with internal error for all other causes
-        //     else {
-        //       this.ManagedFileUpload.transferState =
-        //         states.ERROR_TYPE.STREAM_ERROR;
-        //       this.statusCode = Guacamole.Status.Code.INTERNAL_ERROR;
-        //     }
-        //   });
-
-        // .then(
-        //   (suc) => {
-        // Upload complete
-
-        // Notify of upload completion
-        // $rootScope.$broadcast("guacUploadComplete", file.name);
-        //   },
-
-        //   // Notify if upload fails
-        //   (error) => {
-        //     // // Use provide status code if the error is coming from the stream
-
-        //   }
-        // );
-
-        // Ignore all further acks
-        stream.onack = null;
+            //percent정보 갱신을 위한 notification
+            if (managedFileUpload.notification) {
+              notification.open({
+                key,
+                message: this.$t("label.file.upload"),
+                description:
+                  "[" +
+                  managedFileUpload.progress +
+                  "%] " +
+                  managedFileUpload.filename,
+                placement: "bottomRight",
+                duration: 0,
+                style: {
+                  width: "400px",
+                },
+                // btn: () =>
+                //   h(
+                //     Button,
+                //     {
+                //       type: "primary",
+                //       size: "small",
+                //       onClick: () => {
+                //         notification.close(key);
+                //         managedFileUpload.notification = false;
+                //       },
+                //     },
+                //     { default: () => this.$t("label.ok") }
+                //   ),
+                onClose: () => {
+                  notification.close(key);
+                  managedFileUpload.notification = false;
+                },
+              });
+            }
+          }
+        };
       };
-
-      return this.managedFileUpload;
-    },
-    uploadToStream(tunnel, stream, file, progressCallback) {
-      // Work-around for IE missing window.location.origin
-      var streamOrigin = "";
-      if (!window.location.origin)
-        streamOrigin =
-          window.location.protocol +
-          "//" +
-          window.location.hostname +
-          (window.location.port ? ":" + window.location.port : "");
-      else streamOrigin = window.location.origin;
-
-      // Build upload URL
-      var url =
-        streamOrigin +
-        window.location.pathname +
-        "api/session/tunnels/" +
-        encodeURIComponent(tunnel) +
-        "/streams/" +
-        encodeURIComponent(stream.index) +
-        "/" +
-        encodeURIComponent(this.sanitizeFilename(file.name)) +
-        "?token=" +
-        encodeURIComponent(encrypt(this.token));
-
-      var xhr = new XMLHttpRequest();
-
-      // Invoke provided callback if upload tracking is supported
-      if (progressCallback && xhr.upload) {
-        xhr.upload.addEventListener("progress", (e) => {
-          progressCallback(e.loaded);
-        });
-      }
-
-      // Resolve/reject promise once upload has stopped
-      xhr.onreadystatechange = () => {
-        // Ignore state changes prior to completion
-        if (xhr.readyState !== 4) return;
-
-        // Resolve if HTTP status code indicates success
-        if (xhr.status >= 200 && xhr.status < 300) return new Promise.resolve();
-        // Parse and reject with resulting JSON error
-        else if (xhr.getResponseHeader("Content-Type") === "application/json")
-          return new Promise((resolve, reject) => {
-            reject(JSON.parse(xhr.responseText));
-          });
-        // Warn of lack of permission of a proxy rejects the upload
-        else if (xhr.status >= 400 && xhr.status < 500)
-          return new Promise((resolve, reject) => {
-            console.log(states.ERROR_TYPE.STREAM_ERROR);
-            reject(states.ERROR_TYPE.STREAM_ERROR);
-          });
-        // Assume internal error for all other cases
-        else
-          return new Promise((resolve, reject) => {
-            reject(states.ERROR_TYPE.STREAM_ERROR);
-          });
-      };
-
-      // Perform upload
-      xhr.open("POST", url, true);
-      xhr.send(file);
-
-      return new Promise((resolve, reject) => {
-        resolve("example");
-      });
-    },
-    createErrorCallback(callback) {
-      return function generatedErrorCallback(error) {
-        // Invoke given callback ONLY if due to a legitimate REST error
-        if (error instanceof Error) return callback(error);
-
-        // Log all other errors
-        console.log(error);
-      };
+      // fileReader Call
+      reader.readAsArrayBuffer(file);
     },
     sanitizeFilename(filename) {
       return filename.replace(/[\\\/]+/g, "_");
@@ -1228,33 +1187,8 @@ export default {
       e.stopPropagation();
       this.dropPending = false;
     },
-    // send(cmd) {
-    //   if (!this.client) {
-    //     return;
-    //   }
-    //   for (const c of cmd.data) {
-    //     this.client.sendKeyEvent(1, c.charCodeAt(0));
-    //   }
-    // },
-    // copy(cmd) {
-    //   if (!this.client) {
-    //     return;
-    //   }
-    //   clipboard.cache = {
-    //     type: "text/plain",
-    //     data: cmd.data,
-    //   };
-    //   clipboard.setRemoteClipboard(this.client);
-    // },
-    // handleMouseState(mouseState) {
-    //   const scaledMouseState = Object.assign({}, mouseState, {
-    //     x: mouseState.x / this.display.getScale(),
-    //     y: mouseState.y / this.display.getScale(),
-    //   });
-    //   this.client.sendMouseState(scaledMouseState);
-    // },
   },
-};
+});
 </script>
 
 <style>

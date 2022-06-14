@@ -6,14 +6,6 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import i18n from "./locales";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { fas } from "@fortawesome/free-solid-svg-icons";
-import { far } from "@fortawesome/free-regular-svg-icons";
-import { fab } from "@fortawesome/free-brands-svg-icons";
-library.add(far);
-library.add(fas);
-library.add(fab);
 import {
   BackwardFilled,
   HomeFilled,
@@ -75,10 +67,19 @@ import {
   PlusCircleOutlined,
   LoadingOutlined,
   TranslationOutlined,
+  InboxOutlined,
+  DeleteOutlined,
+  FolderOutlined,
+  FileOutlined,
+  RollbackOutlined,
+  SwapLeftOutlined,
+  StopFilled,
+  FolderOpenFilled,
+  FolderFilled,
+  FileTextFilled,
 } from "@ant-design/icons-vue";
 
 const app = createApp(App);
-app.component("font-awesome-icon", FontAwesomeIcon);
 app.component("BackwardFilled", BackwardFilled);
 app.component("HomeFilled", HomeFilled);
 app.component("DeleteFilled", DeleteFilled);
@@ -139,5 +140,15 @@ app.component("MinusOutlined", MinusOutlined);
 app.component("PlusCircleOutlined", PlusCircleOutlined);
 app.component("LoadingOutlined", LoadingOutlined);
 app.component("TranslationOutlined", TranslationOutlined);
+app.component("InboxOutlined", InboxOutlined);
+app.component("DeleteOutlined", DeleteOutlined);
+app.component("FolderOutlined", FolderOutlined);
+app.component("FileOutlined", FileOutlined);
+app.component("RollbackOutlined", RollbackOutlined);
+app.component("SwapLeftOutlined", SwapLeftOutlined);
+app.component("StopFilled", StopFilled);
+app.component("FolderOpenFilled", FolderOpenFilled);
+app.component("FileTextFilled", FileTextFilled);
+app.component("FolderFilled", FolderFilled);
 
 app.use(VueCryptojs).use(i18n).use(store).use(router).use(Antd).mount("#app");

@@ -16,7 +16,7 @@
                 size="small"
                 @click="fetchRefresh()"
               >
-                <template #icon><ReloadOutlined /></template>
+                <template #icon><HeartFilled /></template>
                 {{ $t("label.refresh") }}
               </a-button>
             </a-col>
@@ -91,7 +91,7 @@
                           <Icon>
                             <template #component>
                               <img
-                                src="@/assets/icons8-remote-desktop-97.png"
+                                src="@/assets/icon-remote-desktop.png"
                                 width="30"
                                 height="30"
                                 @click="
@@ -113,7 +113,7 @@
                           <Icon>
                             <template #component>
                               <img
-                                src="@/assets/icons8-internet-64.png"
+                                src="@/assets/icons-internet.png"
                                 width="30"
                                 height="30"
                                 @click="
@@ -266,7 +266,7 @@ export default defineComponent({
   setup() {
     const pagination = {
       onChange: (page) => {
-        console.log(page);
+        //console.log(page);
       },
       pageSize: 20,
     };
@@ -458,13 +458,14 @@ export default defineComponent({
       liteParamArr["resize-method"] = "display-update";
 
       //liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "GUACD";
+      liteParamArr["drive-name"] = "Share";
       liteParamArr["drive-path"] = "/share";
       liteParamArr["enable-drive"] = true;
       liteParamArr["disable-upload"] = false;
       liteParamArr["disable-download"] = false;
       liteParamArr["enable-printing"] = true;
       liteParamArr["printer-name"] = "VDI-PRINTER";
+      liteParamArr["console"] = true;
 
       liteParamArr["enable-touch"] = true;
 
@@ -502,7 +503,6 @@ export default defineComponent({
 
       try {
         const res = await worksApi.patch(this.worksUrl + uuid);
-        console.log(res.status);
         if (res.status == 200) {
           this.succCnt = this.succCnt + 1;
         }
