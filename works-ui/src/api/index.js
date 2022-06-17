@@ -1,4 +1,4 @@
-import store from "@/store/index.js";
+import store from "@/store";
 import axios from "axios";
 
 function setInterceptors(instance) {
@@ -36,7 +36,7 @@ function worksApiAuth() {
     //baseURL: process.env.VUE_APP_API_URL,
     baseURL: "http://" + (process.env.VUE_APP_API_URL == "" ? window.location.hostname : process.env.VUE_APP_API_URL) + ":" + process.env.VUE_APP_API_PORT,
     withCredentials: true,
-    timeout: 5000,
+    timeout: 15000,
   });
   return setInterceptors(instance);
 }
