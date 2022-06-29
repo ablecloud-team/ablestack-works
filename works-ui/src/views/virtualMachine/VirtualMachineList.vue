@@ -2,12 +2,8 @@
   <a-table
     size="middle"
     :loading="loading"
-    class="ant-table-striped"
     :columns="vmListColumns"
     :data-source="vmDataList"
-    :row-class-name="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
     :row-selection="{
@@ -76,7 +72,7 @@
         <a-Popover placement="topLeft">
           <template #content>
             <Actions
-              v-if="actionFrom === 'VirtualMachineList'"
+              v-if="actionFrom === 'VMList'"
               :action-from="actionFrom"
               :vm-info="record"
               @fetchData="fetchRefresh"
@@ -164,8 +160,6 @@
 <script>
 import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   components: {
     Actions,
@@ -210,7 +204,7 @@ export default defineComponent({
           this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
-      vmDataList: [],
+      vmDataList: ref([]),
       vmListColumns: [
         {
           title: this.$t("label.name"),
@@ -374,7 +368,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
-      this.$emit("actionFromChange", "VirtualMachine", null);
+      this.$emit("actionFromChange", "VM", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];
@@ -385,17 +379,13 @@ export default defineComponent({
       this.state.selectedRowKeys = selectedRowKeys;
       this.state.selectedRows = selectedRows;
       if (this.state.selectedRows.length > 0) {
-        this.$emit(
-          "actionFromChange",
-          "VirtualMachineList",
-          this.state.selectedRows
-        );
+        this.$emit("actionFromChange", "VMList", this.state.selectedRows);
       } else {
-        this.$emit("actionFromChange", "VirtualMachine", null);
+        this.$emit("actionFromChange", "VM", null);
       }
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/instance/all")
         .then((response) => {
           if (response.status == 200) {
@@ -406,73 +396,21 @@ export default defineComponent({
               });
             }
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         })
         .finally(() => {
           this.loading = false;
         });
 
-      this.actionFrom = "VirtualMachineList";
+      this.actionFrom = "VMList";
     },
   },
 });
 </script>
 <style scoped lang="scss">
-::v-deep(.ant-badge-status-dot) {
-  width: 12px;
-  height: 12px;
-}
-::v-deep(.ant-table-thead) {
-  background-color: #f9f9f9;
-}
-
-::v-deep(.ant-table-small) > .ant-table-content > .ant-table-body {
-  margin: 0;
-}
-
-::v-deep(.light-row) {
-  background-color: #fff;
-}
-
-::v-deep(.dark-row) {
-  background-color: #f9f9f9;
-}
-
-.shift-btns {
-  display: flex;
-}
-.shift-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-
-  &:not(:last-child) {
-    margin-right: 5px;
-  }
-
-  &--rotated {
-    font-size: 10px;
-    transform: rotate(90deg);
-  }
-}
-
-.alert-notification-threshold {
-  background-color: rgba(255, 231, 175, 0.75);
-  color: #e87900;
-  padding: 10%;
-}
-
-.alert-disable-threshold {
-  background-color: rgba(255, 190, 190, 0.75);
-  color: #f50000;
-  padding: 10%;
-}
 </style>

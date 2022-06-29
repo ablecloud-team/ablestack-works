@@ -222,10 +222,6 @@
 </template>
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-import store from "@/store/index";
-
 export default defineComponent({
   name: "Dashboard",
   components: {},
@@ -275,15 +271,15 @@ export default defineComponent({
       this.fetchData();
     },
     fetchData() {
-      worksApi
+      this.$worksApi
         .get("/api/serverCheck")
         .then((response) => {
           if (response.status == 200) {
-            store.dispatch("serverCheckCommit", response);
+            this.$store.dispatch("serverCheckCommit", response);
           }
         })
         .catch((error) => {
-          store.dispatch("serverCheckCommit", error.response);
+          this.$store.dispatch("serverCheckCommit", error.response);
           // message.error(this.$t("message.response.data.fail"));
           console.log(error.response.status);
         })
@@ -291,20 +287,21 @@ export default defineComponent({
           this.setServerStatus();
         });
 
-      worksApi
+      this.$worksApi
         .get("/api/v1/dashboard")
         .then((response) => {
           if (response.status == 200) {
-            this.workspaceCount = response.data.result.workspaceCount;
-            this.desktopVmCount = response.data.result.instanceCount;
-            this.accountCount = response.data.result.usersCount;
-            this.desktopConCount = response.data.result.connectedCount;
+            const data = response.data.result;
+            this.workspaceCount = data.workspaceCount;
+            this.desktopVmCount = data.instanceCount;
+            this.accountCount = data.usersCount;
+            this.desktopConCount = data.connectedCount;
             this.appVmCount = "0";
             this.appConCount = "0";
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error.message);
         })
         .finally(() => {
@@ -312,19 +309,19 @@ export default defineComponent({
         });
     },
     async setServerStatus() {
-      if (store.state.dashboard.works === 200) {
+      if (this.$store.state.dashboard.works === 200) {
         this.descStep1 = this.$t("message.status.check.ok");
         this.dashboardStep = 1;
-        if (store.state.dashboard.mold === 200) {
+        if (this.$store.state.dashboard.mold === 200) {
           this.descStep2 = this.$t("message.status.check.ok");
           this.dashboardStep = 2;
-          if (store.state.dashboard.dc === 200) {
+          if (this.$store.state.dashboard.dc === 200) {
             this.descStep3 = this.$t("message.status.check.ok");
             this.dashboardStep = 3;
-            if (store.state.dashboard.samba === 200) {
+            if (this.$store.state.dashboard.samba === 200) {
               this.descStep4 = this.$t("message.status.check.ok");
               this.dashboardStep = 4;
-              if (store.state.dashboard.guac === 200) {
+              if (this.$store.state.dashboard.guac === 200) {
                 this.descStep5 = this.$t("message.status.check.ok");
                 this.dashboardStep = 5;
               } else {

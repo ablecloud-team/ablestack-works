@@ -21,7 +21,7 @@
             <a-col id="content-action" :span="12">
               <div>
                 <Actions
-                  v-if="actionFrom === 'WorkspaceList'"
+                  v-if="actionFrom === 'WSList'"
                   :action-from="actionFrom"
                   :multi-select-list="multiSelectList"
                   @fetchData="refresh"
@@ -31,7 +31,7 @@
                   shape="round"
                   style="margin-left: 10px"
                   @click="showModal(true)"
-                  >{{ addModalTitle }}
+                  >{{ $t("label.workspace.add") }}
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -51,7 +51,7 @@
       </a-layout-content>
     </a-layout>
     <!-- ADD WORKSPACE MODAL START  -->
-    <a-modal v-model:visible="visible" :title="addModalTitle">
+    <a-modal v-model:visible="visible" :title="$t('label.workspace.add')">
       <template #title> </template>
       <template #footer>
         <a-button key="close" @click="showModal(false)">{{
@@ -60,7 +60,7 @@
         <a-button
           key="submit"
           type="primary"
-          :loading="loading"
+          :loading="addLoading"
           @click="putWorkspace"
           >{{ $t("label.ok") }}</a-button
         >
@@ -69,9 +69,8 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
-        :label-col="labelCol"
-        :wrapper-col="wrapperCol"
         layout="vertical"
+        autocomplete="off"
       >
         <!--워크스페이스 이름 start-->
         <a-form-item has-feedback name="name" :label="$t('label.name')">
@@ -201,8 +200,6 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceList from "./WorkSpaceList";
 import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   name: "WorkSpace",
   components: {
@@ -231,9 +228,16 @@ export default defineComponent({
       //let containsEng = /[a-zA-Z]/.test(value); // 대소문자
       //let containsEngUpper = /[A-Z]/.test(value); 대문자
       //let containsNumber = /[0-9]/.test(value);
-      //let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
       let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
-      if (value === "" || containsHangle || lengthCheck) {
+      let firstEng = /^[a-zA-Z]/.test(value);
+      if (
+        value === "" ||
+        containsHangle ||
+        containsSpecial ||
+        lengthCheck ||
+        !firstEng
+      ) {
         return Promise.reject();
       } else {
         return Promise.resolve();
@@ -261,8 +265,6 @@ export default defineComponent({
       desktopTemplates: ref([]),
       applicationTemplates: ref([]),
       offerings: ref([]),
-      labelCol: { span: 10 },
-      wrapperCol: { span: 40 },
       formRef,
       formState,
       rules,
@@ -272,8 +274,8 @@ export default defineComponent({
   },
   data() {
     return {
-      addModalTitle: this.$t("label.workspace.add"),
-      actionFrom: ref("Workspace"),
+      addLoading: ref(false),
+      actionFrom: ref("WS"),
       multiSelectList: ref([]),
     };
   },
@@ -294,7 +296,7 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      this.actionFrom = "Workspace";
+      this.actionFrom = "WS";
       setTimeout(() => {
         this.actionFrom = val;
         this.multiSelectList = obj;
@@ -346,39 +348,41 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          worksApi
+          this.addLoading = true;
+          this.$worksApi
             .get("/api/v1/group/" + this.formState.name) //이름 중복 확인
             .then((response) => {
               if (response.status === 200) {
                 //이름 중복일때 메시지 확인
-                message.error(this.$t("message.name.dupl"));
+                this.$message.error(this.$t("message.name.dupl"));
               }
             })
             .catch((error) => {
               //이름 중복이 아닐때(status code = 401)
-              message.loading(this.$t("message.workspace.createing"));
-              worksApi
+              this.$message.loading(this.$t("message.workspace.createing"));
+              this.$worksApi
                 .post("/api/v1/workspace", params)
                 .then((response) => {
-                  message.destroy();
+                  this.$message.destroy();
                   if (response.status === 200) {
-                    message.success(
+                    this.$message.success(
                       this.$t("message.workspace.create.success"),
                       10
                     );
                   } else {
-                    message.error(this.$t("message.workspace.create.fail"));
+                    this.$message.error(
+                      this.$t("message.workspace.create.fail")
+                    );
                   }
                   this.showModal(false);
                 })
                 .catch((error) => {
-                  message.destroy();
-                  message.error(this.$t("message.workspace.create.fail"));
+                  this.$message.destroy();
+                  this.$message.error(this.$t("message.workspace.create.fail"));
                   console.log(error);
                 })
                 .finally(() => {
-                  this.showModal(false);
-                  this.$refs.listRefreshCall.fetchRefresh();
+                  this.fetch();
                 });
             });
         })
@@ -387,7 +391,7 @@ export default defineComponent({
         });
     },
     fetchOfferingsAndTemplates() {
-      worksApi
+      this.$worksApi
         .get("/api/v1/offering")
         .then((response) => {
           if (response.status == 200) {
@@ -420,10 +424,15 @@ export default defineComponent({
           }
         })
         .catch((error) => {
-          message.destroy();
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.destroy();
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
+    },
+    fetch() {
+      this.addLoading = false;
+      this.showModal(false);
+      this.$refs.listRefreshCall.fetchRefresh();
     },
   },
 });

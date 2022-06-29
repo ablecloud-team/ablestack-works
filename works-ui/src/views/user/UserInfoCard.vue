@@ -8,25 +8,25 @@
           </template>
         </a-avatar>
         <h4 style="margin-left: 20px">
-          {{ accountInfo.username }}
+          {{ resource.username }}
         </h4>
       </div>
     </div>
     <div id="firstname" class="CardItem">
       <div class="ItemName">{{ $t("label.lastname") }}</div>
-      <div class="Item">{{ accountInfo.givenName }}</div>
+      <div class="Item">{{ resource.givenName }}</div>
     </div>
     <div id="firstname" class="CardItem">
       <div class="ItemName">{{ $t("label.firstname") }}</div>
-      <div class="Item">{{ accountInfo.sn }}</div>
+      <div class="Item">{{ resource.sn }}</div>
     </div>
     <div id="email" class="CardItem">
       <div class="ItemName">{{ $t("label.email") }}</div>
-      <div class="Item">{{ accountInfo.mail }}</div>
+      <div class="Item">{{ resource.mail }}</div>
     </div>
     <div id="phone" class="CardItem">
       <div class="ItemName">{{ $t("label.phone") }}</div>
-      <div class="Item">{{ accountInfo.telephoneNumber }}</div>
+      <div class="Item">{{ resource.telephoneNumber }}</div>
     </div>
   </a-spin>
 </template>
@@ -36,9 +36,9 @@ import { defineComponent, ref } from "vue";
 export default defineComponent({
   components: {},
   props: {
-    accountInfo: {
+    resource: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },

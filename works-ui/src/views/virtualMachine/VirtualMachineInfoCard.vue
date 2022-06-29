@@ -8,7 +8,7 @@
           </template>
         </a-avatar>
         <h4 style="margin-left: 20px">
-          {{ vmDbDataInfo.name }}
+          {{ resource.instanceDBInfo.name }}
         </h4>
       </div>
     </div>
@@ -17,27 +17,27 @@
       <div class="ItemName">{{ $t("label.vm.state") }}</div>
       <div class="Item">
         <a-tooltip placement="bottom">
-          <template #title>{{ vmDbDataInfo.mold_status }}</template>
+          <template #title>{{ resource.instanceDBInfo.mold_status }}</template>
           <a-badge
             class="head-example"
             :color="
-              vmDbDataInfo.mold_status === 'Running'
+              resource.instanceDBInfo.mold_status === 'Running'
                 ? 'green'
-                : vmDbDataInfo.mold_status === 'Stopping' ||
-                  vmDbDataInfo.mold_status === 'Starting'
+                : resource.instanceDBInfo.mold_status === 'Stopping' ||
+                  resource.instanceDBInfo.mold_status === 'Starting'
                 ? 'blue'
-                : vmDbDataInfo.mold_status === 'Stopped'
+                : resource.instanceDBInfo.mold_status === 'Stopped'
                 ? 'red'
                 : ''
             "
             :text="
-              vmDbDataInfo.mold_status === 'Running'
+              resource.instanceDBInfo.mold_status === 'Running'
                 ? $t('label.vm.status.running')
-                : vmDbDataInfo.mold_status === 'Starting'
+                : resource.instanceDBInfo.mold_status === 'Starting'
                 ? $t('label.vm.status.starting')
-                : vmDbDataInfo.mold_status === 'Stopping'
+                : resource.instanceDBInfo.mold_status === 'Stopping'
                 ? $t('label.vm.status.stopping')
-                : vmDbDataInfo.mold_status === 'Stopped'
+                : resource.instanceDBInfo.mold_status === 'Stopped'
                 ? $t('label.vm.status.stopped')
                 : ''
             "
@@ -50,34 +50,34 @@
       <div class="ItemName">{{ $t("label.vm.ready.state") }}</div>
       <div class="Item">
         <a-tooltip placement="bottom">
-          <template #title>{{ vmDbDataInfo.handshake_status }}</template>
+          <template #title>{{ resource.instanceDBInfo.handshake_status }}</template>
           <a-badge
             class="head-example"
             :color="
-              vmDbDataInfo.handshake_status === 'Not Ready' ||
-              vmDbDataInfo.handshake_status === 'Pending'
+              resource.instanceDBInfo.handshake_status === 'Not Ready' ||
+              resource.instanceDBInfo.handshake_status === 'Pending'
                 ? 'red'
-                : vmDbDataInfo.handshake_status === 'Joining' ||
-                  vmDbDataInfo.handshake_status === 'Joined'
+                : resource.instanceDBInfo.handshake_status === 'Joining' ||
+                  resource.instanceDBInfo.handshake_status === 'Joined'
                 ? 'yellow'
-                : vmDbDataInfo.handshake_status === 'Ready'
+                : resource.instanceDBInfo.handshake_status === 'Ready'
                 ? 'green'
                 : 'red'
             "
             :text="
-              vmDbDataInfo.handshake_status === 'Not Ready' ||
-              vmDbDataInfo.handshake_status === 'Pending'
+              resource.instanceDBInfo.handshake_status === 'Not Ready' ||
+              resource.instanceDBInfo.handshake_status === 'Pending'
                 ? $t('label.vm.status.initializing') +
                   '(' +
-                  vmDbDataInfo.handshake_status +
+                  resource.instanceDBInfo.handshake_status +
                   ')'
-                : vmDbDataInfo.handshake_status === 'Joining' ||
-                  vmDbDataInfo.handshake_status === 'Joined'
+                : resource.instanceDBInfo.handshake_status === 'Joining' ||
+                  resource.instanceDBInfo.handshake_status === 'Joined'
                 ? $t('label.vm.status.configuring') +
                   '(' +
-                  vmDbDataInfo.handshake_status +
+                  resource.instanceDBInfo.handshake_status +
                   ')'
-                : vmDbDataInfo.handshake_status === 'Ready'
+                : resource.instanceDBInfo.handshake_status === 'Ready'
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "
@@ -88,22 +88,26 @@
     <div id="ID" class="CardItem">
       <div class="ItemName">{{ $t("label.uuid") }}</div>
       <div class="Item">
-        {{ vmDbDataInfo.uuid }}
+        {{ resource.instanceDBInfo.uuid }}
       </div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.createdate") }}</div>
-      <div class="Item">{{ vmDbDataInfo.create_date }}</div>
+      <div class="Item">{{ resource.instanceDBInfo.create_date }}</div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.ostype") }}</div>
-      <div class="Item">{{ vmMoldDataInfo.osdisplayname }}</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].osdisplayname }}</div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.cpu.size") }}</div>
-      <div class="Item">{{ vmMoldDataInfo.cputotal }}</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].cputotal }}</div>
       <a-progress
-        :percent="cpuused"
+        :percent="
+          parseFloat(
+            resource.instanceMoldInfo.virtualmachine[0].cpuused.split('%')[0]
+          )
+        "
         size="small"
         status="active"
         style="width: 97%"
@@ -111,17 +115,17 @@
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.memory.size") }}</div>
-      <div class="Item">{{ vmMoldDataInfo.memory }} MB</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].memory }} MB</div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.disk.size") }}</div>
       <div class="Item">
-        {{ vmDiskInfo.sizegb }}<br />
+        {{ resource.instanceInstanceVolumeInfo.volume[0].sizegb }}<br />
         <a-tag>
           {{
             $t("label.read") +
             " " +
-            (vmMoldDataInfo.diskkbsread / 1048576).toFixed(2)
+            (resource.instanceMoldInfo.virtualmachine[0].diskkbsread / 1048576).toFixed(2)
           }}
           GB</a-tag
         >
@@ -129,15 +133,15 @@
           {{
             $t("label.write") +
             " " +
-            (vmMoldDataInfo.diskkbswrite / 1048576).toFixed(2)
+            (resource.instanceMoldInfo.virtualmachine[0].diskkbswrite / 1048576).toFixed(2)
           }}
           GB</a-tag
         ><br />
         <a-tag>
-          {{ $t("label.read.io") + " " + vmMoldDataInfo.diskioread }}</a-tag
+          {{ $t("label.read.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskioread }}</a-tag
         >
         <a-tag>
-          {{ $t("label.write.io") + " " + vmMoldDataInfo.diskiowrite }}</a-tag
+          {{ $t("label.write.io") + " " + resource.instanceMoldInfo.virtualmachine[0].diskiowrite }}</a-tag
         >
       </div>
     </div>
@@ -145,26 +149,26 @@
       <div class="ItemName">{{ $t("label.network") }}</div>
       <div class="Item">
         <a-tag>
-          <ArrowUpOutlined /> RX {{ vmMoldDataInfo.networkkbsread }} KB</a-tag
+          <ArrowUpOutlined /> RX {{ resource.instanceMoldInfo.virtualmachine[0].networkkbsread }} KB</a-tag
         >
         <a-tag>
           <ArrowDownOutlined /> TX
-          {{ vmMoldDataInfo.networkkbswrite }} KB</a-tag
+          {{ resource.instanceMoldInfo.virtualmachine[0].networkkbswrite }} KB</a-tag
         ><br />
-        {{ vmNetworkInfo.networkname }} ({{ vmNetworkInfo.type }})
+        {{ resource.instanceMoldInfo.virtualmachine[0].nic[0].networkname }} ({{ resource.instanceMoldInfo.virtualmachine[0].nic[0].type }})
       </div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.network.ip") }}</div>
-      <div class="Item">{{ vmNetworkInfo.ipaddress }}</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].nic[0].ipaddress }}</div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.template") }}</div>
-      <div class="Item">{{ vmMoldDataInfo.templatename }}</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].templatename }}</div>
     </div>
     <div class="CardItem">
       <div class="ItemName">{{ $t("label.vm.serviceOffering") }}</div>
-      <div class="Item">{{ vmMoldDataInfo.serviceofferingname }}</div>
+      <div class="Item">{{ resource.instanceMoldInfo.virtualmachine[0].serviceofferingname }}</div>
     </div>
   </a-spin>
 </template>
@@ -175,30 +179,10 @@ import { defineComponent, ref } from "vue";
 export default defineComponent({
   components: {},
   props: {
-    vmDbDataInfo: {
+    resource: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
-    },
-    vmMoldDataInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmNetworkInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmDiskInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    cpuused: {
-      type: Number,
-      required: false,
-      default: 0,
     },
   },
   setup() {

@@ -7,9 +7,10 @@
             <!-- 왼쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
+                v-if="resource.instanceDBInfo"
                 :paths="[
                   { name: $t('label.vm'), component: 'VirtualMachine' },
-                  { name: vmDbDataInfo.name, component: null },
+                  { name: resource.instanceDBInfo.name, component: null },
                 ]"
               />
               <a-button
@@ -25,9 +26,9 @@
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
-                v-if="actionFrom === 'VirtualMachineDetail'"
+                v-if="actionFrom"
                 :action-from="actionFrom"
-                :vm-info="vmDbDataInfo"
+                :vm-info="resource.instanceDBInfo"
                 @fetchData="refresh"
               />
             </a-col>
@@ -37,12 +38,9 @@
       <a-layout-content>
         <div id="content-body">
           <VirtualMachineBody
+            v-if="resource.instanceDBInfo"
             ref="listRefreshCall"
-            :vmDbDataInfo="vmDbDataInfo"
-            :vmMoldDataInfo="vmMoldDataInfo"
-            :vmNetworkInfo="vmNetworkInfo"
-            :vmDiskInfo="vmDiskInfo"
-            :cpuused="cpuused"
+            :resource="resource"
           />
         </div>
       </a-layout-content>
@@ -55,9 +53,6 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import VirtualMachineBody from "./VirtualMachineBody.vue";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-
 export default defineComponent({
   components: { VirtualMachineBody, Apath, Actions },
   props: {},
@@ -68,11 +63,7 @@ export default defineComponent({
   },
   data() {
     return {
-      vmDbDataInfo: ref([]),
-      vmMoldDataInfo: ref([]),
-      vmNetworkInfo: ref([]),
-      vmDiskInfo: ref([]),
-      cpuused: ref(0),
+      resource: ref([]),
     };
   },
   created() {
@@ -84,32 +75,23 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     async fetchData() {
+      this.actionFrom = "";
       try {
-        const response = await worksApi.get(
+        const response = await this.$worksApi.get(
           "/api/v1/instance/detail/" + this.$route.params.vmUuid
         );
 
         if (response.status === 200) {
           //console.log(response.data.result.instanceDBInfo);
-          this.vmDbDataInfo = response.data.result.instanceDBInfo;
-          this.vmMoldDataInfo =
-            response.data.result.instanceMoldInfo.virtualmachine[0];
-          this.vmNetworkInfo = this.vmMoldDataInfo.nic[0];
-          this.vmDiskInfo =
-            response.data.result.instanceInstanceVolumeInfo.volume[0];
-          this.cpuused = parseFloat(
-            response.data.result.instanceMoldInfo.virtualmachine[0].cpuused.split(
-              "%"
-            )[0]
-          );
+          this.resource = response.data.result;
         } else {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
         }
       } catch (error) {
         console.log(error);
-        message.error(this.$t("message.response.data.fail"));
+        this.$message.error(this.$t("message.response.data.fail"));
       }
-      this.actionFrom = "VirtualMachineDetail";
+      this.actionFrom = "VMDetail";
     },
   },
 });

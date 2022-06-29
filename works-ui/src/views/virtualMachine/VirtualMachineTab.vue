@@ -4,9 +4,8 @@
       <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
         <DetailContent
           ref="listRefreshCall1"
-          :action-from="'VirtualMachineDetail'"
-          :vmDbDataInfo="vmDbDataInfo"
-          :vmMoldDataInfo="vmMoldDataInfo"
+          :action-from="'VMDetail'"
+          :resource="resource"
         />
       </a-tab-pane>
       <a-tab-pane
@@ -17,10 +16,9 @@
         <TableContent
           ref="listRefreshCall2"
           :tap-name="'datadisk'"
-          :action-from="'VirtualMachineDetail'"
-          :vm-disk-info="vmDiskInfo"
+          :action-from="'VMDetail'"
+          :resource="resource"
         />
-
       </a-tab-pane>
       <!-- <a-tab-pane key="3" :tab="$t('label.network.list')">
         <TableContent :data="vmNetworkList" :columns="vmNetworkListColumns" />
@@ -39,19 +37,9 @@ export default defineComponent({
     DetailContent,
   },
   props: {
-    vmDbDataInfo: {
+    resource: {
       type: Object,
-      required: false,
-      default: null,
-    },
-    vmMoldDataInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmDiskInfo: {
-      type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },

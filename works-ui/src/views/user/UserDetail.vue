@@ -7,7 +7,7 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
-                :paths="[{ name: accountInfo.username, component: null }]"
+                :paths="[{ name: resource.username, component: null }]"
               />
               <a-button
                 shape="round"
@@ -29,7 +29,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <UserBody ref="refreshCall" :account-info="accountInfo" />
+          <UserBody ref="refreshCall" :resource="resource" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -41,8 +41,6 @@ import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
 import UserBody from "./UserBody";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   components: {
     UserBody,
@@ -57,7 +55,7 @@ export default defineComponent({
   },
   data() {
     return {
-      accountInfo: ref([]),
+      resource: ref([]),
     };
   },
   created() {
@@ -69,17 +67,17 @@ export default defineComponent({
       this.$refs.refreshCall.fetchRefresh();
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/user/" + sessionStorage.getItem("userName"))
         .then((response) => {
           if (response.status == 200) {
-            this.accountInfo = response.data.result;
+            this.resource = response.data.result;
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
       this.actionFrom = "UserDetail";

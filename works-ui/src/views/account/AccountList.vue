@@ -2,12 +2,8 @@
   <a-table
     size="middle"
     :loading="loading"
-    class="ant-table-striped"
     :columns="UserListColumns"
     :data-source="userDataList"
-    :row-class-name="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
@@ -70,7 +66,7 @@
         <a-Popover placement="topLeft">
           <template #content>
             <Actions
-              v-if="actionFrom == 'AccountList'"
+              v-if="actionFrom == 'ACList'"
               :action-from="actionFrom"
               :account-info="record"
               @fetchData="fetchRefresh"
@@ -86,8 +82,7 @@
 <script>
 import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
+import { worksApi } from "@/api";
 export default defineComponent({
   components: {
     Actions,
@@ -114,7 +109,6 @@ export default defineComponent({
     };
     return {
       loading: ref(false),
-      actionFrom: ref(""),
       searchInput,
       state,
       handleSearch,
@@ -123,6 +117,7 @@ export default defineComponent({
   },
   data() {
     return {
+      actionFrom: ref(""),
       timer: ref(null),
       pagination: {
         // pageSize: ref(20),
@@ -148,7 +143,7 @@ export default defineComponent({
           //   filterIcon: "filterIcon",
           // },
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
-          defaultSortOrder: "ascend",
+          // defaultSortOrder: "ascend",
           ellipsis: true,
           customFilterDropdown: true,
           onFilter: (value, record) =>
@@ -244,7 +239,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
-      this.$emit("actionFromChange", "Account", null);
+      this.$emit("actionFromChange", "AC", null);
       this.actionFrom = "";
       this.loading = true;
       this.state.selectedRowKeys = [];
@@ -255,9 +250,9 @@ export default defineComponent({
       this.state.selectedRowKeys = selectedRowKeys;
       this.state.selectedRows = selectedRows;
       if (this.state.selectedRows.length > 0) {
-        this.$emit("actionFromChange", "AccountList", this.state.selectedRows);
+        this.$emit("actionFromChange", "ACList", this.state.selectedRows);
       } else {
-        this.$emit("actionFromChange", "Account", null);
+        this.$emit("actionFromChange", "AC", null);
       }
     },
     async fetchData() {
@@ -281,18 +276,18 @@ export default defineComponent({
               this.userDataList = [];
             }
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
             //console.log(response.message);
           }
         })
         .catch((error) => {
           console.log(error);
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
         })
         .finally(() => {
           this.loading = false;
         });
-      this.actionFrom = "AccountList";
+      this.actionFrom = "ACList";
 
       this.$emit("downloadListSetting", this.userDataList);
     },
@@ -301,54 +296,4 @@ export default defineComponent({
 </script>
 
 <style scoped>
-::v-deep(.ant-table-thead) {
-  background-color: #f9f9f9;
-}
-
-::v-deep(.ant-table-small) > .ant-table-content > .ant-table-body {
-  margin: 0;
-}
-
-::v-deep(.light-row) {
-  background-color: #fff;
-}
-
-::v-deep(.dark-row) {
-  background-color: #f9f9f9;
-}
-</style>
-
-<style scoped lang="scss">
-.shift-btns {
-  display: flex;
-}
-.shift-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-
-  &:not(:last-child) {
-    margin-right: 5px;
-  }
-
-  &--rotated {
-    font-size: 10px;
-    transform: rotate(90deg);
-  }
-}
-
-.alert-notification-threshold {
-  background-color: rgba(255, 231, 175, 0.75);
-  color: #e87900;
-  padding: 10%;
-}
-
-.alert-disable-threshold {
-  background-color: rgba(255, 190, 190, 0.75);
-  color: #f50000;
-  padding: 10%;
-}
 </style>

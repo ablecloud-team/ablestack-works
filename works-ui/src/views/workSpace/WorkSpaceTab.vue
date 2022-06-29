@@ -9,9 +9,8 @@
         <TableContent
           ref="listRefreshCall1"
           :tap-name="'desktop'"
-          :action-from="'VirtualMachineList'"
-          :workspace-info="workspaceInfo"
-          :vm-list="vmList"
+          :action-from="'VMList'"
+          :resource="resource"
           @parentRefresh="parentRefresh"
         />
       </a-tab-pane>
@@ -19,9 +18,8 @@
         <TableContent
           ref="listRefreshCall2"
           :tap-name="'user'"
-          :action-from="'WorkspaceUserList'"
-          :workspace-info="workspaceInfo"
-          :group-info="groupInfo"
+          :action-from="'WSUserList'"
+          :resource="resource"
           @parentRefresh="parentRefresh"
         />
       </a-tab-pane>
@@ -30,13 +28,31 @@
         :tab="$t('label.policy.list')"
         :forceRender="forceRender"
       >
-        <TableContent
+        <a-tabs v-model:activeKey="policyActiveKey" type="card">
+          <a-tab-pane key="1" :tab="$t('label.group.policy')">
+            <TableContent
+              ref="listRefreshCall3"
+              :tap-name="'policy1'"
+              :action-from="'WSPolicyList'"
+              :resource="resource"
+            />
+          </a-tab-pane>
+          <a-tab-pane key="2" :tab="$t('label.webclient.policy')">
+            <TableContent
+              ref="listRefreshCall3"
+              :tap-name="'policy2'"
+              :action-from="'WSPolicyList'"
+              :resource="resource"
+            />
+          </a-tab-pane>
+        </a-tabs>
+
+        <!-- <TableContent
           ref="listRefreshCall3"
           :tap-name="'policy'"
-          :action-from="'policyList'"
-          :workspace-info="workspaceInfo"
-          :workspace-policy-list="workspacePolicyList"
-        />
+          :action-from="'WSPolicyList'"
+          :resource="resource"
+        /> -->
       </a-tab-pane>
       <a-tab-pane
         key="4"
@@ -46,8 +62,7 @@
         <TableContent
           ref="listRefreshCall4"
           :tap-name="'network'"
-          :network-list="networkList"
-          :workspace-info="workspaceInfo"
+          :resource="resource"
         />
       </a-tab-pane>
     </a-tabs>
@@ -60,29 +75,9 @@ import TableContent from "@/components/TableContent";
 export default defineComponent({
   components: { TableContent },
   props: {
-    workspaceInfo: {
+    resource: {
       type: Object,
-      required: false,
-      default: null,
-    },
-    networkList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    groupInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    workspacePolicyList: {
-      type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },
@@ -91,27 +86,20 @@ export default defineComponent({
     return {
       tabPosition: ref("top"),
       activeKey: ref("1"),
+      policyActiveKey: ref("1"),
       forceRender: ref(true),
-      vmActionFrom: ref("VirtualMachineList"),
-      userActionFrom: ref("WorkspaceUserList"),
     };
   },
   created() {},
   methods: {
     fetchRefresh(refreshClick) {
       this.forceRender = true;
-      // this.vmActionFrom = "VirtualMachineList";
-      // this.userActionFrom = "WorkspaceUserList";
-      // setTimeout(() => {
       this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
-      // }, 100);
     },
     parentRefresh() {
-      // this.vmActionFrom = "";
-      // this.userActionFrom = "";
       this.$emit("parentRefresh");
     },
   },

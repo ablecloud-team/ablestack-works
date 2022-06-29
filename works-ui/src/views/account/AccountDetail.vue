@@ -9,7 +9,7 @@
               <Apath
                 :paths="[
                   { name: $t('label.users'), component: 'Account' },
-                  { name: accountInfo.name, component: null },
+                  { name: resource.name, component: null },
                 ]"
               />
               <a-button
@@ -26,9 +26,9 @@
             <!-- 왼쪽 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
-                v-if="actionFrom === 'AccountDetail'"
+                v-if="actionFrom === 'ACDetail'"
                 :action-from="actionFrom"
-                :account-info="accountInfo"
+                :account-info="resource"
               />
             </a-col>
           </a-row>
@@ -36,7 +36,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <AccountBody ref="listRefreshCall" :account-info="accountInfo" />
+          <AccountBody ref="listRefreshCall" :resource="resource" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -48,8 +48,6 @@ import Actions from "../../components/Actions";
 import Apath from "../../components/Apath";
 import AccountBody from "./AccountBody";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   components: {
     AccountBody,
@@ -64,7 +62,7 @@ export default defineComponent({
   },
   data() {
     return {
-      accountInfo: ref([]),
+      resource: ref([]),
     };
   },
   created() {
@@ -76,20 +74,20 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/user/" + this.$route.params.accountName)
         .then((response) => {
           if (response.status == 200) {
-            this.accountInfo = response.data.result;
+            this.resource = response.data.result;
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         });
-      this.actionFrom = "AccountDetail";
+      this.actionFrom = "ACDetail";
     },
   },
 });

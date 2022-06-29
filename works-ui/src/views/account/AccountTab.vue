@@ -4,8 +4,8 @@
       <a-tab-pane key="1" :tab="$t('label.detail')" :forceRender="forceRender">
         <DetailContent
           ref="listRefreshCall1"
-          :action-from="'AccountDetail'"
-          :account-info="accountInfo"
+          :action-from="'ACDetail'"
+          :resource="resource"
         />
       </a-tab-pane>
       <!-- <a-tab-pane key="2" :tab="$t('label.vm.list')" :forceRender="forceRender">
@@ -52,9 +52,9 @@ export default defineComponent({
     DetailContent,
   },
   props: {
-    accountInfo: {
+    resource: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },

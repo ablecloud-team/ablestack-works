@@ -5,7 +5,7 @@
         <DetailContent
           ref="refreshCall"
           :action-from="'UserDetail'"
-          :account-info="accountInfo"
+          :resource="resource"
         />
       </a-tab-pane>
     </a-tabs>
@@ -21,9 +21,9 @@ export default defineComponent({
     DetailContent,
   },
   props: {
-    accountInfo: {
+    resource: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },

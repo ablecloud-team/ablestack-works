@@ -1,37 +1,37 @@
 <template class="able-action">
   <a-space :size="8">
     <!-- 단일 Select 일때 버튼 표시 -->
-    <a-tooltip v-if="state.buttonBoolean.vmStart" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.vmStart" placement="bottom">
       <template #title>{{ $t("tooltip.vmStart") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('vmStart')">
         <CaretRightOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.vmStop" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.vmStop" placement="bottom">
       <template #title>{{ $t("tooltip.vmStop") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('vmStop')">
         <PoweroffOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.vmRestart" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.vmRestart" placement="bottom">
       <template #title>{{ $t("tooltip.vmRestart") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('vmRestart')">
         <ReloadOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.userAllocate" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.userAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.userAllocate") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userAllocate')">
         <UserAddOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.userUnlock" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.userUnlock" placement="bottom">
       <template #title>{{ $t("tooltip.userUnlock") }}</template>
       <a-button shape="circle" @click="setCircleButtonModal('userUnlock')">
         <UserDeleteOutlined />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.vmDestroy" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.vmDestroy" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
@@ -42,38 +42,35 @@
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.workspaceDestroy" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.wsDel" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
         danger
-        @click="setCircleButtonModal('workspaceDestroy')"
+        @click="setCircleButtonModal('wsDel')"
       >
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.accountDestroy" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.userDel" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
         danger
-        @click="setCircleButtonModal('accountDestroy')"
+        @click="setCircleButtonModal('userDel')"
       >
         <DeleteFilled />
       </a-button>
     </a-tooltip>
-    <a-tooltip
-      v-if="state.buttonBoolean.workspaceAccountDestroy"
-      placement="bottom"
-    >
+    <a-tooltip v-if="state.buttonBool.wsUserDel" placement="bottom">
       <template #title>{{ $t("tooltip.destroy") }}</template>
       <a-button
         type="primary"
         shape="circle"
         danger
-        @click="setCircleButtonModal('workspaceAccountDestroy')"
+        @click="setCircleButtonModal('wsUserDel')"
       >
         <DeleteFilled />
       </a-button>
@@ -81,78 +78,57 @@
     <!-- 단일 Select 일때 버튼 표시 -->
 
     <!-- Multi Select 일때 일괄 버튼 표시 -->
-    <a-tooltip v-if="state.buttonBoolean.multiVmStart" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiVmStart" placement="bottom">
       <template #title>{{ $t("tooltip.multiVmStart") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('vmStart')">
         <CaretRightOutlined /> {{ $t("tooltip.multiVmStart") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.multiVmStop" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiVmStop" placement="bottom">
       <template #title>{{ $t("tooltip.multiVmStop") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('vmStop')">
         <PoweroffOutlined /> {{ $t("tooltip.multiVmStop") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.multiVmRestart" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiVmRestart" placement="bottom">
       <template #title>{{ $t("tooltip.multiVmStop") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('vmRestart')">
         <ReloadOutlined /> {{ $t("tooltip.multiVmRestart") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.multiUserAllocate" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiUserAllocate" placement="bottom">
       <template #title>{{ $t("tooltip.multiUserAllocate") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('userAllocate')">
         <UserAddOutlined /> {{ $t("tooltip.multiUserAllocate") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.multiUserUnlock" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiUserUnlock" placement="bottom">
       <template #title>{{ $t("tooltip.multiUserUnlock") }}</template>
       <a-button shape="round" @click="setCircleButtonModal('userUnlock')">
         <UserDeleteOutlined /> {{ $t("tooltip.multiUserUnlock") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip v-if="state.buttonBoolean.multiVmDestroy" placement="bottom">
+    <a-tooltip v-if="state.buttonBool.multiVmDel" placement="bottom">
       <template #title>{{ $t("tooltip.multiDestroy") }}</template>
       <a-button shape="round" danger @click="setCircleButtonModal('vmDestroy')">
         <DeleteFilled /> {{ $t("tooltip.multiDestroy") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip
-      v-if="state.buttonBoolean.multiWorkspaceDestroy"
-      placement="bottom"
-    >
+    <a-tooltip v-if="state.buttonBool.multiWsDel" placement="bottom">
       <template #title>{{ $t("tooltip.multiDestroy") }}</template>
-      <a-button
-        shape="round"
-        danger
-        @click="setCircleButtonModal('workspaceDestroy')"
-      >
+      <a-button shape="round" danger @click="setCircleButtonModal('wsDel')">
         <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip
-      v-if="state.buttonBoolean.multiAccountDestroy"
-      placement="bottom"
-    >
+    <a-tooltip v-if="state.buttonBool.multiUserDel" placement="bottom">
       <template #title>{{ $t("tooltip.multiDestroy") }}</template>
-      <a-button
-        shape="round"
-        danger
-        @click="setCircleButtonModal('accountDestroy')"
-      >
+      <a-button shape="round" danger @click="setCircleButtonModal('userDel')">
         <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
       </a-button>
     </a-tooltip>
-    <a-tooltip
-      v-if="state.buttonBoolean.multiWorkspaceAccountDestroy"
-      placement="bottom"
-    >
+    <a-tooltip v-if="state.buttonBool.multiWsUserDel" placement="bottom">
       <template #title>{{ $t("tooltip.multiDestroy") }}</template>
-      <a-button
-        shape="round"
-        danger
-        @click="setCircleButtonModal('workspaceAccountDestroy')"
-      >
+      <a-button shape="round" danger @click="setCircleButtonModal('wsUserDel')">
         <DeleteFilled />{{ $t("tooltip.multiDestroy") }}
       </a-button>
     </a-tooltip>
@@ -160,7 +136,8 @@
     <!-- Multi Select 일때 일괄 버튼 표시 -->
     <a-modal
       v-model:visible="commonModalView"
-      :title="$t('tooltip.' + modalTitle)"
+      :title="commonModalTitle"
+      :confirm-loading="confirmLoading"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
       @cancel="handleCancel"
@@ -180,10 +157,15 @@
     <a-modal
       v-model:visible="userAllocateVmModalView"
       :title="$t('tooltip.desktop.allocate.user')"
+      :confirm-loading="confirmLoading"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
       @cancel="handleCancel"
-      @ok="handleSubmit()"
+      @ok="
+        () => {
+          if (selectedUser) handleSubmit();
+        }
+      "
     >
       <a-alert :message="modalConfirm" type="info" show-icon />
       <a-select
@@ -217,9 +199,6 @@
 
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-import router from "@/router";
 
 export default defineComponent({
   components: {},
@@ -229,12 +208,22 @@ export default defineComponent({
       requires: true,
       default: "",
     },
-    vmInfo: {
+    resource: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+    wsName: {
+      type: String,
+      requires: false,
+      default: "",
+    },
+    wsInfo: {
       type: Object,
       requires: false,
       default: null,
     },
-    workspaceInfo: {
+    vmInfo: {
       type: Object,
       requires: false,
       default: null,
@@ -249,16 +238,11 @@ export default defineComponent({
       requires: false,
       default: null,
     },
-    wsName: {
-      type: String,
-      requires: false,
-      default: "",
-    },
   },
   emits: ["fetchData"],
   setup() {
     const state = reactive({
-      buttonBoolean: {
+      buttonBool: {
         showModal: ref(false),
         vmStart: ref(false),
         vmStop: ref(false),
@@ -266,38 +250,39 @@ export default defineComponent({
         vmDestroy: ref(false),
         userAllocate: ref(false),
         userUnlock: ref(false),
-        workspaceDestroy: ref(false),
-        workspaceAccountDestroy: ref(false),
-        accountDestroy: ref(false),
+        wsDel: ref(false),
+        wsUserDel: ref(false),
+        userDel: ref(false),
         multiVmStart: ref(false),
         multiVmStop: ref(false),
         multiVmRestart: ref(false),
-        multiVmDestroy: ref(false),
+        multiVmDel: ref(false),
         multiUserAllocate: ref(false),
         multiUserUnlock: ref(false),
-        multiWorkspaceDestroy: ref(false),
-        multiWorkspaceAccountDestroy: ref(false),
-        multiAccountDestroy: ref(false),
+        multiWsDel: ref(false),
+        multiWsUserDel: ref(false),
+        multiUserDel: ref(false),
       },
     });
     return {
       userAllocateVmModalView: ref(false),
       commonModalView: ref(false),
       workspaceUserDataList: ref([]),
-      modalTitle: ref(""),
+      commonModalTitle: ref(""),
+      act: ref(""),
       modalConfirm: ref(""),
       state,
     };
   },
-  data(props) {
+  data() {
     return {
       selectedUser: ref(undefined),
-      callComponent: ref(props.actionFrom),
       eventList: [],
       alertType: ref("info"),
       succCnt: ref(0),
       failCnt: ref(0),
-      worksUrl: ref(""),
+      existVmCnt: ref(0),
+      confirmLoading: ref(false),
       sucMessage: ref(""),
       failMessage: ref(""),
       listColumns: [
@@ -314,33 +299,39 @@ export default defineComponent({
     this.fetchData();
   },
   methods: {
+    parentRefresh() {
+      this.$emit("fetchData");
+    },
     fetchData() {
-      if (this.callComponent.includes("Workspace")) {
-        if (this.workspaceInfo) {
-          this.eventList = [this.workspaceInfo];
-          if (this.callComponent === "WorkspaceUserList")
-            this.state.buttonBoolean.workspaceAccountDestroy = true;
-          else this.state.buttonBoolean.workspaceDestroy = true;
+      // console.log(this.actionFrom, this.wsInfo, this.multiSelectList);
+
+      if (this.actionFrom.includes("WS")) {
+        if (this.wsInfo) {
+          // 단일 워크스페이스 정보일 경우
+          this.eventList = [this.wsInfo];
+          this.state.buttonBool.wsDel = true;
         } else {
+          // multi select 워크스페이스를 선택 했을 경우
           this.eventList = this.multiSelectList;
-          if (this.callComponent === "WorkspaceUserList")
-            this.state.buttonBoolean.multiWorkspaceAccountDestroy = true;
-          else this.state.buttonBoolean.multiWorkspaceDestroy = true;
+          if (this.actionFrom === "WSUserList")
+            this.state.buttonBool.multiWsUserDel = true;
+          else this.state.buttonBool.multiWsDel = true;
         }
-      } else if (this.callComponent.includes("Account")) {
+      } else if (this.actionFrom.includes("AC")) {
         if (this.accountInfo) {
           this.eventList = [this.accountInfo];
-          this.state.buttonBoolean.accountDestroy = true;
+          this.state.buttonBool.userDel = true;
         } else {
           this.eventList = this.multiSelectList;
-          this.state.buttonBoolean.multiAccountDestroy = true;
+          this.state.buttonBool.multiUserDel = true;
         }
-      } else if (this.callComponent.includes("GroupPolicy")) {
-        this.state.buttonBoolean.destroy = true;
+      } else if (this.actionFrom.includes("GroupPolicy")) {
+        this.state.buttonBool.destroy = true;
       }
-      if (this.callComponent.includes("VirtualMachine")) {
+      if (this.actionFrom.includes("VM")) {
+        // 단일 VM 정보일 경우
         if (this.vmInfo) this.eventList = [this.vmInfo];
-        else this.eventList = this.multiSelectList;
+        else this.eventList = this.multiSelectList; // multi select VM를 선택 했을 경우
 
         // console.log(this.eventList);
 
@@ -349,34 +340,34 @@ export default defineComponent({
         res = this.eventList.filter((it) => it.mold_status === "Running");
         if (this.eventList.length === res.length) {
           if (this.vmInfo) {
-            this.state.buttonBoolean.vmStop = true;
-            this.state.buttonBoolean.vmRestart = true;
+            this.state.buttonBool.vmStop = true;
+            this.state.buttonBool.vmRestart = true;
           } else {
-            this.state.buttonBoolean.multiVmStop = true;
-            this.state.buttonBoolean.multiVmRestart = true;
+            this.state.buttonBool.multiVmStop = true;
+            this.state.buttonBool.multiVmRestart = true;
           }
         }
 
         //정지 버튼 체크
         res = this.eventList.filter((it) => it.mold_status === "Stopped");
         if (this.eventList.length === res.length) {
-          if (this.vmInfo) this.state.buttonBoolean.vmStart = true;
-          else this.state.buttonBoolean.multiVmStart = true;
+          if (this.vmInfo) this.state.buttonBool.vmStart = true;
+          else this.state.buttonBool.multiVmStart = true;
         }
         //사용자 할당 해제 버튼 체크
         res = this.eventList.filter(
           (it) =>
             it.owner_account_id !== undefined && it.owner_account_id !== ""
         );
-        console.log(res.length);
+
         if (res.length > 0) {
-          if (this.vmInfo) this.state.buttonBoolean.userUnlock = true;
-          else this.state.buttonBoolean.multiUserUnlock = true;
+          if (this.vmInfo) this.state.buttonBool.userUnlock = true;
+          else this.state.buttonBool.multiUserUnlock = true;
         }
 
         //가상머신 삭제버튼 세팅
-        if (this.vmInfo) this.state.buttonBoolean.vmDestroy = true;
-        else this.state.buttonBoolean.multiVmDestroy = true;
+        if (this.vmInfo) this.state.buttonBool.vmDestroy = true;
+        else this.state.buttonBool.multiVmDel = true;
 
         //사용자 할당 버튼 체크
         res = this.eventList.filter(
@@ -396,10 +387,10 @@ export default defineComponent({
           //사용자 할당 버튼
           if (res.length === 1) {
             //사용자 할당 버튼
-            if (this.vmInfo) this.state.buttonBoolean.userAllocate = true;
-            else this.state.buttonBoolean.multiUserAllocate = true;
+            if (this.vmInfo) this.state.buttonBool.userAllocate = true;
+            else this.state.buttonBool.multiUserAllocate = true;
 
-            worksApi
+            this.$worksApi
               .get("/api/v1/group/" + res[0].workspace_name)
               .then((response) => {
                 if (response.status == 200) {
@@ -413,20 +404,20 @@ export default defineComponent({
                     });
                   }
                 } else {
-                  message.error(this.$t("message.response.data.fail"));
+                  this.$message.error(this.$t("message.response.data.fail"));
                 }
               })
               .catch((error) => {
-                message.destroy();
-                message.error(this.$t("message.response.data.fail"));
-                console.log(error);
+                this.$message.destroy();
+                this.$message.error(this.$t("message.response.data.fail"));
               });
           }
         }
       }
     },
     setCircleButtonModal(value) {
-      this.modalTitle = value;
+      this.act = value;
+      this.commonModalTitle = this.$t("tooltip." + value);
       if (value == "userAllocate") {
         this.userAllocateVmModalView = true;
         this.modalConfirm = this.$t(
@@ -450,13 +441,13 @@ export default defineComponent({
       //     this.workspaceName +
       //     "] " +
       //     this.$t("modal.confirm.workspaceStop");
-      if (value == "workspaceDestroy") {
+      if (value == "wsDel") {
         this.modalConfirm = this.$t("modal.confirm.workspaceDestroy", {
           count: this.eventList.length,
         });
         this.alertType = "warning";
       }
-      if (value == "workspaceAccountDestroy") {
+      if (value == "wsUserDel") {
         this.modalConfirm = this.$t("modal.confirm.workspaceAccountDestroy", {
           count: this.eventList.length,
         });
@@ -489,7 +480,7 @@ export default defineComponent({
           count: this.eventList.length,
         });
       }
-      if (value == "accountDestroy") {
+      if (value == "userDel") {
         this.modalConfirm = this.$t("modal.confirm.accountDestroy", {
           count: this.eventList.length,
         });
@@ -498,30 +489,28 @@ export default defineComponent({
     },
     handleCancel() {
       this.commonModalView = false;
+      this.confirmLoading = false;
       this.userAllocateVmModalView = false;
     },
     handleSubmit() {
-      //console.log(this.modalTitle + "  ::  " + this.callComponent);
-      if (this.callComponent.includes("VirtualMachine")) {
-        if (this.modalTitle.includes("vm")) this.vmAction();
+      // console.log(this.act + "  ::  " + this.actionFrom);
+      this.confirmLoading = true;
+      if (this.actionFrom.includes("VM")) {
+        if (this.act.includes("vm")) this.vmAction();
 
-        if (this.modalTitle.includes("userUnlock")) this.vmUserUnlockAction();
+        if (this.act.includes("userUnlock")) this.vmUserUnlockAction();
 
-        if (this.modalTitle.includes("userAllocate"))
-          this.vmUserAllocateAction();
+        if (this.act.includes("userAllocate")) this.vmUserAllocateAction();
       }
 
-      if (this.callComponent.includes("Workspace")) {
-        if (this.modalTitle.includes("workspaceDestroy"))
-          this.workspaceDestroyAction();
+      if (this.actionFrom.includes("WS")) {
+        if (this.act.includes("wsDel")) this.wsDelAction();
 
-        if (this.modalTitle.includes("workspaceAccountDestroy"))
-          this.workspaceAccountDestroyAction();
+        if (this.act.includes("wsUserDel")) this.multiWsUserDelAction();
       }
 
-      if (this.callComponent.includes("Account")) {
-        if (this.modalTitle.includes("accountDestroy"))
-          this.accountDestroyAction();
+      if (this.actionFrom.includes("AC")) {
+        if (this.act.includes("userDel")) this.userDelAction();
       }
     },
     async funcDelay(delay) {
@@ -531,205 +520,244 @@ export default defineComponent({
         }, delay);
       });
     },
+
+    multiWsUserDelAction() {
+      this.sucMessage = "message.workspace.user.delete.ok";
+      this.failMessage = "message.workspace.user.delete.fail";
+      this.$message.loading(this.$t("message.workspace.vm.user.deleting"), 100);
+
+      var apiUrl = "";
+      const arrAsync = [];
+      for (let val of this.eventList) {
+        apiUrl = "/api/v1/group/" + this.wsName + "/" + val.name;
+        arrAsync.push(this.promiseAction("delete", apiUrl, null));
+      }
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.funcEndMessage();
+          this.handleCancel();
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.parentRefresh();
+        });
+    },
+    vmUserAllocateAction() {
+      if (!this.selectedUser) return false;
+
+      this.sucMessage = "message.user.vm.allocated.ok";
+      this.failMessage = "message.user.vm.allocated.fail";
+      this.$message.loading(this.$t("message.user.vm.allocating"), 100);
+
+      var apiUrl = "";
+      const arrAsync = [];
+      for (let val of this.eventList) {
+        apiUrl = "/api/v1/connection/" + val.uuid + "/" + this.selectedUser;
+        arrAsync.push(this.promiseAction("put", apiUrl, null));
+      }
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.funcEndMessage();
+          this.handleCancel();
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.parentRefresh();
+        });
+    },
+    vmUserUnlockAction() {
+      this.sucMessage = "message.user.vm.unlock.ok";
+      this.failMessage = "message.user.vm.unlock.fail";
+      this.$message.loading(this.$t("message.user.vm.unlocking"), 100);
+
+      var apiUrl = "";
+      const arrAsync = [];
+
+      // 담당자가 할당된 목록만 보냄
+      const ownList = this.eventList.filter(
+        (it) => it.owner_account_id !== undefined && it.owner_account_id !== ""
+      );
+      for (let val of ownList) {
+        apiUrl = "/api/v1/connection/" + val.uuid;
+        arrAsync.push(this.promiseAction("delete", apiUrl, null));
+      }
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.funcEndMessage();
+          this.handleCancel();
+        })
+        .catch((error) => {})
+        .finally(() => {
+          this.parentRefresh();
+        });
+    },
+
+    vmAction() {
+      var apiUrl = "";
+      var timer = 10000;
+      if (this.act.includes("vmStart")) {
+        this.$message.loading(this.$t("message.vm.status.starting"), 100);
+        apiUrl = "/api/v1/instance/VMStart/";
+        this.sucMessage = "message.vm.status.start.ok";
+        this.failMessage = "message.vm.status.start.fail";
+        timer = 10000;
+      }
+      if (this.act.includes("vmStop")) {
+        this.$message.loading(this.$t("message.vm.status.stopping"), 100);
+        apiUrl = "/api/v1/instance/VMStop/";
+        this.sucMessage = "message.vm.status.stop.ok";
+        this.failMessage = "message.vm.status.stop.fail";
+        timer = 15000;
+      }
+      if (this.act.includes("vmRestart")) {
+        this.$message.loading(this.$t("message.vm.status.restarting"), 100);
+        apiUrl = "/api/v1/instance/VMReboot/";
+        this.sucMessage = "message.vm.status.restart.ok";
+        this.failMessage = "message.vm.status.restart.fail";
+        timer = 10000;
+      }
+      if (this.act.includes("vmDestroy")) {
+        this.$message.loading(this.$t("message.vm.status.destroying"), 100);
+        apiUrl = "/api/v1/instance/VMDestroy/";
+        this.sucMessage = "message.vm.status.delete.ok";
+        this.failMessage = "message.vm.status.delete.fail";
+        timer = 10000;
+      }
+
+      const arrAsync = [];
+      for (let val of this.eventList) {
+        arrAsync.push(this.promiseAction("patch", apiUrl + val.uuid, null));
+      }
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.handleCancel();
+        })
+        .catch((error) => {})
+        .finally(() => {
+          setTimeout(() => {
+            this.funcEndMessage();
+
+            if (
+              this.actionFrom == "VMDetail" &&
+              this.act.includes("vmDestroy")
+            ) {
+              //가상머신 상세화면일 경우 삭제시 가상머신 목록 화면으로 이동
+              this.$router.push({ name: "VirtualMachine" });
+            } else {
+              this.parentRefresh();
+            }
+          }, timer);
+        });
+    },
+    wsDelAction() {
+      this.sucMessage = "message.workspace.delete.ok";
+      this.failMessage = "message.workspace.delete.fail";
+      this.existVmMessage = "message.workspace.delete.existvm";
+      this.$message.loading(this.$t("message.workspace.destroying"));
+
+      var apiUrl = "";
+      const arrAsync = [];
+      console.log("this.eventList :>> ", this.eventList);
+      for (let val of this.eventList) {
+        if (val.quantity === 0) {
+          apiUrl = "/api/v1/workspace/" + val.uuid;
+          arrAsync.push(this.promiseAction("delete", apiUrl, null));
+        } else {
+          this.existVmCnt = this.existVmCnt + 1;
+        }
+      }
+      console.log("arrAsync.length :>> ", arrAsync.length);
+      if (arrAsync.length > 0) {
+        Promise.all(arrAsync)
+          .then(() => {
+            this.funcEndMessage();
+            this.handleCancel();
+
+            if (this.actionFrom == "WSDetail") {
+              this.$router.push({ name: "Workspace" });
+            } else {
+              this.parentRefresh();
+            }
+          })
+          .catch((error) => {})
+          .finally(() => {});
+      } else {
+        this.funcEndMessage();
+        this.handleCancel();
+      }
+    },
+    userDelAction() {
+      this.confirmLoading = true;
+      this.sucMessage = "message.account.destroy.ok";
+      this.failMessage = "message.account.destroy.fail";
+      this.$message.loading(this.$t("message.account.destroying"));
+
+      var apiUrl = "";
+      const arrAsync = [];
+      for (let val of this.eventList) {
+        apiUrl = "/api/v1/user/" + val.name;
+        arrAsync.push(this.promiseAction("delete", apiUrl, null));
+      }
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.funcEndMessage();
+          this.handleCancel();
+          if (this.actionFrom == "ACDetail") {
+            this.$router.push({ name: "Account" });
+          } else {
+            this.parentRefresh();
+          }
+        })
+        .catch((error) => {})
+        .finally(() => {});
+    },
+    promiseAction(apiMethod, apiUrl, param) {
+      return new Promise((resolve, reject) => {
+        this.$worksApi({ url: apiUrl, method: apiMethod, data: param })
+          .then((response) => {
+            if (response.status === 200 || response.status === 204)
+              this.succCnt = this.succCnt + 1;
+            else this.failCnt = this.failCnt + 1;
+            resolve(response.status);
+          })
+          .catch((error) => {
+            this.failCnt = this.failCnt + 1;
+            reject(error);
+          });
+      });
+    },
     funcEndMessage() {
-      message.destroy();
+      // console.log(this.failCnt, this.succCnt, this.existVmCnt);
+      this.$message.destroy();
       if (this.succCnt > 0) {
-        message.success(
+        this.$message.success(
           this.$t(this.sucMessage, {
             count: this.succCnt,
-          }),
-          5
+          })
         );
       }
       if (this.failCnt > 0) {
-        message.error(
+        this.$message.error(
           this.$t(this.failMessage, {
             count: this.failCnt,
-          }),
-          5
+          })
+        );
+      }
+      if (this.existVmCnt > 0) {
+        this.$message.error(
+          this.$t(this.existVmMessage, {
+            count: this.existVmCnt,
+          })
         );
       }
       this.failCnt = 0;
       this.succCnt = 0;
-    },
-    async workspaceAccountDestroyAction() {
-      this.sucMessage = "message.workspace.user.delete.ok";
-      this.failMessage = "message.workspace.user.delete.fail";
-
-      message.loading(this.$t("message.workspace.vm.user.deleting"), 100);
-
-      //console.log(this.eventList);
-      for (let val of this.eventList) {
-        try {
-          const response = await worksApi.delete(
-            "/api/v1/group/" + this.wsName + "/" + val.name
-          );
-          if (response.status == 200) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } catch (error) {
-          console.log(error);
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-
-      this.$emit("fetchData");
-      this.funcEndMessage();
-      this.handleCancel();
-      //await this.funcDelay(2000);
-    },
-    async vmUserAllocateAction() {
-      if (this.selectedUser.length == 0) return false;
-
-      this.sucMessage = "message.user.vm.allocated.ok";
-      this.failMessage = "message.user.vm.allocated.fail";
-      message.loading(this.$t("message.user.vm.allocating"), 100);
-
-      for (let val of this.eventList) {
-        try {
-          const response = await worksApi.put(
-            "/api/v1/connection/" + val.uuid + "/" + this.selectedUser
-          );
-          if (response.status == 200) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } catch (error) {
-          console.log(error);
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-
-      this.$emit("fetchData");
-      this.funcEndMessage();
-      this.handleCancel();
-      // await this.funcDelay(1000);
-    },
-    async vmUserUnlockAction() {
-      this.sucMessage = "message.user.vm.unlock.ok";
-      this.failMessage = "message.user.vm.unlock.fail";
-      message.loading(this.$t("message.user.vm.unlocking"), 100);
-
-      for (let val of this.eventList) {
-        try {
-          const response = await worksApi.delete(
-            "/api/v1/connection/" + val.uuid
-          );
-          if (response.status == 204) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } catch (error) {
-          console.log(error);
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-      this.$emit("fetchData");
-      this.funcEndMessage();
-      this.handleCancel();
-      // await this.funcDelay(2000);
-    },
-    async vmAction() {
-      if (this.modalTitle.includes("vmStart")) {
-        message.loading(this.$t("message.vm.status.starting"), 100);
-        this.worksUrl = "/api/v1/instance/VMStart/";
-        this.sucMessage = "message.vm.status.start.ok";
-        this.failMessage = "message.vm.status.start.fail";
-      }
-      if (this.modalTitle.includes("vmStop")) {
-        message.loading(this.$t("message.vm.status.stopping"), 100);
-        this.worksUrl = "/api/v1/instance/VMStop/";
-        this.sucMessage = "message.vm.status.stop.ok";
-        this.failMessage = "message.vm.status.stop.fail";
-      }
-      if (this.modalTitle.includes("vmRestart")) {
-        message.loading(this.$t("message.vm.status.restarting"), 100);
-        this.worksUrl = "/api/v1/instance/VMReboot/";
-        this.sucMessage = "message.vm.status.restart.ok";
-        this.failMessage = "message.vm.status.restart.fail";
-      }
-      if (this.modalTitle.includes("vmDestroy")) {
-        message.loading(this.$t("message.vm.status.destroying"), 100);
-        this.worksUrl = "/api/v1/instance/VMDestroy/";
-        this.sucMessage = "message.vm.status.delete.ok";
-        this.failMessage = "message.vm.status.delete.fail";
-      }
-      for (let val of this.eventList) {
-        try {
-          const res = await worksApi.patch(this.worksUrl + val.uuid);
-          if (res.status == 200) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } catch (error) {
-          console.log(error);
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-
-      await this.funcDelay(12000);
-      if (
-        this.callComponent == "VirtualMachineDetail" &&
-        this.modalTitle.includes("vmDestroy")
-      ) {
-        router.push({ name: "VirtualMachine" });
-      } else {
-        this.$emit("fetchData");
-      }
-
-      //workspace 상세화면의 데스크톱 VM탭인지 여부를 확인하기 위함.
-      if (this.wsName.length > 0) {
-        await this.funcDelay(2000);
-      }
-
-      this.handleCancel();
-      this.funcEndMessage();
-    },
-    async workspaceDestroyAction() {
-      this.sucMessage = "message.workspace.status.delete";
-      this.failMessage = "message.workspace.delete.existvm";
-      message.loading(this.$t("message.workspace.status.destroying"));
-
-      for (let val of this.eventList) {
-        if (val.quantity === 0) {
-          const res = await worksApi.delete("/api/v1/workspace/" + val.uuid);
-          if (res.status == 200) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } else {
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-      this.funcEndMessage();
-      this.handleCancel();
-      // await this.funcDelay(1000);
-      if (this.callComponent == "WorkspaceDetail") {
-        router.push({ name: "Workspace" });
-      } else {
-        this.$emit("fetchData");
-      }
-    },
-    async accountDestroyAction() {
-      this.sucMessage = "message.account.destroy.ok";
-      this.failMessage = "message.account.destroy.fail";
-      message.loading(this.$t("message.account.destroying"));
-
-      for (let val of this.eventList) {
-        try {
-          const res = await worksApi.delete("/api/v1/user/" + val.name);
-          if (res.status == 204) {
-            this.succCnt = this.succCnt + 1;
-          }
-        } catch (error) {
-          console.log(error);
-          this.failCnt = this.failCnt + 1;
-        }
-      }
-      // await this.funcDelay(1000);
-      this.funcEndMessage();
-      this.handleCancel();
-      if (this.callComponent == "AccountDetail") {
-        router.push({ name: "Account" });
-      } else {
-        this.$emit("fetchData");
-      }
+      this.existVmCnt = 0;
     },
   },
 });

@@ -1,27 +1,19 @@
 <template>
   <a-space id="content-space" direction="horizontal">
     <a-row id="content-row" style="min-height: 400px">
-      <a-col :span="8" style="background: #f0f2f5; padding-right: 8px">
+      <a-col :span="6" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
         <a-card bordered style="min-height: 300px">
-          <WorkspaceInfoCard
-            ref="listRefreshCall1"
-            :workspace-info="workspaceInfo"
-            :offering-info="offeringInfo"
-          />
+          <WorkspaceInfoCard ref="listRefreshCall1" :resource="resource" />
         </a-card>
       </a-col>
 
-      <a-col :span="16" style="background: #f0f2f5; padding-left: 8px">
+      <a-col :span="18" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
         <a-card bordered>
           <WorkSpaceTab
             ref="listRefreshCall2"
-            :workspace-info="workspaceInfo"
-            :network-list="networkList"
-            :vm-list="vmList"
-            :group-info="groupInfo"
-            :workspace-policy-list="workspacePolicyList"
+            :resource="resource"
             @parentRefresh="parentRefresh"
           />
         </a-card>
@@ -38,34 +30,9 @@ import WorkspaceInfoCard from "./WorkspaceInfoCard.vue";
 export default defineComponent({
   components: { WorkSpaceTab, WorkspaceInfoCard },
   props: {
-    workspaceInfo: {
+    resource: {
       type: Object,
-      required: false,
-      default: null,
-    },
-    offeringInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    networkList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmList: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    groupInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    workspacePolicyList: {
-      type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },

@@ -1,31 +1,28 @@
 <template>
   <a-spin :spinning="spinning">
-    <a-list
-      v-if="actionFrom === 'VirtualMachineDetail'"
-      item-layout="horizontal"
-    >
+    <a-list v-if="actionFrom === 'VMDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.name") }}</strong>
         <br />
-        {{ vmMoldDataInfo.displayname }}
+        {{ resource.instanceMoldInfo.virtualmachine[0].displayname }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.workspace") }}</strong>
         <br />
-        {{ vmDbDataInfo.workspace_name }}
+        {{ resource.instanceDBInfo.workspace_name }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.vm.state") }}</strong>
-        <br />{{ vmDbDataInfo.state }}
+        <br />{{ resource.instanceDBInfo.state }}
 
         {{
-          vmDbDataInfo.mold_status === "Running"
+          resource.instanceDBInfo.mold_status === "Running"
             ? $t("label.vm.status.running")
-            : vmDbDataInfo.mold_status === "Starting"
+            : resource.instanceDBInfo.mold_status === "Starting"
             ? $t("label.vm.status.starting")
-            : vmDbDataInfo.mold_status === "Stopping"
+            : resource.instanceDBInfo.mold_status === "Stopping"
             ? $t("label.vm.status.stopping")
-            : vmDbDataInfo.mold_status === "Stopped"
+            : resource.instanceDBInfo.mold_status === "Stopped"
             ? $t("label.vm.status.stopped")
             : ""
         }}
@@ -34,92 +31,92 @@
         <strong>{{ $t("label.users") }}</strong>
         <br />
         {{
-          vmDbDataInfo.owner_account_id == ""
+          resource.instanceDBInfo.owner_account_id == ""
             ? $t("label.owner.account.false")
-            : vmDbDataInfo.owner_account_id
+            : resource.instanceDBInfo.owner_account_id
         }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.vm.session.count") }}</strong>
         <br />
-        {{ vmDbDataInfo.connected }}
+        {{ resource.instanceDBInfo.connected }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.domain") }}</strong>
         <br />
-        {{ vmMoldDataInfo.domain }}
+        {{ resource.instanceMoldInfo.virtualmachine[0].domain }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.hypervisor") }}</strong>
         <br />
-        {{ vmMoldDataInfo.hypervisor }}
+        {{ resource.instanceMoldInfo.virtualmachine[0].hypervisor }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.pooltype") }}</strong>
         <br />
-        {{ vmMoldDataInfo.pooltype }}
+        {{ resource.instanceMoldInfo.virtualmachine[0].pooltype }}
       </a-list-item>
     </a-list>
     <a-list
-      v-if="actionFrom === 'UserDetail' || actionFrom === 'AccountDetail'"
+      v-if="actionFrom === 'UserDetail' || actionFrom === 'ACDetail'"
       item-layout="horizontal"
     >
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong>
         <br />
-        {{ accountInfo.username }}
+        {{ resource.username }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.country") }}</strong>
         <br />
-        {{ accountInfo.co }}
+        {{ resource.co }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.countryCode") }}</strong>
         <br />
-        {{ accountInfo.countryCode }}
+        {{ resource.countryCode }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.title") }}</strong>
         <br />
-        {{ accountInfo.title }}
+        {{ resource.title }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.department") }}</strong>
         <br />
-        {{ accountInfo.department }}
+        {{ resource.department }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.email") }}</strong>
         <br />
-        {{ accountInfo.mail }}
+        {{ resource.mail }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.isAdmin") }}</strong
         ><br />
-        {{ accountInfo.isAdmin }}
+        {{ resource.isAdmin }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.telephoneNumber") }}</strong>
         <br />
-        {{ accountInfo.telephoneNumber }}
+        {{ resource.telephoneNumber }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.userPrincipalName") }}</strong>
         <br />
-        {{ accountInfo.userPrincipalName }}
+        {{ resource.userPrincipalName }}
       </a-list-item>
       <a-list-item>
         <strong>{{ $t("label.distinguishedName") }}</strong>
         <br />
-        {{ accountInfo.distinguishedName }}
+        {{ resource.distinguishedName }}
       </a-list-item>
     </a-list>
     <a-list v-if="actionFrom === 'GroupPolicyDetail'" item-layout="horizontal">
       <a-list-item>
         <strong>{{ $t("label.account") }}</strong
         ><br />
-        {{ accountInfo.username }}
+        {{ resource.username }}
       </a-list-item>
     </a-list>
   </a-spin>
@@ -136,31 +133,16 @@ export default defineComponent({
       required: true,
       default: null,
     },
-    vmDbDataInfo: {
+    resource: {
       type: Object,
-      required: false,
-      default: null,
-    },
-    vmMoldDataInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    accountInfo: {
-      type: Object,
-      required: false,
+      required: true,
       default: null,
     },
   },
-  setup(props) {
-    return {
-      actionFrom: ref(props.actionFrom),
-    };
-  },
+  setup(props) {},
   data() {
     return {
       spinning: ref(true),
-      userDataInfo: ref([]),
     };
   },
   created() {
