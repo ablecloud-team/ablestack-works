@@ -99,14 +99,13 @@
 
 <script>
 import { defineComponent, ref, h } from "vue";
-import { message, notification, Button } from "ant-design-vue";
 import Guacamole from "guacamole-common-js";
 // import onScreenKeyboardLayout from "@/keyboard-layouts/en-us-qwerty.json";
 import encrypt from "@/client/encrypt";
 import dis from "@/client/display";
 import states from "@/client/states";
 import UserClientSetting from "./UserClientSetting.vue";
-import store from "@/store/index";
+
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
@@ -136,6 +135,7 @@ export default defineComponent({
   data() {
     return {
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
+      cryptIv: "zxy0123456789abc",
       client: ref(null),
       keyboard: ref(null),
       mouse: ref(null),
@@ -173,7 +173,9 @@ export default defineComponent({
       status: ref(null),
       title: {
         CONNECTING: this.$t("message.userdesktop.status.title.connecting"),
-        DISCONNECTING: this.$t("message.userdesktop.status.title.disconnecting"),
+        DISCONNECTING: this.$t(
+          "message.userdesktop.status.title.disconnecting"
+        ),
         DISCONNECTED: this.$t("message.userdesktop.status.title.disconnected"),
         UNSTABLE: this.$t("message.userdesktop.status.title.unstable"),
         WAITING: this.$t("message.userdesktop.status.title.waiting"),
@@ -302,25 +304,32 @@ export default defineComponent({
       this.token.connection.settings.dpi = browerSize[2];
 
       //파라미터로 넘어온 값 파라미터값 복호화
-      const decrypted = this.$CryptoJS.AES.decrypt(
-        atob(this.$route.query.enc),
-        this.cryptKey
-      ).toString(this.$CryptoJS.enc.Utf8);
-      //console.log(JSON.parse(decrypted));
-
+      const cipher = this.$CryptoJS.AES.decrypt(
+        atob(this.$route.query.crypto),
+        this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
+        {
+          iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+          padding: this.$CryptoJS.pad.Pkcs7,
+          mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+        }
+      );
+      const decrypted = cipher.toString(this.$CryptoJS.enc.Utf8);
+      // console.log('decrypted :>> ', decrypted);
       //복호화 한 값 JSON 형식으로 변경 후 키,값 구분하여 token에 세팅
       const query = JSON.parse(decrypted);
       for (const key in query) {
         this.token.connection.settings[key] = query[key];
       }
+
       if (
         Math.floor(Date.now() / 1000) -
           parseInt(this.token.connection.settings.timestamp) >
-        100000000
-        //10초로 변경 예정
+        30
+        //30초로 변경 예정
       ) {
         this.connectionState = states.DISCONNECTED;
       } else {
+        console.log('encrypt(this.token) :>> ', encrypt(this.token));
         this.client.connect("token=" + encrypt(this.token));
       }
 
@@ -451,7 +460,7 @@ export default defineComponent({
           siz = siz + bufBlob.size;
 
           // console.log(this.bytesToSize(siz), chunks.length);
-          notification.open({
+          this.$notification.open({
             key,
             message: this.$t("label.file.download"),
             description:
@@ -461,8 +470,11 @@ export default defineComponent({
               filename,
             placement: "bottomRight",
             duration: 0,
+            icon: h("SmileOutlined", {
+              style: "color: #108ee9",
+            }),
             onClose: () => {
-              notification.close(key);
+              this.$notification.close(key);
             },
           });
 
@@ -471,7 +483,7 @@ export default defineComponent({
 
         //stream 이 끝났을 시
         arrayBufferReader.onend = () => {
-          notification.open({
+          this.$notification.open({
             key,
             message: this.$t("label.file.download"),
             description: "[" + this.$t("label.complete") + "] " + filename,
@@ -481,7 +493,7 @@ export default defineComponent({
               width: "400px",
             },
             onClose: () => {
-              notification.close(key);
+              this.$notification.close(key);
             },
           });
           const blob = new Blob(chunks, { type: mimetype });
@@ -514,7 +526,7 @@ export default defineComponent({
         // );
         this.resizeWindowEvent();
       });
-      this.inputModeChange("none");
+      this.inputModeChange(false);
       this.mouseModeChange(this.emulateAbsoluteMouse);
       this.setDefaultScale();
     },
@@ -551,10 +563,10 @@ export default defineComponent({
     inputModeChange(inputMethod) {
       this.closeDrawer();
 
-      if (inputMethod == "none") {
+      if (inputMethod === false) {
         // this.inputOsk = false;
         this.inputText = false;
-      } else if (inputMethod == "text") {
+      } else if (inputMethod === true) {
         // this.inputOsk = false;
         this.inputText = true;
       }
@@ -900,23 +912,26 @@ export default defineComponent({
     },
     setDefaultScale() {
       setTimeout(() => {
-        store.state.client.minScale = Math.min(
+        this.$store.state.client.minScale = Math.min(
           this.appEl.offsetWidth / Math.max(this.display.getWidth(), 1),
           this.appEl.offsetHeight / Math.max(this.display.getHeight(), 1)
         );
-        if (store.state.client.minScale < 1) {
+        if (this.$store.state.client.minScale < 1) {
           // console.log(window.innerWidth);
 
-          this.display.scale(store.state.client.minScale);
+          this.display.scale(this.$store.state.client.minScale);
           this.client.sendSize(window.innerWidth, window.innerHeight);
         }
 
-        store.state.client.maxScale = Math.max(store.state.client.minScale, 3);
-        if (this.display.getScale() > store.state.client.minScale)
-          store.state.client.scale = store.state.client.minScale;
-        else if (this.display.getScale() > store.state.client.maxScale)
-          store.state.client.scale = store.state.client.maxScale;
-        else store.state.client.scale = store.state.client.minScale;
+        this.$store.state.client.maxScale = Math.max(
+          this.$store.state.client.minScale,
+          3
+        );
+        if (this.display.getScale() > this.$store.state.client.minScale)
+          this.$store.state.client.scale = this.$store.state.client.minScale;
+        else if (this.display.getScale() > this.$store.state.client.maxScale)
+          this.$store.state.client.scale = this.$store.state.client.maxScale;
+        else this.$store.state.client.scale = this.$store.state.client.minScale;
 
         // console.log(
         //   this.display.getScale(),
@@ -1091,7 +1106,9 @@ export default defineComponent({
 
         stream.onack = (status) => {
           if (status.isError()) {
-            message.error(this.$t("message.file.upload.permission.denied"));
+            this.$message.error(
+              this.$t("message.file.upload.permission.denied")
+            );
             console.log("Error uploading file");
             return false;
           }
@@ -1109,7 +1126,7 @@ export default defineComponent({
 
             // 업로드 완료 정보 표시를 위한 notification
             if (managedFileUpload.notification) {
-              notification.open({
+              this.$notification.open({
                 key,
                 message: this.$t("label.file.upload"),
                 description:
@@ -1123,7 +1140,7 @@ export default defineComponent({
                   width: "400px",
                 },
                 onClose: () => {
-                  notification.close(key);
+                  this.$notification.close(key);
                   managedFileUpload.notification = false;
                 },
               });
@@ -1135,7 +1152,7 @@ export default defineComponent({
 
             //percent정보 갱신을 위한 notification
             if (managedFileUpload.notification) {
-              notification.open({
+              this.$notification.open({
                 key,
                 message: this.$t("label.file.upload"),
                 description:
@@ -1162,7 +1179,7 @@ export default defineComponent({
                 //     { default: () => this.$t("label.ok") }
                 //   ),
                 onClose: () => {
-                  notification.close(key);
+                  this.$notification.close(key);
                   managedFileUpload.notification = false;
                 },
               });

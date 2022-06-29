@@ -170,22 +170,45 @@
         {{ $t("label.close") }}
       </a-button>
     </template>
-    <!-- <a-list
-      item-layout="horizontal"
-      size="small"
-      :data-source="downloadList"
-      :loading="downloadLoading"
-    > -->
-    <a-button @click="backDirectory" shape="round" :size="small">
-      <template #icon><swap-left-outlined /></template>
-      {{ $t("label.move.parent") }}
-    </a-button>
+
+    <a-alert
+      message="하위폴더로 이동은 폴더 항목을 더블클릭 하세요. (※ 폴더 단위 다운로드 불가)"
+      type="info"
+      show-icon
+    />
+
+    <a-row id="content-header-row">
+      <!-- 왼쪽 경로 -->
+      <a-col id="button-left" :span="12">
+        <a-button @click="backDirectory" shape="round" size="small">
+          <template #icon><swap-left-outlined /></template>
+          {{ $t("label.move.parent") }}
+        </a-button>
+      </a-col>
+      <a-col id="button-right" :span="12">
+        <a-button
+          v-if="state.selectedRowKeys.length > 0"
+          @click="batchFileDownAction"
+          type="primary"
+          shape="round"
+          size="small"
+        >
+          <template #icon><download-outlined /></template>
+          {{ $t("label.batch.download") }}
+        </a-button>
+      </a-col>
+    </a-row>
+
     <a-table
       :columns="dowlloadListCol"
       :data-source="downloadList"
       :pagination="false"
       size="small"
       :scroll="{ y: 800 }"
+      :row-selection="{
+        selectedRowKeys: state.selectedRowKeys,
+        onChange: onSelectChange,
+      }"
     >
       <template #headerCell="{ column }">
         <template v-if="column.key === 'name'">
@@ -194,33 +217,35 @@
       </template>
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.key === 'name'">
-          <span @dblclick="fileDblclick(record)" style="cursor: pointer">
-            <folder-open-filled v-if="record.type == 'DIRECTORY'" />
-            <file-outlined v-if="record.type == 'NORMAL'" /> {{ record.name }}
+          <span
+            v-if="record.type === 'DIRECTORY'"
+            @dblclick="fileDblclick(record)"
+            style="cursor: pointer"
+          >
+            <folder-open-filled /> {{ text }}
           </span>
+          <span v-else> <file-outlined /> {{ text }} </span>
+        </template>
+        <template
+          v-if="column.dataIndex === 'action' && record.type == 'NORMAL'"
+        >
+          <a-button
+            @click="fileDownAction(record)"
+            type="primary"
+            shape="round"
+            size="small"
+          >
+            <template #icon><download-outlined /></template>
+            {{ $t("label.download") }}
+          </a-button>
         </template>
       </template>
     </a-table>
-    <!-- <template #renderItem="{ item }">
-        <a-list-item @dblclick="fileDblclick(item)" style="cursor: pointer">
-          <folder-outlined v-if="item.type == 'DIRECTORY'" />
-          <file-outlined v-if="item.type == 'NORMAL'" /> {{ item.name }}
-          <template #actions v-if="item.type == 'NORMAL'">
-            <a key="list-loadmore-edit">다운로드</a>
-          </template>
-        </a-list-item>
-      </template> -->
-    <!-- <template #header>
-        <div>{{ expectedPrefix }}</div>
-      </template> -->
-    <!-- </a-list> -->
   </a-modal>
 </template>
 <script>
-import { defineComponent, ref } from "vue";
-import { message, notification } from "ant-design-vue";
+import { defineComponent, ref, reactive } from "vue";
 import Guacamole from "guacamole-common-js";
-import store from "@/store/index";
 export default defineComponent({
   props: {
     client: {
@@ -245,9 +270,12 @@ export default defineComponent({
     },
   },
   setup() {
-    const value = ref("");
+    const state = reactive({
+      selectedRowKeys: [],
+      selectedRows: [],
+    });
     return {
-      value,
+      state,
     };
   },
   data() {
@@ -255,7 +283,7 @@ export default defineComponent({
       setText: ref(false),
       setMouse: ref(true),
       setFullScreen: ref(false),
-      scale: ref(store.state.client.scale * 100),
+      scale: ref(this.$store.state.client.scale * 100),
       fileList: ref([]),
       uploadModal: ref(false),
       downloadModal: ref(false),
@@ -263,10 +291,15 @@ export default defineComponent({
       downloadList: ref([]),
       dowlloadListCol: [
         {
-          title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "70%",
+          width: "82%",
+        },
+        {
+          title: this.$t("label.action"),
+          key: "action",
+          dataIndex: "action",
+          width: "18%",
         },
       ],
     };
@@ -281,13 +314,13 @@ export default defineComponent({
       this.scaleHandle();
     },
     scaleHandle() {
-      if (store.state.client.minScale * 100 > this.scale)
-        this.scale = store.state.client.minScale * 100;
-      else if (store.state.client.maxScale * 100 < this.scale)
-        this.scale = store.state.client.maxScale * 100;
+      if (this.$store.state.client.minScale * 100 > this.scale)
+        this.scale = this.$store.state.client.minScale * 100;
+      else if (this.$store.state.client.maxScale * 100 < this.scale)
+        this.scale = this.$store.state.client.maxScale * 100;
 
       this.display.scale(parseInt(this.scale) / 100);
-      if (this.scale === store.state.client.minScale)
+      if (this.scale === this.$store.state.client.minScale)
         document.getElementById("app").style.overflow = "hidden";
       else document.getElementById("app").style.overflow = "auto";
     },
@@ -386,19 +419,23 @@ export default defineComponent({
     fullscreenModeChange(setFullScreen) {
       const dc = document;
       const dcEl = document.documentElement;
-      if (setFullScreen) {
+
+      if (setFullScreen && !dc.fullscreenElement) {
         if (dcEl.requestFullscreen) return dcEl.requestFullscreen();
         if (dcEl.webkitRequestFullscreen) return dcEl.webkitRequestFullscreen();
         if (dcEl.mozRequestFullScreen) return dcEl.mozRequestFullScreen();
         if (dcEl.msRequestFullscreen) return dcEl.msRequestFullscreen();
-      } else {
+      } else if (!setFullScreen && dc.fullscreenElement) {
         if (dc.exitFullscreen) return dc.exitFullscreen();
         if (dc.webkitCancelFullscreen) return dc.webkitCancelFullscreen();
         if (dc.mozCancelFullScreen) return dc.mozCancelFullScreen();
         if (dc.msExitFullscreen) return dc.msExitFullscreen();
+      } else {
+        return false;
       }
     },
     updateDirectory(filesystem, file) {
+      this.resetSelectedRow();
       this.filesystem = filesystem;
       this.downloadLoading = true;
       const _this = this;
@@ -440,6 +477,7 @@ export default defineComponent({
 
             // For each received stream name
             var mimetypes = jsonReader.getJSON();
+            var fileIndex = 0;
             for (var name in mimetypes) {
               // Assert prefix is correct
               if (name.substring(0, _this.curDir.length) !== _this.curDir)
@@ -455,12 +493,14 @@ export default defineComponent({
 
               // Add file entry
               file.files.push({
+                key: fileIndex,
                 mimetype: mimetypes[name],
                 streamName: name,
                 type: type,
                 parent: _this.curDir,
                 name: filename,
               });
+              fileIndex = fileIndex + 1;
             }
             _this.downloadList = file.files;
             _this.downloadLoading = false;
@@ -483,66 +523,77 @@ export default defineComponent({
           },
         };
         this.updateDirectory(this.filesystem, this.filesystem.root);
-      } else {
-        //다운로드 시작~
-        const _this = this;
-        this.filesystem.object.requestInputStream(
-          file.streamName,
-          function downloadStream(stream, mimetype) {
-            // Parse filename from string
-            var filename = file.streamName.match(/(.*[\\/])?(.*)/)[2];
-
-            // Start download
-            stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
-
-            const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
-            var chunks = [];
-
-            var siz = 0;
-            const key = filename;
-
-            // stream buffer 데이터 받음
-            arrayBufferReader.ondata = (buffer) => {
-              const bufBlob = new Blob([buffer], { type: mimetype });
-              chunks.push(bufBlob);
-
-              siz = siz + bufBlob.size;
-              notification.open({
-                key,
-                message: _this.$t("label.file.download"),
-                description: "[" + _this.bytesToSize(siz) + "] " + filename,
-                placement: "bottomRight",
-                duration: 0,
-                onClose: () => {
-                  notification.close(key);
-                },
-              });
-
-              stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
-            };
-
-            //stream 이 끝났을 시
-            arrayBufferReader.onend = () => {
-              notification.open({
-                key,
-                message: _this.$t("label.file.download"),
-                description: "[" + _this.$t("label.complete") + "] " + filename,
-                placement: "bottomRight",
-                duration: 5,
-                style: {
-                  width: "400px",
-                },
-                onClose: () => {
-                  notification.close(key);
-                },
-              });
-              const blob = new Blob(chunks, { type: mimetype });
-              const url = URL.createObjectURL(blob);
-              _this.downloadFile(url, filename);
-            };
-          }
-        );
       }
+    },
+    fileDownAction(file) {
+      //다운로드 시작~
+      const _this = this;
+      this.filesystem.object.requestInputStream(
+        file.streamName,
+        function downloadStream(stream, mimetype) {
+          // Parse filename from string
+          var filename = file.streamName.match(/(.*[\\/])?(.*)/)[2];
+
+          // Start download
+          stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+
+          const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
+          var chunks = [];
+
+          var siz = 0;
+          const key = filename;
+
+          // stream buffer 데이터 받음
+          arrayBufferReader.ondata = (buffer) => {
+            const bufBlob = new Blob([buffer], { type: mimetype });
+            chunks.push(bufBlob);
+
+            siz = siz + bufBlob.size;
+            _this.$notification.open({
+              key,
+              message: _this.$t("label.file.download"),
+              description: "[" + _this.bytesToSize(siz) + "] " + filename,
+              placement: "bottomRight",
+              duration: 0,
+              onClose: () => {
+                _this.$notification.close(key);
+              },
+            });
+
+            stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+          };
+
+          //stream 이 끝났을 시
+          arrayBufferReader.onend = () => {
+            _this.$notification.open({
+              key,
+              message: _this.$t("label.file.download"),
+              description: "[" + _this.$t("label.complete") + "] " + filename,
+              placement: "bottomRight",
+              duration: 5,
+              style: {
+                width: "400px",
+              },
+              onClose: () => {
+                _this.$notification.close(key);
+              },
+            });
+            const blob = new Blob(chunks, { type: mimetype });
+            const url = URL.createObjectURL(blob);
+            _this.downloadFile(url, filename);
+          };
+        }
+      );
+    },
+    batchFileDownAction() {
+      this.state.selectedRows.forEach((item, index) => {
+        if (item.type === "NORMAL") this.fileDownAction(item);
+      });
+      this.resetSelectedRow();
+    },
+    resetSelectedRow() {
+      this.state.selectedRowKeys = [];
+      this.state.selectedRows = [];
     },
     bytesToSize(bytes) {
       var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -562,6 +613,16 @@ export default defineComponent({
         }
         this.updateDirectory(this.filesystem, this.filesystem.root);
       }
+    },
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.state.selectedRowKeys = selectedRowKeys;
+      this.state.selectedRows = selectedRows;
+      // console.log(selectedRowKeys, selectedRows);
+      // if (this.state.selectedRows.length > 0) {
+      //   this.$emit("actionFromChange", "VMList", this.state.selectedRows);
+      // } else {
+      //   this.$emit("actionFromChange", "VM", null);
+      // }
     },
   },
 });
@@ -584,5 +645,16 @@ h3 {
 .rct {
   text-decoration: underline;
   cursor: pointer;
+}
+
+#button-left {
+  text-align: left;
+  align-items: center;
+  padding: 10px 0px 10px 40px;
+}
+
+#button-right {
+  text-align: right;
+  padding: 10px 20px 10px 10px;
 }
 </style>
