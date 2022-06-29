@@ -2,9 +2,9 @@
   <div class="user-layout desktop">
     <div style="position: relative z-index: 999;">
       <a-alert
-        v-if="serverStatus"
-        :message="statusMessage"
-        :description="statusDescription"
+        v-if="statusBool"
+        :message="statusMess"
+        :description="statusDesc"
         :type="statusType"
         banner
         show-icon
@@ -16,10 +16,7 @@
         <!-- </template> -->
       </a-alert>
     </div>
-    <div
-      class="user-layout-container"
-      style="position: absolute; top: 50%; z-index: 1"
-    >
+    <div class="user-layout-container" style="position: absolute; z-index: 1">
       <div class="user-layout-header">
         <img
           src="@/assets/ablestack-logo.png"
@@ -101,11 +98,6 @@
 
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import { message } from "ant-design-vue";
-import { worksApi } from "@/api/index";
-import store from "@/store/index";
-import router from "@/router";
-
 export default defineComponent({
   name: "Login",
   components: {},
@@ -141,9 +133,9 @@ export default defineComponent({
       timer: ref(null),
       spinning: ref(true),
       loadedLanguage: ref[""],
-      serverStatus: ref(true),
-      statusMessage: ref(this.$t("message.status.check.worksapi")),
-      statusDescription: ref(this.$t("message.status.check.desc.wait")),
+      statusBool: ref(true),
+      statusMess: ref(this.$t("message.status.check.worksapi")),
+      statusDesc: ref(this.$t("message.status.check.desc.wait")),
       statusType: ref("info"),
     };
   },
@@ -184,64 +176,50 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          message.destroy();
-          message.loading(this.$t("message.logging"), 60);
+          this.$message.destroy();
+          this.$message.loading(this.$t("message.logging"), 60);
           params.append("id", this.formState.id);
           params.append("password", this.formState.password);
 
-          worksApi
+          this.$worksApi
             .post("/api/login", params)
             .then((response) => {
               //console.log(response);
-              if (
-                response.status === 200 &&
-                response.data.result.login === true
-              ) {
-                store.dispatch("loginCommit", response.data);
-                sessionStorage.setItem("token", response.data.result.token);
+              const data = response.data.result;
+              if (response.status === 200 && data.login === true) {
+                this.$store.dispatch("loginCommit", response.data);
+                sessionStorage.setItem("token", data.token);
                 sessionStorage.setItem(
                   "locale",
                   sessionStorage.getItem("locale") == null
                     ? process.env.VUE_APP_I18N_LOCALE
                     : sessionStorage.getItem("locale")
                 );
-                sessionStorage.setItem(
-                  "userName",
-                  response.data.result.username
-                );
-                sessionStorage.setItem("isAdmin", response.data.result.isAdmin);
-                sessionStorage.setItem(
-                  "clusterName",
-                  response.data.result.clusterName
-                );
-                sessionStorage.setItem(
-                  "domainName",
-                  response.data.result.domainName
-                );
-                if (
-                  response.data.result.username.toLowerCase() ===
-                  "administrator"
-                ) {
-                  router.push({ name: "Dashboard" });
+                sessionStorage.setItem("userName", data.username);
+                sessionStorage.setItem("isAdmin", data.isAdmin);
+                sessionStorage.setItem("clusterName", data.clusterName);
+                sessionStorage.setItem("domainName", data.domainName);
+                if (data.username.toLowerCase() === "administrator") {
+                  this.$router.push({ name: "Dashboard" });
                 } else {
-                  router.push({ name: "UserDesktop" });
+                  this.$router.push({ name: "UserDesktop" });
                 }
-                message.destroy();
-                message.success(this.$t("message.login.completed"));
+                this.$message.destroy();
+                this.$message.success(this.$t("message.login.completed"));
               } else {
-                message.destroy();
-                message.error(this.$t("message.login.wrong"));
+                this.$message.destroy();
+                this.$message.error(this.$t("message.login.wrong"));
               }
             })
             .catch((error) => {
-              message.destroy();
+              this.$message.destroy();
               console.log(error);
               if (error.response.status === 400) {
-                message.error(this.$t("message.login.wrong.400"));
+                this.$message.error(this.$t("message.login.wrong.400"));
               } else if (error.response.status === 401) {
-                message.error(this.$t("message.login.wrong.401"));
+                this.$message.error(this.$t("message.login.wrong.401"));
               } else {
-                message.error(this.$t("message.login.wrong"));
+                this.$message.error(this.$t("message.login.wrong"));
               }
             });
         })
@@ -249,94 +227,55 @@ export default defineComponent({
           console.log("error", error);
         });
     },
-    async serverCheck() {
-      await worksApi
+    serverCheck() {
+      this.$worksApi
         .get("/api/serverCheck")
         .then((response) => {
-          this.statusMessage = this.$t("message.status.check.worksapi");
-          setTimeout(() => {
-            if (response.status === 200) {
-              this.statusDescription = this.$t(
-                "message.status.check.desc.worksapi.ok"
-              );
-
-              setTimeout(() => {
-                this.statusMessage = this.$t("message.status.check.moldapi");
-                if (response.data.result["Mold"] === 200) {
-                  this.statusDescription = this.$t(
-                    "message.status.check.desc.moldapi.ok"
-                  );
-
-                  setTimeout(() => {
-                    this.statusMessage = this.$t("message.status.check.dc");
-                    if (response.data.result["Works-DC"] === 200) {
-                      this.statusDescription = this.$t(
-                        "message.status.check.desc.dc.ok"
-                      );
-                      setTimeout(() => {
-                        this.statusMessage = this.$t("message.status.check.ad");
-                        if (response.data.result["Works-Samba"] === 200) {
-                          this.statusDescription = this.$t(
-                            "message.status.check.desc.ad.ok"
-                          );
-
-                          setTimeout(() => {
-                            //정상일 경우
-                            this.statusMessage = this.$t(
-                              "message.status.check.all.ok"
-                            );
-                            this.statusDescription = this.$t(
-                              "message.status.check.desc.all.ok"
-                            );
-                            this.statusType = "success";
-                            clearInterval(this.timer);
-                            setTimeout(() => {
-                              this.spinning = false;
-                              this.serverStatus = false;
-                            }, 1500);
-                          }, 500);
-                        } else {
-                          this.statusDescription = this.$t(
-                            "message.status.check.desc.ad.fail"
-                          );
-                          this.statusType = "error";
-                          return false;
-                        }
-                      }, 200);
-                    } else {
-                      this.statusDescription = this.$t(
-                        "message.status.check.desc.dc.fail"
-                      );
-                      this.statusType = "error";
-                      return false;
-                    }
-                  }, 200);
-                } else {
-                  this.statusDescription = this.$t(
-                    "message.status.check.desc.moldapi.fail"
-                  );
-                  this.statusType = "error";
-                  return false;
-                }
-              }, 200);
-            } else {
-              this.statusDescription = this.$t(
-                "message.status.check.desc.worksapi.fail"
-              );
-              this.statusType = "error";
-              return false;
-            }
-          }, 200);
+          if (response.status === 200) {
+            this.statCheck(response.data.result);
+          } else {
+            this.setStatView(400, "worksapi", "error", 300);
+          }
         })
         .catch((error) => {
-          this.statusMessage = this.$t("message.status.check.worksapi");
-          this.statusDescription = this.$t(
-            "message.status.check.desc.worksapi.fail"
-          );
-          this.statusType = "error";
-          console.log(error.message);
+          this.setStatView(400, "worksapi", "error", 300);
+          // console.log(error.message);
         })
         .finally(() => {});
+    },
+    async statCheck(data) {
+      // console.log(data.Mold, data["Works-DC"], data["Works-Samba"]);
+      var res = await this.setStatView(data["Mold"], "moldapi", "info", 300);
+      if (!res) return false;
+      res = await this.setStatView(data["Works-DC"], "dc", "info", 300);
+      if (!res) return false;
+      res = await this.setStatView(data["Works-Samba"], "ad", "info", 300);
+      if (!res) return false;
+      await this.setStatView(200, "all", "success", 1000);
+    },
+    setStatView(stat, cd, type, time) {
+      const _t = this;
+      return new Promise(function (resolve, reject) {
+        setTimeout(() => {
+          _t.statusMess = _t.$t("message.status.check." + cd);
+          if (stat === 200) {
+            _t.statusDesc = _t.$t("message.status.check.desc." + cd + ".ok");
+            _t.statusType = type;
+            if (cd === "all") {
+              clearInterval(_t.timer);
+              setTimeout(() => {
+                _t.spinning = false;
+                _t.statusBool = false;
+              }, 1200);
+            }
+            resolve(true);
+          } else {
+            _t.statusDesc = _t.$t("message.status.check.desc." + cd + ".fail");
+            _t.statusType = "error";
+            reject(false);
+          }
+        }, time);
+      });
     },
   },
 });
@@ -351,8 +290,6 @@ export default defineComponent({
     width: 100%;
 
     @media (min-height: 600px) {
-      padding: 0;
-      position: relative;
       top: 50%;
       transform: translateY(-50%);
       margin-top: -50px;
@@ -365,29 +302,6 @@ export default defineComponent({
     font-size: 16px;
     height: 40px;
     width: 100%;
-  }
-
-  .user-login-other {
-    text-align: left;
-    margin-top: 24px;
-    line-height: 22px;
-
-    .item-icon {
-      font-size: 24px;
-      color: rgba(0, 0, 0, 0.2);
-      margin-left: 16px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition: color 0.3s;
-
-      &:hover {
-        color: #1890ff;
-      }
-    }
-
-    .register {
-      float: right;
-    }
   }
 }
 .user-layout-login {
