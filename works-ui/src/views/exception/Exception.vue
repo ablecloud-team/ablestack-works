@@ -78,17 +78,23 @@ export default {
 
 <style lang="less" scoped>
 .exception {
-  min-height: 500px;
-  height: 80%;
+  height: 100%;
   align-items: center;
   text-align: center;
-  margin-top: 150px;
   .img {
+    top: 50%;
+    position: relative;
+    transform: translateY(-50%);
+    margin-top: -50px;
     display: inline-block;
     padding-right: 52px;
     zoom: 1;
   }
   .content {
+    top: 50%;
+    position: relative;
+    transform: translateY(-50%);
+    margin-top: -50px;
     display: inline-block;
     flex: auto;
     h1 {

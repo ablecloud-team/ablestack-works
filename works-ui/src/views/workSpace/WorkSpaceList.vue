@@ -2,12 +2,8 @@
   <a-table
     :loading="loading"
     size="middle"
-    class="ant-table-striped"
     :columns="listColumns"
     :data-source="wsDataList"
-    :row-class-name="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
@@ -70,9 +66,9 @@
         <a-Popover placement="topLeft">
           <template #content>
             <Actions
-              v-if="actionFrom == 'WorkspaceList'"
+              v-if="actionFrom == 'WSList'"
               :action-from="actionFrom"
-              :workspace-info="record"
+              :ws-info="record"
               @fetchData="fetchRefresh"
             />
           </template>
@@ -126,8 +122,6 @@
 <script>
 import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
 export default defineComponent({
   components: {
     Actions,
@@ -268,7 +262,7 @@ export default defineComponent({
   },
   methods: {
     fetchRefresh() {
-      this.$emit("actionFromChange", "Workspace", null);
+      this.$emit("actionFromChange", "WS", null);
       this.loading = true;
       this.actionFrom = "";
       this.state.selectedRowKeys = [];
@@ -279,17 +273,13 @@ export default defineComponent({
       this.state.selectedRowKeys = selectedRowKeys;
       this.state.selectedRows = selectedRows;
       if (this.state.selectedRows.length > 0) {
-        this.$emit(
-          "actionFromChange",
-          "WorkspaceList",
-          this.state.selectedRows
-        );
+        this.$emit("actionFromChange", "WSList", this.state.selectedRows);
       } else {
-        this.$emit("actionFromChange", "Workspace", null);
+        this.$emit("actionFromChange", "WS", null);
       }
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/workspace")
         .then((response) => {
           if (response.status == 200) {
@@ -303,76 +293,21 @@ export default defineComponent({
               this.wsDataList = [];
             }
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         })
         .finally(() => {
           this.loading = false;
         });
-      this.actionFrom = "WorkspaceList";
+      this.actionFrom = "WSList";
     },
   },
 });
 </script>
 
 <style scoped>
-::v-deep(.ant-badge-status-dot) {
-  width: 12px;
-  height: 12px;
-}
-
-::v-deep(.ant-table-thead) {
-  background-color: #f9f9f9;
-}
-
-::v-deep(.ant-table-small) > .ant-table-content > .ant-table-body {
-  margin: 0;
-}
-
-::v-deep(.light-row) {
-  background-color: #fff;
-}
-
-::v-deep(.dark-row) {
-  background-color: #f9f9f9;
-}
-</style>
-
-<style scoped lang="scss">
-.shift-btns {
-  display: flex;
-}
-.shift-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-
-  &:not(:last-child) {
-    margin-right: 5px;
-  }
-
-  &--rotated {
-    font-size: 10px;
-    transform: rotate(90deg);
-  }
-}
-
-.alert-notification-threshold {
-  background-color: rgba(255, 231, 175, 0.75);
-  color: #e87900;
-  padding: 10%;
-}
-
-.alert-disable-threshold {
-  background-color: rgba(255, 190, 190, 0.75);
-  color: #f50000;
-  padding: 10%;
-}
 </style>

@@ -66,9 +66,6 @@ const userAuthCheck = (to, from, next) => {
   if (to.name.includes("UserDesktop")) {
     menukey = "2";
   }
-  if (to.name.includes("UserClient")) {
-    menukey = "3";
-  }
   sessionStorage.setItem("menukey", menukey);
 
   tokenCheck(to, from, next, false);
@@ -305,9 +302,10 @@ const routes = [
     ],
   },
   {
-    path: "/client",
+    path: "/client/:crypto",
     name: "Client",
     component: UserClient,
+    beforeEnter: userAuthCheck,
   },
 ];
 

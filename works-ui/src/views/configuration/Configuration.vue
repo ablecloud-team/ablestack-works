@@ -27,10 +27,7 @@
       </a-layout-header>
       <a-layout-content>
         <div id="content-body">
-          <ConfigurationList
-            ref="listRefreshCall"
-            @actionFromChange="actionFromChange"
-          />
+          <ConfigurationList ref="listRefreshCall" />
         </div>
       </a-layout-content>
     </a-layout>
@@ -38,10 +35,10 @@
 </template>
 
 <script>
+import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import ConfigurationList from "@/views/configuration/ConfigurationList";
-import { defineComponent, ref, reactive } from "vue";
 export default defineComponent({
   components: {
     ConfigurationList,
@@ -59,10 +56,6 @@ export default defineComponent({
   methods: {
     refresh() {
       this.$refs.listRefreshCall.fetchRefresh();
-    },
-    actionFromChange(val) {
-      //console.log(val);
-      this.actionFrom = ref(val);
     },
   },
 });

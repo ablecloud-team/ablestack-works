@@ -55,10 +55,7 @@
 
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import { message } from "ant-design-vue";
 import { axiosLogout } from "@/api/index";
-import store from "@/store/index";
-import router from "@/router";
 export default defineComponent({
   name: "AdminHeader",
   components: {},
@@ -121,9 +118,9 @@ export default defineComponent({
     async logoutSubmit() {
       const res = await axiosLogout();
       if (res.data.result.login === false || res.data.result.status > 200) {
-        message.success(this.$t("message.logout.success"), 2);
-        await store.dispatch("logoutCommit");
-        await router.push({ name: "Login" });
+        this.$message.success(this.$t("message.logout.success"), 2);
+        await this.$store.dispatch("logoutCommit");
+        await this.$router.push({ name: "Login" });
       }
     },
     // setLanguage(lang, message) {
@@ -141,7 +138,7 @@ export default defineComponent({
     //   }
     // },
     userinfo() {
-      router.push({ path: "/accountDetail/" + this.userName });
+      this.$router.push({ path: "/accountDetail/" + this.userName });
     },
   },
 });

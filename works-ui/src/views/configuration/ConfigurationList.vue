@@ -2,12 +2,8 @@
   <a-table
     size="middle"
     :loading="loading"
-    class="ant-table-striped"
     :columns="columns"
     :data-source="dataList"
-    :row-class-name="
-      (record, index) => (index % 2 === 1 ? 'dark-row' : 'light-row')
-    "
     :bordered="false"
     style="overflow-y: auto; overflow: auto"
     :pagination="pagination"
@@ -72,17 +68,39 @@
       <template v-if="column.dataIndex === 'action'">
         <div class="editable-row-operations">
           <span v-if="editableData[record.name]">
-            <a-button shape="circle" @click="cancel(record.name)">
-              <CloseCircleOutlined style="color: red" />
-            </a-button>
-            <a-button shape="circle" @click="save(record.name)">
-              <CheckCircleOutlined style="color: #52c41a" />
-            </a-button>
+            <a-tooltip placement="bottom">
+              <template #title>{{ $t("tooltip.destroy") }}</template>
+              <a-button
+                shape="circle"
+                @click="editCancel(record.name)"
+                size="small"
+              >
+                <CloseCircleOutlined style="color: red" />
+              </a-button>
+            </a-tooltip>
+            &nbsp;
+            <a-tooltip placement="bottom">
+              <template #title>{{ $t("tooltip.save") }}</template>
+              <a-button
+                shape="circle"
+                @click="editSave(record.name)"
+                size="small"
+              >
+                <CheckCircleOutlined style="color: #52c41a" />
+              </a-button>
+            </a-tooltip>
           </span>
           <span v-else>
-            <a-button shape="circle" @click="edit(record.name)">
-              <EditOutlined />
-            </a-button>
+            <a-tooltip placement="bottom">
+              <template #title>{{ $t("tooltip.edit") }}</template>
+              <a-button
+                shape="circle"
+                @click="editAction(record.name)"
+                size="small"
+              >
+                <EditOutlined />
+              </a-button>
+            </a-tooltip>
           </span>
         </div>
       </template>
@@ -94,15 +112,11 @@
 import { cloneDeep } from "lodash-es";
 import { defineComponent, ref, reactive } from "vue";
 import Actions from "@/components/Actions";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-
 export default defineComponent({
   components: {
     Actions,
   },
   props: {},
-  emits: ["actionFromChange"],
   setup() {
     const state = reactive({
       searchText: "",
@@ -122,7 +136,6 @@ export default defineComponent({
     return {
       //rowSelection,
       loading: ref(false),
-      actionFrom: ref("AccountList"),
       searchInput,
       state,
       handleSearch,
@@ -214,33 +227,33 @@ export default defineComponent({
       this.fetchData();
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/configuration")
         .then((response) => {
           if (response.status == 200) {
             if (response.data.result !== null) {
               this.dataList = response.data.result;
             } else {
-              this.wsDataList = [];
+              this.dataList = [];
             }
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
           console.log(error);
         })
         .finally(() => {
           this.loading = false;
         });
     },
-    edit(name) {
+    editAction(name) {
       this.editableData[name] = cloneDeep(
         this.dataList.filter((item) => name === item.name)[0]
       );
     },
-    async save(name) {
+    async editSave(name) {
       Object.assign(
         this.dataList.filter((item) => name === item.name)[0],
         this.editableData[name]
@@ -253,25 +266,25 @@ export default defineComponent({
       params.append("value", this.editableData[name].value);
 
       try {
-        const res = await worksApi.patch(
+        const res = await this.$worksApi.patch(
           "/api/v1/configuration/" + this.editableData[name].id,
           params
         );
         if (res.status == 200) {
-          message.success(
+          this.$message.success(
             this.$t("message.configuration.data.update.success", {
               name: this.editableData[name].name,
             })
           );
         } else {
-          message.error(
+          this.$message.error(
             this.$t("message.configuration.data.update.fail", {
               name: this.editableData[name].name,
             })
           );
         }
       } catch (error) {
-        message.error(
+        this.$message.error(
           this.$t("message.configuration.data.update.fail", {
             name: this.editableData[name].name,
           })
@@ -282,7 +295,7 @@ export default defineComponent({
 
       this.fetchRefresh();
     },
-    cancel(name) {
+    editCancel(name) {
       delete this.editableData[name];
     },
   },
@@ -290,57 +303,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-::v-deep(.ant-table-thead) {
-  background-color: #f9f9f9;
-}
-
-::v-deep(.ant-table-small) > .ant-table-content > .ant-table-body {
-  margin: 0;
-}
-
-::v-deep(.light-row) {
-  background-color: #fff;
-}
-
-::v-deep(.dark-row) {
-  background-color: #f9f9f9;
-}
-</style>
-
-<style scoped lang="scss">
-.shift-btns {
-  display: flex;
-}
-.shift-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 12px;
-
-  &:not(:last-child) {
-    margin-right: 5px;
-  }
-
-  &--rotated {
-    font-size: 10px;
-    transform: rotate(90deg);
-  }
-}
-
-.alert-notification-threshold {
-  background-color: rgba(255, 231, 175, 0.75);
-  color: #e87900;
-  padding: 10%;
-}
-
-.alert-disable-threshold {
-  background-color: rgba(255, 190, 190, 0.75);
-  color: #f50000;
-  padding: 10%;
-}
-
 .editable-row-operations a {
   margin-right: 8px;
 }

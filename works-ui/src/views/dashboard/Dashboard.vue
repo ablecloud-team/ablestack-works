@@ -25,23 +25,23 @@
                 <a-steps :current="dashboardStep" :status="stepStatus">
                   <a-step
                     :title="$t('label.status.worksapi')"
-                    :description="descStep1"
+                    :description="descStep0"
                   />
                   <a-step
                     :title="$t('label.status.mold')"
-                    :description="descStep2"
+                    :description="descStep1"
                   />
                   <a-step
                     :title="$t('label.status.dc')"
-                    :description="descStep3"
+                    :description="descStep2"
                   />
                   <a-step
                     :title="$t('label.status.ad')"
-                    :description="descStep4"
+                    :description="descStep3"
                   />
                   <a-step
                     :title="$t('label.status.guac')"
-                    :description="descStep5"
+                    :description="descStep4"
                   />
                 </a-steps>
               </a-card>
@@ -222,10 +222,6 @@
 </template>
 <script>
 import { defineComponent, reactive, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-import store from "@/store/index";
-
 export default defineComponent({
   name: "Dashboard",
   components: {},
@@ -248,16 +244,16 @@ export default defineComponent({
       desktopConCount: ref("0"),
       appConCount: ref("0"),
       stepStatus: ref("error"),
-      dashboardStep: ref(sessionStorage.getItem("dashboardStep")),
+      dashboardStep: ref(0),
+      descStep0: ref(this.$t("message.status.checking")),
       descStep1: ref(this.$t("message.status.checking")),
       descStep2: ref(this.$t("message.status.checking")),
       descStep3: ref(this.$t("message.status.checking")),
       descStep4: ref(this.$t("message.status.checking")),
-      descStep5: ref(this.$t("message.status.checking")),
     };
   },
   created() {
-    this.setServerStatus();
+    this.serverCheck();
     this.fetchData();
     this.timer = setInterval(() => {
       //30초 자동 갱신
@@ -275,86 +271,103 @@ export default defineComponent({
       this.fetchData();
     },
     fetchData() {
-      worksApi
+      this.$worksApi
         .get("/api/serverCheck")
         .then((response) => {
           if (response.status == 200) {
-            store.dispatch("serverCheckCommit", response);
+            this.$store.dispatch("serverCheckCommit", response);
           }
         })
         .catch((error) => {
-          store.dispatch("serverCheckCommit", error.response);
-          // message.error(this.$t("message.response.data.fail"));
-          console.log(error.response.status);
+          this.$store.dispatch("serverCheckCommit", error.response);
+          message.error(this.$t("message.response.data.fail"));
+          // console.log(error.response.status);
         })
         .finally(() => {
-          this.setServerStatus();
+          this.serverCheck();
         });
 
-      worksApi
+      this.$worksApi
         .get("/api/v1/dashboard")
         .then((response) => {
           if (response.status == 200) {
-            this.workspaceCount = response.data.result.workspaceCount;
-            this.desktopVmCount = response.data.result.instanceCount;
-            this.accountCount = response.data.result.usersCount;
-            this.desktopConCount = response.data.result.connectedCount;
+            const data = response.data.result;
+            this.workspaceCount = data.workspaceCount;
+            this.desktopVmCount = data.instanceCount;
+            this.accountCount = data.usersCount;
+            this.desktopConCount = data.connectedCount;
             this.appVmCount = "0";
             this.appConCount = "0";
           }
         })
         .catch((error) => {
-          message.error(this.$t("message.response.data.fail"));
-          console.log(error.message);
+          this.$message.error(this.$t("message.response.data.fail"));
+          // console.log(error.message);
         })
         .finally(() => {
           this.spinning = false;
         });
     },
-    async setServerStatus() {
-      if (store.state.dashboard.works === 200) {
-        this.descStep1 = this.$t("message.status.check.ok");
-        this.dashboardStep = 1;
-        if (store.state.dashboard.mold === 200) {
-          this.descStep2 = this.$t("message.status.check.ok");
-          this.dashboardStep = 2;
-          if (store.state.dashboard.dc === 200) {
-            this.descStep3 = this.$t("message.status.check.ok");
-            this.dashboardStep = 3;
-            if (store.state.dashboard.samba === 200) {
-              this.descStep4 = this.$t("message.status.check.ok");
-              this.dashboardStep = 4;
-              if (store.state.dashboard.guac === 200) {
-                this.descStep5 = this.$t("message.status.check.ok");
-                this.dashboardStep = 5;
-              } else {
-                this.descStep5 = this.$t("message.status.check.nosignal");
-              }
-            } else {
-              this.descStep4 = this.$t("message.status.check.nosignal");
-              this.descStep5 = this.$t("message.status.check.nosignal");
-            }
-          } else {
-            this.descStep3 = this.$t("message.status.check.nosignal");
-            this.descStep4 = this.$t("message.status.check.nosignal");
-            this.descStep5 = this.$t("message.status.check.nosignal");
-          }
-        } else {
-          this.descStep2 = this.$t("message.status.check.nosignal");
-          this.descStep3 = this.$t("message.status.check.nosignal");
-          this.descStep4 = this.$t("message.status.check.nosignal");
-          this.descStep5 = this.$t("message.status.check.nosignal");
-        }
-      } else {
-        this.dashboardStep = 0;
-        this.descStep1 = this.$t("message.status.check.nosignal");
-        this.descStep2 = this.$t("message.status.check.nosignal");
-        this.descStep3 = this.$t("message.status.check.nosignal");
-        this.descStep4 = this.$t("message.status.check.nosignal");
-        this.descStep5 = this.$t("message.status.check.nosignal");
-      }
+    serverCheck() {
+      const it = {
+        works: this.$store.state.dashboard.works,
+        mold: this.$store.state.dashboard.mold,
+        dc: this.$store.state.dashboard.dc,
+        samba: this.$store.state.dashboard.samba,
+        guac: this.$store.state.dashboard.guac,
+      };
+      const mess_nosig = "message.status.check.nosignal";
+      const mess_ok = "message.status.check.ok";
 
-      sessionStorage.setItem("dashboardStep", this.dashboardStep);
+      if (it.works !== 0) {
+        if (it.works === 200) {
+          this.dashboardStep = 1;
+          this.setMessage("works", mess_ok);
+          delete it.works;
+          if (it.mold === 200) {
+            this.dashboardStep = 2;
+            this.setMessage("mold", mess_ok);
+            delete it.mold;
+            if (it.dc === 200) {
+              this.dashboardStep = 3;
+              this.setMessage("dc", mess_ok);
+              delete it.dc;
+              if (it.samba === 200) {
+                this.dashboardStep = 4;
+                this.setMessage("samba", mess_ok);
+                delete it.samba;
+                if (it.guac === 200) {
+                  this.dashboardStep = 5;
+                  this.setMessage("guac", mess_ok);
+                } else for (const v in it) this.setMessage(v, mess_nosig);
+              } else for (const v in it) this.setMessage(v, mess_nosig);
+            } else for (const v in it) this.setMessage(v, mess_nosig);
+          } else for (const v in it) this.setMessage(v, mess_nosig);
+        } else for (const v in it) this.setMessage(v, mess_nosig);
+      }
+    },
+    setMessage(step, mess) {
+      // console.log("step :>> ", step);
+      // console.log("mess :>> ", mess);
+      switch (step) {
+        case "works":
+          this.descStep0 = this.$t(mess);
+          break;
+        case "mold":
+          this.descStep1 = this.$t(mess);
+          break;
+        case "dc":
+          this.descStep2 = this.$t(mess);
+          break;
+        case "samba":
+          this.descStep3 = this.$t(mess);
+          break;
+        case "guac":
+          this.descStep4 = this.$t(mess);
+          break;
+        default:
+          break;
+      }
     },
   },
 });

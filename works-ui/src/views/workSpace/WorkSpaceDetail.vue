@@ -7,9 +7,13 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath
+                v-if="resource.workspaceInfo"
                 :paths="[
-                  { name: $t('label.workspace'), component: 'Workspace' },
-                  { name: workspaceInfo.name, component: null },
+                  {
+                    name: $t('label.workspace'),
+                    component: 'Workspace',
+                  },
+                  { name: resource.workspaceInfo.name, component: null },
                 ]"
               />
               <a-button
@@ -25,9 +29,9 @@
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
-                v-if="actionFrom === 'WorkspaceDetail'"
+                v-if="actionFrom"
                 :action-from="actionFrom"
-                :workspace-info="workspaceInfo"
+                :ws-info="resource.workspaceInfo"
               />
             </a-col>
           </a-row>
@@ -36,14 +40,9 @@
       <a-layout-content>
         <div id="content-body">
           <WorkSpaceBody
-            v-if="actionFrom === 'WorkspaceDetail'"
+            v-if="resource.workspaceInfo"
             ref="listRefreshCall"
-            :workspace-info="workspaceInfo"
-            :offering-info="offeringDataList"
-            :network-list="networkList"
-            :vm-list="vmList"
-            :group-info="groupInfo"
-            :workspace-policy-list="workspacePolicyList"
+            :resource="resource"
             @parentRefresh="refresh"
           />
         </div>
@@ -57,25 +56,16 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import WorkSpaceBody from "./WorkSpaceBody.vue";
 import { defineComponent, ref } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-
 export default defineComponent({
   components: { Apath, Actions, WorkSpaceBody },
   props: {},
   setup() {
-    return {
-      actionFrom: ref(""),
-    };
+    return {};
   },
   data() {
     return {
-      workspaceInfo: ref([]),
-      offeringDataList: ref([]),
-      networkList: ref([]),
-      vmList: ref([]),
-      workspacePolicyList: ref([]),
-      groupInfo: ref([]),
+      actionFrom: ref(""),
+      resource: ref([]),
       timer: ref(null),
     };
   },
@@ -95,36 +85,21 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh(refreshClick);
     },
     async fetchData() {
-      await worksApi
+      await this.$worksApi
         .get("/api/v1/workspace/" + this.$route.params.workspaceUuid)
         .then((response) => {
           if (response.status == 200) {
-            this.workspaceInfo = response.data.result.workspaceInfo;
-            this.offeringDataList =
-              response.data.result.serviceOfferingInfo.serviceoffering[0];
-            this.networkList = response.data.result.networkInfo.network;
-
-            if (response.data.result.instanceList !== null) {
-              this.vmList = response.data.result.instanceList;
-            } else {
-              this.vmList = ref([]);
-            }
-            if (response.data.result.groupDetail !== null) {
-              this.groupInfo = response.data.result.groupDetail;
-            }
-            if (response.data.result.workspacePolicy !== null) {
-              this.workspacePolicyList = response.data.result.workspacePolicy;
-            }
+            this.resource = response.data.result;
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
           console.log(error);
-          message.error(this.$t("message.response.data.fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
         })
         .finally(() => {
-          this.actionFrom = "WorkspaceDetail";
+          this.actionFrom = "WSDetail";
         });
     },
   },

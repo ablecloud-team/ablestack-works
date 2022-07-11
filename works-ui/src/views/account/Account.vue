@@ -21,7 +21,7 @@
             <a-col id="content-action" :span="12">
               <div>
                 <Actions
-                  v-if="actionFrom === 'AccountList'"
+                  v-if="actionFrom === 'ACList'"
                   :action-from="actionFrom"
                   :multi-select-list="multiSelectList"
                   @fetchData="refresh"
@@ -56,7 +56,7 @@
                   shape="round"
                   style="margin-left: 10px"
                   @click="showAddModal(true)"
-                  >{{ addModalTitle }}
+                  >{{ $t("label.user.add") }}
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -76,8 +76,8 @@
         </div>
       </a-layout-content>
     </a-layout>
-    <!-- ADD WORKSPACE MODAL START  -->
-    <a-modal v-model:visible="addVisible" :title="addModalTitle">
+    <!-- ADD MODAL START  -->
+    <a-modal v-model:visible="addVisible" :title="$t('label.user.add')">
       <template #footer>
         <a-button key="close" @click="showAddModal(false)">{{
           $t("label.cancel")
@@ -85,7 +85,7 @@
         <a-button
           key="submit"
           type="primary"
-          :loading="loading"
+          :loading="addLoading"
           @click="putUser"
           >{{ $t("label.ok") }}</a-button
         >
@@ -94,9 +94,8 @@
         ref="formRef"
         :model="formState"
         :rules="rules"
-        :label-col="labelCol"
-        :wrapper-col="wrapperCol"
         layout="vertical"
+        autocomplete="off"
       >
         <a-form-item has-feedback name="account" :label="$t('label.account')">
           <a-input
@@ -137,13 +136,11 @@
               has-feedback
               name="password"
               :label="$t('label.password')"
-              :label-col="12"
+              :label-col="{ span: 12 }"
             >
-              <a-input
+              <a-input-password
                 v-model:value="formState.password"
-                type="password"
                 :placeholder="$t('tooltip.user.password')"
-                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
@@ -152,13 +149,11 @@
               has-feedback
               name="passwordCheck"
               :label="$t('label.passwordCheck')"
-              :label-col="12"
+              :label-col="{ span: 12 }"
             >
-              <a-input
+              <a-input-password
                 v-model:value="formState.passwordCheck"
-                type="password"
                 :placeholder="$t('tooltip.user.passwordCheck')"
-                autocomplete="new-password"
               />
             </a-form-item>
           </a-col>
@@ -193,11 +188,11 @@
         </a-form-item>
       </a-form>
     </a-modal>
-    <!-- ADD WORKSPACE MODAL END  -->
+    <!-- ADD MODAL END  -->
     <a-modal
       v-model:visible="uploadVisible"
-      width="70%"
-      :title="$t(uploadModalTitle)"
+      width="800px"
+      :title="$t('label.user.csv.upload')"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
       @cancel="showUploadModal(false)"
@@ -211,14 +206,15 @@
       />
       <a-upload-dragger
         :file-list="fileList"
-        :remove="handleRemove"
+        @remove="handleRemove"
         :before-upload="beforeUpload"
-        sytle="height: 400px"
       >
-        <!-- <a-button> -->
-        <upload-outlined></upload-outlined>
-        {{ $t("input.file.upload.dragdrop") }}
-        <!-- </a-button> -->
+        <p class="ant-upload-drag-icon">
+          <inbox-outlined />
+        </p>
+        <p class="ant-upload-text">
+          {{ $t("input.file.upload.dragdrop") }}
+        </p>
       </a-upload-dragger>
       <br />
       <a-table
@@ -239,9 +235,6 @@ import Actions from "@/components/Actions";
 import Apath from "@/components/Apath";
 import AccountList from "@/views/account/AccountList";
 import { defineComponent, ref, reactive } from "vue";
-import { worksApi } from "@/api/index";
-import { message } from "ant-design-vue";
-
 export default defineComponent({
   components: {
     AccountList,
@@ -272,12 +265,46 @@ export default defineComponent({
       title: "",
       department: "",
     });
+    let validateAccount = async (rule, value) => {
+      let lengthCheck = value.length > rule.max ? true : false; //길이체크
+      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      // let containsEngUpper = /[A-Z]/.test(value); 대문자
+      // let containsNumber = /[0-9]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
+      let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
+      let containsEngNum = /^[a-zA-Z0-9]+$/.test(value);
+      if (
+        value === "" ||
+        containsHangle ||
+        lengthCheck ||
+        containsSpecial ||
+        !containsEngNum
+      ) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    };
+    let validateName = async (rule, value) => {
+      let lengthCheck = value.length > rule.max ? true : false; //길이체크
+      // let containsEng = /[a-zA-Z]/.test(value); // 대소문자
+      // let containsEngUpper = /[A-Z]/.test(value); 대문자
+      // let containsNumber = /[0-9]/.test(value);
+      // let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
+      // let containsHangle = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(value);
+      let containsHanEngNum = /^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]+$/.test(value);
+      if (value === "" || lengthCheck || !containsHanEngNum) {
+        return Promise.reject();
+      } else {
+        return Promise.resolve();
+      }
+    };
     let validatePass = async (rule, value) => {
       let lengthCheck = value.length >= rule.min ? true : false; //길이체크
       let containsEng = /[a-zA-Z]/.test(value); // 대소문자
       //let containsEngUpper = /[A-Z]/.test(value); 대문자
       let containsNumber = /[0-9]/.test(value);
-      let containsSpecial = /[~!@#$%^&*()_+|<>?:{}]/.test(value);
+      let containsSpecial = /[~!@#$%^&*()\-_+|<>?:{}]/.test(value);
       if (
         value === "" ||
         !containsEng ||
@@ -300,9 +327,18 @@ export default defineComponent({
       }
     };
     const rules = {
-      account: [{ required: true }, { max: 32 }],
-      firstName: [{ required: true }, { max: 32 }],
-      lastName: [{ required: true }, { max: 32 }],
+      account: [
+        { required: true, validator: validateAccount, trigger: "change" },
+        { max: 32 },
+      ],
+      firstName: [
+        { required: true, validator: validateName, trigger: "change" },
+        { max: 32 },
+      ],
+      lastName: [
+        { required: true, validator: validateName, trigger: "change" },
+        { max: 32 },
+      ],
       password: {
         min: 7,
         required: true,
@@ -326,8 +362,6 @@ export default defineComponent({
       department: [{ required: false }, { max: 32 }],
     };
     return {
-      labelCol: { span: 10 },
-      wrapperCol: { span: 40 },
       formRef,
       formState,
       rules,
@@ -340,9 +374,8 @@ export default defineComponent({
   },
   data() {
     return {
-      addModalTitle: this.$t("label.user.add"),
-      uploadModalTitle: this.$t("label.user.csv.upload"),
-      actionFrom: ref("Account"),
+      addLoading: ref(false),
+      actionFrom: ref("AC"),
       multiSelectList: ref([]),
       fileList: ref([]),
       dataList: ref([]),
@@ -424,7 +457,6 @@ export default defineComponent({
   },
   methods: {
     handleRemove(file) {
-      console.log(file);
       const index = this.fileList.indexOf(file);
       const newFileList = this.fileList.slice();
       newFileList.splice(index, 1);
@@ -474,8 +506,7 @@ export default defineComponent({
       const date = new Date();
 
       // "\ufeff" => 한글 깨짐 방지
-      let csv =
-        "\ufeff" + "계정,이름(성),이름(명),직급,부서,전화번호,이메일\n";
+      let csv = "\ufeff" + "계정,이름(성),이름(명),직급,부서,전화번호,이메일\n";
       this.downloadList.forEach((el) => {
         var line =
           el["name"] +
@@ -510,7 +541,7 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      this.actionFrom = "Account";
+      this.actionFrom = "AC";
       setTimeout(() => {
         this.actionFrom = val;
         this.multiSelectList = obj;
@@ -531,34 +562,37 @@ export default defineComponent({
       this.formRef
         .validate()
         .then(() => {
-          worksApi //이름 중복 확인 체크
+          this.addLoading = true;
+          this.$worksApi //이름 중복 확인 체크
             .get("/api/v1/user/" + this.formState.account)
             .then((response) => {
               if (response.status === 200) {
                 //중복일 때
-                message.error(this.$t("message.name.dupl"));
+                this.$message.error(this.$t("message.name.dupl"));
               }
             })
             .catch((error) => {
               //중복 이름 없을 때
-              message.loading(this.$t("message.user.createing"), 1);
-              worksApi
+              this.$message.loading(this.$t("message.user.createing"), 1);
+              this.$worksApi
                 .put("/api/v1/user", params)
                 .then((response) => {
                   //console.log(response.status);
                   if (response.status === 200) {
-                    message.loading(this.$t("message.user.create.success"), 1);
+                    this.$message.loading(
+                      this.$t("message.user.create.success"),
+                      1
+                    );
                   } else {
-                    message.error(this.$t("message.user.create.fail"));
+                    this.$message.error(this.$t("message.user.create.fail"));
                   }
                 })
                 .catch((error) => {
-                  message.error(this.$t("message.user.create.fail"));
+                  this.$message.error(this.$t("message.user.create.fail"));
                   console.log("error", error);
                 })
                 .finally(() => {
-                  this.showAddModal(false);
-                  this.$refs.listRefreshCall.fetchRefresh();
+                  this.fetch();
                 });
             });
         })
@@ -566,6 +600,12 @@ export default defineComponent({
           console.log("error", error);
           //message.error(error);
         });
+    },
+    fetch() {
+      this.addLoading = false;
+      this.showAddModal(false);
+      this.showUploadModal(false);
+      this.$refs.listRefreshCall.fetchRefresh();
     },
   },
 });

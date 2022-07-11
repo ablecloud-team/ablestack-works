@@ -21,7 +21,7 @@
             <!-- 우측 액션 -->
             <a-col id="content-action" :span="12">
               <Actions
-                v-if="actionFrom === 'VirtualMachineList'"
+                v-if="actionFrom === 'VMList'"
                 :action-from="actionFrom"
                 :multi-select-list="multiSelectList"
                 @fetchData="refresh"
@@ -49,7 +49,7 @@ import { defineComponent, ref } from "vue";
 import VirtualMachineList from "./VirtualMachineList";
 
 export default defineComponent({
-  name: "VirtualMachine",
+  name: "VM",
   components: {
     VirtualMachineList,
     Apath,
@@ -58,7 +58,7 @@ export default defineComponent({
   props: {},
   data() {
     return {
-      actionFrom: ref("VirtualMachine"),
+      actionFrom: ref("VM"),
       multiSelectList: ref([]),
     };
   },
@@ -67,7 +67,7 @@ export default defineComponent({
       this.$refs.listRefreshCall.fetchRefresh();
     },
     actionFromChange(val, obj) {
-      this.actionFrom = "VirtualMachine";
+      this.actionFrom = "VM";
       setTimeout(() => {
         this.actionFrom = val;
         this.multiSelectList = obj;

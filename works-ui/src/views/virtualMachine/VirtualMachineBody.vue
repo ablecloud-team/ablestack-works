@@ -1,34 +1,21 @@
 <template>
-  <ASpace id="content-space" direction="horizontal">
-    <ARow id="content-row" style="min-height: 400px">
-      <ACol :span="8" style="background: #f0f2f5; padding-right: 8px">
+  <a-space id="content-space" direction="horizontal">
+    <a-row id="content-row" style="min-height: 400px">
+      <a-col :span="6" style="background: #f0f2f5; padding-right: 8px">
         <!-- 왼쪽 detail 창 -->
-        <ACard bordered style="min-height: 300px">
-          <VirtualMachineInfoCard
-            ref="listRefreshCall1"
-            :vmDbDataInfo="vmDbDataInfo"
-            :vmMoldDataInfo="vmMoldDataInfo"
-            :vmNetworkInfo="vmNetworkInfo"
-            :vmDiskInfo="vmDiskInfo"
-            :cpuused="cpuused"
-          />
-        </ACard>
-      </ACol>
+        <a-card bordered style="min-height: 300px">
+          <VirtualMachineInfoCard ref="listRefreshCall1" :resource="resource" />
+        </a-card>
+      </a-col>
 
-      <ACol :span="16" style="background: #f0f2f5; padding-left: 8px">
+      <a-col :span="18" style="background: #f0f2f5; padding-left: 8px">
         <!-- 오른쪽 tab 창 -->
-        <ACard bordered>
-          <VirtualMachineTab
-            ref="listRefreshCall2"
-            :vmDbDataInfo="vmDbDataInfo"
-            :vmMoldDataInfo="vmMoldDataInfo"
-            :vmNetworkInfo="vmNetworkInfo"
-            :vmDiskInfo="vmDiskInfo"
-          />
-        </ACard>
-      </ACol>
-    </ARow>
-  </ASpace>
+        <a-card bordered>
+          <VirtualMachineTab ref="listRefreshCall2" :resource="resource" />
+        </a-card>
+      </a-col>
+    </a-row>
+  </a-space>
 </template>
 
 <script>
@@ -39,37 +26,13 @@ import VirtualMachineTab from "./VirtualMachineTab.vue";
 export default defineComponent({
   components: { VirtualMachineTab, VirtualMachineInfoCard },
   props: {
-    vmDbDataInfo: {
+    resource: {
       type: Object,
-      required: false,
+      required: true,
       default: null,
-    },
-    vmMoldDataInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmNetworkInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    vmDiskInfo: {
-      type: Object,
-      required: false,
-      default: null,
-    },
-    cpuused: {
-      type: Number,
-      required: false,
-      default: 0,
     },
   },
-  setup() {
-    return {
-      actionFrom: ref("VirtualMachineDetail"),
-    };
-  },
+  setup() {},
   methods: {
     fetchRefresh() {
       this.$refs.listRefreshCall1.fetchRefresh();

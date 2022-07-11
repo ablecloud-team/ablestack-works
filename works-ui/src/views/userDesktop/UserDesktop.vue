@@ -16,7 +16,7 @@
                 size="small"
                 @click="fetchRefresh()"
               >
-                <template #icon><HeartFilled /></template>
+                <template #icon><reload-outlined /></template>
                 {{ $t("label.refresh") }}
               </a-button>
             </a-col>
@@ -95,8 +95,8 @@
                                 width="30"
                                 height="30"
                                 @click="
-                                  workspace.policy.rdp_access_allow == '1'
-                                    ? connectRdpClient(workspace.uuid, vm.uuid)
+                                  vm.handshake_status === 'Ready'
+                                    ? conRdpClient(workspace.uuid, vm.uuid)
                                     : false
                                 "
                               />
@@ -117,8 +117,8 @@
                                 width="30"
                                 height="30"
                                 @click="
-                                  workspace.policy.rdp_access_allow == '1'
-                                    ? connectConsole(workspace.uuid, vm.uuid)
+                                  vm.handshake_status === 'Ready'
+                                    ? conWebClient(workspace.uuid, vm.uuid)
                                     : false
                                 "
                               />
@@ -248,8 +248,6 @@ import customProtocolCheck from "custom-protocol-check";
 import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
-import { worksApi } from "@/api/index";
-import { notification, message, Button } from "ant-design-vue";
 const hostname =
   process.env.VUE_APP_API_URL == ""
     ? window.location.hostname
@@ -273,9 +271,9 @@ export default defineComponent({
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
+      cryptIv: "zxy0123456789abc",
       spinning: ref(false),
       favPopTitle: ref(""),
-      actionFrom: "VirtualMachineList",
       loading: ref(true),
       pagination,
       dataList: ref([]),
@@ -299,9 +297,8 @@ export default defineComponent({
       this.spinning = true;
       this.fetchData();
     },
-    async fetchData() {
-      // console.log("fetchData!!");
-      await worksApi
+    fetchData() {
+      this.$worksApi
         .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
         .then((response) => {
           if (response.status == 200) {
@@ -314,13 +311,16 @@ export default defineComponent({
               this.dataList = [];
             }
           } else {
-            message.error(this.$t("message.response.data.fail"));
-            //console.log(response.message);
+            console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
           }
         })
         .catch((error) => {
-          console.log(error);
-          message.error(this.$t("message.response.data.fail"));
+          console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+          this.$message.error(
+            this.$t("message.worksapi.call.error", {
+              api: "/api/v1/userdesktop/",
+            })
+          );
         })
         .finally(() => {
           this.spinning = false;
@@ -340,16 +340,18 @@ export default defineComponent({
       // document.getElementById(val).style.display = "none";
       // document.getElementById(val).style.display = "none";
     },
-    async connectRdpClient(workspaceUuid, vmUuid) {
+    async conRdpClient(workspaceUuid, vmUuid) {
       if (!this.osPass) {
-        message.warning(this.$t("message.userdesktop.rdp.connect.os.limit"));
+        this.$message.warning(
+          this.$t("message.userdesktop.rdp.connect.os.limit")
+        );
         return false;
       }
       const paramArr = this.dataList
         .filter((dl) => dl.uuid === workspaceUuid)[0]
         .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
-      await worksApi
+      await this.$worksApi
         .get(
           "/api/v1/connection/rdp/" +
             vmUuid +
@@ -383,12 +385,12 @@ export default defineComponent({
               url,
               () => {
                 this.downloadRdpClient("works-client.zip");
-                message.warning(
+                this.$message.warning(
                   this.$t("message.userdesktop.rdp.connect.client.notinstall")
                 );
                 //worksapp 프로토콜이 설치안됨
                 const key = `open${Date.now()}`;
-                notification.info({
+                this.$notification.info({
                   message: "RDP 클라이언트 설치 안내",
                   description: h("div", [
                     this.$t("message.userdesktop.client.install.notice1"),
@@ -407,7 +409,7 @@ export default defineComponent({
                       {
                         type: "primary",
                         size: "small",
-                        onClick: () => notification.close(key),
+                        onClick: () => this.$notification.close(key),
                       },
                       { default: () => this.$t("label.ok") }
                     ),
@@ -419,12 +421,12 @@ export default defineComponent({
               100
             );
           } else {
-            message.error(this.$t("message.response.data.fail"));
+            this.$message.error(this.$t("message.response.data.fail"));
           }
         })
         .catch((error) => {
           console.log(error);
-          message.error(this.$t("fail"));
+          this.$message.error(this.$t("fail"));
         })
         .finally(() => {});
     },
@@ -437,95 +439,123 @@ export default defineComponent({
       downlink.click();
       document.body.removeChild(downlink);
     },
-    connectConsole(workspaceUuid, vmUuid) {
-      // console.log(worksId, vmId);
-      const liteParamArr = this.dataList
-        .filter((dl) => dl.uuid === workspaceUuid)[0]
-        .instanceList.filter((il) => il.uuid === vmUuid)[0];
+    conWebClient(workspaceUuid, vmUuid) {
+      this.$worksApi
+        .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
+        .then((response) => {
+          if (response.status == 200) {
+            if (
+              response.data.workspaceList !== null &&
+              response.data.workspaceList !== undefined
+            ) {
+              this.dataList = response.data.workspaceList;
+            } else {
+              this.dataList = [];
+            }
 
-      liteParamArr["hostname"] = liteParamArr.ipaddress;
-      delete liteParamArr.ipaddress;
-      delete liteParamArr.owner_account_id;
+            const liteParamArr = this.dataList
+              .filter((dl) => dl.uuid === workspaceUuid)[0]
+              .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
-      liteParamArr["port"] = 3389;
-      liteParamArr["username"] = sessionStorage.getItem("userName");
-      liteParamArr["domain"] = sessionStorage.getItem("domainName");
+            const policyList = this.dataList
+              .filter((dl) => dl.uuid === workspaceUuid)[0]
+              .policy.filter((pl) => pl.value !== "");
 
-      liteParamArr["enable-wallpaper"] = true;
-      liteParamArr["enable-font-smoothing"] = true;
-      liteParamArr["enable-theming"] = false;
-      liteParamArr["enable-menu-animations"] = false;
-      liteParamArr["resize-method"] = "display-update";
+            policyList.forEach((item) => {
+              liteParamArr[item.name] = item.value;
+            });
 
-      //liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "Share";
-      liteParamArr["drive-path"] = "/share";
-      liteParamArr["enable-drive"] = true;
-      liteParamArr["disable-upload"] = false;
-      liteParamArr["disable-download"] = false;
-      liteParamArr["enable-printing"] = true;
-      liteParamArr["printer-name"] = "VDI-PRINTER";
-      liteParamArr["console"] = true;
+            // liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
+            liteParamArr["client-name"] = "ABLESTACK Works";
+            liteParamArr["hostname"] = liteParamArr.ipaddress;
+            liteParamArr["username"] = sessionStorage.getItem("userName");
+            liteParamArr["domain"] = sessionStorage.getItem("domainName");
+            // liteParamArr["enable-touch"] = true;
+            console.log(liteParamArr);
 
-      liteParamArr["enable-touch"] = true;
-
-      liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
-      //liteParamArr["security"] = "rdp";
-
-      const encrypted = btoa(
-        this.$CryptoJS.AES.encrypt(
-          JSON.stringify(liteParamArr),
-          this.cryptKey
-        ).toString()
-      );
-      //console.log(encrypted);
-      window.open("/client/?enc=" + encrypted, "_blank");
+            const cipher = this.$CryptoJS.AES.encrypt(
+              JSON.stringify(liteParamArr),
+              this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
+              {
+                iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+                padding: this.$CryptoJS.pad.Pkcs7,
+                mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+              }
+            );
+            const encrypted = btoa(cipher.toString());
+            window.open("/client/" + encrypted, "_blank");
+          } else {
+            console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+          }
+        })
+        .catch((error) => {
+          console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+        })
+        .finally(() => {});
     },
+
     async vmAction(uuid, action) {
+      var apiUrl = "";
+      var timer = 10000;
       if (action == "vmStart") {
-        message.loading(this.$t("message.vm.status.starting"), 100);
-        this.worksUrl = "/api/v1/instance/VMStart/";
+        this.$message.loading(this.$t("message.vm.status.starting"), 100);
+        apiUrl = "/api/v1/instance/VMStart/";
         this.sucMessage = "message.vm.status.start.ok";
         this.failMessage = "message.vm.status.start.fail";
+        timer = 10000;
       }
       if (action == "vmStop") {
-        message.loading(this.$t("message.vm.status.stopping"), 100);
-        this.worksUrl = "/api/v1/instance/VMStop/";
+        this.$message.loading(this.$t("message.vm.status.stopping"), 100);
+        apiUrl = "/api/v1/instance/VMStop/";
         this.sucMessage = "message.vm.status.stop.ok";
         this.failMessage = "message.vm.status.stop.fail";
+        timer = 15000;
       }
       if (action == "vmRestart") {
-        message.loading(this.$t("message.vm.status.restarting"), 100);
-        this.worksUrl = "/api/v1/instance/VMReboot/";
+        this.$message.loading(this.$t("message.vm.status.restarting"), 100);
+        apiUrl = "/api/v1/instance/VMReboot/";
         this.sucMessage = "message.vm.status.restart.ok";
         this.failMessage = "message.vm.status.restart.fail";
+        timer = 10000;
       }
 
-      try {
-        const res = await worksApi.patch(this.worksUrl + uuid);
-        if (res.status == 200) {
-          this.succCnt = this.succCnt + 1;
-        }
-      } catch (error) {
-        console.log(error);
-        this.failCnt = this.failCnt + 1;
-      }
+      const arrAsync = [];
 
-      await this.funcDelay(12000);
-      this.funcEndMessage();
-      this.fetchRefresh();
+      arrAsync.push(this.promiseAction("patch", apiUrl + uuid, null));
+
+      Promise.all(arrAsync)
+        .then(() => {
+          this.handleCancel();
+        })
+        .catch((error) => {})
+        .finally(() => {
+          setTimeout(() => {
+            this.funcEndMessage();
+
+            this.fetchRefresh();
+          }, timer);
+        });
     },
-    async funcDelay(delay) {
-      return new Promise(function (resolve) {
-        setTimeout(function () {
-          resolve("delay call!");
-        }, delay);
+    promiseAction(apiMethod, apiUrl, param) {
+      return new Promise((resolve, reject) => {
+        this.$worksApi({ url: apiUrl, method: apiMethod, data: param })
+          .then((response) => {
+            if (response.status === 200 || response.status === 204)
+              this.succCnt = this.succCnt + 1;
+            else this.failCnt = this.failCnt + 1;
+            resolve(response.status);
+          })
+          .catch((error) => {
+            this.failCnt = this.failCnt + 1;
+            reject(error);
+          });
       });
     },
+
     funcEndMessage() {
-      message.destroy();
+      this.$message.destroy();
       if (this.succCnt > 0) {
-        message.success(
+        this.$message.success(
           this.$t(this.sucMessage, {
             count: this.succCnt,
           }),
@@ -533,7 +563,7 @@ export default defineComponent({
         );
       }
       if (this.failCnt > 0) {
-        message.error(
+        this.$message.error(
           this.$t(this.failMessage, {
             count: this.failCnt,
           }),
