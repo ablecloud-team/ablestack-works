@@ -71,11 +71,21 @@
       </template>
 
       <template v-if="column.dataIndex === 'value'">
+        <!-- {{ record.settable_value.split(",").map((item) => ({ value: item })) }} -->
+
         <div>
-          <a-input
-            v-if="editableData[record.name]"
+          <a-select
+            v-if="editableData[record.name] && record.settable_type == 'S'"
             v-model:value="editableData[record.name][column.dataIndex]"
-            style="margin: -5px 0"
+            style="width: 100%"
+            :options="
+              record.settable_value.split(',').map((item) => ({ value: item }))
+            "
+          ></a-select>
+          <a-input
+            v-else-if="editableData[record.name] && record.settable_type == 'T'"
+            v-model:value="editableData[record.name][column.dataIndex]"
+            style="width: 100%"
           />
           <template v-else>
             {{ text }}
@@ -114,6 +124,12 @@
           </a-tooltip>
         </a-popconfirm>
       </template>
+      <template
+        v-if="column.dataIndex === 'i18N' && actionFrom === 'WSPolicyList'"
+      >
+        {{ $t(text) }}
+      </template>
+
       <template
         v-if="column.dataIndex === 'action' && actionFrom === 'WSPolicyList'"
       >
@@ -345,6 +361,8 @@ export default defineComponent({
   },
   data() {
     return {
+      settable_value: ref(["jack"]),
+      aaa: ["NL", "30", "45", "60", "90", "180", "365"],
       confirmLoading: ref(false),
       actionRef: ref(""),
       workspaceName: ref(""),
@@ -665,49 +683,49 @@ export default defineComponent({
         {
           dataIndex: "name",
           key: "name",
-          // slots: { customRender: "nameRender" },
+          width: "20%",
           title: this.$t("label.name"),
-          sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
+          sorter: (a, b) => a.name.length - b.name.length,
+          defaultSortOrder: "ascend",
           sortDirections: ["descend", "ascend"],
         },
+        // {
+        //   title: this.$t("label.description"),
+        //   dataIndex: "description",
+        //   key: "description",
+        //   width: "40%",
+        // },
         {
           title: this.$t("label.description"),
-          dataIndex: "description",
-          key: "description",
-          width: "40%",
+          dataIndex: "i18N",
+          key: "i18N",
         },
         {
           title: this.$t("label.value"),
           dataIndex: "value",
           key: "value",
-          width: "15%",
+          width: "20%",
         },
         {
           title: this.$t("label.action"),
           dataIndex: "action",
           align: "center",
-          width: "15%",
+          width: "10%",
         },
       ];
       if (
-        this.resource.workspaceInfo.policy !== undefined &&
-        this.resource.workspaceInfo.policy !== null
+        this.resource.workspacePolicy !== undefined &&
+        this.resource.workspacePolicy !== null
       ) {
-        var arr = [];
-        var obj = {};
-        this.dataList = this.resource.workspaceInfo.policy;
-        Object.keys(this.dataList).forEach((index) => {
-          // console.log(index, this.dataList[index]);
-          if (index == "id" || index == "workspace_uuid") {
-          } else {
-            obj["name"] = index;
-            obj["description"] = "";
-            obj["value"] = this.dataList[index];
-            arr.push(obj);
-            obj = {};
-          }
-        });
-        this.dataList = arr;
+        if (this.tapName === "gpolicy") {
+          this.dataList = this.resource.workspacePolicy.filter(
+            (it) => it.type == "R"
+          );
+        } else if (this.tapName === "wpolicy") {
+          this.dataList = this.resource.workspacePolicy.filter(
+            (it) => it.type == "C"
+          );
+        }
       }
     },
     fetchNetwork() {
@@ -921,6 +939,52 @@ export default defineComponent({
     },
     editCancel(name) {
       delete this.editableData[name];
+    },
+    async editSave(name) {
+      Object.assign(
+        this.dataList.filter((item) => name === item.name)[0],
+        this.editableData[name]
+      );
+
+      console.log(
+        this.$route.params.workspaceUuid,
+        this.editableData[name].name,
+        this.editableData[name].value
+      );
+      let params = new URLSearchParams();
+
+      params.append("policyName", this.editableData[name].name);
+      params.append("policyValue", this.editableData[name].value);
+
+      try {
+        const res = await this.$worksApi.patch(
+          "/api/v1/policy/" + this.$route.params.workspaceUuid,
+          params
+        );
+        if (res.status == 200) {
+          this.$message.success(
+            this.$t("message.workspace.policy.data.update.success", {
+              name: this.editableData[name].name,
+            })
+          );
+        } else {
+          this.$message.error(
+            this.$t("message.workspace.policy.data.update.fail", {
+              name: this.editableData[name].name,
+            })
+          );
+        }
+      } catch (error) {
+        this.$message.error(
+          this.$t("message.workspace.policy.data.update.fail", {
+            name: this.editableData[name].name,
+          })
+        );
+        console.log(error);
+      }
+      delete this.editableData[name];
+
+      this.fetchRefresh();
     },
   },
 });

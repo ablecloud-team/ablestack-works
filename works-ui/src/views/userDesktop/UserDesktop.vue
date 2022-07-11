@@ -311,12 +311,16 @@ export default defineComponent({
               this.dataList = [];
             }
           } else {
-            this.$message.error(this.$t("message.response.data.fail"));
+            console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
           }
         })
         .catch((error) => {
-          console.log(error);
-          this.$message.error(this.$t("message.response.data.fail"));
+          console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+          this.$message.error(
+            this.$t("message.worksapi.call.error", {
+              api: "/api/v1/userdesktop/",
+            })
+          );
         })
         .finally(() => {
           this.spinning = false;
@@ -436,52 +440,58 @@ export default defineComponent({
       document.body.removeChild(downlink);
     },
     conWebClient(workspaceUuid, vmUuid) {
-      // console.log(worksId, vmId);
-      const liteParamArr = this.dataList
-        .filter((dl) => dl.uuid === workspaceUuid)[0]
-        .instanceList.filter((il) => il.uuid === vmUuid)[0];
+      this.$worksApi
+        .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
+        .then((response) => {
+          if (response.status == 200) {
+            if (
+              response.data.workspaceList !== null &&
+              response.data.workspaceList !== undefined
+            ) {
+              this.dataList = response.data.workspaceList;
+            } else {
+              this.dataList = [];
+            }
 
-      console.log(liteParamArr);
-      liteParamArr["hostname"] = liteParamArr.ipaddress;
-      delete liteParamArr.ipaddress;
-      delete liteParamArr.owner_account_id;
+            const liteParamArr = this.dataList
+              .filter((dl) => dl.uuid === workspaceUuid)[0]
+              .instanceList.filter((il) => il.uuid === vmUuid)[0];
 
-      liteParamArr["port"] = 3389;
-      liteParamArr["username"] = sessionStorage.getItem("userName");
-      liteParamArr["domain"] = sessionStorage.getItem("domainName");
+            const policyList = this.dataList
+              .filter((dl) => dl.uuid === workspaceUuid)[0]
+              .policy.filter((pl) => pl.value !== "");
 
-      liteParamArr["enable-wallpaper"] = true;
-      liteParamArr["enable-font-smoothing"] = true;
-      liteParamArr["enable-theming"] = false;
-      liteParamArr["enable-menu-animations"] = false;
-      liteParamArr["resize-method"] = "display-update";
+            policyList.forEach((item) => {
+              liteParamArr[item.name] = item.value;
+            });
 
-      //liteParamArr["create-drive-path"] = true;
-      liteParamArr["drive-name"] = "VDI-DRIVE";
-      liteParamArr["drive-path"] = "/share";
-      liteParamArr["enable-drive"] = true;
-      liteParamArr["disable-upload"] = false;
-      liteParamArr["disable-download"] = true;
-      liteParamArr["enable-printing"] = true;
-      liteParamArr["printer-name"] = "VDI-PRINTER";
-      liteParamArr["console"] = true;
+            // liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
+            liteParamArr["client-name"] = "ABLESTACK Works";
+            liteParamArr["hostname"] = liteParamArr.ipaddress;
+            liteParamArr["username"] = sessionStorage.getItem("userName");
+            liteParamArr["domain"] = sessionStorage.getItem("domainName");
+            // liteParamArr["enable-touch"] = true;
+            console.log(liteParamArr);
 
-      liteParamArr["enable-touch"] = true;
-
-      // liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
-      //liteParamArr["security"] = "rdp";
-
-      const cipher = this.$CryptoJS.AES.encrypt(
-        JSON.stringify(liteParamArr),
-        this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
-        {
-          iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
-          padding: this.$CryptoJS.pad.Pkcs7,
-          mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
-        }
-      );
-      const encrypted = btoa(cipher.toString());
-      window.open("/client?crypto=" + encrypted, "_blank");
+            const cipher = this.$CryptoJS.AES.encrypt(
+              JSON.stringify(liteParamArr),
+              this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
+              {
+                iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+                padding: this.$CryptoJS.pad.Pkcs7,
+                mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+              }
+            );
+            const encrypted = btoa(cipher.toString());
+            window.open("/client/" + encrypted, "_blank");
+          } else {
+            console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+          }
+        })
+        .catch((error) => {
+          console.log("[API 호출 에러] :>> /api/v1/userdesktop/ ");
+        })
+        .finally(() => {});
     },
 
     async vmAction(uuid, action) {

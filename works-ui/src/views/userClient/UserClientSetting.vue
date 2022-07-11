@@ -253,6 +253,11 @@ export default defineComponent({
       requires: true,
       default: null,
     },
+    token: {
+      type: Object,
+      requires: true,
+      default: null,
+    },
     display: {
       type: Object,
       requires: true,
@@ -269,6 +274,7 @@ export default defineComponent({
       default: null,
     },
   },
+  emits: ["inputModeChange", "mouseModeChange"],
   setup() {
     const state = reactive({
       selectedRowKeys: [],
@@ -325,10 +331,26 @@ export default defineComponent({
       else document.getElementById("app").style.overflow = "auto";
     },
     fileUpladModalVisible() {
-      this.uploadModal = true;
+      if (
+        this.token.connection.settings["enable-drive"] === "true" &&
+        this.token.connection.settings["disable-upload"] === "false"
+      ) {
+        this.uploadModal = true;
+      } else {
+        this.$message.error(this.$t("message.file.upload.permission.denied"));
+        return false;
+      }
     },
     fileDownloadModalVisible() {
-      this.downloadModal = true;
+      if (
+        this.token.connection.settings["enable-drive"] === "true" &&
+        this.token.connection.settings["disable-download"] === "false"
+      ) {
+        this.downloadModal = true;
+      } else {
+        this.$message.error(this.$t("message.file.download.permission.denied"));
+        return false;
+      }
     },
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -555,6 +577,9 @@ export default defineComponent({
               description: "[" + _this.bytesToSize(siz) + "] " + filename,
               placement: "bottomRight",
               duration: 0,
+              style: {
+                width: "400px",
+              },
               onClose: () => {
                 _this.$notification.close(key);
               },
@@ -595,12 +620,34 @@ export default defineComponent({
       this.state.selectedRowKeys = [];
       this.state.selectedRows = [];
     },
-    bytesToSize(bytes) {
-      var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-      if (bytes == 0) return "0 Byte";
-      var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-      return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+    bytesToSize(bytes, decimals = 1) {
+      if (bytes === 0) return "0 Bytes";
+
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
     },
+    // bytesToSize(x) {
+    //   const units = ["bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    //   let l = 0,
+    //     n = parseInt(x, 10) || 0;
+    //   if (n === 1) return "1 byte";
+
+    //   while (n >= 1024 && ++l) {
+    //     n = n / 1024;
+    //   }
+    //   return n.toFixed(n < 10 && l > 0 ? 1 : 0) + " " + units[l];
+    // },
+    // bytesToSize(bytes) {
+    //   var sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    //   if (bytes == 0) return "0 Byte";
+    //   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    //   return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
+    // },
     backDirectory() {
       if (this.filesystem.root.streamName == "/") {
         return false;

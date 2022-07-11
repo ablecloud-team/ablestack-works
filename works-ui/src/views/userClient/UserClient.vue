@@ -22,9 +22,9 @@
       :display="display"
       :mouse="mouse"
       :keyboard="keyboard"
+      :token="token"
       @inputModeChange="inputModeChange"
       @mouseModeChange="mouseModeChange"
-      @uploadFile="uploadFile"
     />
   </a-drawer>
   <!-- <div ref="viewport" id="viewport" style="position: relative"> -->
@@ -134,11 +134,14 @@ export default defineComponent({
   props: {},
   data() {
     return {
+      timer1: ref(null),
+      display: ref(null),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
       cryptIv: "zxy0123456789abc",
       client: ref(null),
       keyboard: ref(null),
       mouse: ref(null),
+      downloadBlob: ref([]),
       scrollTop: ref(0),
       scrollLeft: ref(0),
       emulateAbsoluteMouse: ref(true),
@@ -305,7 +308,7 @@ export default defineComponent({
 
       //파라미터로 넘어온 값 파라미터값 복호화
       const cipher = this.$CryptoJS.AES.decrypt(
-        atob(this.$route.query.crypto),
+        atob(this.$route.params.crypto),
         this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
         {
           iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
@@ -329,7 +332,6 @@ export default defineComponent({
       ) {
         this.connectionState = states.DISCONNECTED;
       } else {
-        console.log('encrypt(this.token) :>> ', encrypt(this.token));
         this.client.connect("token=" + encrypt(this.token));
       }
 
@@ -445,50 +447,36 @@ export default defineComponent({
 
       //파일 다운로드 이벤트 발생 시
       this.client.onfile = (stream, mimetype, filename) => {
+        if (
+          this.token.connection.settings["enable-drive"] === "false" ||
+          this.token.connection.settings["disable-download"] === "true"
+        ) {
+          this.$message.error(this.$t("message.file.download.permission.denied"));
+          return false;
+        }
+        // console.log("Stream: ", stream);
+        // console.log("Mime type: ", mimetype);
+        // console.log("File name: ", filename);
+
         // 서버에 ack 정보 호출 하여 받겠다는 신호 주기
-        stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+        // stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+        stream.sendAck("onfile_start_OK", Guacamole.Status.Code.SUCCESS);
 
-        const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
-        var chunks = [];
-        var siz = 0;
+        const dur = new Guacamole.DataURIReader(stream, mimetype);
+        const arrAsync = [];
+        const br = new Guacamole.BlobReader(stream, mimetype);
         const key = filename;
-        // stream buffer 데이터 받음
-        arrayBufferReader.ondata = (buffer) => {
-          const bufBlob = new Blob([buffer], { type: mimetype });
-          chunks.push(bufBlob);
-
-          siz = siz + bufBlob.size;
-
-          // console.log(this.bytesToSize(siz), chunks.length);
+        br.onprogress = (length) => {
           this.$notification.open({
             key,
             message: this.$t("label.file.download"),
             description:
               "[" +
-              this.$refs.userClientSetting.bytesToSize(siz) +
+              this.$refs.userClientSetting.bytesToSize(br.getLength()) +
               "] " +
               filename,
             placement: "bottomRight",
             duration: 0,
-            icon: h("SmileOutlined", {
-              style: "color: #108ee9",
-            }),
-            onClose: () => {
-              this.$notification.close(key);
-            },
-          });
-
-          stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
-        };
-
-        //stream 이 끝났을 시
-        arrayBufferReader.onend = () => {
-          this.$notification.open({
-            key,
-            message: this.$t("label.file.download"),
-            description: "[" + this.$t("label.complete") + "] " + filename,
-            placement: "bottomRight",
-            duration: 5,
             style: {
               width: "400px",
             },
@@ -496,10 +484,93 @@ export default defineComponent({
               this.$notification.close(key);
             },
           });
-          const blob = new Blob(chunks, { type: mimetype });
-          const url = URL.createObjectURL(blob);
-          this.$refs.userClientSetting.downloadFile(url, filename);
+          stream.sendAck("onfile_Received", Guacamole.Status.Code.SUCCESS);
         };
+
+        br.onend = () => {
+          console.log("000000000 :>> " + new Date());
+
+          const url = URL.createObjectURL(br.getBlob());
+          arrAsync.push(this.downloadFile(url, filename));
+          console.log("11111111111111 :>> " + new Date());
+          Promise.all(arrAsync)
+            .then(() => {
+              this.$notification.open({
+                key,
+                message: this.$t("label.file.download"),
+                description: "[" + this.$t("label.complete") + "] " + filename,
+                placement: "bottomRight",
+                duration: 5,
+                style: {
+                  width: "400px",
+                },
+                onClose: () => {
+                  this.$notification.close(key);
+                },
+              });
+            })
+            .catch((error) => {
+              console.log("error :>> ", error);
+            })
+            .finally(() => {});
+        };
+
+        ///////////////////////////////////////////////////////////////////////
+        // const arrayBufferReader = new Guacamole.ArrayBufferReader(stream);
+        // var chunks = [];
+        // var siz = 0;
+        // const key = filename;
+        // // stream buffer 데이터 받음
+        // arrayBufferReader.ondata = (buffer) => {
+        //   const bufBlob = new Blob([buffer], { type: mimetype });
+        //   chunks.push(bufBlob);
+
+        //   siz = siz + bufBlob.size;
+
+        //   // console.log(this.bytesToSize(siz), chunks.length);
+        //   this.$notification.open({
+        //     key,
+        //     message: this.$t("label.file.download"),
+        //     description:
+        //       "[" +
+        //       this.$refs.userClientSetting.bytesToSize(siz) +
+        //       "] " +
+        //       filename,
+        //     placement: "bottomRight",
+        //     duration: 0,
+        //     style: {
+        //       width: "400px",
+        //     },
+        //     onClose: () => {
+        //       this.$notification.close(key);
+        //     },
+        //   });
+
+        //   stream.sendAck("OK", Guacamole.Status.Code.SUCCESS);
+        // };
+
+        // //stream 이 끝났을 시
+        // arrayBufferReader.onend = () => {
+        //   this.$notification.open({
+        //     key,
+        //     message: this.$t("label.file.download"),
+        //     description: "[" + this.$t("label.complete") + "] " + filename,
+        //     placement: "bottomRight",
+        //     duration: 5,
+        //     style: {
+        //       width: "400px",
+        //     },
+        //     onClose: () => {
+        //       this.$notification.close(key);
+        //     },
+        //   });
+        //   console.log("chunks :>> ", chunks);
+        //   const blob = new Blob(chunks, { type: mimetype });
+        //   console.log("111111111 :>> " + blob);
+        //   const url = URL.createObjectURL(blob);
+        //   console.log('url :>> ', url);
+        //   this.$refs.userClientSetting.downloadFile(url, filename);
+        // };
       };
       this.client.onfilesystem = (object, name) => {
         // Init new filesystem object
@@ -529,6 +600,21 @@ export default defineComponent({
       this.inputModeChange(false);
       this.mouseModeChange(this.emulateAbsoluteMouse);
       this.setDefaultScale();
+    },
+    downloadFile(url, filename) {
+      return new Promise((resolve, reject) => {
+        console.log("1:::::::::::::::" + new Date());
+        console.log("url :>> ", url + new Date());
+
+        const downlink = document.createElement("a");
+        downlink.setAttribute("href", url);
+        downlink.setAttribute("download", filename);
+        downlink.style.display = "none";
+        document.body.appendChild(downlink);
+        downlink.click();
+        document.body.removeChild(downlink);
+        resolve("성공");
+      });
     },
     isMenuShortcutPressed(keysym) {
       //console.log("isMenuShortcutPressed", keysym);
@@ -1089,6 +1175,13 @@ export default defineComponent({
       }
     },
     dropUploadFile(file, notify) {
+      if (
+        this.token.connection.settings["enable-drive"] === "false" ||
+        this.token.connection.settings["disable-upload"] === "true"
+      ) {
+        this.$message.error(this.$t("message.file.upload.permission.denied"));
+        return false;
+      }
       const reader = new FileReader();
       const STREAM_BLOB_SIZE = 6144;
       const key = file.name;
@@ -1106,10 +1199,7 @@ export default defineComponent({
 
         stream.onack = (status) => {
           if (status.isError()) {
-            this.$message.error(
-              this.$t("message.file.upload.permission.denied")
-            );
-            console.log("Error uploading file");
+            console.log(status.message);
             return false;
           }
           const sliceBytes = bytes.subarray(offset, offset + STREAM_BLOB_SIZE);

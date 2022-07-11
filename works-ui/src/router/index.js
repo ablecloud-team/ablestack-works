@@ -302,7 +302,7 @@ const routes = [
     ],
   },
   {
-    path: "/client",
+    path: "/client/:crypto",
     name: "Client",
     component: UserClient,
     beforeEnter: userAuthCheck,

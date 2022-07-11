@@ -29,18 +29,26 @@
         :forceRender="forceRender"
       >
         <a-tabs v-model:activeKey="policyActiveKey" type="card">
-          <a-tab-pane key="1" :tab="$t('label.group.policy')">
+          <a-tab-pane
+            key="1"
+            :tab="$t('label.group.policy')"
+            :forceRender="forceRender"
+          >
             <TableContent
-              ref="listRefreshCall3"
-              :tap-name="'policy1'"
+              ref="listRefreshCall31"
+              :tap-name="'gpolicy'"
               :action-from="'WSPolicyList'"
               :resource="resource"
             />
           </a-tab-pane>
-          <a-tab-pane key="2" :tab="$t('label.webclient.policy')">
+          <a-tab-pane
+            key="2"
+            :tab="$t('label.webclient.policy')"
+            :forceRender="forceRender"
+          >
             <TableContent
-              ref="listRefreshCall3"
-              :tap-name="'policy2'"
+              ref="listRefreshCall32"
+              :tap-name="'wpolicy'"
               :action-from="'WSPolicyList'"
               :resource="resource"
             />
@@ -96,7 +104,8 @@ export default defineComponent({
       this.forceRender = true;
       this.$refs.listRefreshCall1.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall2.fetchRefresh(refreshClick);
-      this.$refs.listRefreshCall3.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall31.fetchRefresh(refreshClick);
+      this.$refs.listRefreshCall32.fetchRefresh(refreshClick);
       this.$refs.listRefreshCall4.fetchRefresh(refreshClick);
     },
     parentRefresh() {
