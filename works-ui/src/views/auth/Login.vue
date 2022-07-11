@@ -295,7 +295,17 @@ export default defineComponent({
       margin-top: -50px;
     }
   }
+  &-logo {
+    width: 400px;
+    border-style: none;
+    margin: 0 auto 2rem;
+    display: block;
 
+    .mobile & {
+      max-width: 300px;
+      margin-bottom: 1rem;
+    }
+  }
   button.login-button {
     margin-top: 8px;
     padding: 0 15px;
@@ -309,13 +319,12 @@ export default defineComponent({
   width: 368px;
   margin: 0 auto;
 }
-.user-layout-logo {
-  width: 600px;
-  height: 80px;
-  margin: 0 auto 2rem;
-  border-style: none;
-  display: block;
-}
+// .user-layout-logo {
+//   width: 600px;
+//   margin: 0 auto 2rem;
+//   border-style: none;
+//   display: block;
+// }
 .login-translation {
   font-size: 20px;
   margin-top: 10px;
