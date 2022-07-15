@@ -1,6 +1,3 @@
-
-
-
 <template>
   <div id="content-layout">
     <a-layout>
@@ -10,12 +7,7 @@
             <!-- 오른쪽 경로 -->
             <a-col id="content-path" :span="12">
               <Apath :paths="[$t('label.desktop')]" />
-              <a-button
-                shape="round"
-                style="margin-left: 18px"
-                size="small"
-                @click="fetchRefresh()"
-              >
+              <a-button shape="round" style="margin-left: 18px" size="small" @click="fetchRefresh()">
                 <template #icon><reload-outlined /></template>
                 {{ $t("label.refresh") }}
               </a-button>
@@ -26,25 +18,11 @@
       <a-layout-content>
         <a-spin :spinning="spinning" size="large">
           <a-row class="dashboard-a-row" :gutter="4">
-            <a-col
-              flex="auto"
-              v-for="workspace in dataList"
-              class="dashboard-a-col"
-            >
-              <a-card
-                :title="workspace.name + '(' + workspace.description + ')'"
-                :bodyStyle="{ margin: '1px' }"
-              >
+            <a-col flex="auto" v-for="workspace in dataList" class="dashboard-a-col">
+              <a-card :title="workspace.name + '(' + workspace.description + ')'" :bodyStyle="{ margin: '1px' }">
                 <a-row :gutter="4">
-                  <a-col
-                    v-for="vm in workspace.instanceList"
-                    class="dashboard-a-col"
-                  >
-                    <a-card
-                      hoverable
-                      :title="vm.name"
-                      style="width: 200px; text-align: center"
-                    >
+                  <a-col v-for="vm in workspace.instanceList" class="dashboard-a-col">
+                    <a-card hoverable :title="vm.name" style="width: 200px; text-align: center">
                       <DesktopOutlined
                         :style="{
                           fontSize: '40px',
@@ -85,20 +63,14 @@
                         </a-popconfirm> -->
                       <template #actions>
                         <a-tooltip placement="bottom">
-                          <template #title>{{
-                            $t("label.rdp.connect")
-                          }}</template>
+                          <template #title>{{ $t("label.rdp.connect") }}</template>
                           <Icon>
                             <template #component>
                               <img
                                 src="@/assets/icon-remote-desktop.png"
                                 width="30"
                                 height="30"
-                                @click="
-                                  vm.handshake_status === 'Ready'
-                                    ? conRdpClient(workspace.uuid, vm.uuid)
-                                    : false
-                                "
+                                @click="vm.handshake_status === 'Ready' ? conRdpClient(workspace.uuid, vm.uuid) : false"
                               />
                             </template>
                           </Icon>
@@ -106,9 +78,7 @@
 
                         <a-tooltip placement="bottom">
                           <template #title>{{
-                            vm.handshake_status === "Ready"
-                              ? $t("label.desktop.console.connect.ready")
-                              : $t("label.desktop.console.connect.notready")
+                            vm.handshake_status === "Ready" ? $t("label.desktop.console.connect.ready") : $t("label.desktop.console.connect.notready")
                           }}</template>
                           <Icon>
                             <template #component>
@@ -116,11 +86,7 @@
                                 src="@/assets/icons-internet.png"
                                 width="30"
                                 height="30"
-                                @click="
-                                  vm.handshake_status === 'Ready'
-                                    ? conWebClient(workspace.uuid, vm.uuid)
-                                    : false
-                                "
+                                @click="vm.handshake_status === 'Ready' ? conWebClient(workspace.uuid, vm.uuid) : false"
                               />
                             </template>
                           </Icon>
@@ -135,13 +101,8 @@
                               :cancel-text="$t('label.cancel')"
                               @confirm="vmAction(vm.uuid, 'vmStop')"
                             >
-                              <a-tooltip
-                                placement="bottom"
-                                style="padding-right: 40px"
-                              >
-                                <template #title>{{
-                                  $t("tooltip.vmStop")
-                                }}</template>
+                              <a-tooltip placement="bottom" style="padding-right: 40px">
+                                <template #title>{{ $t("tooltip.vmStop") }}</template>
                                 <a-button shape="circle">
                                   <template #icon>
                                     <PoweroffOutlined
@@ -162,9 +123,7 @@
                               @confirm="vmAction(vm.uuid, 'vmRestart')"
                             >
                               <a-tooltip placement="bottom">
-                                <template #title>{{
-                                  $t("tooltip.vmRestart")
-                                }}</template>
+                                <template #title>{{ $t("tooltip.vmRestart") }}</template>
 
                                 <a-button shape="circle">
                                   <template #icon>
@@ -186,9 +145,7 @@
                               @confirm="vmAction(vm.uuid, 'vmStart')"
                             >
                               <a-tooltip placement="bottom">
-                                <template #title>{{
-                                  $t("tooltip.vmStart")
-                                }}</template>
+                                <template #title>{{ $t("tooltip.vmStart") }}</template>
                                 <a-button shape="circle">
                                   <template #icon>
                                     <CaretRightOutlined
@@ -217,14 +174,8 @@
                         <template #title>{{ vm.handshake_status }}</template>
                         <a-badge
                           class="head-example"
-                          :color="
-                            vm.handshake_status == 'Ready' ? 'green' : 'red'
-                          "
-                          :text="
-                            vm.handshake_status == 'Ready'
-                              ? $t('label.vm.status.ready')
-                              : $t('label.vm.status.notready')
-                          "
+                          :color="vm.handshake_status == 'Ready' ? 'green' : 'red'"
+                          :text="vm.handshake_status == 'Ready' ? $t('label.vm.status.ready') : $t('label.vm.status.notready')"
                         />({{ vm.mold_status }})
                       </a-tooltip>
 
@@ -248,12 +199,8 @@ import customProtocolCheck from "custom-protocol-check";
 import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
 import Actions from "@/components/Actions";
-const hostname =
-  process.env.VUE_APP_API_URL == ""
-    ? window.location.hostname
-    : process.env.VUE_APP_API_URL;
-const apiPort =
-  process.env.VUE_APP_API_PORT == "" ? "8082" : process.env.VUE_APP_API_PORT;
+const hostname = process.env.VUE_APP_API_URL == "" ? window.location.hostname : process.env.VUE_APP_API_URL;
+const apiPort = process.env.VUE_APP_API_PORT == "" ? "8082" : process.env.VUE_APP_API_PORT;
 export default defineComponent({
   name: "UserDesktop",
   components: {
@@ -262,12 +209,6 @@ export default defineComponent({
     Actions,
   },
   setup() {
-    const pagination = {
-      onChange: (page) => {
-        //console.log(page);
-      },
-      pageSize: 20,
-    };
     return {
       //desktopIconStyle: ref([ {"fontSize": '40px', "color": '#cc0000'} ]),
       cryptKey: "IgmTQVMISq9t4Bj7iRz7kZklqzfoXuq1",
@@ -275,7 +216,6 @@ export default defineComponent({
       spinning: ref(false),
       favPopTitle: ref(""),
       loading: ref(true),
-      pagination,
       dataList: ref([]),
       succCnt: ref(0),
       failCnt: ref(0),
@@ -302,10 +242,7 @@ export default defineComponent({
         .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
         .then((response) => {
           if (response.status == 200) {
-            if (
-              response.data.workspaceList !== null &&
-              response.data.workspaceList !== undefined
-            ) {
+            if (response.data.workspaceList !== null && response.data.workspaceList !== undefined) {
               this.dataList = response.data.workspaceList;
             } else {
               this.dataList = [];
@@ -342,22 +279,13 @@ export default defineComponent({
     },
     async conRdpClient(workspaceUuid, vmUuid) {
       if (!this.osPass) {
-        this.$message.warning(
-          this.$t("message.userdesktop.rdp.connect.os.limit")
-        );
+        this.$message.warning(this.$t("message.userdesktop.rdp.connect.os.limit"));
         return false;
       }
-      const paramArr = this.dataList
-        .filter((dl) => dl.uuid === workspaceUuid)[0]
-        .instanceList.filter((il) => il.uuid === vmUuid)[0];
+      const paramArr = this.dataList.filter((dl) => dl.uuid === workspaceUuid)[0].instanceList.filter((il) => il.uuid === vmUuid)[0];
 
       await this.$worksApi
-        .get(
-          "/api/v1/connection/rdp/" +
-            vmUuid +
-            "/" +
-            sessionStorage.getItem("userName")
-        )
+        .get("/api/v1/connection/rdp/" + vmUuid + "/" + sessionStorage.getItem("userName"))
         .then((res) => {
           if (res.status == 200) {
             const url =
@@ -385,9 +313,7 @@ export default defineComponent({
               url,
               () => {
                 this.downloadRdpClient("works-client.zip");
-                this.$message.warning(
-                  this.$t("message.userdesktop.rdp.connect.client.notinstall")
-                );
+                this.$message.warning(this.$t("message.userdesktop.rdp.connect.client.notinstall"));
                 //worksapp 프로토콜이 설치안됨
                 const key = `open${Date.now()}`;
                 this.$notification.info({
@@ -444,22 +370,15 @@ export default defineComponent({
         .get("/api/v1/userdesktop/" + sessionStorage.getItem("userName"))
         .then((response) => {
           if (response.status == 200) {
-            if (
-              response.data.workspaceList !== null &&
-              response.data.workspaceList !== undefined
-            ) {
+            if (response.data.workspaceList !== null && response.data.workspaceList !== undefined) {
               this.dataList = response.data.workspaceList;
             } else {
               this.dataList = [];
             }
 
-            const liteParamArr = this.dataList
-              .filter((dl) => dl.uuid === workspaceUuid)[0]
-              .instanceList.filter((il) => il.uuid === vmUuid)[0];
+            const liteParamArr = this.dataList.filter((dl) => dl.uuid === workspaceUuid)[0].instanceList.filter((il) => il.uuid === vmUuid)[0];
 
-            const policyList = this.dataList
-              .filter((dl) => dl.uuid === workspaceUuid)[0]
-              .policy.filter((pl) => pl.value !== "");
+            const policyList = this.dataList.filter((dl) => dl.uuid === workspaceUuid)[0].policy.filter((pl) => pl.value !== "");
 
             policyList.forEach((item) => {
               liteParamArr[item.name] = item.value;
@@ -471,17 +390,13 @@ export default defineComponent({
             liteParamArr["username"] = sessionStorage.getItem("userName");
             liteParamArr["domain"] = sessionStorage.getItem("domainName");
             // liteParamArr["enable-touch"] = true;
-            console.log(liteParamArr);
+            // console.log(liteParamArr);
 
-            const cipher = this.$CryptoJS.AES.encrypt(
-              JSON.stringify(liteParamArr),
-              this.$CryptoJS.enc.Utf8.parse(this.cryptKey),
-              {
-                iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
-                padding: this.$CryptoJS.pad.Pkcs7,
-                mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
-              }
-            );
+            const cipher = this.$CryptoJS.AES.encrypt(JSON.stringify(liteParamArr), this.$CryptoJS.enc.Utf8.parse(this.cryptKey), {
+              iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
+              padding: this.$CryptoJS.pad.Pkcs7,
+              mode: this.$CryptoJS.mode.CBC, // [cbc 모드 선택]
+            });
             const encrypted = btoa(cipher.toString());
             window.open("/client/" + encrypted, "_blank");
           } else {
@@ -498,21 +413,21 @@ export default defineComponent({
       var apiUrl = "";
       var timer = 10000;
       if (action == "vmStart") {
-        this.$message.loading(this.$t("message.vm.status.starting"), 100);
+        this.$message.loading(this.$t("message.vm.status.starting"), 0);
         apiUrl = "/api/v1/instance/VMStart/";
         this.sucMessage = "message.vm.status.start.ok";
         this.failMessage = "message.vm.status.start.fail";
         timer = 10000;
       }
       if (action == "vmStop") {
-        this.$message.loading(this.$t("message.vm.status.stopping"), 100);
+        this.$message.loading(this.$t("message.vm.status.stopping"), 0);
         apiUrl = "/api/v1/instance/VMStop/";
         this.sucMessage = "message.vm.status.stop.ok";
         this.failMessage = "message.vm.status.stop.fail";
         timer = 15000;
       }
       if (action == "vmRestart") {
-        this.$message.loading(this.$t("message.vm.status.restarting"), 100);
+        this.$message.loading(this.$t("message.vm.status.restarting"), 0);
         apiUrl = "/api/v1/instance/VMReboot/";
         this.sucMessage = "message.vm.status.restart.ok";
         this.failMessage = "message.vm.status.restart.fail";
@@ -540,8 +455,7 @@ export default defineComponent({
       return new Promise((resolve, reject) => {
         this.$worksApi({ url: apiUrl, method: apiMethod, data: param })
           .then((response) => {
-            if (response.status === 200 || response.status === 204)
-              this.succCnt = this.succCnt + 1;
+            if (response.status === 200 || response.status === 204) this.succCnt = this.succCnt + 1;
             else this.failCnt = this.failCnt + 1;
             resolve(response.status);
           })
@@ -580,11 +494,7 @@ export default defineComponent({
       if (ua.indexOf("Windows") != -1) {
         os = "Windows";
         this.osPass = true;
-      } else if (
-        ua.indexOf("iPad") != -1 ||
-        ua.indexOf("iPhone") != -1 ||
-        ua.indexOf("iPod") != -1
-      ) {
+      } else if (ua.indexOf("iPad") != -1 || ua.indexOf("iPhone") != -1 || ua.indexOf("iPod") != -1) {
         os = "Apple iOS";
         this.osPass = false;
       } else if (ua.indexOf("Android" != -1)) {
@@ -717,4 +627,3 @@ export default defineComponent({
   margin-right: 8px;
 }
 </style>
-
