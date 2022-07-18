@@ -104,7 +104,6 @@
               <CloseCircleOutlined style="color: red" />
             </a-button>
           </a-tooltip>
-          &nbsp;
           <a-tooltip placement="bottom">
             <template #title>{{ $t("tooltip.save") }}</template>
             <a-button shape="circle" @click="editSave(record.name)" size="small">
@@ -402,18 +401,15 @@ export default defineComponent({
         {
           dataIndex: "name",
           key: "name",
-          // slots: { customRender: "nameRender" },
           title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "",
+          title: this.$t("label.action"),
           key: "action",
           dataIndex: "action",
-          align: "right",
-          width: "5%",
-          // slots: { customRender: "actionRender" },
+          width: "60px",
         },
         {
           title: this.$t("label.users"),
@@ -421,7 +417,6 @@ export default defineComponent({
           key: "owner_account_id",
           sorter: (a, b) => (a.owner_account_id < b.owner_account_id ? -1 : a.owner_account_id > b.owner_account_id ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "userRender" },
         },
         {
           title: this.$t("label.vm.state"),
@@ -429,7 +424,6 @@ export default defineComponent({
           key: "mold_status",
           sorter: (a, b) => (a.mold_status < b.mold_status ? -1 : a.mold_status > b.mold_status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "vmStateRender" },
         },
         {
           title: this.$t("label.vm.ready.state"),
@@ -437,7 +431,6 @@ export default defineComponent({
           key: "status",
           sorter: (a, b) => (a.status < b.status ? -1 : a.status > b.status ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "vmReadyStateRender" },
         },
 
         // {
@@ -476,7 +469,6 @@ export default defineComponent({
           title: this.$t("label.name"),
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
-          // slots: { customRender: "accountNameRender" },
         },
         {
           title: this.$t("label.lastname"),
@@ -484,7 +476,6 @@ export default defineComponent({
           key: "givenName",
           width: "10%",
           sorter: (a, b) => (a.givenName < b.givenName ? -1 : a.givenName > b.givenName ? 1 : 0),
-          // sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t("label.firstname"),
@@ -519,12 +510,10 @@ export default defineComponent({
           sortDirections: ["descend", "ascend"],
         },
         {
-          title: "",
+          title: this.$t("label.action"),
           key: "action",
           dataIndex: "action",
-          align: "right",
-          width: "5%",
-          // slots: { customRender: "deleteRender" },
+          width: "60px",
         },
       ];
       var userInWorkspaceList = [];
@@ -598,7 +587,7 @@ export default defineComponent({
           title: this.$t("label.action"),
           dataIndex: "action",
           align: "center",
-          width: "10%",
+          width: "80px",
         },
       ];
       if (this.resource.workspacePolicy !== undefined && this.resource.workspacePolicy !== null) {
