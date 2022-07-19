@@ -18,7 +18,8 @@ const (
 	WorksUi   = "works-ui"
 	WorksSamba = "works-samba"
 	Guacd      = "guacd"
-	Guacamole  = "guacamole"
+	//Guacamole  = "guacamole"
+	WorksLite = "works-lite"
 )
 
 type Config struct {
@@ -110,7 +111,7 @@ func main() {
 			"--name", "works-samba",
 			"-d", "-t",
 			"--net", "host",
-			"localhost/works-ad:v3",
+			"docker.io/ablecloudteam/works-ad:latest",
 			"config", "8.8.8.8",
 			configStruct.SambaDefaultDomain,
 			"Ablecloud1!", "ad",
@@ -120,18 +121,29 @@ func main() {
 
 		cmdGuacamole, errGuacamole := exec.Command(
 			"podman", "run",
-			"--name", "guacamole",
+			"--name", "works-lite",
 			"--net", "works",
-			"--ip", "10.88.2.10",
-			"-v", "share:/share",
-			"-e", "LDAP_HOSTNAME="+configStruct.SambaDefaultUrl,
-			"-e", "LDAP_USER_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
-			"-e", "LDAP_USERNAME_ATTRIBUTE=cn",
-			"-e", "LDAP_CONFIG_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
-			"-e", "GUACD_HOSTNAME=10.88.2.14",
-			"-d", "-p", "8080:8080",
-			"guacamole:v0.1",
+			"--ip", "10.88.2.15",
+			"-d", "-p", "8088:8080",
+			"docker.io/ablecloudteam/works-lite:latest",
 		).Output()
+		
+		
+//		cmdGuacamole, errGuacamole := exec.Command(
+//			"podman", "run",
+//			"--name", "guacamole",
+//			"--net", "works",
+//			"--ip", "10.88.2.10",
+//			"-v", "share:/share",
+//			"-e", "LDAP_HOSTNAME="+configStruct.SambaDefaultUrl,
+//			"-e", "LDAP_USER_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
+//			"-e", "LDAP_USERNAME_ATTRIBUTE=cn",
+//			"-e", "LDAP_CONFIG_BASE_DN=CN=Users,DC="+configStruct.SambaDefaultDomain+",DC=local",
+//			"-e", "GUACD_HOSTNAME=10.88.2.14",
+//			"-d", "-p", "8080:8080",
+//			"guacamole:v0.1",
+//		).Output()
+		
 		log.Infof("guacamole run exec [%v], error [%v]", string(cmdGuacamole), errGuacamole)
 		time.Sleep(10 * time.Second)
 
@@ -171,7 +183,7 @@ func main() {
 		}
 	} else {
 		containers := []string{
-			WorksSamba, WorksDB, Guacd, Guacamole, WorksApi, WorksUi,
+			WorksSamba, WorksDB, Guacd, WorksLite, WorksApi, WorksUi,
 		}
 		for _, container := range containers {
 			for {
