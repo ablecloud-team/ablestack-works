@@ -98,24 +98,23 @@ func getWorkspacesDetail(c *gin.Context) {
 
 		}
 
-		workspacePolicy, _ := selectWorkspacePolicyList(workspaceInfo.Uuid)
-		log.Debugf("[%v] [%v]", workspacePolicy, workspacePolicy)
+		//workspacePolicy, _ := selectWorkspacePolicyList(workspaceInfo.Uuid)
+		policyList := policyList(workspaceInfo.Uuid)
+
+		//log.Debugf("[%v] [%v]", workspacePolicy, workspacePolicy)
 		//var workspacePolicyData []map[string]interface{}
 		//err = json.NewDecoder(workspacePolicy.Body).Decode(&workspacePolicyData)
 		//if err != nil {
 		//	log.Errorf("workspacePolicy error [%v]", err)
 		//}
-		workspaceInfo.Policy.WorkspaceUuid = workspacePolicy[0].Policy.WorkspaceUuid
-		workspaceInfo.Policy.Id = workspacePolicy[0].Policy.Id
-		workspaceInfo.Policy.RdpPort = workspacePolicy[0].Policy.RdpPort
-		workspaceInfo.Policy.RdpAccessAllow = workspacePolicy[0].Policy.RdpAccessAllow
+
 		resultReturn["workspaceInfo"] = workspaceInfo
 		resultReturn["templateInfo"] = templateResult["listtemplatesresponse"]
 		resultReturn["serviceOfferingInfo"] = serviceOfferingResult["listserviceofferingsresponse"]
 		resultReturn["networkInfo"] = networkResult["listnetworksresponse"]
 		resultReturn["instanceList"] = instanceList
 		resultReturn["groupDetail"] = groupData
-		//resultReturn["workspacePolicy"] = workspacePolicyData
+		resultReturn["workspacePolicy"] = policyList
 		returnCode = http.StatusOK
 	} else {
 		resultReturn["message"] = fmt.Sprintf("There is no workspace for that UUID. [%v]", workspaceUuid)
@@ -182,11 +181,7 @@ func postWorkspaces(c *gin.Context) {
 	workspace.Shared, _ = strconv.ParseBool(c.PostForm("shared"))
 	workspace.NetworkUuid = selectNetworkDetail()
 	workspace.Postfix = 0
-	workspace.Policy.RdpPort, _ = strconv.Atoi(c.PostForm("rdpPort"))
-	if workspace.Policy.RdpPort == 0 {
-		workspace.Policy.RdpPort = 3389
-	}
-	workspace.Policy.RdpAccessAllow, _ = strconv.Atoi(c.PostForm("rdpAccessAllow"))
+
 	resultInsertGroup, err := insertGroup(workspace.Name)
 	if resultInsertGroup.Status == Created201 {
 		resultInsertPolicyRemotefx, _ := insertPolicyRemotefx(workspace.Name)
@@ -201,7 +196,7 @@ func postWorkspaces(c *gin.Context) {
 	result["resultInsertGroup"] = res
 	if resultInsertGroup.Status == Created201 {
 		resultInsertWorkspace, _ := insertWorkspace(workspace)
-		insertWorkspacePolicy(workspace)
+		//insertWorkspacePolicy(workspace)
 		log.Info(resultInsertWorkspace)
 		result["insertWorkspace"] = resultInsertWorkspace
 		if resultInsertWorkspace["status"] == http.StatusOK {
@@ -275,7 +270,7 @@ func deleteWorkspaces(c *gin.Context) {
 		log.Errorf("%v", errDeleteGroup)
 	} else {
 		resultDeleteWorkspace := deleteWorkspace(workspaceUuid)
-		deleteWorkspacePolicy(workspaceUuid)
+		//deleteWorkspacePolicy(workspaceUuid)
 		if resultDeleteWorkspace["status"] == http.StatusOK {
 			returnData["message"] = "workspace delete success"
 			resultCode = http.StatusOK
@@ -538,10 +533,17 @@ func getConnectionRdp(c *gin.Context) {
 			"workspaceController": "getConnectionRdp",
 		}).Infof("res [%v], userName [%v], userPassword [%v], res2 [%v]", res, userName, userPassword, strings.TrimSpace(res["stdout"]))
 
+		var rdpPort string
+		policyList := policyList(workspaceInfo.Uuid)
+		for _, policyInfo := range policyList {
+			if policyInfo.Name == "rdp_port" {
+				rdpPort = policyInfo.Value
+			}
+		}
+
 		instanceInfo.Password = userPassword
 		instanceInfo.PublicPort = selectPublicPort(instanceInfo, workspaceInfo)
-		instanceInfo.PrivatePort = workspaceInfo.Policy.RdpPort
-
+		instanceInfo.PrivatePort, _ = strconv.Atoi(rdpPort)
 		updateRdpConnected(instanceInfo, 1)
 
 		go checkRdpConnect(instanceInfo)

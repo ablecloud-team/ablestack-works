@@ -28,12 +28,7 @@ type Workspace struct {
 	CreateDate          string     `json:"create_date"`
 	Removed             *string    `json:"removed"`
 	InstanceList        []Instance `json:"instanceList"`
-	Policy              struct {
-		Id             int    `json:"id"`
-		WorkspaceUuid  string `json:"workspace_uuid"`
-		RdpPort        int    `json:"rdp_port"`
-		RdpAccessAllow int    `json:"rdp_access_allow"`
-	} `json:"policy"`
+	PolicyList          []Policy   `json:"policy"`
 }
 
 type Instance struct {
@@ -119,59 +114,72 @@ func selectWorkspaceList(workspaceUuid string) ([]Workspace, error) {
 	return workspaceList, err
 }
 
-func selectWorkspacePolicyList(workspaceUuid string) ([]Workspace, error) {
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "selectWorkspacePolicyList",
-	}).Infof("payload workspaceUuid [%v]", workspaceUuid)
-	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"workspaceImpl": "selectWorkspacePolicyList",
-		}).Errorf("selectWorkspacePolicyList DB Connect Error [%v]", err)
-	}
-	defer db.Close()
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "selectWorkspacePolicyList",
-	}).Infof("select selectWorkspacePolicyList DB Connect success")
-
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "selectWorkspacePolicyList",
-	}).Warnf("payload workspaceUuid [%v]", workspaceUuid)
-	queryString := "SELECT" +
-		" id, workspaces_uuid, rdp_port, rdp_access_allow" +
-		" FROM workspaces_policy" +
-		" WHERE removed IS NULL" +
-		" AND workspaces_uuid = '" + workspaceUuid + "'" +
-		" ORDER BY id DESC"
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "selectWorkspacePolicyList",
-	}).Infof("select WorkspacePolicyList Query [%v]", queryString)
-	rows, err := db.Query(queryString)
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"workspaceImpl": "selectWorkspacePolicyList",
-		}).Errorf("WorkspacePolicyList Select Query FAILED [%v]", err)
-	}
-	var workspaceList []Workspace
-	defer rows.Close()
-	for rows.Next() {
-		workspace := Workspace{}
-		err = rows.Scan(
-			&workspace.Policy.Id, &workspace.Policy.WorkspaceUuid, &workspace.Policy.RdpPort, &workspace.Policy.RdpAccessAllow)
-		if err != nil {
-			log.WithFields(logrus.Fields{
-				"workspaceImpl": "selectWorkspacePolicyList",
-			}).Errorf("WorkspacePolicy Select Query 이후 Scan 중 에러가 발생했습니다. [%v]", err)
-		}
-
-		workspaceList = append(workspaceList, workspace)
-	}
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "selectWorkspacePolicyList",
-	}).Infof("selectWorkspacePolicyList Query result [%v]", workspaceList)
-
-	return workspaceList, err
-}
+//func selectWorkspacePolicyList(workspaceUuid string) (PolicyName, error) {
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "selectWorkspacePolicyList",
+//	}).Infof("payload workspaceUuid [%v]", workspaceUuid)
+//	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+//	if err != nil {
+//		log.WithFields(logrus.Fields{
+//			"workspaceImpl": "selectWorkspacePolicyList",
+//		}).Errorf("selectWorkspacePolicyList DB Connect Error [%v]", err)
+//	}
+//	defer db.Close()
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "selectWorkspacePolicyList",
+//	}).Infof("select selectWorkspacePolicyList DB Connect success")
+//
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "selectWorkspacePolicyList",
+//	}).Warnf("payload workspaceUuid [%v]", workspaceUuid)
+//
+//	policyString := " id, workspaces_uuid, rdp_port, rdp_access_allow, clipboard_redirection," +
+//		" windows_installer, network_file_share, network_printer_share, local_printer, windows_auto_update" +
+//		" removable_storage, cmd_use, settings_use, pc_power_use, remotefx," +
+//		" console, initial_program, server_layout, color_depth, width," +
+//		" height, dpi, resize_method, force_lossless, disable_audio," +
+//		" enable_audio_input, enable_printing, printer_name, enable_drive, disable_download," +
+//		" disable_upload, drive_path, create_drive_path, console_audio, enable_wallpaper," +
+//		" enable_theming, enable_font_smoothing, enable_full_window_drag, enable_desktop_composition, enable_menu_animations"
+//
+//	queryString := "SELECT" +
+//		policyString +
+//		" FROM workspaces_policy" +
+//		" WHERE removed IS NULL" +
+//		" AND workspaces_uuid = '" + workspaceUuid + "'" +
+//		" ORDER BY id DESC"
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "selectWorkspacePolicyList",
+//	}).Infof("select WorkspacePolicyList Query [%v]", queryString)
+//	rows, err := db.Query(queryString)
+//	if err != nil {
+//		log.WithFields(logrus.Fields{
+//			"workspaceImpl": "selectWorkspacePolicyList",
+//		}).Errorf("WorkspacePolicyList Select Query FAILED [%v]", err)
+//	}
+//
+//	policyName := PolicyName{}
+//	err = rows.Scan(
+//		&policyName.Id, &policyName.WorkspaceUuid, &policyName.RdpPort, &policyName.RdpAccessAllow, &policyName.ClipboardRedirection,
+//		&policyName.WindowsInstaller, &policyName.NetworkFileShare, &policyName.NetworkPrinterShare, &policyName.LocalPrinter, &policyName.WindowsAutoUpdate,
+//		&policyName.RemovableStorage, &policyName.CmdUse, &policyName.SettingsUse, &policyName.PcPowerUse, &policyName.Remotefx,
+//		&policyName.Console, &policyName.InitialProgram, &policyName.ServerLayout, &policyName.ColorDepth, &policyName.Width,
+//		&policyName.Height, &policyName.Dpi, &policyName.ResizeMethod, &policyName.ForceLossless, &policyName.DisableAudio,
+//		&policyName.EnableAudioInput, &policyName.EnablePrinting, &policyName.PrinterName, &policyName.EnableDrive, &policyName.DisableDownload,
+//		&policyName.DisableUpload, &policyName.DrivePath, &policyName.CreateDrivePath, &policyName.ConsoleAudio, &policyName.EnableWallpaper,
+//		&policyName.EnableTheming, &policyName.EnableFontSmoothing, &policyName.EnableFullWindowDrag, &policyName.EnableDesktopComposition, &policyName.EnableMenuAnimations)
+//	if err != nil {
+//		log.WithFields(logrus.Fields{
+//			"workspaceImpl": "selectWorkspacePolicyList",
+//		}).Errorf("WorkspacePolicy Select Query 이후 Scan 중 에러가 발생했습니다. [%v]", err)
+//	}
+//
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "selectWorkspacePolicyList",
+//	}).Infof("selectWorkspacePolicyList Query result [%v]", policyName)
+//
+//	return policyName, err
+//}
 
 func selectCountWorkspace() (int, error) {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
@@ -363,36 +371,36 @@ func insertWorkspace(workspace Workspace) (map[string]interface{}, error) {
 	return resultData, err
 }
 
-func insertWorkspacePolicy(workspace Workspace) (map[string]interface{}, error) {
-	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
-	resultData := map[string]interface{}{}
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"workspaceImpl": "insertWorkspacePolicy",
-		}).Errorf("insertWorkspacePolicy DB connect error [%v]", err)
-		resultData["message"] = "DB connect error"
-		resultData["status"] = BaseErrorCode
-	}
-	defer db.Close()
-
-	result, err := db.Exec("INSERT INTO workspaces_policy(workspaces_uuid, rdp_port, rdp_access_allow) VALUES (?, ?, ?)",
-		workspace.Uuid, workspace.Policy.RdpPort, workspace.Policy.RdpAccessAllow)
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"workspaceImpl": "insertWorkspacePolicy",
-		}).Errorf("워크스페이스 정 DB Insert 중 오류가 발생하였습니다. [%v]", err)
-		resultData["message"] = "An error occurred while inserting the DB after generating the UUID."
-		resultData["status"] = BaseErrorCode
-	}
-	n, err := result.RowsAffected()
-	if n == 1 {
-		log.Info("워크스페이스가 정상적으로 생성되었습니다.")
-		resultData["message"] = "The workspace has been successfully created."
-		resultData["status"] = http.StatusOK
-	}
-
-	return resultData, err
-}
+//func insertWorkspacePolicy(workspace Workspace) (map[string]interface{}, error) {
+//	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+//	resultData := map[string]interface{}{}
+//	if err != nil {
+//		log.WithFields(logrus.Fields{
+//			"workspaceImpl": "insertWorkspacePolicy",
+//		}).Errorf("insertWorkspacePolicy DB connect error [%v]", err)
+//		resultData["message"] = "DB connect error"
+//		resultData["status"] = BaseErrorCode
+//	}
+//	defer db.Close()
+//
+//	result, err := db.Exec("INSERT INTO workspaces_policy(workspaces_uuid) VALUES (?)",
+//		workspace.Uuid)
+//	if err != nil {
+//		log.WithFields(logrus.Fields{
+//			"workspaceImpl": "insertWorkspacePolicy",
+//		}).Errorf("워크스페이스 정 DB Insert 중 오류가 발생하였습니다. [%v]", err)
+//		resultData["message"] = "An error occurred while inserting the DB after generating the UUID."
+//		resultData["status"] = BaseErrorCode
+//	}
+//	n, err := result.RowsAffected()
+//	if n == 1 {
+//		log.Info("워크스페이스가 정상적으로 생성되었습니다.")
+//		resultData["message"] = "The workspace has been successfully created."
+//		resultData["status"] = http.StatusOK
+//	}
+//
+//	return resultData, err
+//}
 
 func insertInstance(instance Instance) map[string]interface{} {
 	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
@@ -736,34 +744,34 @@ func deleteWorkspace(workspaceUuid string) map[string]interface{} {
 	return resultReturn
 }
 
-func deleteWorkspacePolicy(workspaceUuid string) map[string]interface{} {
-	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
-	resultReturn := map[string]interface{}{}
-	if err != nil {
-		log.Error("DB connect error")
-		log.Error(err)
-		resultReturn["message"] = MsgDBConnectError
-		resultReturn["status"] = BaseErrorCode
-	}
-	log.WithFields(logrus.Fields{
-		"workspaceImpl": "deleteWorkspacePolicy",
-	}).Infof("workspaceUuid [%v]", workspaceUuid)
-	defer db.Close()
-
-	result, err := db.Exec("UPDATE workspaces_policy SET removed=NOW() WHERE workspaces_uuid=?", workspaceUuid)
-	if err != nil {
-		log.Error(MsgDBConnectError)
-		log.Error(err)
-		resultReturn["message"] = MsgDBConnectError
-		resultReturn["status"] = SQLQueryError
-	}
-	n1, _ := result.RowsAffected()
-	if n1 == 1 {
-		resultReturn["status"] = http.StatusOK
-	}
-
-	return resultReturn
-}
+//func deleteWorkspacePolicy(workspaceUuid string) map[string]interface{} {
+//	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
+//	resultReturn := map[string]interface{}{}
+//	if err != nil {
+//		log.Error("DB connect error")
+//		log.Error(err)
+//		resultReturn["message"] = MsgDBConnectError
+//		resultReturn["status"] = BaseErrorCode
+//	}
+//	log.WithFields(logrus.Fields{
+//		"workspaceImpl": "deleteWorkspacePolicy",
+//	}).Infof("workspaceUuid [%v]", workspaceUuid)
+//	defer db.Close()
+//
+//	result, err := db.Exec("UPDATE workspaces_policy SET removed=NOW() WHERE workspaces_uuid=?", workspaceUuid)
+//	if err != nil {
+//		log.Error(MsgDBConnectError)
+//		log.Error(err)
+//		resultReturn["message"] = MsgDBConnectError
+//		resultReturn["status"] = SQLQueryError
+//	}
+//	n1, _ := result.RowsAffected()
+//	if n1 == 1 {
+//		resultReturn["status"] = http.StatusOK
+//	}
+//
+//	return resultReturn
+//}
 
 func selectPortForwardingNumber() int {
 

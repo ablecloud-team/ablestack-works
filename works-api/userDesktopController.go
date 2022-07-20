@@ -26,10 +26,8 @@ func getUserDesktop(c *gin.Context) {
 		for _, workspaceUuid := range workspaceUuidList {
 			userPassword, _ := selectUserPassword(userName)
 			workspaceInfo, _ := selectWorkspaceList(workspaceUuid)
-			workspacePolicy, _ := selectWorkspacePolicyList(workspaceUuid)
-			workspaceInfo[0].Policy.RdpPort = workspacePolicy[0].Policy.RdpPort
-			workspaceInfo[0].Policy.RdpAccessAllow = workspacePolicy[0].Policy.RdpAccessAllow
 			instanceList, _ := selectUserDesktopListForWorkspace(workspaceInfo[0].Uuid, userName)
+			policyList := policyList(workspaceInfo[0].Uuid)
 			for _, instanceInfo := range instanceList {
 				instanceInfo.Password = userPassword
 				paramsMold := []MoldParams{
@@ -42,6 +40,7 @@ func getUserDesktop(c *gin.Context) {
 				instanceInfo.MoldStatus = listVirtualMachinesMetrics.Virtualmachine[0].State
 				workspaceInfo[0].InstanceList = append(workspaceInfo[0].InstanceList, instanceInfo)
 			}
+			workspaceInfo[0].PolicyList = append(workspaceInfo[0].PolicyList, policyList...)
 			workspaceList = append(workspaceList, workspaceInfo[0])
 		}
 	}
