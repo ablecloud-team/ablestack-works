@@ -255,3 +255,8 @@ type ListPublicIpAddressesResponse struct {
 		Hasannotations        bool          `json:"hasannotations"`
 	} `json:"publicipaddress"`
 }
+
+type DatabaseReturnValue struct {
+	status  int    `json:"status"`
+	message string `json:"message"`
+}
