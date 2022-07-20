@@ -1,0 +1,15 @@
+{
+  "database": {
+    "type": "mysql",
+    "user":{
+      "id":"works",
+      "password":"Ablecloud1!"
+    },
+    "host":{
+      "address": "10.88.2.12",
+      "port": "3306",
+      "protocol": "tcp"
+    },
+    "db": "works"
+  }
+}
