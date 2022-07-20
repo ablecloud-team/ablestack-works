@@ -1,11 +1,15 @@
 works-api/works-api
 works-shell/works-shell.exe
 works-shell/works-shell
+works-api/docs/docs.go
+works-api/docs/swagger.json
+works-api/docs/swagger.yaml
+works-api/docs/*
 Works-ui/node_modules/*
-.idea/
+works-api/.idea/*.xml
+works-api/.idea/**/*.xml
 samba-ad.zip
 *.exe
 *.log
 *.msi
 *.zip
-works-api/docs/docs.go
