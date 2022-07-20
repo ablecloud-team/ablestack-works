@@ -105,167 +105,6 @@
                 }
             }
         },
-        "/api/v1/application": {
-            "post": {
-                "description": "워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Application 가상화를 등록하는 API",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace 의 Uuid",
-                        "name": "workspaceUuid",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application 이름",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application 경로",
-                        "name": "path",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application workingDirectory",
-                        "name": "workingDirectory",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application RegApplicationServer",
-                        "name": "RegApplicationServer",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Application 가상화를 등록하는 API",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Application 이름",
-                        "name": "name",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application 경로",
-                        "name": "path",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application workingDirectory",
-                        "name": "workingDirectory",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Application RegApplicationServer",
-                        "name": "RegApplicationServer",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/application/:workspaceUuid": {
-            "get": {
-                "description": "Application List 를 조회하는 API 입니다.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Application List  조회하는 API",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/applicationServer/:workspaceUuid": {
-            "get": {
-                "description": "Application List 를 조회하는 API 입니다.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Application"
-                ],
-                "summary": "Application List  조회하는 API",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/configuration": {
             "get": {
                 "description": "Works 의 환경 설정을 조회하는 API 입니다.",
@@ -689,7 +528,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다.",
+                        "description": "action 해당 값은 [VMStart, VMStop, VMDestroy, VMReboot] 으로 보내야 합니다.",
                         "name": "action",
                         "in": "path",
                         "required": true
@@ -1005,6 +844,30 @@
                         "required": true
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/userdesktop/:userName": {
+            "get": {
+                "description": "유저에게 할당된 Desktop 목록을 조회하는 API",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "userDesktop"
+                ],
+                "summary": "유저 Desktop 목록을 조회하는 API",
                 "responses": {
                     "200": {
                         "description": "OK",

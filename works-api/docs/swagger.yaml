@@ -70,116 +70,6 @@ paths:
       summary: instance 에 사용자를 할당하는 API
       tags:
       - Connection
-  /api/v1/application:
-    delete:
-      consumes:
-      - application/json
-      description: 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
-      parameters:
-      - description: Application 이름
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: Application 경로
-        in: path
-        name: path
-        required: true
-        type: string
-      - description: Application workingDirectory
-        in: path
-        name: workingDirectory
-        required: true
-        type: string
-      - description: Application RegApplicationServer
-        in: path
-        name: RegApplicationServer
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Application 가상화를 등록하는 API
-      tags:
-      - Application
-    post:
-      consumes:
-      - application/json
-      description: 워크스페이스 수, 데스크톱 수, 데스크톱 연결 수, APP 연결 수 정보를 제공하는 API 입니다.
-      parameters:
-      - description: Workspace 의 Uuid
-        in: path
-        name: workspaceUuid
-        required: true
-        type: string
-      - description: Application 이름
-        in: path
-        name: name
-        required: true
-        type: string
-      - description: Application 경로
-        in: path
-        name: path
-        required: true
-        type: string
-      - description: Application workingDirectory
-        in: path
-        name: workingDirectory
-        required: true
-        type: string
-      - description: Application RegApplicationServer
-        in: path
-        name: RegApplicationServer
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Application 가상화를 등록하는 API
-      tags:
-      - Application
-  /api/v1/application/:workspaceUuid:
-    get:
-      consumes:
-      - application/json
-      description: Application List 를 조회하는 API 입니다.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Application List  조회하는 API
-      tags:
-      - Application
-  /api/v1/applicationServer/:workspaceUuid:
-    get:
-      consumes:
-      - application/json
-      description: Application List 를 조회하는 API 입니다.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Application List  조회하는 API
-      tags:
-      - Application
   /api/v1/configuration:
     get:
       consumes:
@@ -460,7 +350,7 @@ paths:
       - application/json
       description: instance 의 상태를 변경하는 API 입니다.
       parameters:
-      - description: action 해당 값은 [VMStart, VMStop, VMDestroy] 으로 보내야 합니다.
+      - description: action 해당 값은 [VMStart, VMStop, VMDestroy, VMReboot] 으로 보내야 합니다.
         in: path
         name: action
         required: true
@@ -689,6 +579,22 @@ paths:
       summary: 사용자 상세조회 하는 API
       tags:
       - User
+  /api/v1/userdesktop/:userName:
+    get:
+      consumes:
+      - application/json
+      description: 유저에게 할당된 Desktop 목록을 조회하는 API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: 유저 Desktop 목록을 조회하는 API
+      tags:
+      - userDesktop
   /api/v1/workspace:
     delete:
       consumes:
