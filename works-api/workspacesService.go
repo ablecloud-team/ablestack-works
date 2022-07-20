@@ -7,22 +7,11 @@ import (
 	"time"
 )
 
-func destroyWorkspaces(workspaceInfo Workspace) {
-	ResultDeleteGroup, errDeleteGroup := deleteGroup(workspaceInfo.Name)
-	ResultDeleteWorkspace := deleteWorkspace(workspaceInfo.Uuid)
-	log.Infof("%v%v%v", ResultDeleteGroup, errDeleteGroup, ResultDeleteWorkspace)
-}
-
 func selectWorkspaceInfo(workspaceUuid string) Workspace {
 
 	workspaceList, _ := selectWorkspaceList(workspaceUuid)
 
 	workspaceInfo := workspaceList[0]
-
-	workspacePolicyList, _ := selectWorkspacePolicyList(workspaceUuid)
-
-	workspaceInfo.Policy.RdpPort = workspacePolicyList[0].Policy.RdpPort
-	workspaceInfo.Policy.RdpAccessAllow = workspacePolicyList[0].Policy.RdpAccessAllow
 
 	return workspaceInfo
 
@@ -61,10 +50,20 @@ func selectPublicPort(instanceInfo Instance, workspaceInfo Workspace) int {
 
 	//portForwardingNumber := selectPortForwardingNumber()
 
+	policyList := policyList(workspaceInfo.Uuid)
+
+	var rdpPort string
+
+	for _, policyInfo := range policyList {
+		if policyInfo.Name == "rdp_port" {
+			rdpPort = policyInfo.Value
+		}
+	}
+
 	paramsCreatePortForwardingRule := []MoldParams{
 		{"ipaddressid": listPublicIpqAddressesResponse.Publicipaddress[0].Id},
 		{"networkid": listNetworksResponse.Network[0].Id},
-		{"privateport": strconv.Itoa(workspaceInfo.Policy.RdpPort)},
+		{"privateport": rdpPort},
 		{"protocol": "tcp"},
 		{"publicport": strconv.Itoa(publicPort)},
 		{"virtualmachineid": instanceInfo.MoldUuid},
