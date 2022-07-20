@@ -500,3 +500,78 @@ func delDeleteUserToGroup(c *gin.Context) {
 		"result": result,
 	})
 }
+
+// patchPasswordUser godoc
+// @Summary 사용자 비밀번호를 변경 하는 API
+// @Description 사용자 비밀번호를 변경하는 API 입니다.
+// @Accept  json
+// @Tags User
+// @Produce  json
+// @Param userName path string true "사용자 계정"
+// @Param oldPassword path string true "기존 비밀번호"
+// @Param userName path string true "새로운 비밀번호"
+// @Router /api/v1/passwordUser/:userName [patch]
+// @Success 200 {object} map[string]interface{}
+func patchPasswordUser(c *gin.Context) {
+	userName := c.Param("userName")
+	oldPassword := c.PostForm("oldPassword")
+	newPassword := c.PostForm("newPassword")
+	//log.Infof("deleteDCUserResult [%v], err [%v]", deleteDCUserResult, err)
+	//result["status"] = http.StatusOK
+	resultLogin, err := postLogin(userName, oldPassword)
+	result := map[string]interface{}{}
+	if err != nil {
+		log.Errorf("result [%v], error [%v]", result, err)
+		result["message"] = "Communication with the DC server failed."
+		c.JSON(http.StatusBadRequest, gin.H{
+			"result": result,
+		})
+		return
+	} else {
+
+		var res map[string]interface{}
+		json.NewDecoder(resultLogin.Body).Decode(&res)
+
+		user := User{}
+		userInfo, _ := json.Marshal(res)
+		json.Unmarshal(userInfo, &user)
+		loginBool := user.Login
+		if loginBool == false {
+			result["message"] = " "
+			c.JSON(http.StatusNotFound, gin.H{
+				"result": result,
+			})
+			return
+		} else if loginBool == true {
+			userPasswordChange(userName, newPassword)
+			user.ClusterName = os.Getenv("ClusterName")
+			user.DomainName = os.Getenv("SambaDomain")
+			c.JSON(http.StatusOK, gin.H{
+				"result": user,
+			})
+			return
+		}
+	}
+	c.JSON(http.StatusNoContent, gin.H{
+		"result": "user password change failure",
+	})
+}
+
+// patchPasswordAdmin godoc
+// @Summary 사용자 비밀번호를 변경 하는 API
+// @Description 사용자 비밀번호를 변경하는 API 입니다.
+// @Accept  json
+// @Tags User
+// @Produce  json
+// @Param userName path string true "사용자 계정"
+// @Param userName path string true "새로운 비밀번호"
+// @Router /api/v1/passwordAdmin/:userName [patch]
+// @Success 200 {object} map[string]interface{}
+func patchPasswordAdmin(c *gin.Context) {
+	userName := c.Param("userName")
+	newPassword := c.PostForm("newPassword")
+	userPasswordChange(userName, newPassword)
+	c.JSON(http.StatusOK, gin.H{
+		"result": "password change result",
+	})
+}
