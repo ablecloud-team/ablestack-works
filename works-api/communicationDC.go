@@ -1,13 +1,14 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -145,6 +146,46 @@ func insertPolicyRemotefx(groupName string) (*http.Response, error) {
 	return resp, err
 }
 
+func insertPolicyDC(groupName string, policy Policy) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 20 * time.Second,
+	}
+	params := url.Values{
+		"groupname": {groupName},
+	}
+	log.Infof("paramsInfo = [%v]", params)
+
+	req, err := http.NewRequest(http.MethodPut, fmt.Sprintf("%v/v1/policy/%v/%v", DCInfo, policy.AdGroupName, groupName), nil)
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	log.WithFields(logrus.Fields{
+		"dcDAO": "insertPolicyRemotefx",
+	}).Infof("workspace group add remotrfx status. resp [%v], err [%v]", resp, err)
+	return resp, err
+}
+
+func deletePolicyDC(groupName string, policy Policy) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 20 * time.Second,
+	}
+	params := url.Values{
+		"groupname": {groupName},
+	}
+	log.Infof("paramsInfo = [%v]", params)
+
+	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("%v/v1/policy/%v/%v", DCInfo, policy.AdGroupName, groupName), nil)
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := client.Do(req)
+	log.WithFields(logrus.Fields{
+		"dcDAO": "insertPolicyRemotefx",
+	}).Infof("workspace group add remotrfx status. resp [%v], err [%v]", resp, err)
+	return resp, err
+}
+
 func selectDCWorkspacePolicyList(workspace Workspace) (*http.Response, error) {
 	var DCInfo = os.Getenv("DCUrl")
 
@@ -240,30 +281,6 @@ func deleteAddUserToGroup(groupName string, userName string) (*http.Response, er
 	return resp, err1
 }
 
-func insertUserDB(user User) map[string]interface{} {
-	db, err := sql.Open(os.Getenv("MysqlType"), os.Getenv("DbInfo"))
-	resultReturn := map[string]interface{}{}
-	if err != nil {
-		log.Error("DB connect error")
-		log.Error(err)
-		resultReturn["message"] = "DB connect error"
-	}
-	defer db.Close()
-	result, err := db.Exec("INSERT INTO users(uuid, user_name, password, create_date) VALUES (?, ?, ?, now())", getUuid(), user.Cn, user.Password)
-	if err != nil {
-		log.Errorf("유저를 DB 등록중에러가 발생했습니다. [%v]", err)
-		resultReturn["message"] = "An error occurred while registering Async Job."
-		resultReturn["status"] = SQLQueryError
-	}
-	n, _ := result.RowsAffected()
-	if n == 1 {
-		log.Info("유저가 정상적으로 등록되었습니다.")
-		resultReturn["status"] = http.StatusOK
-		resultReturn["message"] = "The async job has been successfully registered."
-	}
-	return resultReturn
-}
-
 func insertUserAllocatedInstance1(username string, instanceUuid string) *http.Response {
 	var DCInfo = os.Getenv("DCUrl")
 	client := http.Client{
@@ -343,6 +360,28 @@ func selectPasswordConvert(password string) (*http.Response, error) {
 	resp, err := client.Get(aaa + bbb + "&timeout=20")
 
 	log.Infof("resp [%v], err [%v]", resp, err)
+
+	return resp, err
+}
+
+func patchUserPassword(userName string, newPassword string) (*http.Response, error) {
+	var DCInfo = os.Getenv("DCUrl")
+	client := http.Client{
+		Timeout: 30 * time.Second,
+	}
+	params := url.Values{
+		"password": {newPassword},
+	}
+	req, _ := http.NewRequest(http.MethodPatch, fmt.Sprintf("%v/v1/user/%v", DCInfo, userName), strings.NewReader(params.Encode()))
+
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(params.Encode())))
+	resp, err := client.Do(req)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"communicationMold.go": "patchUserPassword",
+		}).Errorf("An error occurred while deleting the connection. resp [%v], err [%v]", resp, err)
+	}
 
 	return resp, err
 }
