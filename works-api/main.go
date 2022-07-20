@@ -109,6 +109,9 @@ func main() {
 			v1.PUT("/user", putUser)
 			v1.DELETE("/user/:userName", deleteUser)
 
+			v1.PATCH("/passwordUser/:userName", patchPasswordUser)
+			v1.PATCH("/passwordAdmin/:userName", patchPasswordAdmin)
+
 			v1.GET("/group", getGroup)
 			v1.GET("/group/:groupName", getGroupDetail)
 			v1.DELETE("/group/:groupName", delGroupDetail)
@@ -116,6 +119,8 @@ func main() {
 			v1.PUT("/group/:groupName/:userName", putAddUserToGroup)
 
 			v1.GET("/userdesktop/:userName", getUserDesktop)
+
+			v1.PATCH("/policy/:workspaceUuid", patchPolicy)
 		}
 		test := api.Group("/test")
 		{
