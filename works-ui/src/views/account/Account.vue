@@ -50,7 +50,7 @@
                       addModalView = true;
                     }
                   "
-                  >{{ $t("label.user.add") }}
+                  >{{ $t("label.account.create") }}
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -69,7 +69,7 @@
     <!-- ADD MODAL START  -->
     <a-modal
       v-model:visible="addModalView"
-      :title="$t('label.user.add')"
+      :title="$t('label.account.create')"
       :confirm-loading="confirmLoading"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
@@ -413,6 +413,7 @@ export default defineComponent({
               if (response.status === 200) {
                 //중복일 때
                 this.$message.error(this.$t("message.name.dupl"));
+                this.confirmLoading = false;
               }
             })
             .catch((error) => {

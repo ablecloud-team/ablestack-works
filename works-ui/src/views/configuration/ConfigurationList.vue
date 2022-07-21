@@ -75,7 +75,7 @@
 
 <script>
 import { cloneDeep } from "lodash-es";
-import { defineComponent, ref, reactive } from "vue";
+import { defineComponent, ref, reactive, h } from "vue";
 import Actions from "@/components/Actions";
 export default defineComponent({
   components: {
@@ -223,8 +223,12 @@ export default defineComponent({
           this.$message.success(
             this.$t("message.configuration.data.update.success", {
               name: this.editableData[name].name,
-            })
+            }),
+            5
           );
+          this.$notification.warning({
+            description: this.$t("message.configuration.data.update.success.restart"),
+          });
         } else {
           this.$message.error(
             this.$t("message.configuration.data.update.fail", {

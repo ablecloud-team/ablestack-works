@@ -317,7 +317,7 @@ export default defineComponent({
                 //worksapp 프로토콜이 설치안됨
                 const key = `open${Date.now()}`;
                 this.$notification.info({
-                  message: "RDP 클라이언트 설치 안내",
+                  message: this.$t("message.userdesktop.rdpclient.install.info"),
                   description: h("div", [
                     this.$t("message.userdesktop.client.install.notice1"),
                     h("br"),

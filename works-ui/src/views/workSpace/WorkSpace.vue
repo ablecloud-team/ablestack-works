@@ -25,7 +25,7 @@
                       addModalView = true;
                     }
                   "
-                  >{{ $t("label.workspace.add") }}
+                  >{{ $t("label.workspace.create") }}
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -44,7 +44,7 @@
     <!-- ADD WORKSPACE MODAL START  -->
     <a-modal
       v-model:visible="addModalView"
-      :title="$t('label.workspace.add')"
+      :title="$t('label.workspace.create')"
       :confirm-loading="confirmLoading"
       :ok-text="$t('label.ok')"
       :cancel-text="$t('label.cancel')"
