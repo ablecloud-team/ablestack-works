@@ -77,7 +77,7 @@ import states from "@/client/states";
 import UserClientSetting from "./UserClientSetting.vue";
 
 const hostname = process.env.VUE_APP_API_URL == "" ? window.location.hostname : process.env.VUE_APP_API_URL;
-const wsUrl = "ws://" + hostname + ":8088/";
+const wsUrl = "ws://" + hostname + ":8081/";
 export default defineComponent({
   components: {
     UserClientSetting,
