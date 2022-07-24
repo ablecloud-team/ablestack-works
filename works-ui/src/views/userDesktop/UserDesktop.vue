@@ -174,13 +174,34 @@
                         <template #title>{{ vm.handshake_status }}</template>
                         <a-badge
                           class="head-example"
+                          :color="
+                            ['Joining', 'Joined'].includes(vm.handshake_status) ? 'yellow' : vm.handshake_status === 'Ready' ? 'green' : 'red'
+                            // vm.handshake_status === 'Joining' || vm.handshake_status === 'Joined' ? 'yellow' : vm.handshake_status === 'Ready' ? 'green' : 'red'
+                          "
+                          :text="
+                            vm.handshake_status === 'Not Ready' || vm.handshake_status === 'Pending'
+                              ? $t('label.vm.status.initializing') + '(' + vm.handshake_status + ')'
+                              : vm.handshake_status === 'Joining' || vm.handshake_status === 'Joined'
+                              ? $t('label.vm.status.configuring') + '(' + vm.handshake_status + ')'
+                              : vm.handshake_status === 'Ready'
+                              ? $t('label.vm.status.ready')
+                              : $t('label.vm.status.notready')
+                          "
+                        />
+                      </a-tooltip>
+
+                      <!-- 
+                      <a-tooltip placement="bottom">
+                        <template #title>{{ vm.handshake_status }}</template>
+                        <a-badge
+                          class="head-example"
                           :color="vm.handshake_status == 'Ready' ? 'green' : 'red'"
                           :text="vm.handshake_status == 'Ready' ? $t('label.vm.status.ready') : $t('label.vm.status.notready')"
                         />({{ vm.mold_status }})
-                      </a-tooltip>
+                      </a-tooltip> -->
 
                       <br />
-                      <WindowsFilled /> {{ vm.ostype }}
+                      <!-- <WindowsFilled /> {{ vm.ostype }} -->
                     </a-card>
                   </a-col>
                 </a-row>
