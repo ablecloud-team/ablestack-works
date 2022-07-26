@@ -695,7 +695,8 @@ export default defineComponent({
       this.succCnt = 0;
     },
     //데스크톱 가상머신 개수선택해 추가
-    wsVmAdd() {
+    wsVmAdd(e) {
+      e.preventDefault();
       this.confirmLoading = true;
 
       this.sucMessage = "message.workspace.vm.add.success";
@@ -800,7 +801,7 @@ export default defineComponent({
     async editSave(name) {
       Object.assign(this.dataList.filter((item) => name === item.name)[0], this.editableData[name]);
 
-      console.log(this.$route.params.workspaceUuid, this.editableData[name].name, this.editableData[name].value);
+      // console.log(this.$route.params.workspaceUuid, this.editableData[name].name, this.editableData[name].value);
       let params = new URLSearchParams();
 
       params.append("policyName", this.editableData[name].name);

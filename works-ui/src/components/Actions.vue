@@ -342,7 +342,7 @@ export default defineComponent({
       this.$emit("fetchData");
     },
     fetchData() {
-      console.log(this.actionFrom, this.wsInfo, this.multiSelectList);
+      // console.log(this.actionFrom, this.wsInfo, this.multiSelectList);
 
       if (this.actionFrom.includes("WS")) {
         if (this.wsInfo) {
@@ -445,11 +445,11 @@ export default defineComponent({
               })
               .catch((error) => {
                 console.log("[API 호출 에러] :>> /api/v1/group/ ");
-                this.$message.error(
-                  this.$t("message.worksapi.call.error", {
-                    api: "/api/v1/group/",
-                  })
-                );
+                // this.$message.error(
+                //   this.$t("message.worksapi.call.error", {
+                //     api: "/api/v1/group/",
+                //   })
+                // );
               });
           }
         }
@@ -737,7 +737,7 @@ export default defineComponent({
 
       var apiUrl = "";
       const arrAsync = [];
-      console.log("this.eventList :>> ", this.eventList);
+      // console.log("this.eventList :>> ", this.eventList);
       for (let val of this.eventList) {
         if (val.quantity === 0) {
           apiUrl = "/api/v1/workspace/" + val.uuid;
