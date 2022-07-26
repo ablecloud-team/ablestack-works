@@ -105,7 +105,7 @@ func handshakeVdi(instanceInfo Instance, vdiType string) {
 			}
 			reqGetGpupdate.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 			resp, err1 := client.Do(reqGetGpupdate)
-			log.Warnf("resp [%v], err1 [%v]", resp.StatusCode, err1)
+			log.Warnf("resp [%v], err1 [%v]", resp, err1)
 			if err1 != nil {
 				log.WithFields(logrus.Fields{
 					"VDI_IP": vdiUrl,
