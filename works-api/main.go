@@ -9,8 +9,6 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"net/http"
-	"os"
-	"os/exec"
 	//_ "works-api/docs"
 )
 
@@ -21,20 +19,6 @@ var (
 	//nodeContextCancel
 	nodeContextCancel context.CancelFunc
 )
-
-func StartClientApp() (*exec.Cmd, error) {
-	var err error
-
-	cmd := exec.Command("npm", "run", "serve")
-	cmd.Dir = "./app"
-	cmd.Stdout = os.Stdout
-
-	if err = cmd.Start(); err != nil {
-		return cmd, fmt.Errorf("error starting NPM: %w", err)
-	}
-
-	return cmd, nil
-}
 
 func main() {
 	var (
@@ -53,8 +37,6 @@ func main() {
 
 	router := gin.Default()
 	router.Use(SetHeader)
-	//router.LoadHTMLGlob("templates/*")
-	//router.Use(static.Serve("/", static.LocalFile("./app/dist/", true)))
 	router.Use(static.Serve("/swagger/", static.LocalFile("./docs", true)))
 	api := router.Group("/api")
 	{

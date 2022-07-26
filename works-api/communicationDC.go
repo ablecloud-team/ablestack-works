@@ -70,7 +70,11 @@ func getUserList() ([]User, error) {
 			"authDAO": "getUserList",
 		}).Errorf("DC communication failed. [%v], error [%v]", resp, err)
 	} else {
-		json.NewDecoder(resp.Body).Decode(&res)
+		err := json.NewDecoder(resp.Body).Decode(&res)
+		if err != nil {
+			return nil, err
+		}
+
 		jsonMarshal, _ := json.Marshal(res)
 		json.Unmarshal([]byte(jsonMarshal), &userInfoList)
 		log.WithFields(logrus.Fields{

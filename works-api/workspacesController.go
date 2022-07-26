@@ -184,8 +184,8 @@ func postWorkspaces(c *gin.Context) {
 
 	resultInsertGroup, err := insertGroup(workspace.Name)
 	if resultInsertGroup.Status == Created201 {
-		resultInsertPolicyRemotefx, _ := insertPolicyRemotefx(workspace.Name)
-		log.Infof("resultInsertPolicyRemotefx [%v]", resultInsertPolicyRemotefx)
+		resultInsertPolicyRemotefx, err := insertPolicyRemotefx(workspace.Name)
+		log.Infof("resultInsertPolicyRemotefx [%v], [%v]", resultInsertPolicyRemotefx, err)
 	}
 
 	if err != nil {
