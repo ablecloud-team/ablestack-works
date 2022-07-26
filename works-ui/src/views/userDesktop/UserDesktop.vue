@@ -216,6 +216,7 @@
 
 <script>
 import { defineComponent, ref, h } from "vue";
+import { Button } from "ant-design-vue";
 import customProtocolCheck from "custom-protocol-check";
 import Icon from "@ant-design/icons-vue";
 import Apath from "@/components/Apath";
@@ -337,7 +338,7 @@ export default defineComponent({
                 this.$message.warning(this.$t("message.userdesktop.rdp.connect.client.notinstall"));
                 //worksapp 프로토콜이 설치안됨
                 const key = `open${Date.now()}`;
-                this.$notification.info({
+                this.$notification.open({
                   message: this.$t("message.userdesktop.rdpclient.install.info"),
                   description: h("div", [
                     this.$t("message.userdesktop.client.install.notice1"),
@@ -345,6 +346,8 @@ export default defineComponent({
                     this.$t("message.userdesktop.client.install.notice2"),
                     h("br"),
                     this.$t("message.userdesktop.client.install.notice3"),
+                    h("br"),
+                    this.$t("message.userdesktop.client.install.notice4"),
                   ]),
                   duration: 0,
                   style: {
@@ -373,7 +376,7 @@ export default defineComponent({
         })
         .catch((error) => {
           console.log(error);
-          this.$message.error(this.$t("fail"));
+          this.$message.error(this.$t("message.response.data.fail"));
         })
         .finally(() => {});
     },
