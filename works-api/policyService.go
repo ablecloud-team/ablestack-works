@@ -28,6 +28,9 @@ func updatePolicy(workspace Workspace, policy Policy) map[string]interface{} {
 	updateResult, _ := insertPolicy(policy)
 	defaultPolicyInfo, _ := selectDefaultPolicyInfo(policy.Name)
 	log.Debugf("workspace.Name [%v], policy.Value [%v]", workspace.Name, policy.Value)
+	if policy.Name == "" {
+		//TODO 정책 기간별 설정 필요
+	}
 	if defaultPolicyInfo.Value == policy.Value {
 		deletePolicyDC(workspace.Name, defaultPolicyInfo)
 	} else {
