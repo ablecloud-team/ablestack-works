@@ -39,10 +39,10 @@
                     :title="$t('label.status.ad')"
                     :description="descStep3"
                   />
-                  <a-step
+                  <!-- <a-step
                     :title="$t('label.status.guac')"
                     :description="descStep4"
-                  />
+                  /> -->
                 </a-steps>
               </a-card>
             </a-col>
