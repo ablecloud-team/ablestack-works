@@ -230,7 +230,12 @@ export default defineComponent({
   methods: {
     initForm() {
       this.formRef = ref();
-      this.form = reactive({});
+      this.form = reactive({
+        email: "",
+        phone: "",
+        title: "",
+        department: "",
+      });
       this.rules = reactive({
         account: { max: 32, required: true, validator: this.validateAccount, trigger: "change", message: this.$t("input.user.account") },
         firstName: { max: 32, required: true, validator: this.validateName, trigger: "change", message: this.$t("input.user.firstname") },
@@ -392,6 +397,7 @@ export default defineComponent({
       }, 100);
     },
     createAccount() {
+      console.log("this.form :>> ", this.form);
       let params = new URLSearchParams();
       params.append("username", this.form.account);
       params.append("firstName", this.form.firstName);
