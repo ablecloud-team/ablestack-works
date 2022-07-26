@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -95,7 +96,10 @@ func handshakeVdi(instanceInfo Instance, vdiType string) {
 			log.WithFields(logrus.Fields{
 				"VDI_IP": vdiUrl,
 			}).Infof("VDI AD join status. [%v]", statusString)
-			reqGetGpupdate, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%v/v1/cmd/?timeout=60&cmd=%v", vdiUrl, url.QueryEscape("gpupdate /force")), nil)
+			params := url.Values{
+				"domain": {os.Getenv("SambaDomain")},
+			}
+			reqGetGpupdate, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%v/v1", vdiUrl), strings.NewReader(params.Encode()))
 			if err != nil {
 				log.Errorf("An error occurred while setting the URL. [%v]", err)
 			}
