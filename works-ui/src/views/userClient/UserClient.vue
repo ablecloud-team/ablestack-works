@@ -920,9 +920,10 @@ export default defineComponent({
       this.client.sendSize(width, height);
 
       // 세팅 drawer 높이 변경
-      if (width > 1125) this.drawerHeight = 120;
-      else if (width > 680 && width <= 1125) this.drawerHeight = 200;
-      else if (width > 467 && width <= 680) this.drawerHeight = 280;
+      console.log('width :>> ', window.innerWidth);
+      if (window.innerWidth > 1190) this.drawerHeight = 120;
+      else if (window.innerWidth > 715 && window.innerWidth <= 1190) this.drawerHeight = 200;
+      else if (window.innerWidth > 500 && window.innerWidth <= 715) this.drawerHeight = 280;
       else this.drawerHeight = 440;
 
       // if (this.onScreenKeyboard) {
