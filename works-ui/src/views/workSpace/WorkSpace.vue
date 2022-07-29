@@ -63,20 +63,20 @@
         </a-form-item>
         <!--워크스페이스 설명 end-->
         <!--워크스페이스 타입 start-->
-        <a-form-item name="workspaceType" :label="$t('label.type')">
+        <!-- <a-form-item name="workspaceType" :label="$t('label.type')">
           <a-radio-group v-model:value="form.workspaceType" button-style="solid" @change="changeWorkspaceType">
             <a-radio-button value="desktop">{{ $t("label.desktop") }}</a-radio-button>
             <a-radio-button value="application">{{ $t("label.application") }}</a-radio-button>
           </a-radio-group>
-        </a-form-item>
+        </a-form-item> -->
         <!--워크스페이스 타입 end-->
         <!--워크스페이스 전용 여부 start-->
-        <a-form-item v-show="form.workspaceType == 'desktop'" name="dedicatedOrSharedBoolean" :label="$t('label.dedicated.shared')">
+        <!-- <a-form-item v-show="form.workspaceType == 'desktop'" name="dedicatedOrSharedBoolean" :label="$t('label.dedicated.shared')">
           <a-radio-group v-model:value="form.dedicatedOrSharedBoolean" button-style="solid">
             <a-radio-button :value="false">{{ $t("label.dedicated") }}</a-radio-button>
             <a-radio-button :value="true">{{ $t("label.shared") }}</a-radio-button>
           </a-radio-group>
-        </a-form-item>
+        </a-form-item> -->
         <!--워크스페이스 전용 여부 end-->
         <!--워크스페이스 템플릿 start-->
         <a-form-item has-feedback name="masterTemplate" :label="$t('label.mastertemplate')">

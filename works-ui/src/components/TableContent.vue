@@ -130,13 +130,13 @@
         <a-badge
           class="head-example"
           :color="
-            record.mold_status === 'Running'
+            ['Running'].includes(record.mold_status)
               ? 'green'
-              : record.mold_status === 'Stopping' || record.mold_status === 'Starting'
+              : ['Stopping', 'Starting'].includes(record.mold_status)
               ? 'blue'
-              : record.mold_status === 'Stopped'
+              : ['Stopped'].includes(record.mold_status)
               ? 'red'
-              : ''
+              : 'grey'
           "
           :text="
             record.mold_status === 'Running'
@@ -157,21 +157,13 @@
           <template #title>{{ record.handshake_status }}</template>
           <a-badge
             class="head-example"
-            :color="
-              record.handshake_status === 'Not Ready' || record.handshake_status === 'Pending'
-                ? 'red'
-                : record.handshake_status === 'Joining' || record.handshake_status === 'Joined'
-                ? 'yellow'
-                : record.handshake_status === 'Ready'
-                ? 'green'
-                : 'red'
-            "
+            :color="['Joining', 'Joined'].includes(record.handshake_status) ? 'yellow' : record.handshake_status === 'Ready' ? 'green' : 'red'"
             :text="
-              record.handshake_status === 'Not Ready' || record.handshake_status === 'Pending'
+              ['Not Ready', 'Pending'].includes(record.handshake_status)
                 ? $t('label.vm.status.initializing') + '(' + record.handshake_status + ')'
-                : record.handshake_status === 'Joining' || record.handshake_status === 'Joined'
+                : ['Joining', 'Joined'].includes(record.handshake_status)
                 ? $t('label.vm.status.configuring') + '(' + record.handshake_status + ')'
-                : record.handshake_status === 'Ready'
+                : ['Ready'].includes(record.handshake_status)
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
             "

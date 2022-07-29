@@ -110,7 +110,8 @@
   "message.workspace.policy.data.update.success": "[{name}] : Policy settings have been successfully changed.",
   "message.workspace.policy.data.update.fail": "[{name}] : Failed to change policy settings.",
   "message.userdesktop.rdpclient.install.info": "RDP Client Installation Guide",
-
+  "message.userdesktop.policy.rdp.access.denied":"You do not have permission to access RDP. Please check with your administrator.",
+  
   "tooltip.vmStart": "Start Desktop",
   "tooltip.vmStop": "Stop Desktop",
   "tooltip.vmRestart": "Restart Desktop",
@@ -305,7 +306,8 @@
   "label.user.csv.upload": "Upload user list in bulk",
   "label.favorite.off": "Unfavorite",
   "label.favorite.on": "Add to Favorites",
-  "label.rdp.connect": "RDP connection",
+  "label.rdp.connect.ready": "RDP connection",
+  "label.rdp.connect.notready": "RDP connection unavailable",
   "label.desktop.console.connect.ready": "Desktop Connection",
   "label.desktop.console.connect.notready": "Desktop not accessible",
   "label.file.upload": "Upload File",

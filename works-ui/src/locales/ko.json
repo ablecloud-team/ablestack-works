@@ -110,6 +110,7 @@
   "message.workspace.policy.data.update.success": "[{name}] : 정책 설정값이 정상적으로 변경되었습니다.",
   "message.workspace.policy.data.update.fail": "[{name}] : 정책 설정값 변경에 실패하였습니다.",
   "message.userdesktop.rdpclient.install.info": "RDP 클라이언트 설치 안내",
+  "message.userdesktop.policy.rdp.access.denied":"RDP 접속 권한이 없습니다. 관리자에게 확인요청하세요.",
 
   "tooltip.vmStart": "데스크톱 시작",
   "tooltip.vmStop": "데스크톱 정지",
@@ -305,7 +306,8 @@
   "label.user.csv.upload": "사용자 목록 업로드",
   "label.favorite.off": "즐겨찾기 해제",
   "label.favorite.on": "즐겨찾기 추가",
-  "label.rdp.connect": "RDP 접속",
+  "label.rdp.connect.ready": "RDP 접속",
+  "label.rdp.connect.notready": "RDP 접속 불가",
   "label.desktop.console.connect.ready": "데스크톱 접속",
   "label.desktop.console.connect.notready": "데스크톱 접속 불가",
   "label.file.upload": "파일 업로드",
