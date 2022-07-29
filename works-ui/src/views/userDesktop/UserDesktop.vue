@@ -203,7 +203,7 @@
                         />
                       </a-tooltip>
                       <br />
-                      접속준비 상태 :
+                      {{ $t("label.vm.ready.state") }} :
                       <a-tooltip placement="bottom">
                         <template #title>{{ vm.handshake_status }}</template>
                         <a-badge
