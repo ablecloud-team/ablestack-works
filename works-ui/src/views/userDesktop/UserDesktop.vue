@@ -22,16 +22,11 @@
               <a-card :title="workspace.name + '(' + workspace.description + ')'" :bodyStyle="{ margin: '1px' }">
                 <a-row :gutter="4">
                   <a-col v-for="vm in workspace.instanceList" class="dashboard-a-col">
-                    <a-card hoverable :title="vm.name" style="width: 200px; text-align: center">
+                    <a-card hoverable :title="vm.name" style="width: 220px; text-align: center">
                       <DesktopOutlined
                         :style="{
                           fontSize: '40px',
-                          color:
-                            vm.mold_status == 'Running' &&
-                            vm.handshake_status === 'Ready' &&
-                            workspace.policy.filter((it) => it.name === 'rdp_access_allow')[0].value === 'true'
-                              ? 'black'
-                              : 'pink',
+                          color: vm.mold_status == 'Running' && vm.handshake_status === 'Ready' ? 'black' : 'pink',
                         }"
                       />
                       <!-- <a-popconfirm
@@ -70,7 +65,9 @@
                         <a-tooltip placement="bottom">
                           <template #title>
                             {{
-                              vm.handshake_status === "Ready" && workspace.policy.filter((it) => it.name == "rdp_access_allow")[0].value === "true"
+                              vm.mold_status == "Running" &&
+                              vm.handshake_status === "Ready" &&
+                              workspace.policy.filter((it) => it.name == "rdp_access_allow")[0].value === "true"
                                 ? $t("label.rdp.connect.ready")
                                 : $t("label.rdp.connect.notready")
                             }}
@@ -85,7 +82,7 @@
                         <a-tooltip placement="bottom">
                           <template #title>
                             {{
-                              vm.handshake_status === "Ready" && workspace.policy.filter((it) => it.name == "rdp_access_allow")[0].value === "true"
+                              vm.mold_status == "Running" && vm.handshake_status === "Ready"
                                 ? $t("label.desktop.console.connect.ready")
                                 : $t("label.desktop.console.connect.notready")
                             }}
@@ -175,7 +172,7 @@
                       </template>
                       <br /><br />
 
-                      {{ $t("label.vm.state") }} :
+                      {{ $t("label.vm.state") }} :&nbsp;
                       <a-tooltip placement="bottom">
                         <template #title>{{ vm.mold_status }}</template>
                         <a-badge
@@ -203,7 +200,7 @@
                         />
                       </a-tooltip>
                       <br />
-                      {{ $t("label.vm.ready.state") }} :
+                      {{ $t("label.vm.ready.state") }} :&nbsp;
                       <a-tooltip placement="bottom">
                         <template #title>{{ vm.handshake_status }}</template>
                         <a-badge
@@ -438,7 +435,7 @@ export default defineComponent({
           const liteParamArr = data.filter((dl) => dl.uuid === workspaceUuid)[0].instanceList.filter((il) => il.uuid === vmUuid)[0];
           const policyList = data.filter((dl) => dl.uuid === workspaceUuid)[0].policy.filter((pl) => pl.value !== "");
 
-          if (liteParamArr.handshake_status === "Ready" && policyList.filter((pl) => pl.name == "rdp_access_allow")[0].value === "true") {
+          if (liteParamArr.mold_status == "Running" && liteParamArr.handshake_status === "Ready") {
             policyList.forEach((item) => {
               liteParamArr[item.name] = item.value;
             });
@@ -458,7 +455,7 @@ export default defineComponent({
             const encrypted = btoa(cipher.toString());
             window.open("/client/" + encrypted, "_blank");
           } else {
-            this.$message.warning(this.$t("message.userdesktop.policy.rdp.access.denied"));
+            this.$message.warning(this.$t("message.userdesktop.webclient.notready"));
             return false;
           }
         })
