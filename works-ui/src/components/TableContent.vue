@@ -584,7 +584,7 @@ export default defineComponent({
       ];
       if (this.resource.workspacePolicy !== undefined && this.resource.workspacePolicy !== null) {
         if (this.tapName === "gpolicy") {
-          this.dataList = this.resource.workspacePolicy.filter((it) => it.type == "R");
+          this.dataList = this.resource.workspacePolicy.filter((it) => it.type == "R" && it.name !== "rdp_port");
         } else if (this.tapName === "wpolicy") {
           this.dataList = this.resource.workspacePolicy.filter((it) => it.type == "C");
         }
