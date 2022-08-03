@@ -359,7 +359,14 @@ export default defineComponent({
                     "&instanceUuid=" +
                     vmUuid +
                     "&hash=" +
-                    res.data.instance.hash;
+                    res.data.instance.hash +
+                    "&redirectprinters=1" +
+                    "&redirectlocation=1" +
+                    "&redirectcomports=1" +
+                    "&redirectsmartcards=1" +
+                    "&redirectclipboard=1" +
+                    "&redirectposdevices=1" +
+                    "&drivestoredirect=*";
 
                   // console.log(url);
                   customProtocolCheck(
@@ -442,10 +449,11 @@ export default defineComponent({
             // liteParamArr["timestamp"] = Math.floor(Date.now() / 1000);
             liteParamArr["client-name"] = "ABLESTACK Works";
             liteParamArr["hostname"] = liteParamArr.ipaddress;
+            liteParamArr["port"] = liteParamArr.rdp_port;
             liteParamArr["username"] = sessionStorage.getItem("userName");
             liteParamArr["domain"] = sessionStorage.getItem("domainName");
             // liteParamArr["enable-touch"] = true;
-            // console.log(liteParamArr);
+            console.log(liteParamArr);
 
             const cipher = this.$CryptoJS.AES.encrypt(JSON.stringify(liteParamArr), this.$CryptoJS.enc.Utf8.parse(this.cryptKey), {
               iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
