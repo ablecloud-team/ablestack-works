@@ -118,7 +118,6 @@ export default defineComponent({
           title: this.$t("label.account"),
           dataIndex: "name",
           key: "name",
-          width: "22%",
           // slots: {
           //   customRender: "nameRender",
           //   filterDropdown: "filterDropdown",
@@ -138,12 +137,10 @@ export default defineComponent({
           },
         },
         {
-          title: "",
+          title: this.$t("label.action"),
           key: "action",
           dataIndex: "action",
-          align: "right",
-          width: "3%",
-          // slots: { customRender: "actionRender" },
+          width: "50px",
         },
         {
           title: this.$t("label.lastname"),
