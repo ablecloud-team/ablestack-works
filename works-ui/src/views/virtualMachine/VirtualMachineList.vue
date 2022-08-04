@@ -56,7 +56,7 @@
         </a-Popover>
       </template>
       <template v-if="column.dataIndex === 'workspace_type'">
-        {{ record.workspace_type.toUpperCase() }}
+        {{ record.workspace_type === "desktop" ? $t("label.desktop") : record.workspace_type === "application" ? $t("label.application") : "" }}
       </template>
       <template v-if="column.dataIndex === 'status'">
         <a-badge

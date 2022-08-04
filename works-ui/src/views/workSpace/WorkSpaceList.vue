@@ -13,40 +13,21 @@
     }"
   >
     <!-- 검색 필터링 template-->
-    <template
-      #customFilterDropdown="{
-        setSelectedKeys,
-        selectedKeys,
-        confirm,
-        clearFilters,
-        column,
-      }"
-    >
+    <template #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
       <div style="padding: 8px">
         <a-input
           ref="searchInput"
           :placeholder="$t('search.' + column.dataIndex)"
           :value="selectedKeys[0]"
           style="width: 188px; margin-bottom: 8px; display: block"
-          @change="
-            (e) => setSelectedKeys(e.target.value ? [e.target.value] : [])
-          "
+          @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
         />
-        <a-button
-          type="primary"
-          size="small"
-          style="width: 90px; margin-right: 8px"
-          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
-        >
+        <a-button type="primary" size="small" style="width: 90px; margin-right: 8px" @click="handleSearch(selectedKeys, confirm, column.dataIndex)">
           <template #icon><search-outlined /></template>
           {{ $t("label.search") }}
         </a-button>
-        <a-button
-          size="small"
-          style="width: 90px"
-          @click="handleReset(clearFilters)"
-        >
+        <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
           {{ $t("label.reset") }}
         </a-button>
       </div>
@@ -65,12 +46,7 @@
       <template v-if="column.dataIndex === 'action'">
         <a-Popover placement="topLeft">
           <template #content>
-            <Actions
-              v-if="actionFrom == 'WSList'"
-              :action-from="actionFrom"
-              :ws-info="record"
-              @fetchData="fetchRefresh"
-            />
+            <Actions v-if="actionFrom == 'WSList'" :action-from="actionFrom" :ws-info="record" @fetchData="fetchRefresh" />
           </template>
           <MoreOutlined />
         </a-Popover>
@@ -81,29 +57,19 @@
           <a-badge
             class="head-example"
             :color="
-              record.template_ok_check === 'Not Ready' ||
-              record.template_ok_check === 'Pending'
+              record.template_ok_check === 'Not Ready' || record.template_ok_check === 'Pending'
                 ? 'red'
-                : record.template_ok_check === 'Joining' ||
-                  record.template_ok_check === 'Joined'
+                : record.template_ok_check === 'Joining' || record.template_ok_check === 'Joined'
                 ? 'yellow'
                 : record.template_ok_check === 'Ready'
                 ? 'green'
                 : 'red'
             "
             :text="
-              record.template_ok_check === 'Not Ready' ||
-              record.template_ok_check === 'Pending'
-                ? $t('label.vm.status.initializing') +
-                  '(' +
-                  record.template_ok_check +
-                  ')'
-                : record.template_ok_check === 'Joining' ||
-                  record.template_ok_check === 'Joined'
-                ? $t('label.vm.status.configuring') +
-                  '(' +
-                  record.template_ok_check +
-                  ')'
+              record.template_ok_check === 'Not Ready' || record.template_ok_check === 'Pending'
+                ? $t('label.vm.status.initializing') + '(' + record.template_ok_check + ')'
+                : record.template_ok_check === 'Joining' || record.template_ok_check === 'Joined'
+                ? $t('label.vm.status.configuring') + '(' + record.template_ok_check + ')'
                 : record.template_ok_check === 'Ready'
                 ? $t('label.vm.status.ready')
                 : $t('label.vm.status.notready')
@@ -113,7 +79,7 @@
       </template>
 
       <template v-if="column.dataIndex === 'workspace_type'">
-        {{ record.workspace_type.toUpperCase() }}
+        {{ record.workspace_type === "desktop" ? $t("label.desktop") : record.workspace_type === "application" ? $t("label.application") : "" }}
       </template>
     </template>
   </a-table>
@@ -161,8 +127,7 @@ export default defineComponent({
         // pageSize: 10,
         showSizeChanger: true, // display can change the number of pages per page
         pageSizeOptions: ["10", "20", "50", "100", "200"], // number of pages per option
-        showTotal: (total) =>
-          this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
+        showTotal: (total) => this.$t("label.total") + ` ${total}` + this.$t("label.items"), // show total
         // showSizeChange: (current, pageSize) => (this.pageSize = pageSize), // update display when changing the number of pages per page
       },
       wsDataList: ref([]),
@@ -171,13 +136,12 @@ export default defineComponent({
           title: this.$t("label.name"),
           dataIndex: "name",
           key: "name",
-          width: "37%",
+          width: "27%",
           sorter: (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           ellipsis: true,
           customFilterDropdown: true,
-          onFilter: (value, record) =>
-            record.name.toString().toLowerCase().includes(value.toLowerCase()),
+          onFilter: (value, record) => record.name.toString().toLowerCase().includes(value.toLowerCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -187,7 +151,6 @@ export default defineComponent({
           },
         },
         {
-          title: "",
           key: "action",
           dataIndex: "action",
           align: "right",
@@ -197,22 +160,16 @@ export default defineComponent({
           title: this.$t("label.state"),
           dataIndex: "state",
           key: "state",
-          width: "20%",
-          sorter: (a, b) =>
-            a.state < b.state ? -1 : a.state > b.state ? 1 : 0,
+          width: "10%",
+          sorter: (a, b) => (a.state < b.state ? -1 : a.state > b.state ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
         {
           title: this.$t("label.type"),
           dataIndex: "workspace_type",
           key: "workspace_type",
-          width: "20%",
-          sorter: (a, b) =>
-            a.workspace_type < b.workspace_type
-              ? -1
-              : a.workspace_type > b.workspace_type
-              ? 1
-              : 0,
+          width: "10%",
+          sorter: (a, b) => (a.workspace_type < b.workspace_type ? -1 : a.workspace_type > b.workspace_type ? 1 : 0),
           sortDirections: ["descend", "ascend"],
           // filters: [
           //   {
@@ -225,11 +182,7 @@ export default defineComponent({
           //   },
           // ],
           customFilterDropdown: true,
-          onFilter: (value, record) =>
-            record.workspace_type
-              .toString()
-              .toUpperCase()
-              .includes(value.toUpperCase()),
+          onFilter: (value, record) => record.workspace_type.toString().toUpperCase().includes(value.toUpperCase()),
           onFilterDropdownVisibleChange: (visible) => {
             if (visible) {
               setTimeout(() => {
@@ -239,12 +192,27 @@ export default defineComponent({
           },
         },
         {
+          title: this.$t("label.mastertemplate"),
+          dataIndex: "master_template_name",
+          key: "master_template_name",
+          width: "20%",
+          sorter: (a, b) => (a.master_template_name < b.master_template_name ? -1 : a.master_template_name > b.master_template_name ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
           title: this.$t("label.desktop.quantity"),
           dataIndex: "quantity",
           key: "quantity",
+          width: "10%",
+          sorter: (a, b) => (a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0),
+          sortDirections: ["descend", "ascend"],
+        },
+        {
+          title: this.$t("label.description"),
+          dataIndex: "description",
+          key: "description",
           width: "20%",
-          sorter: (a, b) =>
-            a.quantity < b.quantity ? -1 : a.quantity > b.quantity ? 1 : 0,
+          sorter: (a, b) => (a.description < b.description ? -1 : a.description > b.description ? 1 : 0),
           sortDirections: ["descend", "ascend"],
         },
       ],
@@ -309,5 +277,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
