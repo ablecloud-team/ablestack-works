@@ -336,7 +336,7 @@ export default defineComponent({
           const liteParamArr = data.filter((dl) => dl.uuid === workspaceUuid)[0].instanceList.filter((il) => il.uuid === vmUuid)[0];
           const policyList = data.filter((dl) => dl.uuid === workspaceUuid)[0].policy.filter((pl) => pl.value !== "");
 
-          if (liteParamArr.handshake_status === "Ready" && policyList.filter((pl) => pl.name == "rdp_access_allow")[0].value === "true") {
+          if (liteParamArr.mold_status === "Running" && liteParamArr.handshake_status === "Ready" && policyList.filter((pl) => pl.name == "rdp_access_allow")[0].value === "true") {
             this.$worksApi
               .get("/api/v1/connection/rdp/" + vmUuid + "/" + sessionStorage.getItem("userName"))
               .then((res) => {
