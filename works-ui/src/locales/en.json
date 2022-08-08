@@ -110,6 +110,7 @@
   "message.workspace.policy.data.update.success": "[{name}] : Policy settings have been successfully changed.",
   "message.workspace.policy.data.update.fail": "[{name}] : Failed to change policy settings.",
   "message.userdesktop.rdpclient.install.info": "RDP Client Installation Guide",
+  "message.userdesktop.rdp.notready": "RDP connection is not ready. Connect after checking the virtual machine status and connection ready status.",
   "message.userdesktop.policy.rdp.access.denied": "You do not have RDP access rights. Please check with your administrator.",
   "message.userdesktop.webclient.notready": "Desktop connection is not ready. Please connect after checking the virtual machine status and connection readiness status.",
 
