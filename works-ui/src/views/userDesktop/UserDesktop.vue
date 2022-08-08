@@ -208,9 +208,9 @@
                           :color="['Joining', 'Joined'].includes(vm.handshake_status) ? 'yellow' : vm.handshake_status === 'Ready' ? 'green' : 'red'"
                           :text="
                             ['Not Ready', 'Pending'].includes(vm.handshake_status)
-                              ? $t('label.vm.status.initializing') + '(' + vm.handshake_status + ')'
+                              ? $t('label.vm.status.initializing')
                               : ['Joining', 'Joined'].includes(vm.handshake_status)
-                              ? $t('label.vm.status.configuring') + '(' + vm.handshake_status + ')'
+                              ? $t('label.vm.status.configuring')
                               : ['Ready'].includes(vm.handshake_status)
                               ? $t('label.vm.status.ready')
                               : $t('label.vm.status.notready')
