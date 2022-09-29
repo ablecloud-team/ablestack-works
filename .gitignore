@@ -7,7 +7,7 @@ samba-ad.zip
 *.log
 *.msi
 *.zip
-
+samba-ad
 
 # Miscellaneous
 *.class

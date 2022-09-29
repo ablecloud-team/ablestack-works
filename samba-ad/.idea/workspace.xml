@@ -5,72 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8015071c-652b-4e59-9433-a61e0cb6b70c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/Unattend.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/Unattend.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/cloudbase-init-unattend.conf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/cloudinit-conf/cloudbase-init.conf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/manifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/policylist.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{651CA0AD-75E7-4B67-9880-C7C3BECE4105}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/Preferences/NetworkShares/NetworkShares.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{9E91CA38-2A3A-49C4-AA66-68671A31B947}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{C0481EF0-9E9C-4E2E-9519-3532C36E1F03}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{CA920D7A-6629-41CA-96CE-04BA5DDE7107}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/DomainSysvol/GPO/Machine/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{D664EA0E-71EF-4C8E-86CE-816E0114F2C3}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/Backup.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/comment.cmtx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/DomainSysvol/GPO/User/registry.pol" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/bkupInfo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/grouppolicy/{FCFB1F57-B307-4AE6-A559-EF5EBD9886E3}/gpreport.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/sysprep audit.cmd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../domain-controller/Works-DC/sysprep oobe.cmd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/Abledc.exe" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/Abledc.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/adutil.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/adutil.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/authconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/conf.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../domain-controller/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ablecloud_works_client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../ablecloud_works_client/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ablecloud_works_client/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../ablecloud_works_client/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/conf.json" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/conf.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../domain-controller/logrus.log" beforeDir="false" afterPath="$PROJECT_DIR$/../domain-controller/logrus.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/agent.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init-unattend.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init-unattend.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/client/cloudbase-init.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init-unattend.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init-unattend.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init.conf" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/cloudbaseinit/cloudbase-init.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../windows-agent/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../windows-agent/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../windows-agent/go.sum" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.16.6" />
+  <component name="GOROOT" url="file://$USER_HOME$/sdk/go1.17.6" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="true" />
+  </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$USER_HOME$/sdk/go1.16.6/src/io/ioutil/ioutil.go" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/main.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/users.go" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/utils.go" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="1wCn0CkRCZ9t3lShKP3cscmH5yo" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -80,18 +41,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="go.formatter.settings.were.checked" value="true" />
-    <property name="go.import.settings.migrated" value="true" />
-    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
-    <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="restartRequiresConfirmation" value="false" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.format.on.save.advertiser.fired&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/User/Documents/ablestack-desktop2/samba-ad&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;모듈&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;dart.settings&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\Documents\GitHub\ablestack-desktop\samba-ad" />
@@ -100,11 +67,11 @@
       <recent name="C:\Users\user\Documents\GitHub\ablestack-desktop\samba-ad\container" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build samba-ad linux">
+  <component name="RunManager" selected="Go 빌드.go build samba-ad linux">
     <configuration name="go build samba-ad linux" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
+      <go_parameters value="-i -o container\samba-ad" />
       <envs>
         <env name="GOOS" value="linux" />
         <env name="GOARCH" value="amd64" />
@@ -120,19 +87,35 @@
     <configuration name="go build samba-ad" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="samba-ad" />
       <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
+      <go_parameters value="-i -o samba-ad.exe" />
+      <envs>
+        <env name="GOOS" value="windows" />
+        <env name="GOARCH" value="amd64" />
+      </envs>
       <kind value="PACKAGE" />
       <package value="samba-ad" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
+      <output_directory value="$PROJECT_DIR$/container" />
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Go Build.go build samba-ad linux" />
-      <item itemvalue="Go Build.go build samba-ad" />
+      <item itemvalue="Go 빌드.go build samba-ad" />
+      <item itemvalue="Go 빌드.go build samba-ad linux" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <created>1652422037040</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1652422037040</updated>
+      <workItem from="1652422038936" duration="970000" />
+      <workItem from="1655272828840" duration="631000" />
+    </task>
+    <servers />
+  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
@@ -146,12 +129,15 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="VgoProject">
-    <integration-enabled>true</integration-enabled>
+    <settings-migrated>true</settings-migrated>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

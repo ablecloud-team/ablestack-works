@@ -1340,6 +1340,7 @@ func checkStatus() {
 		ADconfig.Status = ADconfig.Status + " adjoin"
 		ADsave()
 		output, err = shell.Exec(cmd)
+		time.Sleep(10)
 	}
 
 	//service 권한 elevate
@@ -1357,6 +1358,7 @@ func checkStatus() {
 		ADsave()
 		stdout2, err2 := shell.Exec(service)
 		log.Infof("stdout: %v, \nstderr: %v\n", stdout2, err2)
+		time.Sleep(10)
 	}
 
 	///gp import
@@ -1376,23 +1378,23 @@ func checkStatus() {
 			policylist = append(policylist, policyModel{Name: line, Description: strings.TrimSpace(description)})
 		}
 	}
+	currentWorkingDirectory, err := os.Getwd()
+	policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
+	data, err := os.Open(policyfile)
+	if err != nil {
+		log.Fatalf("Can not find %v file, %v", policyfile, err)
+		os.Exit(1)
+	}
 
-	if len(policylist) < 1 {
-		currentWorkingDirectory, err := os.Getwd()
-		policyfile := fmt.Sprintf("%v/%v/%v", currentWorkingDirectory, ADconfig.PolicyPATH, ADconfig.PolicyLIST)
-		data, err := os.Open(policyfile)
-		if err != nil {
-			log.Fatalf("Can not find %v file, %v", policyfile, err)
-			os.Exit(1)
-		}
+	byteValue, err := ioutil.ReadAll(data)
+	if err != nil {
+		log.Debugf("%v", err)
+		os.Exit(1)
+	}
+	var policyList []map[string]string
+	err = json.Unmarshal(byteValue, &policyList)
+	if len(policylist) < len(policyList) {
 
-		byteValue, err := ioutil.ReadAll(data)
-		if err != nil {
-			log.Debugf("%v", err)
-			os.Exit(1)
-		}
-		var policyList []map[string]string
-		err = json.Unmarshal(byteValue, &policyList)
 		for _, policyItem := range policyList {
 			shell, err := setupShell()
 			if err != nil {

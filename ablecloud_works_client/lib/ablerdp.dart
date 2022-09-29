@@ -125,11 +125,11 @@ disable cursor setting:i:0
 bitmapcachepersistenable:i:1
 audiomode:i:0
 redirectprinters:i:1
-redirectlocation:i:0
-redirectcomports:i:0
+redirectlocation:i:1
+redirectcomports:i:1
 redirectsmartcards:i:1
 redirectclipboard:i:1
-redirectposdevices:i:0
+redirectposdevices:i:1
 autoreconnection enabled:i:1
 authentication level:i:2
 prompt for credentials:i:1
