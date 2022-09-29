@@ -128,6 +128,7 @@ export default defineComponent({
       liteParamArr["client-name"] = "ABLESTACK Works";
       liteParamArr["hostname"] = sessionStorage.getItem("dcurl");
       liteParamArr["password"] = "Ablecloud1!";
+      liteParamArr["port"] = "13389";
       liteParamArr["username"] = sessionStorage.getItem("userName");
       liteParamArr["domain"] = sessionStorage.getItem("domainName");
       // liteParamArr["enable-touch"] = true;

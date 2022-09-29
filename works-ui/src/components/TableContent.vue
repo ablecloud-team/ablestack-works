@@ -201,11 +201,7 @@
     @ok="wsUserAdd"
   >
     <p>
-      {{
-        $t("modal.confirm.workspace.add.user", {
-          name: resource.workspaceInfo.name,
-        })
-      }}
+      {{ $t("modal.confirm.workspace.add.user", { name: resource.workspaceInfo.name }) }}
     </p>
     <a-select
       v-model:value="selectedUser"
@@ -525,6 +521,8 @@ export default defineComponent({
                   return o1.name == o2.name;
                 });
               });
+              this.addAbleUserList = this.addAbleUserList.filter((map) => !["Administrator", "Guest", "krbtgt"].includes(map.name));
+
               userInWorkspaceList = response.data.result.filter(function (o1) {
                 return userInWorkspaceList.some(function (o2) {
                   return o1.name == o2.name;

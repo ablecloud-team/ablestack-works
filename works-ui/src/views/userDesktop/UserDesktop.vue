@@ -208,9 +208,9 @@
                           :color="['Joining', 'Joined'].includes(vm.handshake_status) ? 'yellow' : vm.handshake_status === 'Ready' ? 'green' : 'red'"
                           :text="
                             ['Not Ready', 'Pending'].includes(vm.handshake_status)
-                              ? $t('label.vm.status.initializing') + '(' + vm.handshake_status + ')'
+                              ? $t('label.vm.status.initializing')
                               : ['Joining', 'Joined'].includes(vm.handshake_status)
-                              ? $t('label.vm.status.configuring') + '(' + vm.handshake_status + ')'
+                              ? $t('label.vm.status.configuring')
                               : ['Ready'].includes(vm.handshake_status)
                               ? $t('label.vm.status.ready')
                               : $t('label.vm.status.notready')
@@ -336,7 +336,11 @@ export default defineComponent({
           const liteParamArr = data.filter((dl) => dl.uuid === workspaceUuid)[0].instanceList.filter((il) => il.uuid === vmUuid)[0];
           const policyList = data.filter((dl) => dl.uuid === workspaceUuid)[0].policy.filter((pl) => pl.value !== "");
 
-          if (liteParamArr.handshake_status === "Ready" && policyList.filter((pl) => pl.name == "rdp_access_allow")[0].value === "true") {
+          if (liteParamArr.mold_status === "Running" && liteParamArr.handshake_status === "Ready") {
+            if (policyList.filter((pl) => pl.name == "rdp_access_allow")[0].value === "false") {
+              this.$message.warning(this.$t("message.userdesktop.policy.rdp.access.denied"));
+              return false;
+            }
             this.$worksApi
               .get("/api/v1/connection/rdp/" + vmUuid + "/" + sessionStorage.getItem("userName"))
               .then((res) => {
@@ -418,7 +422,7 @@ export default defineComponent({
               })
               .finally(() => {});
           } else {
-            this.$message.warning(this.$t("message.userdesktop.policy.rdp.access.denied"));
+            this.$message.warning(this.$t("message.userdesktop.rdp.notready"));
             return false;
           }
         })

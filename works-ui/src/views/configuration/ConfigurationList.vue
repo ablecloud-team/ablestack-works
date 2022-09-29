@@ -161,7 +161,7 @@ export default defineComponent({
           title: this.$t("label.action"),
           dataIndex: "action",
           align: "center",
-          width: "15%",
+          width: "100px",
           // slots: { customRender: "actionRender" },
         },
       ],
