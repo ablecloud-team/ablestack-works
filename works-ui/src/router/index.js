@@ -41,15 +41,15 @@ const adminAuthCheck = (to, from, next) => {
   if (to.name.includes("Account")) {
     menukey = "4";
   }
-  if (to.name.includes("GroupPolicy")) {
-    menukey = "5";
-  }
-  if (to.name.includes("Audit")) {
-    menukey = "6";
-  }
-  if (to.name.includes("Community")) {
-    menukey = "7";
-  }
+  // if (to.name.includes("GroupPolicy")) {
+  //   menukey = "5";
+  // }
+  // if (to.name.includes("Audit")) {
+  //   menukey = "6";
+  // }
+  // if (to.name.includes("Community")) {
+  //   menukey = "7";
+  // }
   if (to.name.includes("Configuration")) {
     menukey = "8";
   }

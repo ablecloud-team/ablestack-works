@@ -7,7 +7,7 @@
         selectedKeysSetting(1);
       "
     />
-    <a-menu v-model:selectedKeys="state.selectedKeys" mode="inline" theme="light" inline="true">
+    <a-menu v-model:selectedKeys="menukey" mode="inline" theme="light" inline="true">
       <a-menu-item
         key="1"
         @click="
@@ -91,7 +91,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive, ref } from "vue";
+import { defineComponent } from "vue";
 import Logo from "./Logo";
 export default defineComponent({
   components: {
@@ -104,29 +104,15 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: ["changeToggleCollapsed"],
-  setup(props) {
-    const state = reactive({
-      collapsed: props.collapsed,
-      selectedKeys: [sessionStorage.getItem("menukey")],
-    });
-    return {
-      state,
-    };
-  },
-  created() {
-    this.updateMenu();
-  },
-  methods: {
-    updateMenu() {
-      this.state.selectedKeys = this.state.selectedKeys == [""] ? ["1"] : [sessionStorage.getItem("menukey")];
+  watch: {
+    menukey() {
+      return [sessionStorage.getItem("menukey")];
     },
-    // toggleCollapsed: function () {
-    //   this.$emit("changeToggleCollapsed");
-    // },
-    selectedKeysSetting: function (key) {
+  },
+  created() {},
+  methods: {
+    selectedKeysSetting(key) {
       sessionStorage.setItem("menukey", key);
-      this.state.selectedKeys = [key];
     },
   },
 });
