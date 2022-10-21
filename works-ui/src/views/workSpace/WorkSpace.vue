@@ -206,7 +206,7 @@ export default defineComponent({
       }, 100);
     },
     changeWorkspaceType(val) {
-      console.log("val :>> ", val.target.value);
+      // console.log("val :>> ", val.target.value);
       if (val.target.value === "desktop") {
         if (this.arrayHasItems(this.desktopTemplates)) {
           this.form.masterTemplate = 0;

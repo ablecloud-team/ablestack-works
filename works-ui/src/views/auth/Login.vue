@@ -137,7 +137,7 @@ export default defineComponent({
                 this.$worksApi
                   .get("/api/v1/configuration")
                   .then((response) => {
-                    console.log(response.data);
+                    // console.log(response.data);
                     if (response.status === 200) {
                       const dcurl = response.data.result.filter((it) => it.name == "dc.default.url")[0].value;
                       const worksurl = response.data.result.filter((it) => it.name == "works.default.url")[0].value;

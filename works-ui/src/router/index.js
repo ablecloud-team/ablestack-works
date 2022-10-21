@@ -75,9 +75,8 @@ const tokenCheck = (to, from, next, isAdmin) => {
   const isToken = sessionStorage.getItem("token");
   // console.log("isToken :>> ", isToken);
   if (isToken && isToken !== "") {
-    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
-      goRoute(0, next);
-    } else {
+    goRoute(0, next);
+    if (from.name !== "Login" && to.name !== "Dashboard") {
       worksApi
         .get("/api/v1/token")
         .then((response) => {

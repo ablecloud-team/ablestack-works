@@ -312,16 +312,14 @@ export default defineComponent({
       });
     },
     favorite(uuid, bool) {
-      console.log(uuid + " :: " + bool);
+      // console.log(uuid + " :: " + bool);
       // //const elId = event.currentTarget.id;
-
       // document.getElementById(elId).style.display = "none";
       // if (elId.includes("-TRUE")) {
       //   document.getElementById(val + "-FALSE").style.display = "block";
       // } else if (elId.includes("-FALSE")) {
       //   document.getElementById(val + "-TRUE").style.display = "block";
       // }
-
       // document.getElementById(val).style.display = "none";
       // document.getElementById(val).style.display = "none";
     },
@@ -457,7 +455,7 @@ export default defineComponent({
             liteParamArr["username"] = sessionStorage.getItem("userName");
             liteParamArr["domain"] = sessionStorage.getItem("domainName");
             // liteParamArr["enable-touch"] = true;
-            console.log(liteParamArr);
+            // console.log(liteParamArr);
 
             const cipher = this.$CryptoJS.AES.encrypt(JSON.stringify(liteParamArr), this.$CryptoJS.enc.Utf8.parse(this.cryptKey), {
               iv: this.$CryptoJS.enc.Utf8.parse(this.cryptIv), // [Enter IV (Optional) 지정 방식]
