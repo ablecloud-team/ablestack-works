@@ -1,18 +1,13 @@
 <template>
   <div style="width: 100%; height: 100%">
     <Logo
+      :collapsed="collapsed"
       @click="
         $router.push({ name: 'Dashboard' });
         selectedKeysSetting(1);
       "
     />
-    <a-menu
-      v-model:selectedKeys="state.selectedKeys"
-      mode="inline"
-      theme="light"
-      inline="true"
-      style="padding-top: 14px"
-    >
+    <a-menu v-model:selectedKeys="state.selectedKeys" mode="inline" theme="light" inline="true">
       <a-menu-item
         key="1"
         @click="
@@ -103,12 +98,16 @@ export default defineComponent({
     Logo,
   },
   props: {
-    collapsed: Boolean,
+    collapsed: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   emits: ["changeToggleCollapsed"],
   setup(props) {
     const state = reactive({
-      collapsed: ref(props.collapsed),
+      collapsed: props.collapsed,
       selectedKeys: [sessionStorage.getItem("menukey")],
     });
     return {
@@ -120,10 +119,7 @@ export default defineComponent({
   },
   methods: {
     updateMenu() {
-      this.state.selectedKeys =
-        this.state.selectedKeys == [""]
-          ? ["1"]
-          : [sessionStorage.getItem("menukey")];
+      this.state.selectedKeys = this.state.selectedKeys == [""] ? ["1"] : [sessionStorage.getItem("menukey")];
     },
     // toggleCollapsed: function () {
     //   this.$emit("changeToggleCollapsed");
