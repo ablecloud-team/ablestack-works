@@ -397,7 +397,7 @@ export default defineComponent({
       }, 100);
     },
     createAccount() {
-      console.log("this.form :>> ", this.form);
+      // console.log("this.form :>> ", this.form);
       let params = new URLSearchParams();
       params.append("username", this.form.account);
       params.append("firstName", this.form.firstName);

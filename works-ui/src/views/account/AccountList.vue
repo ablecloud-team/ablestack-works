@@ -108,7 +108,7 @@ export default defineComponent({
           this.state.selectedRowKeys = [];
         },
         showSizeChange: (current, pageSize) => {
-          console.log(current, pageSize);
+          // console.log(current, pageSize);
           this.pageSize = pageSize;
         }, // update display when changing the number of pages per page
       },
@@ -213,7 +213,7 @@ export default defineComponent({
       this.fetchData();
     },
     onSelectChange(selectedRowKeys, selectedRows) {
-      console.log("selectedRowKeys :>> ", selectedRowKeys);
+      // console.log("selectedRowKeys :>> ", selectedRowKeys);
       this.state.selectedRowKeys = selectedRowKeys;
       this.state.selectedRows = selectedRows;
       if (this.state.selectedRows.length > 0) {

@@ -224,7 +224,7 @@ export default defineComponent({
       //   }
       // };
       this.tunnel.onuuid = (string) => {
-        console.log(string);
+        // console.log(string);
       };
       this.client = new Guacamole.Client(this.tunnel);
       this.client.onerror = (error) => {
@@ -440,11 +440,11 @@ export default defineComponent({
         };
 
         br.onend = () => {
-          console.log("000000000 :>> " + new Date());
+          // console.log("000000000 :>> " + new Date());
 
           const url = URL.createObjectURL(br.getBlob());
           arrAsync.push(this.downloadFile(url, filename));
-          console.log("11111111111111 :>> " + new Date());
+          // console.log("11111111111111 :>> " + new Date());
           Promise.all(arrAsync)
             .then(() => {
               this.$notification.open({
@@ -552,8 +552,8 @@ export default defineComponent({
     },
     downloadFile(url, filename) {
       return new Promise((resolve, reject) => {
-        console.log("1:::::::::::::::" + new Date());
-        console.log("url :>> ", url + new Date());
+        // console.log("1:::::::::::::::" + new Date());
+        // console.log("url :>> ", url + new Date());
 
         const downlink = document.createElement("a");
         downlink.setAttribute("href", url);
@@ -920,7 +920,7 @@ export default defineComponent({
       this.client.sendSize(width, height);
 
       // 세팅 drawer 높이 변경
-      console.log('width :>> ', window.innerWidth);
+      console.log("width :>> ", window.innerWidth);
       if (window.innerWidth > 1190) this.drawerHeight = 120;
       else if (window.innerWidth > 715 && window.innerWidth <= 1190) this.drawerHeight = 200;
       else if (window.innerWidth > 500 && window.innerWidth <= 715) this.drawerHeight = 280;

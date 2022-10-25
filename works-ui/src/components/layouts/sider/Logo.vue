@@ -1,16 +1,22 @@
 <template>
-  <div class="logo">
-    <img
-      alt="ABLESTACK Works"
-      src="@/assets/ablestack-logo.png"
-      class="logo-image"
-    />
+  <div v-if="!collapsed" class="logo">
+    <img alt="ABLESTACK Works" src="@/assets/ablestack-logo.png" class="logo-image" />
+  </div>
+  <div v-else class="logo">
+    <img alt="ABLESTACK Works" src="@/assets/mini-ablestack-logo.png" class="mini-logo-image" />
   </div>
 </template>
 
 <script>
 export default {
   name: "Logo",
+  props: {
+    collapsed: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
 };
 </script>
 
@@ -28,7 +34,18 @@ export default {
 .logo-image {
   display: inline-block;
   vertical-align: middle;
-  height: 43px;
+  margin-left: 8px;
+  margin-right: 8px;
+  margin-bottom: -10px;
+  height: 100%;
   width: 240px;
+}
+
+.mini-logo-image {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 8px;
+  height: 80%;
+  width: 80%;
 }
 </style>

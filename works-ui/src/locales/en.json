@@ -131,7 +131,7 @@
   "tooltip.userUnlock": "Unlock user",
   "tooltip.userPassChange": "Change user password",
   "tooltip.desktop.allocate.user": "Assign desktop user",
-  "tooltip.userDel": "Delete user account",
+  "tooltip.accountDel": "Delete user account",
   "tooltip.wsDel": "Delete workspace",
   "tooltip.wsUserDel": "Delete Workspace User",
   "tooltip.multiVmStart": "Batch Start",

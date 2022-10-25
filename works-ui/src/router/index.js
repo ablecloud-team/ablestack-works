@@ -41,15 +41,15 @@ const adminAuthCheck = (to, from, next) => {
   if (to.name.includes("Account")) {
     menukey = "4";
   }
-  if (to.name.includes("GroupPolicy")) {
-    menukey = "5";
-  }
-  if (to.name.includes("Audit")) {
-    menukey = "6";
-  }
-  if (to.name.includes("Community")) {
-    menukey = "7";
-  }
+  // if (to.name.includes("GroupPolicy")) {
+  //   menukey = "5";
+  // }
+  // if (to.name.includes("Audit")) {
+  //   menukey = "6";
+  // }
+  // if (to.name.includes("Community")) {
+  //   menukey = "7";
+  // }
   if (to.name.includes("Configuration")) {
     menukey = "8";
   }
@@ -75,9 +75,8 @@ const tokenCheck = (to, from, next, isAdmin) => {
   const isToken = sessionStorage.getItem("token");
   // console.log("isToken :>> ", isToken);
   if (isToken && isToken !== "") {
-    if ((to.name === "UserFavorite" || to.name === "Dashboard") && from.name === "Login") {
-      goRoute(0, next);
-    } else {
+    goRoute(0, next);
+    if (from.name !== "Login" && to.name !== "Dashboard") {
       worksApi
         .get("/api/v1/token")
         .then((response) => {

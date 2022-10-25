@@ -211,7 +211,7 @@ export default defineComponent({
     async editSave(name) {
       Object.assign(this.dataList.filter((item) => name === item.name)[0], this.editableData[name]);
 
-      console.log(this.editableData[name].name, this.editableData[name].value);
+      // console.log(this.editableData[name].name, this.editableData[name].value);
       let params = new URLSearchParams();
 
       params.append("id", this.editableData[name].id);
