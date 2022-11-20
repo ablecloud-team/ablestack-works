@@ -8,8 +8,9 @@ C:\agent\nssm.exe set "Ablecloud Works Agent" AppStderr C:\agent\stderr.txt
 C:\agent\nssm.exe set "Ablecloud Works Agent" Description "Ablestask의 VDI agent입니다."
 C:\agent\nssm.exe set "Ablecloud Works Agent" DisplayName "Ablecloud Works Agent"
 C:\agent\nssm.exe set "Ablecloud Works Agent" ObjectName LocalSystem
-C:\agent\nssm.exe set "Ablecloud Works Agent" Start SERVICE_DELAYED_AUTO_START
+C:\agent\nssm.exe set "Ablecloud Works Agent" Start SERVICE_AUTO_START
 C:\agent\nssm.exe set "Ablecloud Works Agent" Type SERVICE_WIN32_OWN_PROCESS
+C:\agent\nssm.exe set "Ablecloud Works Agent" DependOnService :Winmgmt
 
 powershell -command "set-executionpolicy unrestricted -force"
 powershell -command "unblock-file  c:\agent\get-session.ps1"

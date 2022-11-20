@@ -1,26 +1,74 @@
 [
   {
-    "name":"clipboard_block",
-    "description":"클립보드 사용 금지"
+    "name": "clipboard_block",
+    "description": "클립보드 사용 금지"
   },
   {
-    "name":"usb_block",
-    "description":"usb 사용 금지"
+    "name": "install_block",
+    "description": "신규 설치 금지"
   },
   {
-    "name":"share_block",
-    "description":"공유 스토리지 사용 금지"
+    "name": "cmd_block",
+    "description": "명령어 사용 금지"
   },
   {
-    "name":"remotefx",
-    "description":"RemoteFX 기능 사용"
+    "name": "logoff_block",
+    "description": "로그오프 금지"
   },
   {
-    "name":"install_block",
-    "description":"신규 설치 금지"
+    "name": "local_printer_block",
+    "description": "프린터 redirection 금지"
   },
   {
-    "name":"update_block",
-    "description":"업데이트 금지"
+    "name": "network_printer_block",
+    "description": "네트워크 프린터 추가 금지"
+  },
+  {
+    "name": "share_block",
+    "description": "공유 스토리지 사용 금지"
+  },
+  {
+    "name": "update_block",
+    "description": "업데이트 금지"
+  },
+  {
+    "name": "remotefx",
+    "description": "RemoteFX 기능 사용"
+  },
+  {
+    "name": "setting_block",
+    "description": "설정/제어판 사용 금지"
+  },
+  {
+    "name": "usb_block",
+    "description": "usb 사용 금지"
+  },
+  {
+    "name": "passwordchangeday0",
+    "description": "비밀번호 사용 제한 없음"
+  },
+  {
+    "name": "passwordchangeday1",
+    "description": "비밀번호 사용 제한 1일"
+  },
+  {
+    "name": "passwordchangeday30",
+    "description": "비밀번호 사용 제한 30일"
+  },
+  {
+    "name": "passwordchangeday60",
+    "description": "비밀번호 사용 제한 60일"
+  },
+  {
+    "name": "passwordchangeday90",
+    "description": "비밀번호 사용 제한 90일"
+  },
+  {
+    "name": "passwordchangeday180",
+    "description": "비밀번호 사용 제한 180일"
+  },
+  {
+    "name": "passwordchangeday365",
+    "description": "비밀번호 사용 제한 365일"
   }
 ]

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RegistrySettings clsid="{A3CCFC41-DFDB-43a5-8D26-0FE8B954DA51}"><Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="NoAddPrinter" status="NoAddPrinter" image="12" changed="2022-07-14 06:20:17" uid="{550DF495-9C07-40F2-8ED6-2CD8B109F1B9}"><Properties action="U" displayDecimal="1" default="0" hive="HKEY_LOCAL_MACHINE" key="SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer" name="NoAddPrinter" type="REG_DWORD" value="00000001"/></Registry>
+</RegistrySettings>

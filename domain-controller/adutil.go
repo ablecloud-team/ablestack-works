@@ -172,8 +172,8 @@ func ADinit() (err error) {
 	if err != nil {
 		return err
 	}
-
-	if ADconfig.UpdatePolicy != ADconfig.UpdatePolicy {
+/*
+	if ADconfig.UpdatePolicy  {
 		for _, policyItem := range policyList {
 			shell, err := setupShell()
 			if err != nil {
@@ -182,16 +182,23 @@ func ADinit() (err error) {
 			}
 			policy := policyItem["name"]
 			description := policyItem["description"]
-			stdout, err := shell.Exec(fmt.Sprintf("c:\\Works-DC\\psexec.exe -accepteula -u %v\\%v -p %v \"powershell import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded\"", ADconfig.ADdomain, ADconfig.ADusername, ADconfig.ADpassword, policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
+			//stdout, err := shell.Exec(fmt.Sprintf("c:\\Works-DC\\psexec.exe -accepteula -u %v\\%v -p %v \"powershell import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded\"", ADconfig.ADdomain, ADconfig.ADusername, ADconfig.ADpassword, policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH))
+			cmd := fmt.Sprintf("import-gpo -BackupGpoName %v -TargetName %v -Path '%v/%v' -CreateIfNeeded", policy, policy, currentWorkingDirectory, ADconfig.PolicyPATH)
+			log.Infof("%v", cmd)
+			stdout, err := shell.Exec(cmd)
+
 			log.Infof("stdout: %v, \nstderr: %v\n", stdout, err)
 			if err != nil {
 				err2 = fmt.Sprintf("%v, %v", err2, err)
+				return errors.New(err2)
 			}
+
 			shell.Exec(fmt.Sprintf("$policy = Get-Gpo -Name '%v'", policy))
 			shell.Exec(fmt.Sprintf("$policy.Description = '%v' ", description))
 
 		}
 	}
+ */
 	if err2 == "" {
 		return nil
 	}

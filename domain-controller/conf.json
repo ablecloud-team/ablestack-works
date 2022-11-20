@@ -8,5 +8,9 @@
   "Silent": false,
   "PolicyPATH": "./grouppolicy",
   "PolicyLIST": "policylist.json",
-  "UpdatePolicy": false
+  "UpdatePolicy": false,
+  "BootStraped": false,
+  "Status": " renamehost adjoin",
+  "HostName": "ycyun-dc",
+  "Domain": "ycyun"
 }
